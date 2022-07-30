@@ -22,7 +22,8 @@
     "strict": true,
     "target": "es2020",
     "types": [
-      "jest"
+      "jest",
+      "node"
     ],
     "lib": [
       "es5",
