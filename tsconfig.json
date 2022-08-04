@@ -34,7 +34,8 @@
       "es2019",
       "es2020",
       "es2021",
-      "es2021.String"
+      "es2021.String",
+      "eS2015.Iterable"
     ]
   },
   "include": [
