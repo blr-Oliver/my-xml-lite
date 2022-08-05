@@ -1,5 +1,5 @@
 import {StringSource} from './StringSource';
-import {CData, Comment, Declaration, Document, Element, NamedNode, Node, NodeContainer, Text} from './xml-node';
+import {Document, Element, NamedNode, Node, NodeContainer, NodeType, Text, ValueNode} from './xml-node';
 
 const LT = '<'.charCodeAt(0);
 const GT = '>'.charCodeAt(0);
@@ -14,6 +14,8 @@ const CMT_START = stringToArray('<!--');
 const CMT_END = stringToArray('-->');
 const CD_START = stringToArray('<![CDATA[');
 const CD_END = stringToArray(']]>');
+const PI_START = stringToArray('<?');
+const PI_END = stringToArray('?>');
 
 function stringToArray(s: string): number[] {
   return [...s].map(c => c.codePointAt(0)!);
@@ -138,7 +140,7 @@ export class Parser {
   lt(): string | void {
     let code = this.source.next();
     if (code === SLASH) return this.closingTag();
-    else if (code === QUESTION) this.declaration();
+    else if (code === QUESTION) this.pi();
     else if (code === EXCLAMATION) this.commentOrCdata();
     else if (isNameChar(code) || isSpace(code)) return this.element();
     else this.unexpected(`Expected valid markup or name`);
@@ -214,45 +216,25 @@ export class Parser {
   }
 
   comment() {
-    const comment = {
-      type: 'comment'
-    } as Comment;
-    if (this.source.next() !== HYPHEN) this.unexpected(`Expected '<!--'`);
-    this.source.start();
-    if (this.skipToSeq(CMT_END) === -1) this.unexpected(`Expected '-->'`);
-    comment.value = this.source.end(1, CMT_END.length - 1);
-    this.startNode(comment, false);
+    this.borderedValueNode('comment', CMT_START, CMT_END, 3);
   }
 
   cdata() {
-    const cdata = {
-      type: 'cdata'
-    } as CData;
-    this.startNode(cdata);
-    for (let i = 3; i < CD_START.length; ++i)
-      if (this.source.next() !== CD_START[i]) this.unexpected(`Expected '<![CDATA['`);
-    this.source.start();
-    if (this.skipToSeq(CD_END) === -1) this.unexpected(`Expected ']]>'`);
-    cdata.value = this.source.end(1, CD_END.length - 1);
-    this.finishNode();
+    this.borderedValueNode('cdata', CD_START, CD_END, 3);
   }
 
-  declaration() {
-    this.skipSpace();
-    const name = this.readName();
-    const declaration = {
-      type: 'declaration',
-      name,
-      attributes: {}
-    } as Declaration;
-    while (isSpace(this.source.get())) {
-      this.skipSpace();
-      if (isNameChar(this.source.get()))
-        this.attribute();
-      else break;
-    }
-    if (this.source.get() !== QUESTION || this.source.next() !== GT) this.unexpected(`Expected '?>'`);
-    this.startNode(declaration, false);
+  pi() {
+    this.borderedValueNode('processing-instruction', PI_START, PI_END, 2);
+  }
+
+  borderedValueNode(type: NodeType, startSeq: number[], endSeq: number[], startOffset: number) {
+    const node = {type} as ValueNode;
+    for (let i = startOffset; i < startSeq.length; ++i)
+      if (this.source.next() !== startSeq[i]) this.unexpected(`Expected '${String.fromCodePoint(...startSeq)}'`);
+    this.source.start();
+    if (this.skipToSeq(endSeq) === -1) this.unexpected(`Expected '${String.fromCodePoint(...endSeq)}'`);
+    node.value = this.source.end(1, endSeq.length - 1);
+    this.startNode(node, false);
   }
 
   skipTo(terminator: number): number {

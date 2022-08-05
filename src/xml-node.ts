@@ -1,4 +1,4 @@
-export type NodeType = 'document' | 'element' | 'text' | 'comment' | 'cdata' | 'declaration' | 'processing-instruction';
+export type NodeType = 'document' | 'element' | 'text' | 'comment' | 'cdata' | 'processing-instruction';
 
 export interface Node {
   type: NodeType;
@@ -28,10 +28,6 @@ export interface Element extends NamedNode, NodeContainer {
   empty: boolean;
 }
 
-export interface Declaration extends NamedNode {
-  type: 'declaration';
-}
-
 export interface Text extends ValueNode {
   type: 'text';
   blank: boolean;
@@ -54,14 +50,13 @@ export function textContent(node: Node): string {
     case 'text':
     case 'comment':
     case 'cdata':
-    case 'processing-instruction':
-      return (node as ValueNode).value;
     case 'document':
     case 'element':
       return collectTextNodesFlat(node as NodeContainer)
           .map(text => text.value)
           .join('');
-    case 'declaration':
+    case 'processing-instruction':
+      return '';
     default:
       return '';
   }
