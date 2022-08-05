@@ -9,6 +9,10 @@ export interface CharacterSource {
   get(): number | -1 | -2;
 }
 
+export interface RestartableCharacterSource extends CharacterSource {
+  restart(): void;
+}
+
 export interface StringSource extends CharacterSource {
   /**
    Marks start of a new string, including last read character.
@@ -48,22 +52,26 @@ export class BufferedStringSource implements StringSource {
   }
 }
 
-export class UTF16NonValidatingCharacterSource implements CharacterSource {
-  private position: number = 0;
-  private code: number = -2;
+export abstract class ArrayCharacterSource<T extends ArrayLike<number>> implements RestartableCharacterSource {
+  protected position: number;
+  protected code: number = -2;
 
-  constructor(private readonly data: Uint16Array,
-              private readonly limit: number = data.length,
-              offset: number = 0) {
+  protected constructor(protected readonly data: T,
+                        protected readonly limit: number = data.length,
+                        protected readonly offset: number = 0) {
     this.position = offset;
   }
 
+  restart() {
+    this.position = this.offset;
+    this.code = -2;
+  }
+
+  protected abstract consumeNext(): number;
+
   next(): number {
     if (this.position >= this.limit) return this.code = -1;
-    const word1 = this.data[this.position++];
-    if (word1 < 0xD800 || word1 >= 0xE000) return this.code = word1;
-    const word2 = this.data[this.position++];
-    return this.code = (0x10000 + (((word1 & 0x3FF) << 10) | (word2 & 0x3FF)));
+    return this.code = this.consumeNext();
   }
 
   get(): number {
@@ -71,26 +79,29 @@ export class UTF16NonValidatingCharacterSource implements CharacterSource {
   }
 }
 
-export class UTF8NonValidatingCharacterSource implements CharacterSource {
-  private position: number;
-  private code: number = -2;
-
-  constructor(private readonly data: Uint8Array,
-              private readonly limit: number = data.length,
-              offset: number = 0) {
-    this.position = offset;
+export class UTF16NonValidatingCharacterSource extends ArrayCharacterSource<Uint16Array> {
+  constructor(data: Uint16Array, limit?: number, offset?: number) {
+    super(data, limit, offset);
   }
 
-  next(): number {
-    if (this.position >= this.limit) return this.code = -1;
+  consumeNext(): number {
+    const word1 = this.data[this.position++];
+    if (word1 < 0xD800 || word1 >= 0xE000) return word1;
+    const word2 = this.data[this.position++];
+    return (0x10000 + (((word1 & 0x3FF) << 10) | (word2 & 0x3FF)));
+  }
+}
+
+export class UTF8NonValidatingCharacterSource extends ArrayCharacterSource<Uint8Array> {
+  constructor(data: Uint8Array, limit?: number, offset?: number) {
+    super(data, limit, offset);
+  }
+
+  consumeNext(): number {
     const byte1 = this.data[this.position++];
     const leadingOnes = Math.clz32(~byte1 & 0xFF) - 24;
-    if (leadingOnes === 0) return this.code = byte1;
-    return this.code = this.withTails(byte1, leadingOnes - 1);
-  }
-
-  get(): number {
-    return this.code;
+    if (leadingOnes === 0) return byte1;
+    return this.withTails(byte1, leadingOnes - 1);
   }
 
   private withTails(byte1: number, count: number): number {
