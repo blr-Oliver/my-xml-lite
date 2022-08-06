@@ -1,6 +1,7 @@
 import {readFileSync} from 'fs';
-import {Parser} from '../src';
-import {BufferedStringSource, StringSource, UTF16NonValidatingCharacterSource, UTF8NonValidatingCharacterSource} from '../src/StringSource';
+import {document} from '../src/parser';
+import {BufferedStringSource, StringSource, UTF16NonValidatingCharacterSource, UTF8NonValidatingCharacterSource} from '../src/stream-source';
+import {stringify} from '../src/stringifier';
 
 function inlineStringSource(s: string): StringSource {
   const data = new Uint16Array(s.length);
@@ -16,63 +17,37 @@ function fileStringSource(name: string): StringSource {
   const charSource = new UTF8NonValidatingCharacterSource(data);
   return new BufferedStringSource(charSource);
 }
-const sampleRoot = 'F:/Dev/Idea/workspace/galaxy-map/etc/samples';
 
-describe('real samples', function () {
-  test('4-en', () => {
-    let source = fileStringSource(sampleRoot + '/espionage/4-en.html');
-    let parser = new Parser(source);
-    let result = parser.document();
-  });
-});
+function fileBasedTest(inFile: string, outFile: string) {
+  const input = fileStringSource(inFile);
+  expect(input).toBeDefined();
+  const doc = document(input);
+  expect(doc).toBeDefined();
+  expect(doc.type).toBe('document');
+  expect(doc.childNodes).toBeDefined();
+  expect(doc.childNodes.length).toBeGreaterThan(0);
+  const output = stringify(doc);
+  expect(output).toBeDefined();
+  expect(output.length).toBeGreaterThan(0);
+  const expected: string = readFileSync(outFile, {encoding: 'utf-8'});
+  expect(output).toEqual(expected);
+}
 
-describe('full-document', function () {
-  test('simple 1', () => {
-    let input = `<div id="test"><span class="pretty" enabled>Lorem ipsum</span></div>`;
-    let parser = new Parser(inlineStringSource(input));
-    let result = parser.document();
-    expect(result).toBeDefined();
-    const sample = {
-      type: 'element',
-      parent: result,
-      name: 'div',
-      empty: false,
-      attributes: {
-        'id': 'test'
-      },
-      children: [{
-        type: 'element',
-        name: 'span',
-        empty: false,
-        attributes: {
-          'class': 'pretty',
-          'enabled': null
-        },
-        children: [],
-        childNodes: [{
-          type: 'text',
-          blank: false,
-          value: 'Lorem ipsum'
-        }]
-      }]
-    };
-    (sample as any).childNodes = [sample.children[0]];
-    (sample.children[0] as any).parent = sample;
-    (sample.children[0].childNodes[0] as any).parent = sample.children[0];
-    expect(result.children[0]).toEqual(sample);
-  });
-
-  test('text only', () => {
-    let input = `abc`;
-    let parser = new Parser(inlineStringSource(input));
-    let doc = parser.document();
-    let result = doc.childNodes;
-    expect(result).toBeDefined();
-    expect(result).toHaveLength(1);
-    expect(result[0]).toHaveProperty('type', 'text');
-    expect(result[0]).toHaveProperty('value', 'abc');
-  });
-
+describe('parse-stringify cycle', function () {
+  describe('primitive', function () {
+    const primitiveRoot = './test/samples/primitive';
+    function primitiveCase(name: string) {
+      const fileName = `${primitiveRoot}/${name}.in-out.html`;
+      test(name, () => {
+        fileBasedTest(fileName, fileName);
+      });
+    }
+    primitiveCase('cdata');
+    primitiveCase('comment');
+    primitiveCase('pi');
+    primitiveCase('element');
+    primitiveCase('text');
+  })
 });
 
 describe('fine-grained', () => {
