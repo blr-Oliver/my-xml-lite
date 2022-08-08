@@ -1,7 +1,7 @@
 {
-  "name": "dom-parser-lite",
-  "version": "0.0.1",
-  "description": "Minimal ArrayBuffer-based UTF-8 DOM XML/HTML parser with weak validation",
+  "name": "xml-lite",
+  "version": "0.1.0",
+  "description": "Minimal ArrayBuffer-based UTF-8/UTF DOM XML/HTML parser with weak validation",
   "main": "./dist/index.js",
   "scripts": {
     "build": "tsc",
