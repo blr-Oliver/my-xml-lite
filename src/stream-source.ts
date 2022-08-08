@@ -92,6 +92,25 @@ export class UTF16NonValidatingCharacterSource extends ArrayCharacterSource<Uint
   }
 }
 
+export class UTF16ValidatingCharacterSource extends ArrayCharacterSource<Uint16Array> {
+  constructor(data: Uint16Array, limit?: number, offset?: number) {
+    super(data, limit, offset);
+  }
+
+  consumeNext(): number {
+    const word1 = this.data[this.position++];
+    if (word1 < 0xD800 || word1 >= 0xE000) return word1;
+    if (word1 >= 0xDC00)
+      throw new Error(`Expected leading surrogate, found trailing surrogate 0x${word1.toString(16).toUpperCase()} at ${this.position - 1}`);
+    if (this.position >= this.limit)
+      throw new Error(`Expected trailing surrogate, found end of input`);
+    const word2 = this.data[this.position++];
+    if (word2 < 0xDC00 || word2 >= 0xE000)
+      throw new Error(`Expected trailing surrogate, found 0x${word1.toString(16).toUpperCase()} at ${this.position - 1}`);
+    return (0x10000 + (((word1 & 0x3FF) << 10) | (word2 & 0x3FF)));
+  }
+}
+
 export class UTF8NonValidatingCharacterSource extends ArrayCharacterSource<Uint8Array> {
   constructor(data: Uint8Array, limit?: number, offset?: number) {
     super(data, limit, offset);
