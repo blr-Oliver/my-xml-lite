@@ -24,7 +24,7 @@ const EXCLAMATION = '!'.charCodeAt(0);
 const HYPHEN = '-'.charCodeAt(0);
 const EQ = '='.charCodeAt(0);
 const QUOTE = '\''.charCodeAt(0);
-const DQUOTE = '\"'.charCodeAt(0);
+const DOUBLE_QUOTE = '\"'.charCodeAt(0);
 const SLASH = '/'.charCodeAt(0);
 const CMT_START = stringToArray('<!--');
 const CMT_END = stringToArray('-->');
@@ -91,7 +91,7 @@ export function document(source: StringSource): Document {
 /**
  @return name of closing tag (with relaxed closing - not necessarily matching enclosing tag)
  */
-export function elementContents(source: StringSource, parent: NodeContainer): string | void {
+function elementContents(source: StringSource, parent: NodeContainer): string | void {
   while (source.get() !== -1) {
     text(source, parent);
     if (source.get() === LT) {
@@ -103,7 +103,7 @@ export function elementContents(source: StringSource, parent: NodeContainer): st
   }
 }
 
-export function text(source: StringSource, parent: NodeContainer): void {
+function text(source: StringSource, parent: NodeContainer): void {
   let code: number = source.next();
   if (code === -1 || code === LT) return;
   source.start();
@@ -126,7 +126,7 @@ export function text(source: StringSource, parent: NodeContainer): void {
  * @return name of the closing tag or name of tag being improperly closed or nothing if any node opened by this is properly closed.
  */
 
-export function lt(source: StringSource, parent: NodeContainer): string | void {
+function lt(source: StringSource, parent: NodeContainer): string | void {
   let code = source.next();
   if (code === SLASH) return closingTag(source);
   else if (code === QUESTION) pi(source, parent);
@@ -135,14 +135,14 @@ export function lt(source: StringSource, parent: NodeContainer): string | void {
   else unexpected(source, `Expected valid markup or name`);
 }
 
-export function addNode(parent: NodeContainer, node: Node) {
+function addNode(parent: NodeContainer, node: Node) {
   node.parent = parent;
   parent.childNodes.push(node);
   if (node.type === 'element')
     parent.children.push(node as Element);
 }
 
-export function closingTag(source: StringSource): string {
+function closingTag(source: StringSource): string {
   source.next();
   skipSpace(source);
   const name = readName(source);
@@ -153,7 +153,7 @@ export function closingTag(source: StringSource): string {
 /**
  * @return name of element it improperly closes or nothing if properly closed
  */
-export function element(source: StringSource, parent: NodeContainer): string | void {
+function element(source: StringSource, parent: NodeContainer): string | void {
   skipSpace(source);
   const name = readName(source);
   const element = {
@@ -187,7 +187,7 @@ export function element(source: StringSource, parent: NodeContainer): string | v
   }
 }
 
-export function attribute(source: StringSource, node: NamedNode) {
+function attribute(source: StringSource, node: NamedNode) {
   // TODO duplicate attributes
   const name = readName(source);
   skipSpace(source);
@@ -196,7 +196,7 @@ export function attribute(source: StringSource, node: NamedNode) {
     source.next();
     skipSpace(source);
     const startQuote = source.start();
-    if (startQuote !== QUOTE && startQuote !== DQUOTE) unexpected(source, `Expected single (') or double quote (")`);
+    if (startQuote !== QUOTE && startQuote !== DOUBLE_QUOTE) unexpected(source, `Expected single (') or double quote (")`);
     source.next();
     const endQuote = skipTo(source, startQuote);
     if (startQuote !== endQuote) unexpected(source, `Expected matching quote (${startQuote})`);
@@ -206,26 +206,26 @@ export function attribute(source: StringSource, node: NamedNode) {
   node.attributes[name] = value;
 }
 
-export function commentOrCdata(source: StringSource, parent: NodeContainer) {
+function commentOrCdata(source: StringSource, parent: NodeContainer) {
   const code = source.next();
   if (code === CMT_START[2]) comment(source, parent);
   else if (code === CD_START[2]) cdata(source, parent);
   else unexpected(source, 'Expected comment or CDATA section start');
 }
 
-export function comment(source: StringSource, parent: NodeContainer) {
+function comment(source: StringSource, parent: NodeContainer) {
   borderedValueNode(source, parent, 'comment', CMT_START, CMT_END, 3);
 }
 
-export function cdata(source: StringSource, parent: NodeContainer) {
+function cdata(source: StringSource, parent: NodeContainer) {
   borderedValueNode(source, parent, 'cdata', CD_START, CD_END, 3);
 }
 
-export function pi(source: StringSource, parent: NodeContainer) {
+function pi(source: StringSource, parent: NodeContainer) {
   borderedValueNode(source, parent, 'processing-instruction', PI_START, PI_END, 2);
 }
 
-export function borderedValueNode(source: StringSource, parent: NodeContainer, type: NodeType, startSeq: number[], endSeq: number[], startOffset: number) {
+function borderedValueNode(source: StringSource, parent: NodeContainer, type: NodeType, startSeq: number[], endSeq: number[], startOffset: number) {
   const node = {type} as ValueNode;
   for (let i = startOffset; i < startSeq.length; ++i)
     if (source.next() !== startSeq[i]) unexpected(source, `Expected '${String.fromCodePoint(...startSeq)}'`);
@@ -235,7 +235,7 @@ export function borderedValueNode(source: StringSource, parent: NodeContainer, t
   addNode(parent, node);
 }
 
-export function skipTo(source: StringSource, terminator: number): number {
+function skipTo(source: StringSource, terminator: number): number {
   let code: number = source.get();
   while (code !== -1 && code !== terminator)
     code = source.next();
@@ -261,14 +261,14 @@ export function skipToSeq(source: StringSource, seq: number[]): number {
   return code;
 }
 
-export function skipSpace(source: StringSource): number {
+function skipSpace(source: StringSource): number {
   let code = source.get();
   while (isSpace(code))
     code = source.next();
   return code;
 }
 
-export function readName(source: StringSource): string {
+function readName(source: StringSource): string {
   source.start();
   if (!isNameStartChar(source.get()))
     unexpected(source, 'Name start expected');
@@ -279,7 +279,7 @@ export function readName(source: StringSource): string {
   return source.end();
 }
 
-export function unexpected(source: StringSource, message: string) {
+function unexpected(source: StringSource, message: string) {
   const code = source.get();
   if (code === -1)
     throw new Error(`${message}, found end of input`);

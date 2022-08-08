@@ -1,6 +1,6 @@
 import {readFileSync} from 'fs';
+import {BufferedStringSource, StringSource, UTF16NonValidatingCharacterSource, UTF8NonValidatingCharacterSource} from '../src';
 import {document, skipToSeq} from '../src/parser';
-import {BufferedStringSource, StringSource, UTF16NonValidatingCharacterSource, UTF8NonValidatingCharacterSource} from '../src/stream-source';
 import {stringify} from '../src/stringifier';
 
 function fileStringSource(name: string): StringSource {

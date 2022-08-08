@@ -45,31 +45,36 @@ export interface ProcessingInstruction extends ValueNode {
   type: 'processing-instruction';
 }
 
-export function textContent(node: Node): string {
+const verbatimJoiner: (chunks: Text[]) => string =
+    chunks => chunks.map(text => text.value).join('');
+const trimmingJoiner: (chunks: Text[]) => string =
+    chunks => chunks
+        .filter((text, i, all) => !text.blank || (i > 0 && !all[i - 1].blank))
+        .map(text => text.blank ? ' ' : text.value.trim())
+        .join('')
+        .trim();
+
+export function textContent(node: Node, trim: boolean = false): string {
+  const joiner: (chunks: Text[]) => string = trim ? trimmingJoiner : verbatimJoiner;
   switch (node.type) {
     case 'text':
-    case 'comment':
-    case 'cdata':
+      return (node as Text).value;
     case 'document':
     case 'element':
-      return collectTextNodesFlat(node as NodeContainer)
-          .map(text => text.value)
-          .join('');
-    case 'processing-instruction':
-      return '';
+      return joiner(textNodes(node as NodeContainer));
     default:
       return '';
   }
 }
 
-function collectTextNodesFlat(node: NodeContainer, chunks: Text[] = []): Text[] {
+export function textNodes(node: NodeContainer, chunks: Text[] = []): Text[] {
   for (let childNode of node.childNodes) {
     switch (childNode.type) {
       case 'text':
         chunks.push(childNode as Text);
         break;
       case 'element':
-        collectTextNodesFlat(childNode as Element, chunks);
+        textNodes(childNode as Element, chunks);
         break;
     }
   }
