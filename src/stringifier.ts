@@ -6,8 +6,8 @@ export function stringify(node: Node): string {
   return chunks.join('');
 }
 
-export type NodeStringifier<T extends Node> = (node: T, chunks: string[]) => void;
-export const handlersPerType: { [type: string]: NodeStringifier<any> } = {
+type NodeStringifier<T extends Node> = (node: T, chunks: string[]) => void;
+const handlersPerType: { [type: string]: NodeStringifier<any> } = {
   'document': stringifyContents,
   'element': stringifyElement,
   'text': stringifyText,
@@ -16,40 +16,40 @@ export const handlersPerType: { [type: string]: NodeStringifier<any> } = {
   'processing-instruction': stringifyPI
 };
 
-export function stringifyNode(node: Node, chunks: string[]) {
+function stringifyNode(node: Node, chunks: string[]) {
   handlersPerType[node.type](node, chunks);
 }
 
-export function stringifyContents(node: NodeContainer, chunks: string[]) {
+function stringifyContents(node: NodeContainer, chunks: string[]) {
   for (let childNode of node.childNodes)
     stringifyNode(childNode, chunks);
 }
 
-export function stringifyValueNode(node: ValueNode, prefix: string, suffix: string, chunks: string[]) {
+function stringifyValueNode(node: ValueNode, prefix: string, suffix: string, chunks: string[]) {
   chunks.push(prefix, node.value, suffix);
 }
 
-export function stringifyText(node: Text, chunks: string[]) {
+function stringifyText(node: Text, chunks: string[]) {
   chunks.push(node.value);
 }
 
-export function stringifyComment(node: Comment, chunks: string[]) {
+function stringifyComment(node: Comment, chunks: string[]) {
   stringifyValueNode(node, '<!--', '-->', chunks);
 }
 
-export function stringifyCData(node: CData, chunks: string[]) {
+function stringifyCData(node: CData, chunks: string[]) {
   stringifyValueNode(node, '<![CDATA[', ']]>', chunks);
 }
 
-export function stringifyPI(node: ProcessingInstruction, chunks: string[]) {
+function stringifyPI(node: ProcessingInstruction, chunks: string[]) {
   stringifyValueNode(node, '<?', '?>', chunks);
 }
 
-export function stringifyElement(node: Element, chunks: string[]) {
+function stringifyElement(node: Element, chunks: string[]) {
   chunks.push('<', node.name);
   for (let attrName in node.attributes) {
-    let attrValue = node.attributes[attrName];
     chunks.push(' ', attrName);
+    const attrValue = node.attributes[attrName];
     if (attrValue !== null)
       chunks.push('="', attrValue, '"');
   }
