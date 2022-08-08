@@ -1,5 +1,5 @@
 import {StringSource} from './stream-source';
-import {Document, Element, NamedNode, Node, NodeContainer, NodeType, Text, ValueNode} from './xml-node';
+import {Declaration, Document, Element, Node, NodeContainer, NodeType, Text, ValueNode} from './xml-node';
 
 const ALWAYS_EMPTY: { [tag: string]: boolean } = {
   br: true,
@@ -130,7 +130,7 @@ function lt(source: StringSource, parent: NodeContainer): string | void {
   let code = source.next();
   if (code === SLASH) return closingTag(source);
   else if (code === QUESTION) pi(source, parent);
-  else if (code === EXCLAMATION) commentOrCdata(source, parent);
+  else if (code === EXCLAMATION) exclamation(source, parent);
   else if (isNameChar(code) || isSpace(code)) return element(source, parent);
   else unexpected(source, `Expected valid markup or name`);
 }
@@ -187,7 +187,7 @@ function element(source: StringSource, parent: NodeContainer): string | void {
   }
 }
 
-function attribute(source: StringSource, node: NamedNode) {
+function attribute(source: StringSource, node: Element) {
   // TODO duplicate attributes
   const name = readName(source);
   skipSpace(source);
@@ -206,11 +206,12 @@ function attribute(source: StringSource, node: NamedNode) {
   node.attributes[name] = value;
 }
 
-function commentOrCdata(source: StringSource, parent: NodeContainer) {
+function exclamation(source: StringSource, parent: NodeContainer) {
   const code = source.next();
   if (code === CMT_START[2]) comment(source, parent);
   else if (code === CD_START[2]) cdata(source, parent);
-  else unexpected(source, 'Expected comment or CDATA section start');
+  else if (isNameStartChar(code)) declaration(source, parent);
+  else unexpected(source, 'Expected comment, declaration or CDATA section start');
 }
 
 function comment(source: StringSource, parent: NodeContainer) {
@@ -223,6 +224,24 @@ function cdata(source: StringSource, parent: NodeContainer) {
 
 function pi(source: StringSource, parent: NodeContainer) {
   borderedValueNode(source, parent, 'processing-instruction', PI_START, PI_END, 2);
+}
+
+function declaration(source: StringSource, parent: NodeContainer) {
+  const declType = readName(source);
+  skipSpace(source);
+  source.start();
+  let level = 1;
+  let code: number = source.get();
+  while (level > 0 && code !== -1) {
+    if (code === LT) ++level;
+    else if (code === GT) --level;
+    code = source.next();
+  }
+  addNode(parent, {
+    type: 'declaration',
+    declType,
+    value: source.end(0, 1)
+  } as Declaration);
 }
 
 function borderedValueNode(source: StringSource, parent: NodeContainer, type: NodeType, startSeq: number[], endSeq: number[], startOffset: number) {

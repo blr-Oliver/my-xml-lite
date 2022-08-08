@@ -1,4 +1,4 @@
-export type NodeType = 'document' | 'element' | 'text' | 'comment' | 'cdata' | 'processing-instruction';
+export type NodeType = 'document' | 'element' | 'text' | 'comment' | 'cdata' | 'processing-instruction' | 'declaration';
 
 export interface Node {
   type: NodeType;
@@ -16,7 +16,6 @@ export interface Document extends NodeContainer {
 
 export interface NamedNode extends Node {
   name: string;
-  attributes: { [key: string]: string | null };
 }
 
 export interface ValueNode extends Node {
@@ -26,6 +25,7 @@ export interface ValueNode extends Node {
 export interface Element extends NamedNode, NodeContainer {
   type: 'element';
   empty: boolean;
+  attributes: { [key: string]: string | null };
 }
 
 export interface Text extends ValueNode {
@@ -43,6 +43,11 @@ export interface CData extends ValueNode {
 
 export interface ProcessingInstruction extends ValueNode {
   type: 'processing-instruction';
+}
+
+export interface Declaration extends ValueNode {
+  type: 'declaration';
+  declType: string;
 }
 
 const verbatimJoiner: (chunks: Text[]) => string =

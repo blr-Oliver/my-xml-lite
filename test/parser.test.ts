@@ -51,6 +51,7 @@ describe('parse-stringify cycle', function () {
     primitiveCase('element');
     primitiveCase('text');
     primitiveCase('properly-closed');
+    primitiveCase('decl');
   });
 
   describe('throwing', () => {

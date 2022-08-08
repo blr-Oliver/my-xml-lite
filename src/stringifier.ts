@@ -1,4 +1,4 @@
-import {CData, Comment, Element, Node, NodeContainer, ProcessingInstruction, Text, ValueNode} from './xml-node';
+import {CData, Comment, Declaration, Element, Node, NodeContainer, ProcessingInstruction, Text, ValueNode} from './xml-node';
 
 export function stringify(node: Node): string {
   const chunks: string[] = [];
@@ -13,7 +13,8 @@ const handlersPerType: { [type: string]: NodeStringifier<any> } = {
   'text': stringifyText,
   'comment': stringifyComment,
   'cdata': stringifyCData,
-  'processing-instruction': stringifyPI
+  'processing-instruction': stringifyPI,
+  'declaration': stringifyDeclaration
 };
 
 function stringifyNode(node: Node, chunks: string[]) {
@@ -43,6 +44,10 @@ function stringifyCData(node: CData, chunks: string[]) {
 
 function stringifyPI(node: ProcessingInstruction, chunks: string[]) {
   stringifyValueNode(node, '<?', '?>', chunks);
+}
+
+function stringifyDeclaration(node: Declaration, chunks: string[]) {
+  chunks.push('<!', node.declType, ' ', node.value, '>');
 }
 
 function stringifyElement(node: Element, chunks: string[]) {
