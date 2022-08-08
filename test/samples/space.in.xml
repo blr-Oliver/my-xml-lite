@@ -1,0 +1,8 @@
+	prolog
+< element1 attr1=" val1 "
+	attr2=' val2' 	null_attr   >
+  <!-- comment 1 -->
+  text 1 	<  empty_element /><element2></element2><![CDATA[]]><element3 null_attr><![CDATA[ character 	data]]>
+</element3></ element1  >
+  <? unknown   processing instruction ?>  
+  outlog

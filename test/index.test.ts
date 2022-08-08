@@ -1,15 +1,7 @@
 import {readFileSync} from 'fs';
 import {document} from '../src/parser';
-import {BufferedStringSource, StringSource, UTF16NonValidatingCharacterSource, UTF8NonValidatingCharacterSource} from '../src/stream-source';
+import {BufferedStringSource, StringSource, UTF8NonValidatingCharacterSource} from '../src/stream-source';
 import {stringify} from '../src/stringifier';
-
-function inlineStringSource(s: string): StringSource {
-  const data = new Uint16Array(s.length);
-  for (let i = 0; i < data.length; ++i)
-    data[i] = s.charCodeAt(i)!;
-  const charSource = new UTF16NonValidatingCharacterSource(data);
-  return new BufferedStringSource(charSource, data.length);
-}
 
 function fileStringSource(name: string): StringSource {
   const buffer = readFileSync(name);
@@ -34,10 +26,17 @@ function fileBasedTest(inFile: string, outFile: string) {
 }
 
 describe('parse-stringify cycle', function () {
+  const samplesRoot = './test/samples/';
+  function standardCase(name: string) {
+    test(name, () => {
+      fileBasedTest(`${samplesRoot}${name}.in.xml`, `${samplesRoot}${name}.out.xml`);
+    });
+  }
+
   describe('primitive', function () {
-    const primitiveRoot = './test/samples/primitive';
+    const primitiveRoot = samplesRoot + 'primitive/';
     function primitiveCase(name: string) {
-      const fileName = `${primitiveRoot}/${name}.in-out.html`;
+      const fileName = `${primitiveRoot}${name}.in-out.xml`;
       test(name, () => {
         fileBasedTest(fileName, fileName);
       });
@@ -47,7 +46,32 @@ describe('parse-stringify cycle', function () {
     primitiveCase('pi');
     primitiveCase('element');
     primitiveCase('text');
-  })
+    primitiveCase('properly-closed');
+  });
+
+  describe('throwing', () => {
+    const invalidRoot = samplesRoot + 'invalid/';
+    function invalidCase(name: string) {
+      test(name, () => {
+        const input = fileStringSource(`${invalidRoot}${name}.xml`);
+        expect(input).toBeDefined();
+        expect(() => document(input)).toThrow();
+      });
+    }
+
+    invalidCase('broken-cdata-1');
+    invalidCase('broken-cdata-2');
+    invalidCase('broken-comment-1');
+    invalidCase('broken-comment-2');
+    invalidCase('broken-tag-1');
+    invalidCase('broken-tag-2');
+    invalidCase('illegal-name-start-1');
+    invalidCase('illegal-name-start-2');
+    invalidCase('unfinished-cdata');
+    invalidCase('unfinished-comment');
+  });
+  standardCase('space');
+  standardCase('improperly-closed');
 });
 
 describe('fine-grained', () => {

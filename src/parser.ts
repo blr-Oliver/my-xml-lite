@@ -178,7 +178,7 @@ export function element(source: StringSource, parent: NodeContainer): string | v
   } else {
     if (source.get() !== GT) unexpected(source, `Expected valid markup or name`);
     const lcName = name.toLowerCase();
-    if (lcName in ALWAYS_EMPTY && ALWAYS_EMPTY[lcName]) {
+    if (ALWAYS_EMPTY[lcName]) {
       element.empty = true;
       return;
     }
