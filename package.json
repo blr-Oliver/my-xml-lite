@@ -1,7 +1,7 @@
 {
-  "name": "xml-lite",
+  "name": "my-xml-lite",
   "version": "0.1.0",
-  "description": "Minimal ArrayBuffer-based UTF-8/UTF DOM XML/HTML parser with weak validation",
+  "description": "Minimal ArrayBuffer-based UTF-8/UTF-16 DOM XML/HTML parser with weak validation",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "scripts": {
