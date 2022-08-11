@@ -17,6 +17,10 @@ const ALWAYS_EMPTY: { [tag: string]: boolean } = {
   wbr: true
 };
 
+const NO_CHILDREN: { [tag: string]: boolean } = {
+  script: true
+}
+
 const LT = '<'.charCodeAt(0);
 const GT = '>'.charCodeAt(0);
 const QUESTION = '?'.charCodeAt(0);
@@ -128,8 +132,12 @@ function text(source: StringSource, parent: NodeContainer): void {
 
 function lt(source: StringSource, parent: NodeContainer): string | void {
   let code = source.next();
-  if (code === SLASH) return closingTag(source);
-  else if (code === QUESTION) pi(source, parent);
+  if (code === SLASH) {
+    const name = closingTag(source);
+    if (ALWAYS_EMPTY[name.toLowerCase()])
+      return;
+    return name;
+  } else if (code === QUESTION) pi(source, parent);
   else if (code === EXCLAMATION) exclamation(source, parent);
   else if (isNameChar(code) || isSpace(code)) return element(source, parent);
   else unexpected(source, `Expected valid markup or name`);
@@ -182,7 +190,19 @@ function element(source: StringSource, parent: NodeContainer): string | void {
       element.empty = true;
       return;
     }
-    const closingName = elementContents(source, element);
+    let closingName: string | void;
+    if (NO_CHILDREN[lcName]) {
+      source.start();
+      skipToSeq(source, [LT, SLASH]);
+      addNode(element, {
+        type: 'text',
+        blank: false, // TODO
+        value: source.end(1, 2)
+      } as Text);
+      closingName = closingTag(source);
+    } else {
+      closingName = elementContents(source, element);
+    }
     if (closingName !== name) return closingName;
   }
 }
