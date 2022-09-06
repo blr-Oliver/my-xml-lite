@@ -77,6 +77,7 @@ describe('parse-stringify cycle', function () {
   });
   standardCase('space');
   standardCase('improperly-closed');
+  standardCase('entity-enclosed-attribute');
 });
 
 

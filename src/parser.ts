@@ -30,6 +30,8 @@ const EQ = '='.charCodeAt(0);
 const QUOTE = '\''.charCodeAt(0);
 const DOUBLE_QUOTE = '\"'.charCodeAt(0);
 const SLASH = '/'.charCodeAt(0);
+const AMPERSAND = '&'.charCodeAt(0);
+const SEMICOLON = ';'.charCodeAt(0);
 const CMT_START = stringToArray('<!--');
 const CMT_END = stringToArray('-->');
 const CD_START = stringToArray('<![CDATA[');
@@ -216,14 +218,30 @@ function attribute(source: StringSource, node: Element) {
     source.next();
     skipSpace(source);
     const startQuote = source.start();
-    if (startQuote !== QUOTE && startQuote !== DOUBLE_QUOTE) unexpected(source, `Expected single (') or double quote (")`);
-    source.next();
-    const endQuote = skipTo(source, startQuote);
-    if (startQuote !== endQuote) unexpected(source, `Expected matching quote (${startQuote})`);
-    value = source.end(1);
-    source.next();
+    if (startQuote === AMPERSAND) {
+      // let all bears of deepest woods drill creator of this fucking invalid XML shit
+      value = attributeWithEntityQuote(source);
+    } else {
+      if (startQuote !== QUOTE && startQuote !== DOUBLE_QUOTE) unexpected(source, `Expected single (') or double quote (")`);
+      source.next();
+      const endQuote = skipTo(source, startQuote);
+      if (startQuote !== endQuote) unexpected(source, `Expected matching quote (${startQuote})`);
+      value = source.end(1);
+      source.next();
+    }
   }
   node.attributes[name] = value;
+}
+
+function attributeWithEntityQuote(source: StringSource): string {
+  skipTo(source, SEMICOLON);
+  source.next();
+  const entity = source.end();
+  source.start();
+  const endMarker = skipToSeq(source, stringToArray(entity));
+  if (endMarker !== SEMICOLON) unexpected(source, `Expected same closing entity ${entity}`);
+  source.next();
+  return source.end(0, entity.length);
 }
 
 function exclamation(source: StringSource, parent: NodeContainer) {
