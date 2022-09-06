@@ -3,7 +3,7 @@ import {
   ArrayCharacterSource,
   BufferedStringSource,
   CharacterSource,
-  RestartableCharacterSource,
+  Resettable,
   StringSource,
   UTF16NonValidatingCharacterSource,
   UTF16ValidatingCharacterSource,
@@ -29,7 +29,7 @@ import {
 export {
   // stream-source
   CharacterSource,
-  RestartableCharacterSource,
+  Resettable,
   StringSource,
   BufferedStringSource,
   ArrayCharacterSource,

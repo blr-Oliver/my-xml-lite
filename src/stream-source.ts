@@ -9,8 +9,8 @@ export interface CharacterSource {
   get(): number | -1 | -2;
 }
 
-export interface RestartableCharacterSource extends CharacterSource {
-  restart(): void;
+export interface Resettable {
+  reset(): void;
 }
 
 export interface StringSource extends CharacterSource {
@@ -26,7 +26,7 @@ export interface StringSource extends CharacterSource {
   end(cutStart?: number, cutEnd?: number): string;
 }
 
-export class BufferedStringSource implements StringSource {
+export class BufferedStringSource implements StringSource, Resettable {
   private readonly buffer: Uint32Array;
   private position: number = -1;
 
@@ -47,22 +47,38 @@ export class BufferedStringSource implements StringSource {
     return this.buffer[this.position = 0] = this.get();
   }
 
+  reset() {
+    this.position = 0;
+  }
+
   end(cutStart: number = 0, cutEnd: number = 0): string {
     return String.fromCodePoint(...this.buffer.slice(cutStart, this.position - cutEnd));
   }
 }
 
-export abstract class ArrayCharacterSource<T extends ArrayLike<number>> implements RestartableCharacterSource {
+export abstract class ArrayCharacterSource<T extends ArrayLike<number>> implements CharacterSource, Resettable {
+  protected data: T;
   protected position: number;
-  protected code: number = -2;
+  protected code: number;
 
-  protected constructor(protected readonly data: T,
-                        protected readonly limit: number = data.length,
-                        protected readonly offset: number = 0) {
-    this.position = offset;
+  protected constructor(data?: T,
+                        protected limit: number = data?.length || 0,
+                        protected offset: number = 0) {
+    this.data = !!data ? data : ([] as unknown as T);
+    this.position = this.offset;
+    this.code = -2;
   }
 
-  restart() {
+  setData(data: T,
+          limit: number = data.length,
+          offset: number = 0) {
+    this.data = data;
+    this.limit = limit;
+    this.offset = offset;
+    this.reset();
+  }
+
+  reset() {
     this.position = this.offset;
     this.code = -2;
   }
@@ -80,7 +96,7 @@ export abstract class ArrayCharacterSource<T extends ArrayLike<number>> implemen
 }
 
 export class UTF16NonValidatingCharacterSource extends ArrayCharacterSource<Uint16Array> {
-  constructor(data: Uint16Array, limit?: number, offset?: number) {
+  constructor(data?: Uint16Array, limit?: number, offset?: number) {
     super(data, limit, offset);
   }
 
@@ -93,7 +109,7 @@ export class UTF16NonValidatingCharacterSource extends ArrayCharacterSource<Uint
 }
 
 export class UTF16ValidatingCharacterSource extends ArrayCharacterSource<Uint16Array> {
-  constructor(data: Uint16Array, limit?: number, offset?: number) {
+  constructor(data?: Uint16Array, limit?: number, offset?: number) {
     super(data, limit, offset);
   }
 
@@ -112,7 +128,7 @@ export class UTF16ValidatingCharacterSource extends ArrayCharacterSource<Uint16A
 }
 
 export class UTF8NonValidatingCharacterSource extends ArrayCharacterSource<Uint8Array> {
-  constructor(data: Uint8Array, limit?: number, offset?: number) {
+  constructor(data?: Uint8Array, limit?: number, offset?: number) {
     super(data, limit, offset);
   }
 
