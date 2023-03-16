@@ -52,6 +52,8 @@ export {
   textNodes
 }
 
+export * from './xml-node-lite';
+
 function parse(input: ArrayBuffer | string | StringSource): Document {
   return document(createSource(input));
 }
