@@ -1,4 +1,3 @@
-import {document} from './parser';
 import {
   ArrayCharacterSource,
   BufferedStringSource,
@@ -8,8 +7,7 @@ import {
   UTF16NonValidatingCharacterSource,
   UTF16ValidatingCharacterSource,
   UTF8NonValidatingCharacterSource
-} from './stream-source';
-import {stringify} from './stringifier';
+} from './common/stream-source';
 import {
   CData,
   Comment,
@@ -24,7 +22,9 @@ import {
   textContent,
   textNodes,
   ValueNode
-} from './xml-node';
+} from './common/xml-node';
+import {document} from './legacy/parser';
+import {stringify} from './legacy/stringifier';
 
 export {
   // stream-source
@@ -52,7 +52,7 @@ export {
   textNodes
 }
 
-export * from './xml-node-lite';
+export * from './decl/xml-lite-decl';
 
 function parse(input: ArrayBuffer | string | StringSource): Document {
   return document(createSource(input));

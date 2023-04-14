@@ -20,14 +20,13 @@ export namespace XMLLite {
     readonly previousSibling: Node | null;
     readonly parentNode: Node | null;
     readonly parentElement: Element | null;
-    readonly nodeType: number;
+    readonly nodeType: NodeType;
     readonly nodeValue: string | null;
-    readonly textContent: string | null;
     hasChildNodes(): boolean;
   }
 
   export interface ParentNode extends Node {
-    readonly children: ArrayLike<Element>;
+    readonly children: NodeList<Element>;
     readonly firstElementChild: Element | null;
     readonly lastElementChild: Element | null;
     getElementsByTagName(name: string): NodeList<Element>;
@@ -47,6 +46,7 @@ export namespace XMLLite {
     getAttributeNames(): string[];
     hasAttribute(qName: string): boolean;
     hasAttributes(): boolean;
+    readonly selfClosed?: boolean;
   }
 
   export interface CharacterData extends Node {
@@ -68,8 +68,8 @@ export namespace XMLLite {
 
   export interface DocumentType extends Node {
     readonly name: string;
-    readonly publicId: string;
-    readonly systemId: string;
+    readonly publicId?: string;
+    readonly systemId?: string;
   }
 
   export interface Document extends ParentNode {
@@ -87,7 +87,7 @@ export namespace XMLLite {
   }
 
   export function isText(node: Node): node is Text {
-    return node.nodeType === NodeType.TEXT_NODE;
+    return node.nodeType === NodeType.TEXT_NODE || isCDATA(node);
   }
 
   export function isCDATA(node: Node): node is CDATASection {

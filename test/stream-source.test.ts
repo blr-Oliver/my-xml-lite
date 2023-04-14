@@ -1,4 +1,4 @@
-import {CharacterSource, UTF16ValidatingCharacterSource} from '../src/stream-source';
+import {CharacterSource, UTF16ValidatingCharacterSource} from '../src/common/stream-source';
 
 function inlineUTF16Source(data: number[]): CharacterSource {
   return new UTF16ValidatingCharacterSource(new Uint16Array(data));

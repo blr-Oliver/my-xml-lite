@@ -1,4 +1,4 @@
-import {CharacterSource} from './stream-source';
+import {CharacterSource} from '../common/stream-source';
 
 export interface CsvDocument {
   header?: string[];

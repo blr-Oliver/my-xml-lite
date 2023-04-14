@@ -1,3 +1,4 @@
+export const EOF = -1;
 export const LT = '<'.charCodeAt(0);
 export const GT = '>'.charCodeAt(0);
 export const QUESTION = '?'.charCodeAt(0);
@@ -10,6 +11,11 @@ export const SLASH = '/'.charCodeAt(0);
 export const AMPERSAND = '&'.charCodeAt(0);
 export const SEMICOLON = ';'.charCodeAt(0);
 export const COLON = ':'.charCodeAt(0);
+export const SHARP = '#'.charCodeAt(0);
+export const X_REGULAR = 'x'.charCodeAt(0);
+export const X_CAPITAL = 'X'.charCodeAt(0);
+export const OPEN_SQUARE_BRACKET = '['.charCodeAt(0);
+export const CLOSE_SQUARE_BRACKET = ']'.charCodeAt(0);
 
 export const CMT_START = stringToArray('<!--');
 export const CMT_END = stringToArray('-->');
@@ -17,6 +23,9 @@ export const CD_START = stringToArray('<![CDATA[');
 export const CD_END = stringToArray(']]>');
 export const PI_START = stringToArray('<?');
 export const PI_END = stringToArray('?>');
+export const DOCTYPE = stringToArray('DOCTYPE');
+export const PUBLIC_ID = stringToArray('PUBLIC');
+export const SYSTEM_ID = stringToArray('SYSTEM');
 
 export function stringToArray(s: string): number[] {
   return [...s].map(c => c.codePointAt(0)!);
@@ -47,7 +56,7 @@ function isExoticNameStartChar(code: number) {
 function isCommonNameChar(code: number) {
   return isCommonNameStartChar(code) ||
       code === HYPHEN ||
-      (code >= 0x30 && code <= 0x39) || // 0-9
+      isDigit(code) ||
       code === 0x2E;// period (.)
 }
 function isExoticNameChar(code: number) {
@@ -56,9 +65,35 @@ function isExoticNameChar(code: number) {
       (code >= 0x0300 && code <= 0x03F6) ||
       (code >= 0x203F && code <= 0x2040);
 }
+export function isDigit(code: number) {
+  return (code >= 0x30 && code <= 0x39);
+}
+export function isHexDigit(code: number) {
+  return isDigit(code) ||
+      (code >= 0x41 && code <= 0x46) ||
+      (code >= 0x61 && code <= 0x66);
+}
+export function hexDigitToValue(code: number): number {
+  if (isDigit(code)) return code - 0x30;
+  if (code >= 0x41 && code <= 0x46) return 10 + code - 0x41;
+  if (code >= 0x61 && code <= 0x66) return 10 + code - 0x61;
+  return NaN;
+}
 export function isNameStartChar(code: number): boolean {
   return isCommonNameStartChar(code) || isExoticNameStartChar(code);
 }
 export function isNameChar(code: number): boolean {
   return isCommonNameChar(code) || isExoticNameChar(code);
+}
+export const KNOWN_ENTITIES: { readonly [key: string]: number[] } = {
+  'lt': [LT],
+  'gt': [GT],
+  'amp': [AMPERSAND],
+  'apos': [QUOTE],
+  'quot': [DOUBLE_QUOTE],
+  'tab': [0x09],
+  'newline': [0x0A],
+  'nbsp': [0x00A0],
+  'ndash': [0x2013],
+  'mdash': [0x2014]
 }

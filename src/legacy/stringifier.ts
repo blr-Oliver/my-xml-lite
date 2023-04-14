@@ -1,4 +1,4 @@
-import {CData, Comment, Declaration, Element, Node, NodeContainer, ProcessingInstruction, Text, ValueNode} from './xml-node';
+import {CData, Comment, Declaration, Element, Node, NodeContainer, ProcessingInstruction, Text, ValueNode} from '../common/xml-node';
 
 export function stringify(node: Node): string {
   const chunks: string[] = [];

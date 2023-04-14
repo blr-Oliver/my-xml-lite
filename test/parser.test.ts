@@ -1,7 +1,7 @@
 import {readFileSync} from 'fs';
 import {BufferedStringSource, StringSource, UTF16NonValidatingCharacterSource, UTF8NonValidatingCharacterSource} from '../src';
-import {document, skipToSeq} from '../src/parser';
-import {stringify} from '../src/stringifier';
+import {document, skipToSeq} from '../src/legacy/parser';
+import {stringify} from '../src/legacy/stringifier';
 
 function fileStringSource(name: string): StringSource {
   const buffer = readFileSync(name);

@@ -19,9 +19,9 @@ import {
   SEMICOLON,
   SLASH,
   stringToArray
-} from './code-points';
-import {StringSource} from './stream-source';
-import {Declaration, Document, Element, Node, NodeContainer, NodeType, Text, ValueNode} from './xml-node';
+} from '../common/code-points';
+import {StringSource} from '../common/stream-source';
+import {Declaration, Document, Element, Node, NodeContainer, NodeType, Text, ValueNode} from '../common/xml-node';
 
 const ALWAYS_EMPTY: { [tag: string]: boolean } = {
   br: true,
