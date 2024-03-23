@@ -1,4 +1,5 @@
 import {CharacterSource} from '../common/stream-source';
+import {StringBuilder} from './StringBuilder';
 
 export namespace Tokenizer {
   export enum TokenType {
@@ -43,15 +44,6 @@ export namespace Tokenizer {
   export interface Attribute {
     name: string;
     value: string | null;
-  }
-
-  export interface StringBuilder {
-    readonly buffer: ArrayLike<number>;
-    position: number;
-    clear(): void;
-    append(code: number): void;
-    appendSequence(seq: number[]): void;
-    buildString(from?: number, to?: number): string;
   }
 
   export interface State {

@@ -5,9 +5,12 @@ export const QUESTION = '?'.charCodeAt(0);
 export const EXCLAMATION = '!'.charCodeAt(0);
 export const HYPHEN = '-'.charCodeAt(0);
 export const EQ = '='.charCodeAt(0);
-export const QUOTE = '\''.charCodeAt(0);
-export const DOUBLE_QUOTE = '\"'.charCodeAt(0);
-export const SLASH = '/'.charCodeAt(0);
+export const APOSTROPHE = '\''.charCodeAt(0);
+export const SINGLE_QUOTE = APOSTROPHE;
+export const QUOTE = '\"'.charCodeAt(0);
+export const DOUBLE_QUOTE = QUOTE;
+export const SOLIDUS = '/'.charCodeAt(0);
+export const SLASH = SOLIDUS;
 export const AMPERSAND = '&'.charCodeAt(0);
 export const SEMICOLON = ';'.charCodeAt(0);
 export const COLON = ':'.charCodeAt(0);
@@ -16,6 +19,7 @@ export const X_REGULAR = 'x'.charCodeAt(0);
 export const X_CAPITAL = 'X'.charCodeAt(0);
 export const OPEN_SQUARE_BRACKET = '['.charCodeAt(0);
 export const CLOSE_SQUARE_BRACKET = ']'.charCodeAt(0);
+export const REPLACEMENT_CHAR = 0xFFFD;
 
 export const CMT_START = stringToArray('<!--');
 export const CMT_END = stringToArray('-->');
@@ -27,15 +31,40 @@ export const DOCTYPE = stringToArray('DOCTYPE');
 export const PUBLIC_ID = stringToArray('PUBLIC');
 export const SYSTEM_ID = stringToArray('SYSTEM');
 
+export type CharCodePredicate = (code: number) => boolean;
+export function range(lo: number, hi: number, loInclusive: boolean = true, hiInclusive: boolean = false): CharCodePredicate {
+  return loInclusive ?
+      (hiInclusive ? code => lo <= code && code <= hi : code => lo <= code && code < hi) :
+      (hiInclusive ? code => lo < code && code <= hi : code => lo < code && code < hi);
+}
+export function or(...predicates: CharCodePredicate[]): CharCodePredicate {
+  return code => predicates.some(p => p(code));
+}
 export function stringToArray(s: string): number[] {
   return [...s].map(c => c.codePointAt(0)!);
 }
 export function isSpace(code: number): boolean {
   return code === 0x20 || code === 9 || code === 10 || code === 13;
 }
+export const isAsciiLowerAlpha = range(0x61, 0x7A);
+export const isAsciiUpperAlpha = range(0x41, 0x5A);
+export const isAsciiAlpha = or(isAsciiLowerAlpha, isAsciiUpperAlpha);
+export const isDigit = range(0x30, 0x39);
+export const isLowerHexDigit = range(0x61, 0x66);
+export const isUpperHexDigit = range(0x41, 0x46);
+export const isHexDigit = or(isDigit, isUpperHexDigit, isLowerHexDigit);
+export const isAsciiAlphaNum = or(isAsciiAlpha, isDigit);
+export const isC0Control = range(0x00, 0x1F);
+export const isControl = or(isC0Control, range(0x7F, 0x9F));
+export const isLeadingSurrogate = range(0xD800, 0xDBFF);
+export const isTrailingSurrogate = range(0xDC00, 0xDFFF);
+export const isSurrogate = or(isLeadingSurrogate, isTrailingSurrogate);
+const NON_CHARS: number[] = [0xFFFE, 0xFFFF, 0x1FFFE, 0x1FFFF, 0x2FFFE, 0x2FFFF, 0x3FFFE, 0x3FFFF, 0x4FFFE, 0x4FFFF, 0x5FFFE, 0x5FFFF, 0x6FFFE, 0x6FFFF, 0x7FFFE, 0x7FFFF, 0x8FFFE, 0x8FFFF, 0x9FFFE, 0x9FFFF, 0xAFFFE, 0xAFFFF, 0xBFFFE, 0xBFFFF, 0xCFFFE, 0xCFFFF, 0xDFFFE, 0xDFFFF, 0xEFFFE, 0xEFFFF, 0xFFFFE, 0xFFFFF, 0x10FFFE, 0x10FFFF];
+export function isNonCharacter(code: number): boolean {
+  return (code >= 0xFDD0 && code <= 0xFDEF) || NON_CHARS.includes(code);
+}
 function isCommonNameStartChar(code: number) {
-  return (code >= 0x61 && code <= 0x7A) || // a-z
-      (code >= 0x41 && code <= 0x5A) || // A-Z
+  return isAsciiAlpha(code) ||
       code === 0x5F || // underscore (_)
       code === COLON;  // colon (:)
 }
@@ -65,14 +94,6 @@ function isExoticNameChar(code: number) {
       (code >= 0x0300 && code <= 0x03F6) ||
       (code >= 0x203F && code <= 0x2040);
 }
-export function isDigit(code: number) {
-  return (code >= 0x30 && code <= 0x39);
-}
-export function isHexDigit(code: number) {
-  return isDigit(code) ||
-      (code >= 0x41 && code <= 0x46) ||
-      (code >= 0x61 && code <= 0x66);
-}
 export function hexDigitToValue(code: number): number {
   if (isDigit(code)) return code - 0x30;
   if (code >= 0x41 && code <= 0x46) return 10 + code - 0x41;
@@ -89,7 +110,7 @@ export const KNOWN_ENTITIES: { readonly [key: string]: number[] } = {
   'lt': [LT],
   'gt': [GT],
   'amp': [AMPERSAND],
-  'apos': [QUOTE],
+  'apos': [SINGLE_QUOTE],
   'quot': [DOUBLE_QUOTE],
   'tab': [0x09],
   'newline': [0x0A],
