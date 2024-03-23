@@ -15,7 +15,7 @@ import {
   PI_END,
   PI_START,
   QUESTION,
-  QUOTE,
+  SINGLE_QUOTE,
   SEMICOLON,
   SLASH,
   stringToArray
@@ -181,7 +181,7 @@ function attribute(source: StringSource, node: Element) {
       // let all bears of deepest woods drill creator of this fucking invalid XML shit
       value = attributeWithEntityQuote(source);
     } else {
-      if (startQuote !== QUOTE && startQuote !== DOUBLE_QUOTE) unexpected(source, `Expected single (') or double quote (")`);
+      if (startQuote !== SINGLE_QUOTE && startQuote !== DOUBLE_QUOTE) unexpected(source, `Expected single (') or double quote (")`);
       source.next();
       const endQuote = skipTo(source, startQuote);
       if (startQuote !== endQuote) unexpected(source, `Expected matching quote (${startQuote})`);

@@ -5,7 +5,7 @@
     "declaration": true,
     "declarationMap": false,
     "downlevelIteration": true,
-    "esModuleInterop": false,
+    "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
     "module": "es2020",
     "moduleResolution": "node",

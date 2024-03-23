@@ -16,44 +16,22 @@ import {
   LT,
   OPEN_SQUARE_BRACKET,
   QUESTION,
-  QUOTE,
   SEMICOLON,
   SHARP,
+  SINGLE_QUOTE,
   SLASH,
   X_CAPITAL,
   X_REGULAR
 } from '../common/code-points';
-import {Tokenizer} from '../decl/lexer-decl';
 import {CharacterSource} from '../common/stream-source';
+import {Tokenizer} from '../decl/lexer-decl';
+import {StringBuilder} from '../decl/StringBuilder';
 
 const CD_START_TAIL = CD_START.slice(2);
 
-export class FixedSizeStringBuilder implements Tokenizer.StringBuilder {
-  buffer: Uint32Array;
-  position: number = 0;
-
-  constructor(size: number = 1 << 12) {
-    this.buffer = new Uint32Array(size);
-  }
-
-  clear() {
-    this.position = 0;
-  }
-  append(code: number) {
-    this.buffer[this.position++] = code;
-  }
-  appendSequence(seq: number[]): void {
-    for (let i = 0; i < seq.length; ++i)
-      this.append(seq[i]);
-  }
-  buildString(from = 0, to = this.position): string {
-    return String.fromCodePoint(...this.buffer.subarray(from, to));
-  }
-}
-
 export abstract class TokenizerImpl implements Tokenizer.TokenizerInternals {
   declare input: CharacterSource;
-  declare stringBuilder: Tokenizer.StringBuilder;
+  declare stringBuilder: StringBuilder;
 
   nextToken(): Tokenizer.Token | null {
     switch (this.input.get()) {
@@ -227,13 +205,13 @@ export abstract class TokenizerImpl implements Tokenizer.TokenizerInternals {
   attributeValue(): string {
     let code = this.input.get();
     switch (code) {
-      case QUOTE:
+      case SINGLE_QUOTE:
       case DOUBLE_QUOTE:
         this.input.next();
         return this.quotedAttributeValue(code);
       case AMPERSAND:
         let entity = this.entity();
-        if (entity.length === 1 && (entity[0] === QUOTE || entity[0] === DOUBLE_QUOTE))
+        if (entity.length === 1 && (entity[0] === SINGLE_QUOTE || entity[0] === DOUBLE_QUOTE))
           return this.quotedByEntityAttributeValue(entity[0]);
         return String.fromCodePoint(...entity) + this.unquotedAttributeValue();
       default:
@@ -243,7 +221,7 @@ export abstract class TokenizerImpl implements Tokenizer.TokenizerInternals {
   attributeValueOnlyStrict(): string {
     let code = this.input.get();
     switch (code) {
-      case QUOTE:
+      case SINGLE_QUOTE:
       case DOUBLE_QUOTE:
         this.input.next();
         return this.quotedAttributeValue(code);
