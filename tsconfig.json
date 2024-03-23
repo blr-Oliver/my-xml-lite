@@ -7,7 +7,7 @@
     "downlevelIteration": true,
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
-    "module": "es2020",
+    "module": "commonjs",
     "moduleResolution": "node",
     "noImplicitAny": true,
     "noPropertyAccessFromIndexSignature": true,

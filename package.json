@@ -3,11 +3,11 @@
   "version": "0.1.0",
   "description": "Minimal ArrayBuffer-based UTF-8/UTF-16 DOM XML/HTML parser with weak validation",
   "main": "./dist/index.js",
-  "type": "module",
   "types": "./dist/index.d.ts",
   "scripts": {
     "build": "tsc",
-    "test": "jest"
+    "test": "jest",
+    "debug": "node --inspect=9230 dist/debug.js"
   },
   "keywords": [
     "DOM",
