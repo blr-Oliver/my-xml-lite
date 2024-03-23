@@ -95,6 +95,29 @@ export abstract class ArrayCharacterSource<T extends ArrayLike<number>> implemen
   }
 }
 
+export class DirectCharacterSource extends ArrayCharacterSource<Uint16Array> {
+  constructor(data?: Uint16Array, limit?: number, offset?: number) {
+    super(data, limit, offset);
+  }
+
+  getData(): Uint16Array {
+    return this.data;
+  }
+  getLimit(): number {
+    return this.limit;
+  }
+  setLimit(limit: number) {
+    this.limit = limit;
+  }
+  getPosition(): number {
+    return this.position;
+  }
+
+  protected consumeNext(): number {
+    return this.data[this.position++];
+  }
+}
+
 export class UTF16NonValidatingCharacterSource extends ArrayCharacterSource<Uint16Array> {
   constructor(data?: Uint16Array, limit?: number, offset?: number) {
     super(data, limit, offset);
