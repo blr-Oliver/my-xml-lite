@@ -21,7 +21,7 @@ import {StringBuilder} from '../decl/StringBuilder';
 import {CHAR_REF_REPLACEMENT} from './CallBasedCharRefParser';
 import {PrefixNode} from './entity-ref-index';
 
-type State = 'ref' | 'numeric' | 'numericEnd' | 'named' | 'hexStart' | 'hex' | 'decimal';
+type State = 'ref' | 'numeric' | 'numericEnd' | 'named' | 'hexStart' | 'hex' | 'decimalStart' | 'decimal';
 
 export class StateBasedRefParser implements CharacterReferenceParser {
   output: number[][] = [];
@@ -63,9 +63,10 @@ export class StateBasedRefParser implements CharacterReferenceParser {
     this.buffer.clear();
     this.buffer.append(AMPERSAND);
     let code = this.input.next();
-    if (code === SHARP)
+    if (code === SHARP) {
+      this.buffer.append(code);
       return 'numeric';
-    else if (isAsciiAlphaNum(code))
+    } else if (isAsciiAlphaNum(code))
       return 'named';
   }
   numeric(): State {
@@ -75,7 +76,7 @@ export class StateBasedRefParser implements CharacterReferenceParser {
       this.buffer.append(code);
       return 'hexStart';
     } else
-      return 'decimal';
+      return 'decimalStart';
   }
   numericEnd(): undefined {
     let code = this.charCode;
@@ -126,6 +127,14 @@ export class StateBasedRefParser implements CharacterReferenceParser {
       }
       code = this.input.next();
     }
+  }
+  decimalStart(): State | undefined {
+    let code = this.input.get();
+    if (!isDigit(code)) {
+      this.reconsume = true;
+      this.error('absence-of-digits-in-numeric-character-reference');
+    } else
+      return 'decimal';
   }
   decimal(): State | undefined {
     let code = this.input.get();

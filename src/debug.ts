@@ -18,7 +18,7 @@ async function peek() {
   let parser = new StateBasedRefParser(buildIndex(HTML_SPECIAL), new FixedSizeStringBuilder(32));
   let input = new DirectCharacterSource(new Uint16Array(1 << 10));
   input.reset();
-  setChars(input, '#97;');
+  setChars(input, '#');
   parser.parse(input, true);
 }
 

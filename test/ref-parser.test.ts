@@ -29,8 +29,8 @@ function createSuite(parser: CharacterReferenceParser) {
         parser.parse(input, test.isAttribute);
         let output = String.fromCodePoint(...parser.output.flatMap(chunk => chunk));
         expect(output).toBe(test.output);
-        expect(parser.errors).toBe(test.errors || []);
-        expect(input.getPosition()).toBe(parser.reconsume ? test.inputPosition + 1 : test.inputPosition);
+        expect(parser.errors).toStrictEqual(test.errors || []);
+        expect(parser.reconsume ? input.getPosition() - 1 : input.getPosition()).toBe(test.inputPosition);
       })
     }
 
@@ -50,7 +50,7 @@ function createSuite(parser: CharacterReferenceParser) {
         });
         performTest({
           isAttribute: true,
-          input: '#97',
+          input: '#97+',
           output: 'a',
           inputPosition: 3,
           errors: ['missing-semicolon-after-character-reference']
@@ -64,24 +64,24 @@ function createSuite(parser: CharacterReferenceParser) {
         });
         performTest({
           isAttribute: true,
-          input: '#',
+          input: '#+',
           output: '&#',
           inputPosition: 1,
-          errors: ['absence-of-digits-in-numeric-character-reference parse error']
+          errors: ['absence-of-digits-in-numeric-character-reference']
         });
         performTest({
           isAttribute: true,
           input: '#;',
           output: '&#',
           inputPosition: 1,
-          errors: ['absence-of-digits-in-numeric-character-reference parse error']
+          errors: ['absence-of-digits-in-numeric-character-reference']
         });
         performTest({
           isAttribute: true,
           input: '#a',
           output: '&#',
           inputPosition: 1,
-          errors: ['absence-of-digits-in-numeric-character-reference parse error']
+          errors: ['absence-of-digits-in-numeric-character-reference']
         });
       });
       describe('hexadecimal', () => {

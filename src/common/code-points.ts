@@ -32,7 +32,7 @@ export const PUBLIC_ID = stringToArray('PUBLIC');
 export const SYSTEM_ID = stringToArray('SYSTEM');
 
 export type CharCodePredicate = (code: number) => boolean;
-export function range(lo: number, hi: number, loInclusive: boolean = true, hiInclusive: boolean = false): CharCodePredicate {
+export function range(lo: number, hi: number, loInclusive: boolean = true, hiInclusive: boolean = true): CharCodePredicate {
   return loInclusive ?
       (hiInclusive ? code => lo <= code && code <= hi : code => lo <= code && code < hi) :
       (hiInclusive ? code => lo < code && code <= hi : code => lo < code && code < hi);
