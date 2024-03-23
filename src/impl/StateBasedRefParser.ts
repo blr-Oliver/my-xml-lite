@@ -105,9 +105,11 @@ export class StateBasedRefParser implements CharacterReferenceParser {
   }
   hexStart(): State | undefined {
     let code = this.input.next();
-    if (isHexDigit(code))
+    if (!isHexDigit(code)) {
+      this.reconsume = true;
+      this.error('absence-of-digits-in-numeric-character-reference');
+    } else
       return 'hex';
-    this.error('absence-of-digits-in-numeric-character-reference');
   }
   hex(): State | undefined {
     let code = this.input.get();
