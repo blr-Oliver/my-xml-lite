@@ -16,47 +16,48 @@ import {
   X_REGULAR
 } from '../common/code-points';
 import {CharacterSource} from '../common/stream-source';
+import {CharacterReferenceParser} from '../decl/CharacterReferenceParser';
 import {StringBuilder} from '../decl/StringBuilder';
-import {CHAR_REF_REPLACEMENT} from './character-reference-parser';
+import {CHAR_REF_REPLACEMENT} from './CallBasedCharRefParser';
 import {PrefixNode} from './entity-ref-index';
 
-type StateHandler = () => (State | undefined);
-type State = Exclude<keyof {
-  [K in keyof StateBasedRefParser]: StateHandler extends StateBasedRefParser[K] ? true : never;
-}, 'run'>;
+type State = 'ref' | 'numeric' | 'numericEnd' | 'named' | 'hexStart' | 'hex' | 'decimal';
 
-export class StateBasedRefParser {
-  private input: CharacterSource;
-  private refsIndex: PrefixNode<number[]>;
-  private buffer: StringBuilder;
+export class StateBasedRefParser implements CharacterReferenceParser {
+  output: number[][] = [];
+  errors: string[] = [];
+  reconsume!: boolean;
 
+  private input!: CharacterSource;
   private charCode!: number;
   private isAttribute!: boolean;
   private state: State | undefined;
-  private reconsume!: boolean;
   private refLength!: number;
 
-  constructor(input: CharacterSource,
-              refsIndex: PrefixNode<number[]>,
-              buffer: StringBuilder
+  constructor(private refsIndex: PrefixNode<number[]>,
+              private buffer: StringBuilder
   ) {
-    this.input = input;
-    this.refsIndex = refsIndex;
-    this.buffer = buffer
   }
 
-  run(isAttribute: boolean) {
+  parse(input: CharacterSource, isAttribute: boolean) {
+    this.input = input;
     this.isAttribute = isAttribute;
     this.reset();
     while (this.state) {
       this.state = this[this.state]();
     }
+    if (this.buffer.position)
+      this.output.push(this.buffer.getCodes());
+    //@ts-ignore
+    this.input = undefined;
   }
   private reset() {
     this.state = 'ref';
     this.refLength = 0;
     this.charCode = 0;
     this.reconsume = false;
+    this.output.length = 0;
+    this.errors.length = 0;
   }
   ref(): State | undefined {
     this.buffer.clear();
@@ -79,18 +80,18 @@ export class StateBasedRefParser {
   numericEnd(): undefined {
     let code = this.charCode;
     if (code === 0) {
-      this.parseError('null-character-reference');
+      this.error('null-character-reference');
       code = REPLACEMENT_CHAR;
     } else if (code > 0x10FFFF) {
-      this.parseError('character-reference-outside-unicode-range');
+      this.error('character-reference-outside-unicode-range');
       code = REPLACEMENT_CHAR;
     } else if (isSurrogate(code)) {
-      this.parseError('surrogate-character-reference');
+      this.error('surrogate-character-reference');
       code = REPLACEMENT_CHAR;
     } else if (isNonCharacter(code)) {
-      this.parseError('noncharacter-character-reference');
+      this.error('noncharacter-character-reference');
     } else if (code === 0x0D || (!isSpace(code) && isControl(code))) {
-      this.parseError('control-character-reference');
+      this.error('control-character-reference');
       code = CHAR_REF_REPLACEMENT[code - 0x80] || code;
     }
     this.buffer.clear();
@@ -98,13 +99,14 @@ export class StateBasedRefParser {
     return;
   }
   named(): State | undefined {
+    // TODO
     return;
   }
   hexStart(): State | undefined {
     let code = this.input.next();
     if (isHexDigit(code))
       return 'hex';
-    this.parseError('absence-of-digits-in-numeric-character-reference parse error');
+    this.error('absence-of-digits-in-numeric-character-reference');
   }
   hex(): State | undefined {
     let code = this.input.get();
@@ -118,7 +120,7 @@ export class StateBasedRefParser {
       } else if (isLowerHexDigit(code)) {
         this.charCode = this.charCode * 16 + code - 0x57;
       } else {
-        this.parseError('missing-semicolon-after-character-reference');
+        this.error('missing-semicolon-after-character-reference');
         this.reconsume = true;
         return 'numericEnd';
       }
@@ -133,7 +135,7 @@ export class StateBasedRefParser {
       } else if (code === SEMICOLON)
         return 'numericEnd';
       else {
-        this.parseError('missing-semicolon-after-character-reference');
+        this.error('missing-semicolon-after-character-reference');
         this.reconsume = true;
         return 'numericEnd';
       }
@@ -141,7 +143,8 @@ export class StateBasedRefParser {
     }
   }
 
-  private parseError(name: string) {
+  private error(name: string) {
+    this.errors.push(name);
   }
 
 }

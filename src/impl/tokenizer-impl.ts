@@ -243,7 +243,7 @@ export abstract class TokenizerImpl implements Tokenizer.TokenizerInternals {
           break;
         case delimiter:
           this.input.next();
-          return this.stringBuilder.buildString();
+          return this.stringBuilder.getString();
         default:
           this.stringBuilder.append(code);
           code = this.input.next();
@@ -261,7 +261,7 @@ export abstract class TokenizerImpl implements Tokenizer.TokenizerInternals {
         case AMPERSAND:
           let entity = this.entity();
           if (entity.length === 1 && entity[0] === delimiter)
-            return this.stringBuilder.buildString();
+            return this.stringBuilder.getString();
           this.stringBuilder.appendSequence(entity);
           code = this.input.get();
           break;
@@ -291,7 +291,7 @@ export abstract class TokenizerImpl implements Tokenizer.TokenizerInternals {
           }
       }
     }
-    return this.stringBuilder.buildString();
+    return this.stringBuilder.getString();
   }
   entity(): number[] {
     // noinspection FallThroughInSwitchStatementJS
@@ -366,12 +366,12 @@ export abstract class TokenizerImpl implements Tokenizer.TokenizerInternals {
       this.stringBuilder.append(code);
       code = this.input.next();
     } while (isNameChar(code));
-    return this.stringBuilder.buildString();
+    return this.stringBuilder.getString();
   }
   text(resolveEntities: boolean, stopSequence: number[]): string {
     this.stringBuilder.clear();
     if (this.appendUpTo(resolveEntities, stopSequence))
-      return this.stringBuilder.buildString(0, this.stringBuilder.position + 1 - stopSequence.length);
+      return this.stringBuilder.getString(0, this.stringBuilder.position + 1 - stopSequence.length);
     else
       this.unexpected();
   }
@@ -421,8 +421,8 @@ export abstract class TokenizerImpl implements Tokenizer.TokenizerInternals {
     if (this.appendUpTo(false, wellFormedStart ? goodEnd : badEnd))
       this.input.next();
     else
-      return this.stringBuilder.buildString();
-    return this.stringBuilder.buildString(0, this.stringBuilder.position - (wellFormedStart ? goodEnd : badEnd).length + 1);
+      return this.stringBuilder.getString();
+    return this.stringBuilder.getString(0, this.stringBuilder.position - (wellFormedStart ? goodEnd : badEnd).length + 1);
   }
   assertSequence(seq: number[], append: boolean = true): boolean {
     let actual = this.input.get();

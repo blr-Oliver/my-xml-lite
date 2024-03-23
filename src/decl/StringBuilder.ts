@@ -4,5 +4,6 @@ export interface StringBuilder {
   clear(): void;
   append(code: number): void;
   appendSequence(seq: number[]): void;
-  buildString(from?: number, to?: number): string;
+  getString(from?: number, to?: number): string;
+  getCodes(from?: number, to?: number): number[];
 }

@@ -18,7 +18,10 @@ export class FixedSizeStringBuilder implements StringBuilder {
     for (let i = 0; i < seq.length; ++i)
       this.append(seq[i]);
   }
-  buildString(from = 0, to = this.position): string {
+  getString(from = 0, to = this.position): string {
     return String.fromCodePoint(...this.buffer.subarray(from, to));
+  }
+  getCodes(from: number = 0, to: number = this.position): number[] {
+    return [...this.buffer.subarray(from, to)];
   }
 }
