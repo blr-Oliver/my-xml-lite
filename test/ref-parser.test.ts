@@ -1,9 +1,9 @@
-import {HTML_SPECIAL} from '../src/common/known-named-refs';
+import {HTML_SPECIAL} from '../src/decl/known-named-refs';
 import {DirectCharacterSource} from '../src/common/stream-source';
 import {CharacterReferenceParser} from '../src/decl/CharacterReferenceParser';
-import {buildIndex} from '../src/impl/entity-ref-index';
+import {buildIndex} from '../src/impl/character-reference/entity-ref-index';
 import {FixedSizeStringBuilder} from '../src/impl/FixedSizeStringBuilder';
-import {StateBasedRefParser} from '../src/impl/StateBasedRefParser';
+import {StateBasedRefParser} from '../src/impl/character-reference/StateBasedRefParser';
 import {setChars} from './common';
 
 function createSuite(parser: CharacterReferenceParser) {

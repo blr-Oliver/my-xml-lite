@@ -15,12 +15,11 @@ import {
   SHARP,
   X_CAPITAL,
   X_REGULAR
-} from '../common/code-points';
-import {CharacterSource} from '../common/stream-source';
-import {CharacterReferenceParser} from '../decl/CharacterReferenceParser';
-import {StringBuilder} from '../decl/StringBuilder';
-import {CHAR_REF_REPLACEMENT} from './CallBasedCharRefParser';
-import {PrefixNode} from './entity-ref-index';
+} from '../../common/code-points';
+import {CharacterSource} from '../../common/stream-source';
+import {CharacterReferenceParser} from '../../decl/CharacterReferenceParser';
+import {StringBuilder} from '../../decl/StringBuilder';
+import {CHAR_REF_REPLACEMENT, PrefixNode} from './entity-ref-index';
 
 type State = 'ref' | 'numeric' | 'numericEnd' | 'named' | 'hexStart' | 'hex' | 'decimalStart' | 'decimal' | 'ambiguous';
 
@@ -33,7 +32,6 @@ export class StateBasedRefParser implements CharacterReferenceParser {
   private charCode!: number;
   private isAttribute!: boolean;
   private state: State | undefined;
-  private refLength!: number;
 
   constructor(private refsIndex: PrefixNode<number[]>,
               private buffer: StringBuilder
@@ -50,11 +48,10 @@ export class StateBasedRefParser implements CharacterReferenceParser {
     if (this.buffer.position)
       this.output.push(this.buffer.getCodes());
     //@ts-ignore
-    this.input = undefined;
+    this.input = undefined; // do not keep reference, it belongs to the parser state only for convenience
   }
   private reset() {
     this.state = 'ref';
-    this.refLength = 0;
     this.charCode = 0;
     this.reconsume = false;
     this.output.length = 0;

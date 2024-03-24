@@ -1,4 +1,4 @@
-import {AMPERSAND, DOUBLE_QUOTE, GT, LT, SINGLE_QUOTE} from './code-points';
+import {AMPERSAND, DOUBLE_QUOTE, GT, LT, SINGLE_QUOTE} from '../common/code-points';
 
 export type EntityMapping<T> = {
   [entity: string]: T;
