@@ -1,5 +1,6 @@
 import {
   AMPERSAND,
+  EQ,
   isAsciiAlphaNum,
   isControl,
   isDigit,
@@ -21,7 +22,7 @@ import {StringBuilder} from '../decl/StringBuilder';
 import {CHAR_REF_REPLACEMENT} from './CallBasedCharRefParser';
 import {PrefixNode} from './entity-ref-index';
 
-type State = 'ref' | 'numeric' | 'numericEnd' | 'named' | 'hexStart' | 'hex' | 'decimalStart' | 'decimal';
+type State = 'ref' | 'numeric' | 'numericEnd' | 'named' | 'hexStart' | 'hex' | 'decimalStart' | 'decimal' | 'ambiguous';
 
 export class StateBasedRefParser implements CharacterReferenceParser {
   output: number[][] = [];
@@ -59,7 +60,7 @@ export class StateBasedRefParser implements CharacterReferenceParser {
     this.output.length = 0;
     this.errors.length = 0;
   }
-  ref(): State | undefined {
+  private ref(): State | undefined {
     this.buffer.clear();
     this.buffer.append(AMPERSAND);
     let code = this.input.next();
@@ -69,7 +70,7 @@ export class StateBasedRefParser implements CharacterReferenceParser {
     } else if (isAsciiAlphaNum(code))
       return 'named';
   }
-  numeric(): State {
+  private numeric(): State {
     this.charCode = 0;
     let code = this.input.next();
     if (code === X_CAPITAL || code === X_REGULAR) {
@@ -78,7 +79,7 @@ export class StateBasedRefParser implements CharacterReferenceParser {
     } else
       return 'decimalStart';
   }
-  numericEnd(): undefined {
+  private numericEnd(): undefined {
     let code = this.charCode;
     if (code === 0) {
       this.error('null-character-reference');
@@ -99,11 +100,30 @@ export class StateBasedRefParser implements CharacterReferenceParser {
     this.buffer.append(code);
     return;
   }
-  named(): State | undefined {
-    // TODO
-    return;
+  private named(): State | undefined {
+    let code: number = this.input.get();
+    let node = this.refsIndex, next: PrefixNode<number[]>;
+    let lastMatch = 0x00;
+    while (node.children && (next = node.children[code])) {
+      node = next;
+      this.buffer.append(lastMatch = code);
+      code = this.input.next();
+    }
+    if (node.value) {
+      this.reconsume = true;
+      if (this.isAttribute && lastMatch !== SEMICOLON && (code === EQ || isAsciiAlphaNum(code))) { // for historical reasons
+        return;
+      } else {
+        if (lastMatch !== SEMICOLON)
+          this.error('missing-semicolon-after-character-reference');
+        this.buffer.clear();
+        this.buffer.appendSequence(node.value);
+        return;
+      }
+    } else
+      return 'ambiguous';
   }
-  hexStart(): State | undefined {
+  private hexStart(): State | undefined {
     let code = this.input.next();
     if (!isHexDigit(code)) {
       this.reconsume = true;
@@ -111,7 +131,7 @@ export class StateBasedRefParser implements CharacterReferenceParser {
     } else
       return 'hex';
   }
-  hex(): State | undefined {
+  private hex(): State | undefined {
     let code = this.input.get();
     while (true) {
       if (code === SEMICOLON) {
@@ -130,7 +150,7 @@ export class StateBasedRefParser implements CharacterReferenceParser {
       code = this.input.next();
     }
   }
-  decimalStart(): State | undefined {
+  private decimalStart(): State | undefined {
     let code = this.input.get();
     if (!isDigit(code)) {
       this.reconsume = true;
@@ -138,7 +158,7 @@ export class StateBasedRefParser implements CharacterReferenceParser {
     } else
       return 'decimal';
   }
-  decimal(): State | undefined {
+  private decimal(): State | undefined {
     let code = this.input.get();
     while (true) {
       if (isDigit(code)) {
@@ -151,6 +171,28 @@ export class StateBasedRefParser implements CharacterReferenceParser {
         return 'numericEnd';
       }
       code = this.input.next();
+    }
+  }
+
+  private ambiguous(): State | undefined {
+    const maxSize = this.buffer.buffer.length;
+    this.reconsume = true;
+    this.output.push(this.buffer.getCodes());
+    this.buffer.clear();
+    let code = this.input.get();
+    while (true) {
+      if (this.buffer.position === maxSize) {
+        this.output.push(this.buffer.getCodes());
+        this.buffer.clear();
+      }
+      if (code === SEMICOLON) {
+        this.error('unknown-named-character-reference');
+        return;
+      } else if (isAsciiAlphaNum(code)) {
+        this.buffer.append(code);
+        code = this.input.next();
+      } else
+        return;
     }
   }
 

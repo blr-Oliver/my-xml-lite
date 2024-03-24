@@ -72,17 +72,18 @@ function createSuite(parser: CharacterReferenceParser) {
       });
     });
     describe('named', () => {
-      makeTest('apos;', '\'', 5);
-      makeTest('lt;', '<', 3);
+      makeTest('apos;', '\'', 5, [], true);
+      makeTest('lt;', '<', 3, [], true);
       makeTest('ltt', '<', 2, ['missing-semicolon-after-character-reference'], undefined, false);
-      makeTest('ltt', '&lt', 2);
+      makeTest('ltt', '&lt', 2, [], undefined, true);
       makeTest('lt=', '<', 2, ['missing-semicolon-after-character-reference'], undefined, false);
-      makeTest('lt=', '&lt', 2);
+      makeTest('lt=', '&lt', 2, [], undefined, true);
       makeTest('lt-', '<', 2, ['missing-semicolon-after-character-reference']);
       makeTest('9;', '&9', 1, ['unknown-named-character-reference']);
-      makeTest('9', '&9', 1);
+      makeTest('9', '&9', 1, [], true);
       makeTest('9 9', '&9', 1);
-      makeTest('9abcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcd', '&abcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcd', 49);
+      makeTest('9abcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcd', '&9abcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcd', 49, [], true);
+      makeTest('9abcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcd+', '&9abcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcd', 49);
     });
   });
 }
