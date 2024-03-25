@@ -55,7 +55,6 @@ export class StateBasedRefParser implements CharacterReferenceParser {
   private reset() {
     this.state = 'ref';
     this.charCode = 0;
-    this.reconsume = false;
   }
   // do not keep references, this state belongs to the parser only for convenience
   private forget() {

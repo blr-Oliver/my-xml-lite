@@ -1,7 +1,10 @@
+import {stringToArray} from '../src/common/code-points';
 import {DirectCharacterSource} from '../src/common/stream-source';
 import {CharacterReferenceParser} from '../src/decl/CharacterReferenceParser';
 import {HTML_SPECIAL} from '../src/decl/known-named-refs';
 import {ParserInterface} from '../src/decl/ParserInterface';
+import {StringBuilder} from '../src/decl/StringBuilder';
+import {ChainingStringBuilder} from '../src/impl/ChainingStringBuilder';
 import {buildIndex} from '../src/impl/character-reference/entity-ref-index';
 import {StateBasedRefParser} from '../src/impl/character-reference/StateBasedRefParser';
 import {FixedSizeStringBuilder} from '../src/impl/FixedSizeStringBuilder';
@@ -13,28 +16,29 @@ function createSuite(parser: CharacterReferenceParser) {
     let buffer = new FixedSizeStringBuilder(1 << 8);
     let producedErrors: string[] = [];
 
-    function makeTest(input: string, output: string, position: number, errors: string[] = [], reconsume?: boolean, attribute?: boolean) {
+    function makeTest(input: string, output: string, position: number, errors: string[] = [], reconsume?: boolean, attribute?: boolean, sb: StringBuilder = buffer, initialReconsume = false, extraChecks?: () => void) {
       const commonName = `${input} -> ${output} (${position} consumed, ${errors?.length || 0} errors)`;
       if (attribute === undefined) {
         describe(commonName, () => {
-          makeTest(input, output, position, errors, reconsume, true);
-          makeTest(input, output, position, errors, reconsume, false);
+          makeTest(input, output, position, errors, reconsume, true, sb, initialReconsume, extraChecks);
+          makeTest(input, output, position, errors, reconsume, false, sb, initialReconsume, extraChecks);
         })
       } else {
         const name = `${attribute ? 'IN' : 'NOT IN'} attribute: ${commonName}`;
         it(name, () => {
           source.reset();
           setChars(source, input);
-          buffer.clear();
+          if (initialReconsume) source.next();
+          sb.clear();
           producedErrors.length = 0;
           const io: ParserInterface = {
             input: source,
-            buffer: buffer,
+            buffer: sb,
             errors: producedErrors,
-            reconsume: false
+            reconsume: initialReconsume
           }
           parser.parse(io, attribute);
-          let actual = buffer.getString()
+          let actual = sb.getString();
           expect(actual).toBe(output);
           expect(producedErrors).toStrictEqual(errors || []);
           if (reconsume !== undefined) {
@@ -43,9 +47,21 @@ function createSuite(parser: CharacterReferenceParser) {
           } else {
             expect(io.reconsume ? source.getPosition() - 1 : source.getPosition()).toBe(position);
           }
+          if(extraChecks) extraChecks();
         });
       }
     }
+
+    describe('inter-connection', () => {
+      buffer.clear();
+      buffer.appendSequence(stringToArray('test'));
+      let overlay = new ChainingStringBuilder(buffer);
+      let extraCheck = () => {
+        expect(buffer.getString()).toBe('testa');
+      }
+      makeTest('#97;', 'a', 4, [], undefined, true, overlay, true, extraCheck);
+      makeTest('#97;', 'a', 4, [], undefined, true, overlay, false, extraCheck);
+    });
 
     describe('numeric', () => {
       describe('decimal', () => {
