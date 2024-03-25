@@ -15,10 +15,14 @@ export class FixedSizeStringBuilder implements StringBuilder {
     this.buffer[this.position++] = code;
   }
   appendSequence(seq: number[]): void {
-    for (let i = 0; i < seq.length; ++i)
-      this.append(seq[i]);
+    const l = seq.length;
+    const buffer = this.buffer;
+    let i = 0, j = this.position;
+    while (i < l)
+      buffer[j++] = seq[i++];
+    this.position = j;
   }
-  getString(from = 0, to = this.position): string {
+  getString(from = 0, to: number = this.position): string {
     return String.fromCodePoint(...this.buffer.subarray(from, to));
   }
   getCodes(from: number = 0, to: number = this.position): number[] {
