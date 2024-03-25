@@ -1,9 +1,5 @@
-import {CharacterSource} from '../common/stream-source';
+import {ParserInterface} from './ParserInterface';
 
 export interface CharacterReferenceParser {
-  output: number[][];
-  errors: string[];
-  reconsume: boolean;
-
-  parse(input: CharacterSource, isAttribute: boolean): void;
+  parse(input: ParserInterface, isAttribute: boolean): void;
 }

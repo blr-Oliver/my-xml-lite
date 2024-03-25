@@ -18,49 +18,64 @@ import {
 } from '../../common/code-points';
 import {CharacterSource} from '../../common/stream-source';
 import {CharacterReferenceParser} from '../../decl/CharacterReferenceParser';
+import {ParserInterface} from '../../decl/ParserInterface';
 import {StringBuilder} from '../../decl/StringBuilder';
 import {CHAR_REF_REPLACEMENT, PrefixNode} from './entity-ref-index';
 
 type State = 'ref' | 'numeric' | 'numericEnd' | 'named' | 'hexStart' | 'hex' | 'decimalStart' | 'decimal' | 'ambiguous';
 
 export class StateBasedRefParser implements CharacterReferenceParser {
-  output: number[][] = [];
-  errors: string[] = [];
-  reconsume!: boolean;
+  private reconsume!: boolean;
 
   private input!: CharacterSource;
+  private buffer!: StringBuilder;
+  private errors!: string[];
+
   private charCode!: number;
   private isAttribute!: boolean;
   private state: State | undefined;
 
-  constructor(private refsIndex: PrefixNode<number[]>,
-              private buffer: StringBuilder
-  ) {
+  constructor(private refsIndex: PrefixNode<number[]>) {
   }
 
-  parse(input: CharacterSource, isAttribute: boolean) {
-    this.input = input;
+  parse(io: ParserInterface, isAttribute: boolean) {
+    this.input = io.input;
+    this.buffer = io.buffer;
+    this.errors = io.errors;
+    this.reconsume = io.reconsume;
+
     this.isAttribute = isAttribute;
     this.reset();
     while (this.state) {
       this.state = this[this.state]();
     }
-    if (this.buffer.position)
-      this.output.push(this.buffer.getCodes());
-    //@ts-ignore
-    this.input = undefined; // do not keep reference, it belongs to the parser state only for convenience
+    io.reconsume = this.reconsume;
+    this.forget();
   }
   private reset() {
     this.state = 'ref';
     this.charCode = 0;
     this.reconsume = false;
-    this.output.length = 0;
-    this.errors.length = 0;
+  }
+  // do not keep references, this state belongs to the parser only for convenience
+  private forget() {
+    // @ts-ignore
+    this.input = undefined;
+    // @ts-ignore
+    this.buffer = undefined;
+    // @ts-ignore
+    this.errors = undefined;
   }
   private ref(): State | undefined {
     this.buffer.clear();
     this.buffer.append(AMPERSAND);
-    let code = this.input.next();
+    let code;
+    if (this.reconsume) {
+      code = this.input.get();
+      this.reconsume = false;
+    } else {
+      code = this.input.next();
+    }
     if (code === SHARP) {
       this.buffer.append(code);
       return 'numeric';
@@ -172,16 +187,9 @@ export class StateBasedRefParser implements CharacterReferenceParser {
   }
 
   private ambiguous(): State | undefined {
-    const maxSize = this.buffer.buffer.length;
     this.reconsume = true;
-    this.output.push(this.buffer.getCodes());
-    this.buffer.clear();
     let code = this.input.get();
     while (true) {
-      if (this.buffer.position === maxSize) {
-        this.output.push(this.buffer.getCodes());
-        this.buffer.clear();
-      }
       if (code === SEMICOLON) {
         this.error('unknown-named-character-reference');
         return;

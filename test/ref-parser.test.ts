@@ -1,14 +1,17 @@
-import {HTML_SPECIAL} from '../src/decl/known-named-refs';
 import {DirectCharacterSource} from '../src/common/stream-source';
 import {CharacterReferenceParser} from '../src/decl/CharacterReferenceParser';
+import {HTML_SPECIAL} from '../src/decl/known-named-refs';
+import {ParserInterface} from '../src/decl/ParserInterface';
 import {buildIndex} from '../src/impl/character-reference/entity-ref-index';
-import {FixedSizeStringBuilder} from '../src/impl/FixedSizeStringBuilder';
 import {StateBasedRefParser} from '../src/impl/character-reference/StateBasedRefParser';
+import {FixedSizeStringBuilder} from '../src/impl/FixedSizeStringBuilder';
 import {setChars} from './common';
 
 function createSuite(parser: CharacterReferenceParser) {
   describe('Character reference parser tests', () => {
     let source = new DirectCharacterSource(new Uint16Array(1 << 10));
+    let buffer = new FixedSizeStringBuilder(1 << 8);
+    let producedErrors: string[] = [];
 
     function makeTest(input: string, output: string, position: number, errors: string[] = [], reconsume?: boolean, attribute?: boolean) {
       const commonName = `${input} -> ${output} (${position} consumed, ${errors?.length || 0} errors)`;
@@ -22,15 +25,23 @@ function createSuite(parser: CharacterReferenceParser) {
         it(name, () => {
           source.reset();
           setChars(source, input);
-          parser.parse(source, attribute);
-          let actual = String.fromCodePoint(...parser.output.flatMap(chunk => chunk));
+          buffer.clear();
+          producedErrors.length = 0;
+          const io: ParserInterface = {
+            input: source,
+            buffer: buffer,
+            errors: producedErrors,
+            reconsume: false
+          }
+          parser.parse(io, attribute);
+          let actual = buffer.getString()
           expect(actual).toBe(output);
-          expect(parser.errors).toStrictEqual(errors || []);
+          expect(producedErrors).toStrictEqual(errors || []);
           if (reconsume !== undefined) {
-            expect(parser.reconsume).toBe(reconsume);
+            expect(io.reconsume).toBe(reconsume);
             expect(source.getPosition()).toBe(position);
           } else {
-            expect(parser.reconsume ? source.getPosition() - 1 : source.getPosition()).toBe(position);
+            expect(io.reconsume ? source.getPosition() - 1 : source.getPosition()).toBe(position);
           }
         });
       }
@@ -88,4 +99,4 @@ function createSuite(parser: CharacterReferenceParser) {
   });
 }
 
-createSuite(new StateBasedRefParser(buildIndex(HTML_SPECIAL), new FixedSizeStringBuilder(32)));
+createSuite(new StateBasedRefParser(buildIndex(HTML_SPECIAL)));

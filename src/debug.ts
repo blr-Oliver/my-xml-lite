@@ -1,9 +1,9 @@
 import {stringToArray} from './common/code-points';
-import {HTML_SPECIAL} from './common/known-named-refs';
 import {DirectCharacterSource} from './common/stream-source';
-import {buildIndex} from './impl/entity-ref-index';
+import {HTML_SPECIAL} from './decl/known-named-refs';
+import {buildIndex} from './impl/character-reference/entity-ref-index';
+import {StateBasedRefParser} from './impl/character-reference/StateBasedRefParser';
 import {FixedSizeStringBuilder} from './impl/FixedSizeStringBuilder';
-import {StateBasedRefParser} from './impl/StateBasedRefParser';
 
 export function setChars(buffer: DirectCharacterSource, chars: string, offset: number = 0) {
   let src = stringToArray(chars);
@@ -14,12 +14,17 @@ export function setChars(buffer: DirectCharacterSource, chars: string, offset: n
 }
 
 async function peek() {
-  debugger;
-  let parser = new StateBasedRefParser(buildIndex(HTML_SPECIAL), new FixedSizeStringBuilder(32));
+  let parser = new StateBasedRefParser(buildIndex(HTML_SPECIAL));
   let input = new DirectCharacterSource(new Uint16Array(1 << 10));
   input.reset();
-  setChars(input, '#');
-  parser.parse(input, true);
+  setChars(input, '#x2ffff;');
+  const buffer = new FixedSizeStringBuilder(64);
+  parser.parse({
+    input,
+    buffer,
+    errors: [],
+    reconsume: false
+  }, true);
 }
 
 async function keypress(): Promise<void> {
