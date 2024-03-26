@@ -1,9 +1,9 @@
-import {CharacterSource} from '../common/stream-source';
+import {StringSource} from '../common/stream-source';
 import {StringBuilder} from './StringBuilder';
 
 export interface ParserInterface {
-  readonly input: CharacterSource;
-  readonly buffer: StringBuilder
+  readonly input: StringSource;
+  readonly buffer: StringBuilder;
   readonly errors: string[];
   reconsume: boolean;
 }

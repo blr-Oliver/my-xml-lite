@@ -2,11 +2,11 @@ export interface CharacterSource {
   /**
    * @return next valid Unicode code point (including characters outside BMP) or -1 if the source is exhausted
    */
-  next(): number | -1;
+  next(): number;
   /**
    * @return current (last returned) valid Unicode code point (including characters outside BMP) or -1 if the source is exhausted or -2 if no code point was drained yet
    */
-  get(): number | -1 | -2;
+  get(): number;
 }
 
 export interface Resettable {
@@ -95,7 +95,9 @@ export abstract class ArrayCharacterSource<T extends ArrayLike<number>> implemen
   }
 }
 
-export class DirectCharacterSource extends ArrayCharacterSource<Uint16Array> {
+export class DirectCharacterSource extends ArrayCharacterSource<Uint16Array> implements StringSource {
+  protected mark: number = 0;
+
   constructor(data?: Uint16Array, limit?: number, offset?: number) {
     super(data, limit, offset);
   }
@@ -115,6 +117,13 @@ export class DirectCharacterSource extends ArrayCharacterSource<Uint16Array> {
 
   protected consumeNext(): number {
     return this.data[this.position++];
+  }
+  start(): number {
+    this.mark = this.position;
+    return this.get();
+  }
+  end(cutStart: number = 0, cutEnd: number = 0): string {
+    return String.fromCodePoint(...this.data.slice(this.mark + cutStart, this.position - cutEnd));
   }
 }
 
