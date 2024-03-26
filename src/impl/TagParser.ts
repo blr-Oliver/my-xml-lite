@@ -16,11 +16,7 @@ import {
 import {CharacterSource} from '../common/stream-source';
 import {ParserInterface} from '../decl/ParserInterface';
 import {StringBuilder} from '../decl/StringBuilder';
-
-type Attribute = {
-  name: string;
-  value?: string;
-}
+import {Attribute, EOF_TOKEN, TagToken, TextToken, Token} from './tokens';
 
 type State =
     'tagOpen'
@@ -109,16 +105,15 @@ export class TagParser {
         return;
       case EOF:
         this.error('eof-before-tag-name');
-        this.emit('<');
-        this.emit(EOF);
-        return;
+        this.emitCharacters('<');
+        return this.emit(EOF_TOKEN);
       default:
         if (isAsciiAlpha(code)) {
           this.buffer.clear();
           return 'tagName';
         }
         this.error('invalid-first-character-of-tag-name');
-        this.emit('<');
+        this.emitCharacters('<');
         this.externalState('data', true);
         return;
     }
@@ -133,9 +128,8 @@ export class TagParser {
         return;
       case EOF:
         this.error('eof-before-tag-name');
-        this.emit('</');
-        this.emit(EOF);
-        return;
+        this.emitCharacters('</');
+        return this.emit(EOF_TOKEN);
       default:
         if (isAsciiAlpha(code)) {
           this.buffer.clear();
@@ -166,9 +160,7 @@ export class TagParser {
           return 'selfClosingStartTag';
         case GT:
           this.name = this.buffer.getString();
-          this.emit(this);
-          this.externalState('data', false);
-          return;
+          return this.emitTag();
         case 0:
           this.error('unexpected-null-character');
           this.buffer.append(REPLACEMENT_CHAR);
@@ -176,8 +168,7 @@ export class TagParser {
           break;
         case EOF:
           this.error('eof-in-tag');
-          this.emit(EOF);
-          return;
+          return this.emit(EOF_TOKEN);
         default:
           if (isAsciiUpperAlpha(code))
             code += 0x20; // toLowerCase
@@ -232,8 +223,8 @@ export class TagParser {
         case EOF:
           return 'afterAttributeName';
         case 0x00:
-          this.name += '\uFFFD';
           this.error('unexpected-null-character');
+          this.buffer.append(REPLACEMENT_CHAR);
           break;
         case SINGLE_QUOTE:
         case DOUBLE_QUOTE:
@@ -260,15 +251,12 @@ export class TagParser {
         case 0x0C:
           break;
         case GT:
-          this.externalState('data', false);
-          this.emit(this);
-          return;
+          return this.emitTag();
         case SOLIDUS:
           return 'selfClosingStartTag';
         case EOF:
           this.error('eof-in-tag');
-          this.emit(EOF);
-          return;
+          return this.emit(EOF_TOKEN);
         default:
           return 'attributeName';
       }
@@ -290,10 +278,8 @@ export class TagParser {
         case SINGLE_QUOTE:
           return 'attributeValueSingleQuote';
         case GT:
-          this.error('missing-attribute-value parse error');
-          this.externalState('data', false);
-          this.emit(this);
-          return;
+          this.error('missing-attribute-value');
+          return this.emitTag();
         default:
           return 'attributeValueUnquoted';
       }
@@ -327,8 +313,7 @@ export class TagParser {
           break;
         case EOF:
           this.error('eof-in-tag');
-          this.emit(EOF);
-          return;
+          return this.emit(EOF_TOKEN);
         case 0x00:
           this.error('unexpected-null-character');
           code = REPLACEMENT_CHAR;
@@ -360,9 +345,7 @@ export class TagParser {
           code = this.nextOrReconsume();
           break;
         case GT:
-          this.externalState('data', false);
-          this.emit(this);
-          return;
+          return this.emitTag();
         case 0x00:
           this.error('unexpected-null-character');
           this.buffer.append(REPLACEMENT_CHAR);
@@ -370,8 +353,7 @@ export class TagParser {
           break;
         case EOF:
           this.error('eof-in-tag');
-          this.emit(EOF);
-          return;
+          return this.emit(EOF_TOKEN);
         case DOUBLE_QUOTE:
         case SINGLE_QUOTE:
         case LT:
@@ -395,13 +377,10 @@ export class TagParser {
       case SOLIDUS:
         return 'selfClosingStartTag';
       case GT:
-        this.externalState('data', false);
-        this.emit(this);
-        return;
+        return this.emitTag();
       case EOF:
         this.error('eof-in-tag');
-        this.emit(EOF);
-        return;
+        return this.emit(EOF_TOKEN);
       default:
         this.error('missing-whitespace-between-attributes');
         this.reconsume = true;
@@ -413,13 +392,10 @@ export class TagParser {
     switch (this.input.next()) {
       case GT:
         this.selfClosing = true;
-        this.externalState('data', false);
-        this.emit(this);
-        return;
+        return this.emitTag();
       case EOF:
         this.error('eof-in-tag');
-        this.emit(EOF);
-        return;
+        return this.emit(EOF_TOKEN);
       default:
         this.error('unexpected-solidus-in-tag');
         this.reconsume = true;
@@ -427,8 +403,23 @@ export class TagParser {
     }
   }
 
-  private emit(token: any) {
+  private emitCharacters(data: string): undefined {
+    return this.emit({type: 'character', data} as TextToken);
+  }
+
+  private emitTag(): undefined {
+    this.externalState('data', false);
+    return this.emit({
+      type: this.isStart ? 'startTag' : 'endTag',
+      name: this.name!,
+      selfClosing: this.selfClosing,
+      attributes: this.attributes.slice()
+    } as TagToken);
+  }
+
+  private emit(token: Token): undefined {
     // TODO
+    return;
   }
 
   private startEmptyComment() {
