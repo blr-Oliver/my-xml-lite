@@ -13,9 +13,7 @@ import {
   SINGLE_QUOTE,
   SOLIDUS
 } from '../common/code-points';
-import {CharacterSource} from '../common/stream-source';
-import {ParserInterface} from '../decl/ParserInterface';
-import {StringBuilder} from '../decl/StringBuilder';
+import {ParserEnvironment} from '../decl/ParserEnvironment';
 import {Attribute, EOF_TOKEN, TagToken, TextToken, Token} from './tokens';
 
 type State =
@@ -38,35 +36,26 @@ export class TagParser {
   private selfClosing: boolean = false;
   private attributes: Attribute[] = [];
 
-  private input!: CharacterSource;
-  private buffer!: StringBuilder;
-  private errors!: string[];
-  private reconsume!: boolean;
-
-  private state: State | undefined;
+  private env!: ParserEnvironment;
 
   constructor() {
   }
 
   private externalState(state: string, reconsume: boolean) {
-    this.reconsume = reconsume;
+    this.env.state = state;
+    this.env.reconsume = reconsume;
   }
 
-  parse(io: ParserInterface) {
-    this.reset(io);
-    while (this.state)
-      this.state = this[this.state]();
-    io.reconsume = this.reconsume;
+  parse(env: ParserEnvironment) {
+    this.env = env;
+    this.reset();
+    let state: State | undefined = env.state as State ?? 'tagOpen';
+    while (state)
+      env.state = state = this[state]();
     this.forget();
   }
 
-  private reset(io: ParserInterface) {
-    this.input = io.input;
-    this.buffer = io.buffer;
-    this.errors = io.errors;
-    this.reconsume = io.reconsume;
-
-    this.state = 'tagOpen';
+  private reset() {
     this.name = undefined;
     this.isStart = true;
     this.selfClosing = false;
@@ -75,19 +64,20 @@ export class TagParser {
 
   private forget() {
     // @ts-ignore
-    this.input = undefined;
-    // @ts-ignore
-    this.buffer = undefined;
-    // @ts-ignore
-    this.errors = undefined;
+    this.env = undefined;
   }
 
   private nextOrReconsume(): number {
-    if (this.reconsume) {
-      this.reconsume = false;
-      return this.input.get();
+    if (this.env.reconsume) {
+      this.env.reconsume = false;
+      return this.env.input.get();
     }
-    return this.input.next();
+    return this.env.input.next();
+  }
+
+  private reconsumeIn(state: State): State {
+    this.env.reconsume = true;
+    return state;
   }
 
   private tagOpen(): State | undefined {
@@ -109,7 +99,7 @@ export class TagParser {
         return this.emit(EOF_TOKEN);
       default:
         if (isAsciiAlpha(code)) {
-          this.buffer.clear();
+          this.env.buffer.clear();
           return 'tagName';
         }
         this.error('invalid-first-character-of-tag-name');
@@ -120,7 +110,7 @@ export class TagParser {
   }
 
   private endTagOpen(): State | undefined {
-    let code = this.input.next();
+    let code = this.env.input.next();
     switch (code) {
       case GT:
         this.error('missing-end-tag-name');
@@ -132,7 +122,7 @@ export class TagParser {
         return this.emit(EOF_TOKEN);
       default:
         if (isAsciiAlpha(code)) {
-          this.buffer.clear();
+          this.env.buffer.clear();
           this.isStart = false;
           return 'tagName';
         }
@@ -143,12 +133,12 @@ export class TagParser {
 
   private tagName(): State | undefined {
     let result = this.doTagName();
-    this.name = this.buffer.toString();
-    this.buffer.clear();
+    this.name = this.env.buffer.toString();
+    this.env.buffer.clear();
     return result;
   }
   private doTagName(): State | undefined {
-    let code = this.input.get();
+    let code = this.env.input.get();
     while (true) {
       switch (code) {
         case 0x20:
@@ -159,12 +149,12 @@ export class TagParser {
         case SOLIDUS:
           return 'selfClosingStartTag';
         case GT:
-          this.name = this.buffer.getString();
+          this.name = this.env.buffer.getString();
           return this.emitTag();
         case 0:
           this.error('unexpected-null-character');
-          this.buffer.append(REPLACEMENT_CHAR);
-          code = this.input.next();
+          this.env.buffer.append(REPLACEMENT_CHAR);
+          code = this.env.input.next();
           break;
         case EOF:
           this.error('eof-in-tag');
@@ -172,8 +162,8 @@ export class TagParser {
         default:
           if (isAsciiUpperAlpha(code))
             code += 0x20; // toLowerCase
-          this.buffer.append(code);
-          code = this.input.next();
+          this.env.buffer.append(code);
+          code = this.env.input.next();
       }
     }
   }
@@ -186,7 +176,7 @@ export class TagParser {
         case 0x09:
         case 0x0A:
         case 0x0C:
-          code = this.input.next();
+          code = this.env.input.next();
           break;
         case SOLIDUS:
         case GT:
@@ -194,8 +184,8 @@ export class TagParser {
           return 'afterAttributeName';
         case EQ:
           this.error('unexpected-equals-sign-before-attribute-name');
-          this.buffer.append(code);
-          this.input.next();
+          this.env.buffer.append(code);
+          this.env.input.next();
         default:
           return 'attributeName';
       }
@@ -204,12 +194,12 @@ export class TagParser {
 
   private attributeName(): State | undefined {
     let result = this.doAttributeName();
-    this.attributes.push({name: this.buffer.getString()});
-    this.buffer.clear();
+    this.attributes.push({name: this.env.buffer.getString()});
+    this.env.buffer.clear();
     return result;
   }
   private doAttributeName(): State | undefined {
-    let code = this.input.get();
+    let code = this.env.input.get();
     while (true) {
       switch (code) {
         case EQ:
@@ -224,7 +214,7 @@ export class TagParser {
           return 'afterAttributeName';
         case 0x00:
           this.error('unexpected-null-character');
-          this.buffer.append(REPLACEMENT_CHAR);
+          this.env.buffer.append(REPLACEMENT_CHAR);
           break;
         case SINGLE_QUOTE:
         case DOUBLE_QUOTE:
@@ -233,14 +223,14 @@ export class TagParser {
         default:
           if (isAsciiUpperAlpha(code))
             code += 0x20; // toLowerCase
-          this.buffer.append(code);
+          this.env.buffer.append(code);
       }
-      code = this.input.next();
+      code = this.env.input.next();
     }
   }
 
   private afterAttributeName(): State | undefined {
-    let code = this.input.get();
+    let code = this.env.input.get();
     while (true) {
       switch (code) {
         case EQ:
@@ -260,12 +250,12 @@ export class TagParser {
         default:
           return 'attributeName';
       }
-      code = this.input.next();
+      code = this.env.input.next();
     }
   }
 
   private beforeAttributeValue(): State | undefined {
-    let code = this.input.next();
+    let code = this.env.input.next();
     while (true) {
       switch (code) {
         case 0x20:
@@ -297,12 +287,12 @@ export class TagParser {
 
   private quotedAttribute(terminator: number): State | undefined {
     let result = this.doQuotedAttribute(terminator);
-    this.attributes[this.attributes.length - 1].value = this.buffer.getString();
-    this.buffer.clear();
+    this.attributes[this.attributes.length - 1].value = this.env.buffer.getString();
+    this.env.buffer.clear();
     return result;
   }
   private doQuotedAttribute(terminator: number): State | undefined {
-    let code = this.input.next();
+    let code = this.env.input.next();
     while (true) {
       switch (code) {
         case terminator:
@@ -318,8 +308,8 @@ export class TagParser {
           this.error('unexpected-null-character');
           code = REPLACEMENT_CHAR;
         default:
-          this.buffer.append(code);
-          code = this.input.next();
+          this.env.buffer.append(code);
+          code = this.env.input.next();
           break;
       }
     }
@@ -327,12 +317,12 @@ export class TagParser {
 
   private attributeValueUnquoted(): State | undefined {
     let result = this.doAttributeValueUnquoted();
-    this.attributes[this.attributes.length - 1].value = this.buffer.getString();
-    this.buffer.clear();
+    this.attributes[this.attributes.length - 1].value = this.env.buffer.getString();
+    this.env.buffer.clear();
     return result;
   }
   private doAttributeValueUnquoted(): State | undefined {
-    let code = this.input.get();
+    let code = this.env.input.get();
     while (true) {
       switch (code) {
         case 0x20:
@@ -348,8 +338,8 @@ export class TagParser {
           return this.emitTag();
         case 0x00:
           this.error('unexpected-null-character');
-          this.buffer.append(REPLACEMENT_CHAR);
-          code = this.input.next();
+          this.env.buffer.append(REPLACEMENT_CHAR);
+          code = this.env.input.next();
           break;
         case EOF:
           this.error('eof-in-tag');
@@ -361,14 +351,14 @@ export class TagParser {
         case 0x60: // grave accent (`)
           this.error('unexpected-character-in-unquoted-attribute-value');
         default:
-          this.buffer.append(code);
-          code = this.input.next();
+          this.env.buffer.append(code);
+          code = this.env.input.next();
       }
     }
   }
 
   private afterAttributeValue(): State | undefined {
-    switch (this.input.next()) {
+    switch (this.env.input.next()) {
       case 0x20:
       case 0x09:
       case 0x0A:
@@ -383,13 +373,12 @@ export class TagParser {
         return this.emit(EOF_TOKEN);
       default:
         this.error('missing-whitespace-between-attributes');
-        this.reconsume = true;
-        return 'beforeAttributeName';
+        return this.reconsumeIn('beforeAttributeName');
     }
   }
 
   private selfClosingStartTag(): State | undefined {
-    switch (this.input.next()) {
+    switch (this.env.input.next()) {
       case GT:
         this.selfClosing = true;
         return this.emitTag();
@@ -398,27 +387,28 @@ export class TagParser {
         return this.emit(EOF_TOKEN);
       default:
         this.error('unexpected-solidus-in-tag');
-        this.reconsume = true;
-        return 'beforeAttributeName';
+        return this.reconsumeIn('beforeAttributeName');
     }
   }
 
   private emitCharacters(data: string): undefined {
-    return this.emit({type: 'character', data} as TextToken);
+    this.env.tokens!.emit({type: 'character', data} as TextToken);
+    return;
   }
 
   private emitTag(): undefined {
     this.externalState('data', false);
-    return this.emit({
+    this.env.tokens!.emit({
       type: this.isStart ? 'startTag' : 'endTag',
       name: this.name!,
       selfClosing: this.selfClosing,
       attributes: this.attributes.slice()
     } as TagToken);
+    return;
   }
 
   private emit(token: Token): undefined {
-    // TODO
+    this.env.tokens!.emit(token);
     return;
   }
 
@@ -428,6 +418,6 @@ export class TagParser {
   }
 
   private error(name: string) {
-    this.errors.push(name);
+    this.env.errors.push(name);
   }
 }

@@ -18,7 +18,7 @@ import {
 } from '../../common/code-points';
 import {CharacterSource} from '../../common/stream-source';
 import {CharacterReferenceParser} from '../../decl/CharacterReferenceParser';
-import {ParserInterface} from '../../decl/ParserInterface';
+import {ParserEnvironment} from '../../decl/ParserEnvironment';
 import {StringBuilder} from '../../decl/StringBuilder';
 import {CHAR_REF_REPLACEMENT, PrefixNode} from './entity-ref-index';
 
@@ -38,7 +38,7 @@ export class StateBasedRefParser implements CharacterReferenceParser {
   constructor(private refsIndex: PrefixNode<number[]>) {
   }
 
-  parse(io: ParserInterface, isAttribute: boolean) {
+  parse(io: ParserEnvironment, isAttribute: boolean) {
     this.input = io.input;
     this.buffer = io.buffer;
     this.errors = io.errors;

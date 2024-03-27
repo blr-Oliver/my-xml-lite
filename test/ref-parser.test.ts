@@ -2,7 +2,7 @@ import {stringToArray} from '../src/common/code-points';
 import {DirectCharacterSource} from '../src/common/stream-source';
 import {CharacterReferenceParser} from '../src/decl/CharacterReferenceParser';
 import {HTML_SPECIAL} from '../src/decl/known-named-refs';
-import {ParserInterface} from '../src/decl/ParserInterface';
+import {ParserEnvironment} from '../src/decl/ParserEnvironment';
 import {StringBuilder} from '../src/decl/StringBuilder';
 import {ChainingStringBuilder} from '../src/impl/ChainingStringBuilder';
 import {buildIndex} from '../src/impl/character-reference/entity-ref-index';
@@ -31,7 +31,7 @@ function createSuite(parser: CharacterReferenceParser) {
           if (initialReconsume) source.next();
           sb.clear();
           producedErrors.length = 0;
-          const io: ParserInterface = {
+          const io: ParserEnvironment = {
             input: source,
             buffer: sb,
             errors: producedErrors,

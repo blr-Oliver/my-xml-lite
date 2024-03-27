@@ -1,5 +1,5 @@
-import {ParserInterface} from './ParserInterface';
+import {ParserEnvironment} from './ParserEnvironment';
 
 export interface CharacterReferenceParser {
-  parse(input: ParserInterface, isAttribute: boolean): void;
+  parse(input: ParserEnvironment, isAttribute: boolean): void;
 }
