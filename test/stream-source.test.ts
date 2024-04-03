@@ -1,6 +1,6 @@
-import {CharacterSource, UTF16ValidatingCharacterSource} from '../src/common/stream-source';
+import {ReconsumableCharacterSource, UTF16ValidatingCharacterSource} from '../src/common/stream-source';
 
-function inlineUTF16Source(data: number[]): CharacterSource {
+function inlineUTF16Source(data: number[]): ReconsumableCharacterSource {
   return new UTF16ValidatingCharacterSource(new Uint16Array(data));
 }
 

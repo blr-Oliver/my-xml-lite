@@ -1,7 +1,7 @@
 import {
   ArrayCharacterSource,
   BufferedStringSource,
-  CharacterSource,
+  ReconsumableCharacterSource,
   Resettable,
   StringSource,
   UTF16NonValidatingCharacterSource,
@@ -28,7 +28,7 @@ import {stringify} from './legacy/stringifier';
 
 export {
   // stream-source
-  CharacterSource,
+  ReconsumableCharacterSource,
   Resettable,
   StringSource,
   BufferedStringSource,

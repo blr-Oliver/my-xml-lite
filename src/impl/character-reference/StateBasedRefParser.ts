@@ -16,7 +16,7 @@ import {
   X_CAPITAL,
   X_REGULAR
 } from '../../common/code-points';
-import {CharacterSource} from '../../common/stream-source';
+import {ReconsumableCharacterSource} from '../../common/stream-source';
 import {CharacterReferenceParser} from '../../decl/CharacterReferenceParser';
 import {ParserEnvironment} from '../../decl/ParserEnvironment';
 import {StringBuilder} from '../../decl/StringBuilder';
@@ -27,7 +27,7 @@ type State = 'ref' | 'numeric' | 'numericEnd' | 'named' | 'hexStart' | 'hex' | '
 export class StateBasedRefParser implements CharacterReferenceParser {
   private reconsume!: boolean;
 
-  private input!: CharacterSource;
+  private input!: ReconsumableCharacterSource;
   private buffer!: StringBuilder;
   private errors!: string[];
 

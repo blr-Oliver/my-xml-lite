@@ -23,14 +23,14 @@ import {
   X_CAPITAL,
   X_REGULAR
 } from '../common/code-points';
-import {CharacterSource} from '../common/stream-source';
+import {ReconsumableCharacterSource} from '../common/stream-source';
 import {Tokenizer} from '../decl/lexer-decl';
 import {StringBuilder} from '../decl/StringBuilder';
 
 const CD_START_TAIL = CD_START.slice(2);
 
 export abstract class TokenizerImpl implements Tokenizer.TokenizerInternals {
-  declare input: CharacterSource;
+  declare input: ReconsumableCharacterSource;
   declare stringBuilder: StringBuilder;
 
   nextToken(): Tokenizer.Token | null {

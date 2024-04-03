@@ -1,8 +1,12 @@
 export interface CharacterSource {
   /**
    * @return next valid Unicode code point (including characters outside BMP) or -1 if the source is exhausted
+   * or -2 if no more characters are available at the moment
    */
   next(): number;
+}
+
+export interface ReconsumableCharacterSource extends CharacterSource {
   /**
    * @return current (last returned) valid Unicode code point (including characters outside BMP) or -1 if the source is exhausted or -2 if no code point was drained yet
    */
@@ -18,7 +22,7 @@ export interface Resettable {
   reset(): void;
 }
 
-export interface StringSource extends CharacterSource {
+export interface StringSource extends ReconsumableCharacterSource {
   /**
    Marks start of a new string, including last read character.
 
@@ -33,15 +37,15 @@ export interface StringSource extends CharacterSource {
 
 export class BufferedStringSource implements StringSource, Resettable {
   private readonly buffer: Uint32Array;
-  private position: number = 0;
+  private position: number = -1;
 
-  constructor(private readonly source: CharacterSource,
+  constructor(private readonly source: ReconsumableCharacterSource,
               bufferSize: number = 1 << 14 /* 16K */) {
     this.buffer = new Uint32Array(bufferSize);
   }
 
   next(): number {
-    return this.buffer[this.position++] = this.source.next();
+    return this.buffer[++this.position] = this.source.next();
   }
 
   get(): number {
@@ -49,7 +53,7 @@ export class BufferedStringSource implements StringSource, Resettable {
   }
 
   reconsume(): number {
-    return this.buffer[--this.position] = this.source.reconsume();
+    return this.buffer[this.position--] = this.source.reconsume();
   }
 
   start(): number {
@@ -65,7 +69,7 @@ export class BufferedStringSource implements StringSource, Resettable {
   }
 }
 
-export abstract class ArrayCharacterSource<T extends ArrayLike<number>> implements CharacterSource, Resettable {
+export abstract class ArrayCharacterSource<T extends ArrayLike<number>> implements ReconsumableCharacterSource, Resettable {
   protected data: T;
   protected position: number;
   protected code: number;

@@ -1,4 +1,4 @@
-import {CharacterSource} from '../common/stream-source';
+import {ReconsumableCharacterSource} from '../common/stream-source';
 
 export interface CsvDocument {
   header?: string[];
@@ -35,7 +35,7 @@ export class CsvParser {
     this.buffer = new Uint32Array(bufferSize);
   }
 
-  parse(input: CharacterSource, hasHeader = false): CsvDocument {
+  parse(input: ReconsumableCharacterSource, hasHeader = false): CsvDocument {
     return this.csv(input, hasHeader);
   }
 
@@ -48,7 +48,7 @@ export class CsvParser {
       this.buffer = new Uint32Array(value);
   }
 
-  protected csv(input: CharacterSource, hasHeader: boolean): CsvDocument {
+  protected csv(input: ReconsumableCharacterSource, hasHeader: boolean): CsvDocument {
     let state = START_DOC;
     let result: CsvDocument = {
       records: []
@@ -106,7 +106,7 @@ export class CsvParser {
     }
   }
 
-  protected row(input: CharacterSource): string[] {
+  protected row(input: ReconsumableCharacterSource): string[] {
     let state: number = START_ROW;
     let tokens: string[] = [];
     let code: number = input.get();
@@ -144,7 +144,7 @@ export class CsvParser {
     }
   }
 
-  protected field(input: CharacterSource): string {
+  protected field(input: ReconsumableCharacterSource): string {
     let state: number = START_TOKEN;
     let code: number = input.get();
     while (true) {
@@ -177,7 +177,7 @@ export class CsvParser {
     }
   }
 
-  protected quoted(input: CharacterSource): string {
+  protected quoted(input: ReconsumableCharacterSource): string {
     const buffer = this.buffer;
     let state = START_QUOTED;
     let tokenLen = 0;
@@ -212,7 +212,7 @@ export class CsvParser {
     }
   }
 
-  protected unquoted(input: CharacterSource): string {
+  protected unquoted(input: ReconsumableCharacterSource): string {
     const buffer = this.buffer;
     let state = START_UNQUOTED;
     let tokenLen = 0;

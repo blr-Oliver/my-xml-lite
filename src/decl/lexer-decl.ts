@@ -1,4 +1,4 @@
-import {CharacterSource} from '../common/stream-source';
+import {ReconsumableCharacterSource} from '../common/stream-source';
 import {StringBuilder} from './StringBuilder';
 
 export namespace Tokenizer {
@@ -47,7 +47,7 @@ export namespace Tokenizer {
   }
 
   export interface State {
-    input: CharacterSource;
+    input: ReconsumableCharacterSource;
     stringBuilder: StringBuilder;
   }
 
