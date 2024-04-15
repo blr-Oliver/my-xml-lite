@@ -1,4 +1,10 @@
 export const EOF = -1;
+export const NUL = 0;
+export const TAB = 0x9;
+export const LF = 0xA;
+export const FF = 0xC;
+export const CR = 0xD;
+export const SPACE = 0x20;
 export const LT = '<'.charCodeAt(0);
 export const GT = '>'.charCodeAt(0);
 export const QUESTION = '?'.charCodeAt(0);
