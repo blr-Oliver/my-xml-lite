@@ -42,7 +42,7 @@ export abstract class TagParser extends ParserBase {
       default:
         if (isAsciiAlpha(code)) {
           this.emitAccumulatedCharacters();
-          this.resetCurrentTag(); // TODO this should never be called directly
+          this.startNewTag();
           return this.tagName(code);
         }
         this.error('invalid-first-character-of-tag-name');
@@ -330,9 +330,10 @@ export abstract class TagParser extends ParserBase {
   }
   private emitCurrentTag() {
     this.emit(this.currentTag);
-    this.resetCurrentTag();
+    // @ts-ignore
+    this.currentTag = undefined;
   }
-  private resetCurrentTag() {
+  private startNewTag() {
     this.currentTag = {
       name: '',
       type: 'startTag',
