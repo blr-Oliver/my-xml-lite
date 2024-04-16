@@ -108,4 +108,14 @@ export abstract class ParserBase {
   protected data(code: number): State {
     throw new TypeError('Malformed inheritance');
   }
+  protected emitAccumulatedCharacters() {
+    const buffer = this.env.buffer;
+    if (buffer.position) {
+      this.emit({
+        type: 'characters',
+        data: buffer.getString()
+      });
+      buffer.clear();
+    }
+  }
 }

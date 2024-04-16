@@ -18,10 +18,13 @@ import {
   SPACE,
   TAB
 } from '../../common/code-points';
-import {EOF_TOKEN} from '../tokens';
+import {Attribute, EOF_TOKEN, TagToken} from '../tokens';
 import {ParserBase, State} from './common';
 
 export abstract class TagParser extends ParserBase {
+  currentTag!: TagToken;
+  currentAttribute!: Attribute;
+
   tagOpen(code: number): State {
     switch (code) {
       case EXCLAMATION:
@@ -38,7 +41,9 @@ export abstract class TagParser extends ParserBase {
         return 'eof';
       default:
         if (isAsciiAlpha(code)) {
-          this.env.buffer.clear();
+          this.emitAccumulatedCharacters();
+          this.resetCurrentTag();
+          this.resetCurrentAttribute();
           return this.tagName(code);
         }
         this.error('invalid-first-character-of-tag-name');
@@ -59,8 +64,8 @@ export abstract class TagParser extends ParserBase {
         return 'eof';
       default:
         if (isAsciiAlpha(code)) {
-          this.env.buffer.clear();
-          // TODO set start flag to false
+          this.emitAccumulatedCharacters();
+          this.currentTag.type = 'endTag';
           return this.tagName(code);
         }
         this.error('invalid-first-character-of-tag-name');
@@ -69,17 +74,24 @@ export abstract class TagParser extends ParserBase {
   }
 
   tagName(code: number): State {
+    const buffer = this.env.buffer;
     while (true) {
       switch (code) {
         case TAB:
         case LF:
         case FF:
         case SPACE:
+          this.currentTag.name = buffer.getString();
+          buffer.clear();
           return 'beforeAttributeName';
         case SOLIDUS:
+          this.currentTag.name = buffer.getString();
+          buffer.clear();
           return 'selfClosingStartTag';
         case GT:
-          // TODO emit current tag
+          this.currentTag.name = buffer.getString();
+          buffer.clear();
+          this.emitCurrentTag();
           return 'data';
         case EOF:
           this.error('eof-in-tag');
@@ -90,7 +102,7 @@ export abstract class TagParser extends ParserBase {
           code = REPLACEMENT_CHAR;
         default:
           if (isAsciiUpperAlpha(code)) code += 0x20; // toLowerCase
-          this.env.buffer.append(code);
+          buffer.append(code);
           code = this.env.input.next();
       }
     }
@@ -120,9 +132,12 @@ export abstract class TagParser extends ParserBase {
   }
 
   attributeName(code: number): State {
+    const buffer = this.env.buffer;
     while (true) {
       switch (code) {
         case EQ:
+          this.currentAttribute.name = buffer.getString();
+          buffer.clear();
           return 'beforeAttributeValue';
         case TAB:
         case LF:
@@ -131,10 +146,12 @@ export abstract class TagParser extends ParserBase {
         case GT:
         case SOLIDUS:
         case EOF:
+          this.currentAttribute.name = buffer.getString();
+          buffer.clear();
           return this.afterAttributeName(code);
         case NUL:
           this.error('unexpected-null-character');
-          this.env.buffer.append(REPLACEMENT_CHAR);
+          buffer.append(REPLACEMENT_CHAR);
           break;
         case SINGLE_QUOTE:
         case DOUBLE_QUOTE:
@@ -142,7 +159,7 @@ export abstract class TagParser extends ParserBase {
           this.error('unexpected-character-in-attribute-name');
         default:
           if (isAsciiUpperAlpha(code)) code += 0x20; // toLowerCase
-          this.env.buffer.append(code);
+          buffer.append(code);
       }
       code = this.env.input.next();
     }
@@ -160,15 +177,18 @@ export abstract class TagParser extends ParserBase {
           code = this.env.input.next();
           break;
         case GT:
-          // TODO emit current tag
+          this.addCurrentAttribute();
+          this.emitCurrentTag();
           return 'data';
         case SOLIDUS:
+          this.addCurrentAttribute();
           return 'selfClosingStartTag';
         case EOF:
           this.error('eof-in-tag');
           this.emit(EOF_TOKEN);
           return 'eof';
         default:
+          this.addCurrentAttribute();
           return this.attributeName(code);
       }
     }
@@ -188,7 +208,7 @@ export abstract class TagParser extends ParserBase {
           return 'attributeValueSingleQuoted';
         case GT:
           this.error('missing-attribute-value');
-          // TODO emit current tag
+          this.emitCurrentTag();
           return 'data';
         default:
           return this.attributeValueUnquoted(code);
@@ -198,17 +218,21 @@ export abstract class TagParser extends ParserBase {
 
 
   attributeValueDoubleQuoted(code: number): State {
-    return this.quotedAttribute(code, DOUBLE_QUOTE);
+    return this.attributeValueQuoted(code, DOUBLE_QUOTE);
   }
 
   attributeValueSingleQuoted(code: number): State {
-    return this.quotedAttribute(code, SINGLE_QUOTE);
+    return this.attributeValueQuoted(code, SINGLE_QUOTE);
   }
 
-  private quotedAttribute(code: number, terminator: number): State {
+  private attributeValueQuoted(code: number, terminator: number): State {
+    const buffer = this.env.buffer;
     while (true) {
       switch (code) {
         case terminator:
+          this.currentAttribute.value = buffer.getString();
+          buffer.clear();
+          this.addCurrentAttribute();
           return 'afterAttributeValueQuoted';
         case AMPERSAND:
           // TODO call refParser
@@ -221,7 +245,7 @@ export abstract class TagParser extends ParserBase {
           this.error('unexpected-null-character');
           code = REPLACEMENT_CHAR;
         default:
-          this.env.buffer.append(code);
+          buffer.append(code);
           code = this.env.input.next();
           break;
       }
@@ -229,22 +253,29 @@ export abstract class TagParser extends ParserBase {
   }
 
   attributeValueUnquoted(code: number): State {
+    const buffer = this.env.buffer;
     while (true) {
       switch (code) {
         case TAB:
         case LF:
         case FF:
         case SPACE:
+          this.currentAttribute.value = buffer.getString();
+          buffer.clear();
+          this.addCurrentAttribute();
           return 'beforeAttributeName';
         case AMPERSAND:
           // TODO call refParser
           break;
         case GT:
-          // TODO emit current tag
+          this.currentAttribute.value = buffer.getString();
+          buffer.clear();
+          this.addCurrentAttribute();
+          this.emitCurrentTag();
           return 'data';
         case NUL:
           this.error('unexpected-null-character');
-          this.env.buffer.append(REPLACEMENT_CHAR);
+          buffer.append(REPLACEMENT_CHAR);
           code = this.env.input.next();
           break;
         case EOF:
@@ -258,7 +289,7 @@ export abstract class TagParser extends ParserBase {
         case 0x60: // grave accent (`)
           this.error('unexpected-character-in-unquoted-attribute-value');
         default:
-          this.env.buffer.append(code);
+          buffer.append(code);
           code = this.env.input.next();
       }
     }
@@ -274,7 +305,7 @@ export abstract class TagParser extends ParserBase {
       case SOLIDUS:
         return 'selfClosingStartTag';
       case GT:
-        // TODO emit current tag
+        this.emitCurrentTag();
         return 'data';
       case EOF:
         this.error('eof-in-tag');
@@ -289,8 +320,8 @@ export abstract class TagParser extends ParserBase {
   selfClosingStartTag(code: number): State {
     switch (code) {
       case GT:
-        // TODO set selfClosing flag to true
-        // TODO emit current tag
+        this.currentTag.selfClosing = true;
+        this.emitCurrentTag();
         return 'data';
       case EOF:
         this.error('eof-in-tag');
@@ -300,5 +331,27 @@ export abstract class TagParser extends ParserBase {
         this.error('unexpected-solidus-in-tag');
         return this.beforeAttributeName(code);
     }
+  }
+  private emitCurrentTag() {
+    this.emit(this.currentTag);
+    this.resetCurrentTag();
+  }
+  private resetCurrentTag() {
+    this.currentTag = {
+      name: '',
+      type: 'startTag',
+      selfClosing: false,
+      attributes: []
+    }
+  }
+  private addCurrentAttribute() {
+    this.currentTag.attributes.push(this.currentAttribute);
+    this.resetCurrentAttribute();
+  }
+  private resetCurrentAttribute() {
+    this.currentAttribute = {
+      name: '',
+      value: undefined
+    };
   }
 }
