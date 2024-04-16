@@ -1,5 +1,11 @@
+type Writable<T, P extends keyof T = keyof T> = {
+  [K in keyof T as K extends P ? never : K]: T[K];
+} & {
+  -readonly [K in P]: T[K];
+}
+
 export interface StringBuilder {
-  readonly buffer: ArrayLike<number>;
+  readonly buffer: Writable<ArrayLike<number>, number>;
   position: number;
   clear(): void;
   append(code: number): void;

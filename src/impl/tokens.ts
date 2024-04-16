@@ -29,6 +29,14 @@ export interface TextToken extends Token {
   data: string;
 }
 
+export interface CharactersToken extends TextToken {
+  type: 'characters';
+}
+
+export interface CommentToken extends TextToken {
+  type: 'comment'
+}
+
 export const EOF_TOKEN: Token = {
   type: 'eof'
 } as const;
