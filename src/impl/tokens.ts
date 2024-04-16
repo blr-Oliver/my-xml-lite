@@ -14,7 +14,7 @@ export interface DoctypeToken extends Token {
 
 export interface Attribute {
   name: string;
-  value?: string;
+  value: string | undefined;
 }
 
 export interface TagToken extends Token {
