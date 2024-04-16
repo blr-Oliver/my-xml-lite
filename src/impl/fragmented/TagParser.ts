@@ -42,8 +42,7 @@ export abstract class TagParser extends ParserBase {
       default:
         if (isAsciiAlpha(code)) {
           this.emitAccumulatedCharacters();
-          this.resetCurrentTag();
-          this.resetCurrentAttribute();
+          this.resetCurrentTag(); // TODO this should never be called directly
           return this.tagName(code);
         }
         this.error('invalid-first-character-of-tag-name');
@@ -123,9 +122,11 @@ export abstract class TagParser extends ParserBase {
           return this.afterAttributeName(code);
         case EQ:
           this.error('unexpected-equals-sign-before-attribute-name');
+          this.startNewAttribute();
           this.env.buffer.append(code);
           return 'attributeName';
         default:
+          this.startNewAttribute();
           return this.attributeName(code);
       }
     }
@@ -177,18 +178,16 @@ export abstract class TagParser extends ParserBase {
           code = this.env.input.next();
           break;
         case GT:
-          this.addCurrentAttribute();
           this.emitCurrentTag();
           return 'data';
         case SOLIDUS:
-          this.addCurrentAttribute();
           return 'selfClosingStartTag';
         case EOF:
           this.error('eof-in-tag');
           this.emit(EOF_TOKEN);
           return 'eof';
         default:
-          this.addCurrentAttribute();
+          this.startNewAttribute();
           return this.attributeName(code);
       }
     }
@@ -232,7 +231,6 @@ export abstract class TagParser extends ParserBase {
         case terminator:
           this.currentAttribute.value = buffer.getString();
           buffer.clear();
-          this.addCurrentAttribute();
           return 'afterAttributeValueQuoted';
         case AMPERSAND:
           // TODO call refParser
@@ -262,7 +260,6 @@ export abstract class TagParser extends ParserBase {
         case SPACE:
           this.currentAttribute.value = buffer.getString();
           buffer.clear();
-          this.addCurrentAttribute();
           return 'beforeAttributeName';
         case AMPERSAND:
           // TODO call refParser
@@ -270,7 +267,6 @@ export abstract class TagParser extends ParserBase {
         case GT:
           this.currentAttribute.value = buffer.getString();
           buffer.clear();
-          this.addCurrentAttribute();
           this.emitCurrentTag();
           return 'data';
         case NUL:
@@ -344,14 +340,10 @@ export abstract class TagParser extends ParserBase {
       attributes: []
     }
   }
-  private addCurrentAttribute() {
-    this.currentTag.attributes.push(this.currentAttribute);
-    this.resetCurrentAttribute();
-  }
-  private resetCurrentAttribute() {
-    this.currentAttribute = {
+  private startNewAttribute() {
+    this.currentTag.attributes.push(this.currentAttribute = {
       name: '',
       value: undefined
-    };
+    });
   }
 }
