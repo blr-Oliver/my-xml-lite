@@ -4,15 +4,19 @@ import {
   EOF,
   EQ,
   EXCLAMATION,
+  FF,
   GT,
   isAsciiAlpha,
   isAsciiUpperAlpha,
+  LF,
   LT,
   NUL,
   QUESTION,
   REPLACEMENT_CHAR,
   SINGLE_QUOTE,
-  SOLIDUS
+  SOLIDUS,
+  SPACE,
+  TAB
 } from '../../common/code-points';
 import {EOF_TOKEN} from '../tokens';
 import {ParserBase, State} from './common';
@@ -35,7 +39,7 @@ export abstract class TagParser extends ParserBase {
       default:
         if (isAsciiAlpha(code)) {
           this.env.buffer.clear();
-          return 'tagName';
+          return this.tagName(code);
         }
         this.error('invalid-first-character-of-tag-name');
         this.emitCharacter(LT);
@@ -57,7 +61,7 @@ export abstract class TagParser extends ParserBase {
         if (isAsciiAlpha(code)) {
           this.env.buffer.clear();
           // TODO set start flag to false
-          return 'tagName';
+          return this.tagName(code);
         }
         this.error('invalid-first-character-of-tag-name');
         return this.bogusComment(code);
@@ -67,28 +71,25 @@ export abstract class TagParser extends ParserBase {
   tagName(code: number): State {
     while (true) {
       switch (code) {
-        case 0x20:
-        case 0x09:
-        case 0x0A:
-        case 0x0C:
+        case TAB:
+        case LF:
+        case FF:
+        case SPACE:
           return 'beforeAttributeName';
         case SOLIDUS:
           return 'selfClosingStartTag';
         case GT:
           // TODO emit current tag
-          return 'data'
-        case NUL:
-          this.error('unexpected-null-character');
-          this.env.buffer.append(REPLACEMENT_CHAR);
-          code = this.env.input.next();
-          break;
+          return 'data';
         case EOF:
           this.error('eof-in-tag');
           this.emit(EOF_TOKEN);
           return 'eof';
+        case NUL:
+          this.error('unexpected-null-character');
+          code = REPLACEMENT_CHAR;
         default:
-          if (isAsciiUpperAlpha(code))
-            code += 0x20; // toLowerCase
+          if (isAsciiUpperAlpha(code)) code += 0x20; // toLowerCase
           this.env.buffer.append(code);
           code = this.env.input.next();
       }
@@ -98,16 +99,16 @@ export abstract class TagParser extends ParserBase {
   beforeAttributeName(code: number): State {
     while (true) {
       switch (code) {
-        case 0x20:
-        case 0x09:
-        case 0x0A:
-        case 0x0C:
+        case TAB:
+        case LF:
+        case FF:
+        case SPACE:
           code = this.env.input.next();
           break;
         case SOLIDUS:
         case GT:
         case EOF:
-          return 'afterAttributeName';
+          return this.afterAttributeName(code);
         case EQ:
           this.error('unexpected-equals-sign-before-attribute-name');
           this.env.buffer.append(code);
@@ -123,15 +124,15 @@ export abstract class TagParser extends ParserBase {
       switch (code) {
         case EQ:
           return 'beforeAttributeValue';
+        case TAB:
+        case LF:
+        case FF:
+        case SPACE:
         case GT:
         case SOLIDUS:
-        case 0x20:
-        case 0x09:
-        case 0x0A:
-        case 0x0C:
         case EOF:
-          return 'afterAttributeName';
-        case 0x00:
+          return this.afterAttributeName(code);
+        case NUL:
           this.error('unexpected-null-character');
           this.env.buffer.append(REPLACEMENT_CHAR);
           break;
@@ -152,10 +153,11 @@ export abstract class TagParser extends ParserBase {
       switch (code) {
         case EQ:
           return 'beforeAttributeValue';
-        case 0x20:
-        case 0x09:
-        case 0x0A:
-        case 0x0C:
+        case TAB:
+        case LF:
+        case FF:
+        case SPACE:
+          code = this.env.input.next();
           break;
         case GT:
           // TODO emit current tag
@@ -167,19 +169,18 @@ export abstract class TagParser extends ParserBase {
           this.emit(EOF_TOKEN);
           return 'eof';
         default:
-          return 'attributeName';
+          return this.attributeName(code);
       }
-      code = this.env.input.next();
     }
   }
 
   beforeAttributeValue(code: number): State {
     while (true) {
       switch (code) {
-        case 0x20:
-        case 0x09:
-        case 0x0A:
-        case 0x0C:
+        case TAB:
+        case LF:
+        case FF:
+        case SPACE:
           break;
         case DOUBLE_QUOTE:
           return 'attributeValueDoubleQuoted';
@@ -190,7 +191,7 @@ export abstract class TagParser extends ParserBase {
           // TODO emit current tag
           return 'data';
         default:
-          return 'attributeValueUnquoted';
+          return this.attributeValueUnquoted(code);
       }
     }
   }
@@ -230,10 +231,10 @@ export abstract class TagParser extends ParserBase {
   attributeValueUnquoted(code: number): State {
     while (true) {
       switch (code) {
-        case 0x20:
-        case 0x09:
-        case 0x0A:
-        case 0x0C:
+        case TAB:
+        case LF:
+        case FF:
+        case SPACE:
           return 'beforeAttributeName';
         case AMPERSAND:
           // TODO call refParser
@@ -265,10 +266,10 @@ export abstract class TagParser extends ParserBase {
 
   afterAttributeValueQuoted(code: number): State {
     switch (code) {
-      case 0x20:
-      case 0x09:
-      case 0x0A:
-      case 0x0C:
+      case TAB:
+      case LF:
+      case FF:
+      case SPACE:
         return 'beforeAttributeName';
       case SOLIDUS:
         return 'selfClosingStartTag';
@@ -292,7 +293,6 @@ export abstract class TagParser extends ParserBase {
         // TODO emit current tag
         return 'data';
       case EOF:
-        this.error('eof-in-tag');
         this.error('eof-in-tag');
         this.emit(EOF_TOKEN);
         return 'eof';
