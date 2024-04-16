@@ -1,4 +1,4 @@
-export type TokenType = 'doctype' | 'startTag' | 'endTag' | 'comment' | 'character' | 'eof';
+export type TokenType = 'doctype' | 'startTag' | 'endTag' | 'comment' | 'characters' | 'eof';
 
 export interface Token {
   type: TokenType;
@@ -25,7 +25,7 @@ export interface TagToken extends Token {
 }
 
 export interface TextToken extends Token {
-  type: 'comment' | 'character';
+  type: 'comment' | 'characters';
   data: string;
 }
 

@@ -12,23 +12,10 @@ import {
   REPLACEMENT_CHAR,
   SINGLE_QUOTE,
   SOLIDUS
-} from '../common/code-points';
-import {ParserEnvironment} from '../decl/ParserEnvironment';
-import {Attribute, EOF_TOKEN, TagToken, TextToken, Token} from './tokens';
-
-type State =
-    'tagOpen'
-    | 'endTagOpen'
-    | 'tagName'
-    | 'beforeAttributeName'
-    | 'attributeName'
-    | 'afterAttributeName'
-    | 'beforeAttributeValue'
-    | 'attributeValueUnquoted'
-    | 'attributeValueSingleQuote'
-    | 'attributeValueDoubleQuote'
-    | 'afterAttributeValue'
-    | 'selfClosingStartTag';
+} from '../../common/code-points';
+import {ParserEnvironment} from '../../decl/ParserEnvironment';
+import {Attribute, EOF_TOKEN, TagToken, TextToken, Token} from '../tokens';
+import {State} from './common';
 
 export class TagParser {
   private name?: string;
@@ -46,12 +33,13 @@ export class TagParser {
     this.env.reconsume = reconsume;
   }
 
+  // TODO this must be part of complete parser
   parse(env: ParserEnvironment) {
     this.env = env;
     this.reset();
     let state: State | undefined = env.state as State ?? 'tagOpen';
     while (state)
-      env.state = state = this[state]();
+      env.state = state = (this as any)[state]();
     this.forget();
   }
 
@@ -264,9 +252,9 @@ export class TagParser {
         case 0x0C:
           break;
         case DOUBLE_QUOTE:
-          return 'attributeValueDoubleQuote';
+          return 'attributeValueDoubleQuoted';
         case SINGLE_QUOTE:
-          return 'attributeValueSingleQuote';
+          return 'attributeValueSingleQuoted';
         case GT:
           this.error('missing-attribute-value');
           return this.emitTag();
@@ -277,11 +265,11 @@ export class TagParser {
   }
 
 
-  private attributeValueDoubleQuote(): State | undefined {
+  attributeValueDoubleQuoted(): State | undefined {
     return this.quotedAttribute(DOUBLE_QUOTE);
   }
 
-  private attributeValueSingleQuote(): State | undefined {
+  attributeValueSingleQuoted(): State | undefined {
     return this.quotedAttribute(SINGLE_QUOTE);
   }
 
@@ -296,7 +284,7 @@ export class TagParser {
     while (true) {
       switch (code) {
         case terminator:
-          return 'afterAttributeValue';
+          return 'afterAttributeValueQuoted';
         case AMPERSAND:
           // TODO call refParser
           code = this.nextOrReconsume();
@@ -315,7 +303,7 @@ export class TagParser {
     }
   }
 
-  private attributeValueUnquoted(): State | undefined {
+  attributeValueUnquoted(): State | undefined {
     let result = this.doAttributeValueUnquoted();
     this.attributes[this.attributes.length - 1].value = this.env.buffer.getString();
     this.env.buffer.clear();
@@ -357,7 +345,7 @@ export class TagParser {
     }
   }
 
-  private afterAttributeValue(): State | undefined {
+  afterAttributeValueQuoted(): State | undefined {
     switch (this.env.input.next()) {
       case 0x20:
       case 0x09:
@@ -377,7 +365,7 @@ export class TagParser {
     }
   }
 
-  private selfClosingStartTag(): State | undefined {
+  selfClosingStartTag(): State | undefined {
     switch (this.env.input.next()) {
       case GT:
         this.selfClosing = true;
@@ -391,8 +379,10 @@ export class TagParser {
     }
   }
 
+  // TODO make following methods part of common interface
+
   private emitCharacters(data: string): undefined {
-    this.env.tokens!.emit({type: 'character', data} as TextToken);
+    this.env.tokens!.emit({type: 'characters', data} as TextToken);
     return;
   }
 
