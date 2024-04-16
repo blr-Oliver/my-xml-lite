@@ -25,6 +25,10 @@ export class FixedSizeStringBuilder implements StringBuilder {
   getString(from = 0, to: number = this.position): string {
     return String.fromCodePoint(...this.buffer.subarray(from, to));
   }
+  takeString(from = 0, to: number = this.position): string {
+    this.position = 0;
+    return String.fromCodePoint(...this.buffer.subarray(from, to));
+  }
   getCodes(from: number = 0, to: number = this.position): number[] {
     return [...this.buffer.subarray(from, to)];
   }

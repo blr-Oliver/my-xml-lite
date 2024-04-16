@@ -31,6 +31,10 @@ export class ChainingStringBuilder implements StringBuilder {
   getString(from: number = 0, to: number = this.position): string {
     return this.host.getString(from + this.offset, to + this.offset);
   }
+  takeString(from = 0, to: number = this.position): string {
+    this.host.position = this.offset;
+    return this.host.getString(from + this.offset, to + this.offset);
+  }
   getCodes(from: number = 0, to: number = this.position): number[] {
     return this.host.getCodes(from + this.offset, to + this.offset);
   }

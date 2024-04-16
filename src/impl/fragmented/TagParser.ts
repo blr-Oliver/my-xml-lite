@@ -80,16 +80,13 @@ export abstract class TagParser extends ParserBase {
         case LF:
         case FF:
         case SPACE:
-          this.currentTag.name = buffer.getString();
-          buffer.clear();
+          this.currentTag.name = buffer.takeString();
           return 'beforeAttributeName';
         case SOLIDUS:
-          this.currentTag.name = buffer.getString();
-          buffer.clear();
+          this.currentTag.name = buffer.takeString();
           return 'selfClosingStartTag';
         case GT:
-          this.currentTag.name = buffer.getString();
-          buffer.clear();
+          this.currentTag.name = buffer.takeString();
           this.emitCurrentTag();
           return 'data';
         case EOF:
@@ -137,8 +134,7 @@ export abstract class TagParser extends ParserBase {
     while (true) {
       switch (code) {
         case EQ:
-          this.currentAttribute.name = buffer.getString();
-          buffer.clear();
+          this.currentAttribute.name = buffer.takeString();
           return 'beforeAttributeValue';
         case TAB:
         case LF:
@@ -147,8 +143,7 @@ export abstract class TagParser extends ParserBase {
         case GT:
         case SOLIDUS:
         case EOF:
-          this.currentAttribute.name = buffer.getString();
-          buffer.clear();
+          this.currentAttribute.name = buffer.takeString();
           return this.afterAttributeName(code);
         case NUL:
           this.error('unexpected-null-character');
@@ -229,8 +224,7 @@ export abstract class TagParser extends ParserBase {
     while (true) {
       switch (code) {
         case terminator:
-          this.currentAttribute.value = buffer.getString();
-          buffer.clear();
+          this.currentAttribute.value = buffer.takeString();
           return 'afterAttributeValueQuoted';
         case AMPERSAND:
           // TODO call refParser
@@ -258,15 +252,13 @@ export abstract class TagParser extends ParserBase {
         case LF:
         case FF:
         case SPACE:
-          this.currentAttribute.value = buffer.getString();
-          buffer.clear();
+          this.currentAttribute.value = buffer.takeString();
           return 'beforeAttributeName';
         case AMPERSAND:
           // TODO call refParser
           break;
         case GT:
-          this.currentAttribute.value = buffer.getString();
-          buffer.clear();
+          this.currentAttribute.value = buffer.takeString();
           this.emitCurrentTag();
           return 'data';
         case NUL:
@@ -332,6 +324,8 @@ export abstract class TagParser extends ParserBase {
     this.emit(this.currentTag);
     // @ts-ignore
     this.currentTag = undefined;
+    // @ts-ignore
+    this.currentAttribute = undefined;
   }
   private startNewTag() {
     this.currentTag = {
