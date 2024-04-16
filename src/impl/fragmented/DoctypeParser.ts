@@ -1,7 +1,10 @@
 import {DOUBLE_QUOTE, EOF, FF, GT, isAsciiUpperAlpha, LF, NUL, REPLACEMENT_CHAR, SINGLE_QUOTE, SPACE, TAB} from '../../common/code-points';
+import {DoctypeToken, EOF_TOKEN} from '../tokens';
 import {ParserBase, State} from './common';
 
 export abstract class DoctypeParser extends ParserBase {
+  private currentDoctype!: DoctypeToken;
+
   doctype(code: number): State {
     switch (code) {
       case TAB:
@@ -10,9 +13,10 @@ export abstract class DoctypeParser extends ParserBase {
       case SPACE:
         return 'beforeDoctypeName';
       case EOF:
+        this.startNewDoctype(true);
         this.error('eof-in-doctype');
-        this.emit({type: 'doctype', forceQuirks: true}); // TODO emit doctype
-        this.emit(EOF);
+        this.emitCurrentDoctype();
+        this.emit(EOF_TOKEN);
         return 'eof';
       default:
         this.error('missing-whitespace-before-doctype-name');
@@ -22,6 +26,7 @@ export abstract class DoctypeParser extends ParserBase {
   }
 
   beforeDoctypeName(code: number): State {
+    const buffer = this.env.buffer;
     while (true) {
       switch (code) {
         case TAB:
@@ -32,46 +37,50 @@ export abstract class DoctypeParser extends ParserBase {
           break;
         case GT:
           this.error('missing-doctype-name');
-          this.emit({type: 'doctype', forceQuirks: true}); // TODO emit doctype
+          this.startNewDoctype(true);
+          this.emitCurrentDoctype();
           return 'data';
         case EOF:
           this.error('eof-in-doctype');
-          this.emit({type: 'doctype', forceQuirks: true}); // TODO emit doctype
-          this.emit(EOF);
+          this.startNewDoctype(true);
+          this.emitCurrentDoctype();
+          this.emit(EOF_TOKEN);
           return 'eof';
         case NUL:
           this.error('unexpected-null-character');
           code = REPLACEMENT_CHAR;
         default:
+          this.startNewDoctype();
           if (isAsciiUpperAlpha(code)) code += 0x20;
-          // TODO append to buffer
+          buffer.append(code);
           return 'doctypeName';
       }
     }
   }
 
   doctypeName(code: number): State {
+    const buffer = this.env.buffer;
     while (true) {
       switch (code) {
         case TAB:
         case LF:
         case FF:
         case SPACE:
+          this.currentDoctype.name = buffer.takeString();
           return 'afterDoctypeName';
         case GT:
-          this.emit({type: 'doctype'}); // TODO emit doctype
+          this.currentDoctype.name = buffer.takeString();
+          this.emitCurrentDoctype();
           return 'data';
         case EOF:
-          this.error('eof-in-doctype');
-          this.emit({type: 'doctype', name: '', forceQuirks: true}); // TODO emit doctype
-          this.emit(EOF);
-          return 'eof';
+          this.currentDoctype.name = buffer.takeString();
+          return this.eofInDoctype();
         case NUL:
           this.error('unexpected-null-character');
           code = REPLACEMENT_CHAR;
         default:
           if (isAsciiUpperAlpha(code)) code += 0x20;
-          // TODO append to buffer
+          buffer.append(code);
           code = this.nextCode();
       }
     }
@@ -87,12 +96,12 @@ export abstract class DoctypeParser extends ParserBase {
           code = this.nextCode();
           break;
         case GT:
-          this.emit({type: 'doctype'}); // TODO emit doctype
+          this.emitCurrentDoctype();
           return 'data';
         case EOF:
           this.error('eof-in-doctype');
-          this.emit({type: 'doctype', name: '', forceQuirks: true}); // TODO emit doctype
-          this.emit(EOF);
+          this.emitCurrentDoctype();
+          this.emit(EOF_TOKEN);
           return 'eof';
         default:
           // TODO make possible to check for sequence
@@ -103,8 +112,8 @@ export abstract class DoctypeParser extends ParserBase {
             case 'system':
               return 'afterDoctypeSystemKeyword';
             default:
+              this.currentDoctype.forceQuirks = true;
               this.error('invalid-character-sequence-after-doctype-name');
-              // TODO set forceQuirks -> on
               return this.bogusDoctype(code);
           }
       }
@@ -120,24 +129,24 @@ export abstract class DoctypeParser extends ParserBase {
         return 'beforeDoctypePublicIdentifier';
       case DOUBLE_QUOTE:
         this.error('missing-whitespace-after-doctype-public-keyword');
-        // TODO set public id to empty string
         return 'doctypePublicIdentifierDoubleQuoted';
       case SINGLE_QUOTE:
         this.error('missing-whitespace-after-doctype-public-keyword');
-        // TODO set public id to empty string
         return 'doctypePublicIdentifierSingleQuoted';
       case GT:
+        this.currentDoctype.forceQuirks = true;
         this.error('missing-doctype-public-identifier');
-        this.emit({type: 'doctype', forceQuirks: true}); // TODO emit doctype
+        this.emitCurrentDoctype();
         return 'data';
       case EOF:
+        this.currentDoctype.forceQuirks = true;
         this.error('eof-in-doctype');
-        this.emit({type: 'doctype', forceQuirks: true}); // TODO emit doctype
-        this.emit(EOF);
+        this.emitCurrentDoctype();
+        this.emit(EOF_TOKEN);
         return 'eof';
       default:
+        this.currentDoctype.forceQuirks = true;
         this.error('missing-quote-before-doctype-public-identifier');
-        // TODO set forceQuirks -> on
         return this.bogusDoctype(code);
     }
   }
@@ -152,23 +161,19 @@ export abstract class DoctypeParser extends ParserBase {
           code = this.nextCode();
           break;
         case DOUBLE_QUOTE:
-          // TODO set public id to empty string
           return 'doctypePublicIdentifierDoubleQuoted';
         case SINGLE_QUOTE:
-          // TODO set public id to empty string
           return 'doctypePublicIdentifierSingleQuoted';
         case GT:
+          this.currentDoctype.forceQuirks = true;
           this.error('missing-doctype-public-identifier');
-          this.emit({type: 'doctype', forceQuirks: true}); // TODO emit doctype
+          this.emitCurrentDoctype();
           return 'data';
         case EOF:
-          this.error('eof-in-doctype');
-          this.emit({type: 'doctype', forceQuirks: true}); // TODO emit doctype
-          this.emit(EOF);
-          return 'eof';
+          return this.eofInDoctype();
         default:
+          this.currentDoctype.forceQuirks = true;
           this.error('missing-quote-before-doctype-public-identifier');
-          // TODO set forceQuirks -> on
           return this.bogusDoctype(code);
       }
     }
@@ -183,24 +188,26 @@ export abstract class DoctypeParser extends ParserBase {
   }
 
   private doctypePublicIdentifierQuoted(code: number, terminator: number): State {
+    const buffer = this.env.buffer;
     while (true) {
       switch (code) {
         case terminator:
+          this.currentDoctype.publicId = buffer.takeString();
           return 'afterDoctypePublicIdentifier';
         case GT:
+          this.currentDoctype.publicId = buffer.takeString();
+          this.currentDoctype.forceQuirks = true;
           this.error('abrupt-doctype-public-identifier');
-          this.emit({type: 'doctype', forceQuirks: true}); // TODO emit doctype
+          this.emitCurrentDoctype();
           return 'data';
         case EOF:
-          this.error('eof-in-doctype');
-          this.emit({type: 'doctype', forceQuirks: true}); // TODO emit doctype
-          this.emit(EOF);
-          return 'eof';
+          this.currentDoctype.publicId = buffer.takeString();
+          return this.eofInDoctype();
         case NUL:
           this.error('unexpected-null-character');
           code = REPLACEMENT_CHAR;
         default:
-          // TODO append to buffer
+          buffer.append(code);
           code = this.nextCode();
       }
     }
@@ -214,25 +221,23 @@ export abstract class DoctypeParser extends ParserBase {
       case SPACE:
         return 'betweenDoctypePublicAndSystemIdentifiers';
       case GT:
-        this.emit({type: 'doctype'});  // TODO emit doctype
+        this.emitCurrentDoctype();
         return 'data';
       case DOUBLE_QUOTE:
         this.error('missing-whitespace-between-doctype-public-and-system-identifiers');
-        // TODO set system id to empty string
         return 'doctypeSystemIdentifierDoubleQuoted';
       case SINGLE_QUOTE:
         this.error('missing-whitespace-between-doctype-public-and-system-identifiers');
-        // TODO set system id to empty string
         return 'doctypeSystemIdentifierSingleQuoted';
       case EOF:
+        this.currentDoctype.forceQuirks = true;
         this.error('eof-in-doctype');
-        // TODO set forceQuirks -> on
-        this.emit({type: 'doctype'}); // TODO emit doctype
-        this.emit(EOF);
+        this.emitCurrentDoctype();
+        this.emit(EOF_TOKEN);
         return 'eof';
       default:
+        this.currentDoctype.forceQuirks = true;
         this.error('missing-quote-before-doctype-system-identifier');
-        // TODO set forceQuirks -> on
         return this.bogusDoctype(code);
     }
   }
@@ -247,23 +252,17 @@ export abstract class DoctypeParser extends ParserBase {
           code = this.nextCode();
           break;
         case DOUBLE_QUOTE:
-          // TODO set system id to empty string
           return 'doctypeSystemIdentifierDoubleQuoted';
         case SINGLE_QUOTE:
-          // TODO set system id to empty string
           return 'doctypeSystemIdentifierSingleQuoted';
         case GT:
-          this.emit({type: 'doctype'}); // TODO emit doctype
+          this.emitCurrentDoctype();
           return 'data';
         case EOF:
-          this.error('eof-in-doctype');
-          // TODO set forceQuirks -> on
-          this.emit({type: 'doctype'}); // TODO emit doctype
-          this.emit(EOF);
-          return 'eof';
+          return this.eofInDoctype();
         default:
+          this.currentDoctype.forceQuirks = true;
           this.error('missing-quote-before-doctype-system-identifier');
-          // TODO set forceQuirks -> on
           return this.bogusDoctype(code);
       }
     }
@@ -278,26 +277,24 @@ export abstract class DoctypeParser extends ParserBase {
         return 'beforeDoctypeSystemIdentifier';
       case DOUBLE_QUOTE:
         this.error('missing-whitespace-after-doctype-system-keyword');
-        // TODO set system id to empty string
         return 'doctypeSystemIdentifierDoubleQuoted';
       case SINGLE_QUOTE:
         this.error('missing-whitespace-after-doctype-system-keyword');
-        // TODO set system id to empty string
         return 'doctypeSystemIdentifierSingleQuoted';
       case GT:
+        this.currentDoctype.forceQuirks = true;
         this.error('missing-doctype-system-identifier');
-        // TODO set forceQuirks -> on
-        this.emit({type: 'doctype'}); // TODO emit doctype
+        this.emitCurrentDoctype();
         return 'data';
       case EOF:
+        this.currentDoctype.forceQuirks = true;
         this.error('eof-in-doctype');
-        // TODO set forceQuirks -> on
-        this.emit({type: 'doctype'}); // TODO emit doctype
-        this.emit(EOF);
+        this.emitCurrentDoctype();
+        this.emit(EOF_TOKEN);
         return 'eof';
       default:
+        this.currentDoctype.forceQuirks = true;
         this.error('missing-quote-before-doctype-system-identifier');
-        // TODO set forceQuirks -> on
         return this.bogusDoctype(code);
     }
   }
@@ -312,25 +309,19 @@ export abstract class DoctypeParser extends ParserBase {
           code = this.nextCode();
           break;
         case DOUBLE_QUOTE:
-          // TODO set system id to empty string
           return 'doctypeSystemIdentifierDoubleQuoted';
         case SINGLE_QUOTE:
-          // TODO set system id to empty string
           return 'doctypeSystemIdentifierSingleQuoted';
         case GT:
+          this.currentDoctype.forceQuirks = true;
           this.error('missing-doctype-system-identifier');
-          // TODO set forceQuirks -> on
-          this.emit({type: 'doctype'}); // TODO emit doctype
+          this.emitCurrentDoctype();
           return 'data';
         case EOF:
-          this.error('eof-in-doctype');
-          // TODO set forceQuirks -> on
-          this.emit({type: 'doctype'}); // TODO emit doctype
-          this.emit(EOF);
-          return 'eof';
+          return this.eofInDoctype();
         default:
+          this.currentDoctype.forceQuirks = true;
           this.error('missing-quote-before-doctype-system-identifier');
-          // TODO set forceQuirks -> on
           return this.bogusDoctype(code);
       }
     }
@@ -344,24 +335,26 @@ export abstract class DoctypeParser extends ParserBase {
   }
 
   private doctypeSystemIdentifierQuoted(code: number, terminator: number): State {
+    const buffer = this.env.buffer;
     while (true) {
       switch (code) {
         case terminator:
+          this.currentDoctype.systemId = buffer.takeString();
           return 'afterDoctypeSystemIdentifier';
         case GT:
+          this.currentDoctype.systemId = buffer.takeString();
+          this.currentDoctype.forceQuirks = true;
           this.error('abrupt-doctype-system-identifier');
-          this.emit({type: 'doctype', forceQuirks: true}); // TODO emit doctype
+          this.emitCurrentDoctype();
           return 'data';
         case EOF:
-          this.error('eof-in-doctype');
-          this.emit({type: 'doctype', forceQuirks: true}); // TODO emit doctype
-          this.emit(EOF);
-          return 'eof';
+          this.currentDoctype.systemId = buffer.takeString();
+          return this.eofInDoctype();
         case NUL:
           this.error('unexpected-null-character');
           code = REPLACEMENT_CHAR;
         default:
-          // TODO append to buffer
+          buffer.append(code);
           code = this.nextCode();
       }
     }
@@ -377,13 +370,10 @@ export abstract class DoctypeParser extends ParserBase {
           code = this.nextCode();
           break;
         case GT:
-          this.emit({type: 'doctype'}); // TODO emit doctype
+          this.emitCurrentDoctype();
           return 'data';
         case EOF:
-          this.error('eof-in-doctype');
-          this.emit({type: 'doctype', forceQuirks: true}); // TODO emit doctype
-          this.emit(EOF);
-          return 'eof';
+          return this.eofInDoctype();
         default:
           this.error('unexpected-character-after-doctype-system-identifier');
           return this.bogusDoctype(code);
@@ -395,11 +385,11 @@ export abstract class DoctypeParser extends ParserBase {
     while (true) {
       switch (code) {
         case GT:
-          this.emit({type: 'doctype'}); // TODO emit doctype
+          this.emitCurrentDoctype()
           return 'data';
         case EOF:
-          this.emit({type: 'doctype'}); // TODO emit doctype
-          this.emit(EOF);
+          this.emitCurrentDoctype();
+          this.emit(EOF_TOKEN);
           return 'eof';
         case NUL:
           this.error('unexpected-null-character');
@@ -407,5 +397,28 @@ export abstract class DoctypeParser extends ParserBase {
           code = this.nextCode();
       }
     }
+  }
+
+  private startNewDoctype(forceQuirks: boolean = false) {
+    this.currentDoctype = {
+      type: 'doctype',
+      name: undefined,
+      publicId: undefined,
+      systemId: undefined,
+      forceQuirks
+    };
+  }
+  private emitCurrentDoctype() {
+    this.emit(this.currentDoctype);
+    // @ts-ignore
+    this.currentDoctype = undefined;
+  }
+
+  private eofInDoctype(): State {
+    this.currentDoctype.forceQuirks = true;
+    this.error('eof-in-doctype');
+    this.emitCurrentDoctype();
+    this.emit(EOF_TOKEN);
+    return 'eof';
   }
 }

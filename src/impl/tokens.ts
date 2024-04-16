@@ -6,9 +6,9 @@ export interface Token {
 
 export interface DoctypeToken extends Token {
   type: 'doctype';
-  name?: string;
-  publicId?: string;
-  systemId?: string;
+  name: string | undefined;
+  publicId: string | undefined;
+  systemId: string | undefined;
   forceQuirks: boolean;
 }
 
