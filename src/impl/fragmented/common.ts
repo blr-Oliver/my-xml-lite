@@ -126,12 +126,14 @@ export abstract class ParserBase {
       attributes: []
     }
   }
+
   protected startNewAttribute() {
     this.currentTag.attributes.push(this.currentAttribute = {
       name: '',
       value: undefined
     });
   }
+
   protected emitAccumulatedCharacters() {
     const buffer = this.env.buffer;
     if (buffer.position) {
@@ -141,5 +143,19 @@ export abstract class ParserBase {
       });
       buffer.clear();
     }
+  }
+
+  protected startTagIfMatches(expectedTag: string, emitIfMatched: boolean = false, fromPosition: number = 2): boolean {
+    const buffer = this.env.buffer;
+    const name = buffer.getString(fromPosition); // leading "</"
+    const matches = name === expectedTag;
+    if (matches) {
+      this.startNewTag(name);
+      buffer.clear();
+      if (emitIfMatched)
+        this.emitCurrentTag();
+      return true;
+    }
+    return false;
   }
 }

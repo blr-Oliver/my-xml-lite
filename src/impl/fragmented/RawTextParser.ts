@@ -63,37 +63,25 @@ export abstract class RawTextParser extends ParserBase {
         case LF:
         case FF:
         case SPACE:
-          // TODO pass proper appropriate tag
-          return this.proceedIfAppropriateTag(code, 'noscript', 'beforeAttributeName');
+          if (this.startTagIfMatches('noscript'))// TODO pass proper appropriate tag
+            return 'beforeAttributeName';
+          else return this.rawtext(code);
         case SOLIDUS:
-          // TODO pass proper appropriate tag
-          return this.proceedIfAppropriateTag(code, 'noscript', 'selfClosingStartTag');
+          if (this.startTagIfMatches('noscript'))// TODO pass proper appropriate tag
+            return 'selfClosingStartTag';
+          else return this.rawtext(code);
         case GT:
-          // TODO pass proper appropriate tag
-          return this.proceedIfAppropriateTag(code, 'noscript', 'data', true);
+          if (this.startTagIfMatches('noscript', true))// TODO pass proper appropriate tag
+            return 'data';
+          else return this.rawtext(code);
         default:
           if (isAsciiUpperAlpha(code)) code += 0x20;
           if (isAsciiLowerAlpha(code)) {
-            buffer.append(code)
+            buffer.append(code);
             code = this.nextCode();
-          } else {
-            return this.rawtext(code);
-          }
+          } else return this.rawtext(code);
       }
     }
-  }
-
-  private proceedIfAppropriateTag(code: number, expectedTag: string, nextState: State, emitIfMatched: boolean = false): State {
-    const buffer = this.env.buffer;
-    let name = buffer.getString(2); // leading "</"
-    if (name === expectedTag) {
-      this.startNewTag(name);
-      buffer.clear();
-      if (emitIfMatched)
-        this.emitCurrentTag();
-      return nextState;
-    } else
-      return this.rawtext(code);
   }
 
 }
