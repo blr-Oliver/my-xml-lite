@@ -1,4 +1,5 @@
 import {ParserEnvironment} from '../../decl/ParserEnvironment';
+import {Attribute, TagToken} from '../tokens';
 
 export type State =
     'data' |
@@ -87,6 +88,8 @@ export type State =
 export abstract class ParserBase {
   protected env!: ParserEnvironment;
   protected returnState!: State;
+  currentTag!: TagToken;
+  currentAttribute!: Attribute;
 
   protected error(name: string) {
   }
@@ -107,6 +110,27 @@ export abstract class ParserBase {
   }
   protected data(code: number): State {
     throw new TypeError('Malformed inheritance');
+  }
+  protected emitCurrentTag() {
+    this.emit(this.currentTag);
+    // @ts-ignore
+    this.currentTag = undefined;
+    // @ts-ignore
+    this.currentAttribute = undefined;
+  }
+  protected startNewTag(name: string = '') {
+    this.currentTag = {
+      name,
+      type: 'startTag',
+      selfClosing: false,
+      attributes: []
+    }
+  }
+  protected startNewAttribute() {
+    this.currentTag.attributes.push(this.currentAttribute = {
+      name: '',
+      value: undefined
+    });
   }
   protected emitAccumulatedCharacters() {
     const buffer = this.env.buffer;

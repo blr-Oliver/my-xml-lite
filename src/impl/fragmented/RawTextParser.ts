@@ -1,20 +1,22 @@
 import {EOF, FF, GT, isAsciiAlpha, isAsciiLowerAlpha, isAsciiUpperAlpha, LF, LT, NUL, REPLACEMENT_CHAR, SOLIDUS, SPACE, TAB} from '../../common/code-points';
+import {EOF_TOKEN} from '../tokens';
 import {ParserBase, State} from './common';
 
 export abstract class RawTextParser extends ParserBase {
   rawtext(code: number): State {
+    const buffer = this.env.buffer;
     while (true) {
       switch (code) {
         case LT:
           return 'rawtextLessThanSign';
         case EOF:
-          this.emit(EOF);
+          this.emit(EOF_TOKEN);
           return 'eof';
         case NUL:
           this.error('unexpected-null-character');
           code = REPLACEMENT_CHAR;
         default:
-          this.emitCharacter(code);
+          buffer.append(code);
           code = this.nextCode();
           break;
       }
@@ -22,55 +24,76 @@ export abstract class RawTextParser extends ParserBase {
   }
 
   rawtextLessThanSign(code: number): State {
-    if (code === SOLIDUS) {
-      // TODO reset buffer
-      return 'rawtextEndTagOpen';
-    } else {
-      this.emitCharacter(LT);
-      return this.rawtext(code);
+    const buffer = this.env.buffer;
+    while (true) {
+      switch (code) {
+        case SOLIDUS:
+          return 'rawtextEndTagOpen';
+        case LT:
+          buffer.append(code);
+          code = this.nextCode();
+          break;
+        default:
+          buffer.append(LT);
+          return this.rawtext(code);
+      }
     }
   }
 
   rawtextEndTagOpen(code: number): State {
+    const buffer = this.env.buffer;
     if (isAsciiAlpha(code)) {
-      // TODO create tag token
+      this.emitAccumulatedCharacters();
+      buffer.append(LT);
+      buffer.append(SOLIDUS);
       return this.rawtextEndTagName(code);
     } else {
-      this.emitCharacter2(LT, SOLIDUS);
+      buffer.append(LT);
+      buffer.append(SOLIDUS);
       return this.rawtext(code);
     }
   }
 
   rawtextEndTagName(code: number): State {
     // TODO replace with common call
-    // return this.specialEndTagName(code, 'rawtext');
+    const buffer = this.env.buffer;
     while (true) {
       switch (code) {
         case TAB:
         case LF:
         case FF:
         case SPACE:
-          // TODO check for corresponding start tag
-          return 'beforeAttributeName';
+          // TODO pass proper appropriate tag
+          return this.proceedIfAppropriateTag(code, 'noscript', 'beforeAttributeName');
         case SOLIDUS:
-          return 'selfClosingStartTag';
+          // TODO pass proper appropriate tag
+          return this.proceedIfAppropriateTag(code, 'noscript', 'selfClosingStartTag');
         case GT:
-          // TODO check for corresponding start tag
-          // TODO create tag token
-          this.emit({type: 'tag'});
-          return 'data';
+          // TODO pass proper appropriate tag
+          return this.proceedIfAppropriateTag(code, 'noscript', 'data', true);
         default:
           if (isAsciiUpperAlpha(code)) code += 0x20;
           if (isAsciiLowerAlpha(code)) {
-            // TODO append current code
+            buffer.append(code)
             code = this.nextCode();
           } else {
-            this.emitCharacter2(LT, SOLIDUS);
-            // TODO emit current buffer as text
             return this.rawtext(code);
           }
       }
     }
+  }
+
+  private proceedIfAppropriateTag(code: number, expectedTag: string, nextState: State, emitIfMatched: boolean = false): State {
+    const buffer = this.env.buffer;
+    let name = buffer.getString(2); // leading "</"
+    if (name === expectedTag) {
+      this.startNewTag(name);
+      buffer.clear();
+      if (emitIfMatched)
+        this.emitCurrentTag();
+      return nextState;
+    } else
+      return this.rawtext(code);
   }
 
 }

@@ -22,8 +22,6 @@ import {Attribute, EOF_TOKEN, TagToken} from '../tokens';
 import {ParserBase, State} from './common';
 
 export abstract class TagParser extends ParserBase {
-  currentTag!: TagToken;
-  currentAttribute!: Attribute;
 
   tagOpen(code: number): State {
     switch (code) {
@@ -319,26 +317,5 @@ export abstract class TagParser extends ParserBase {
         this.error('unexpected-solidus-in-tag');
         return this.beforeAttributeName(code);
     }
-  }
-  private emitCurrentTag() {
-    this.emit(this.currentTag);
-    // @ts-ignore
-    this.currentTag = undefined;
-    // @ts-ignore
-    this.currentAttribute = undefined;
-  }
-  private startNewTag() {
-    this.currentTag = {
-      name: '',
-      type: 'startTag',
-      selfClosing: false,
-      attributes: []
-    }
-  }
-  private startNewAttribute() {
-    this.currentTag.attributes.push(this.currentAttribute = {
-      name: '',
-      value: undefined
-    });
   }
 }
