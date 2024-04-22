@@ -1,6 +1,7 @@
 import {EOF, EXCLAMATION, GT, HYPHEN, LT, NUL, REPLACEMENT_CHAR} from '../../common/code-points';
 import {CommentToken, EOF_TOKEN} from '../tokens';
-import {ParserBase, State} from './common';
+import {State} from './states';
+import {ParserBase} from './ParserBase';
 
 export abstract class CommentParser extends ParserBase {
   private currentComment!: CommentToken;

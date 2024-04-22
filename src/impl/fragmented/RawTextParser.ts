@@ -1,6 +1,7 @@
 import {EOF, FF, GT, isAsciiAlpha, isAsciiLowerAlpha, isAsciiUpperAlpha, LF, LT, NUL, REPLACEMENT_CHAR, SOLIDUS, SPACE, TAB} from '../../common/code-points';
 import {EOF_TOKEN} from '../tokens';
-import {ParserBase, State} from './common';
+import {State} from './states';
+import {ParserBase} from './ParserBase';
 
 export abstract class RawTextParser extends ParserBase {
   rawtext(code: number): State {

@@ -1,6 +1,7 @@
 import {DOUBLE_QUOTE, EOF, FF, GT, isAsciiUpperAlpha, LF, NUL, REPLACEMENT_CHAR, SINGLE_QUOTE, SPACE, TAB} from '../../common/code-points';
 import {DoctypeToken, EOF_TOKEN} from '../tokens';
-import {ParserBase, State} from './common';
+import {State} from './states';
+import {ParserBase} from './ParserBase';
 
 export abstract class DoctypeParser extends ParserBase {
   private currentDoctype!: DoctypeToken;

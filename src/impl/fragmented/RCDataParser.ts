@@ -15,7 +15,8 @@ import {
   TAB
 } from '../../common/code-points';
 import {EOF_TOKEN} from '../tokens';
-import {ParserBase, State} from './common';
+import {State} from './states';
+import {ParserBase} from './ParserBase';
 
 export abstract class RCDataParser extends ParserBase {
 

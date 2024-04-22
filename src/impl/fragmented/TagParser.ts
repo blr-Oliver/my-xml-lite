@@ -19,7 +19,8 @@ import {
   TAB
 } from '../../common/code-points';
 import {Attribute, EOF_TOKEN, TagToken} from '../tokens';
-import {ParserBase, State} from './common';
+import {State} from './states';
+import {ParserBase} from './ParserBase';
 
 export abstract class TagParser extends ParserBase {
 

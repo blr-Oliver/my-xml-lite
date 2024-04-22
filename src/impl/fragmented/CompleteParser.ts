@@ -1,6 +1,6 @@
 import {AMPERSAND, EOF, FF, GT, isAsciiLowerAlpha, isAsciiUpperAlpha, LF, LT, NUL, REPLACEMENT_CHAR, SOLIDUS, SPACE, TAB} from '../../common/code-points';
 import {ParserEnvironment} from '../../decl/ParserEnvironment';
-import {State} from './common';
+import {State} from './states';
 
 export class CompleteParser {
   private env!: ParserEnvironment;

@@ -1,6 +1,7 @@
 import {CLOSE_SQUARE_BRACKET, EOF, GT} from '../../common/code-points';
 import {EOF_TOKEN} from '../tokens';
-import {ParserBase, State} from './common';
+import {State} from './states';
+import {ParserBase} from './ParserBase';
 
 export abstract class CDataParser extends ParserBase {
   cdataSection(code: number): State {
