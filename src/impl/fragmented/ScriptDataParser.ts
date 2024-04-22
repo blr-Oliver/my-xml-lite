@@ -15,22 +15,47 @@ import {
   SPACE,
   TAB
 } from '../../common/code-points';
+import {EOF_TOKEN} from '../tokens';
 import {ParserBase, State} from './common';
 
+// @formatter:off
+/**
+ `<script>` element parser.
+
+ Everything inside is treated as text, no nested elements allowed. However, fake "comments" (enclosed in `<!--` and `-->`) are possible inside. And
+ especially the so called "double escaped" state when `<script>` is located inside fake comment.
+
+ There are 3 major states:
+ <pre>
+ 1. script data
+    - enters "script data escaped" after `<!--`
+    - exits back to "data" after an end `</script>` tag
+ 2. script data escaped: after `<!--`
+    - returns to "script data" after `-->`
+    - enters "script data double escaped" after a start `<script>`tag
+    - exits back to "data" after an end `</script>` tag
+ 3. script data double escaped: after `<!--` AND start `<script>` tag
+    - returns to "script data" after `-->`
+    - returns to "script data escaped" after an end `</script>` tag
+ </pre>
+ */
+// @formatter:on
 export abstract class ScriptDataParser extends ParserBase {
   scriptData(code: number): State {
+    const buffer = this.env.buffer;
     while (true) {
       switch (code) {
         case LT:
           return 'scriptDataLessThanSign';
         case EOF:
-          this.emit(EOF);
+          this.emitAccumulatedCharacters();
+          this.emit(EOF_TOKEN);
           return 'eof';
         case NUL:
           this.error('unexpected-null-character');
           code = REPLACEMENT_CHAR;
         default:
-          this.emitCharacter(code);
+          buffer.append(code);
           code = this.nextCode();
           break;
       }
@@ -38,25 +63,30 @@ export abstract class ScriptDataParser extends ParserBase {
   }
 
   scriptDataLessThanSign(code: number): State {
+    const buffer = this.env.buffer;
     switch (code) {
       case SOLIDUS:
-        // TODO reset buffer
         return 'scriptDataEndTagOpen';
       case EXCLAMATION:
-        this.emitCharacter2(LT, EXCLAMATION);
+        buffer.append(LT);
+        buffer.append(EXCLAMATION);
         return 'scriptDataEscapeStart';
       default:
-        this.emitCharacter(LT);
+        buffer.append(LT);
         return this.scriptData(code);
     }
   }
 
   scriptDataEndTagOpen(code: number): State {
+    const buffer = this.env.buffer;
     if (isAsciiAlpha(code)) {
-      // TODO create new tag token
+      this.emitAccumulatedCharacters();
+      buffer.append(LT);
+      buffer.append(SOLIDUS);
       return this.scriptDataEndTagName(code);
     } else {
-      this.emitCharacter2(LT, SOLIDUS);
+      buffer.append(LT);
+      buffer.append(SOLIDUS);
       return this.scriptData(code);
     }
   }
@@ -64,6 +94,7 @@ export abstract class ScriptDataParser extends ParserBase {
   scriptDataEndTagName(code: number): State {
     // TODO replace with common call
     // return this.specialEndTagName(code, 'scriptData');
+    const buffer = this.env.buffer;
     while (true) {
       switch (code) {
         case TAB:
@@ -71,30 +102,35 @@ export abstract class ScriptDataParser extends ParserBase {
         case FF:
         case SPACE:
           // TODO check for corresponding start tag
-          return 'beforeAttributeName';
+          if (this.startTagIfMatches('script'))
+            return 'beforeAttributeName';
+          else
+            return this.scriptData(code);
         case SOLIDUS:
-          return 'selfClosingStartTag';
+          if (this.startTagIfMatches('script'))
+            return 'selfClosingStartTag';
+          else
+            return this.scriptData(code);
         case GT:
-          // TODO check for corresponding start tag
-          // TODO create tag token
-          this.emit({type: 'tag'});
-          return 'data';
+          if (this.startTagIfMatches('script', true))
+            return 'data';
+          else
+            return this.scriptData(code);
         default:
           if (isAsciiUpperAlpha(code)) code += 0x20;
           if (isAsciiLowerAlpha(code)) {
-            // TODO append current code
+            buffer.append(code);
             code = this.nextCode();
           } else {
-            this.emitCharacter2(LT, SOLIDUS);
-            // TODO emit current buffer as text
             return this.scriptData(code);
           }
       }
     }
   }
+
   scriptDataEscapeStart(code: number): State {
     if (code === HYPHEN) {
-      this.emitCharacter(HYPHEN);
+      this.env.buffer.append(code);
       return 'scriptDataEscapeStartDash';
     } else
       return this.scriptData(code);
@@ -102,99 +138,110 @@ export abstract class ScriptDataParser extends ParserBase {
 
   scriptDataEscapeStartDash(code: number): State {
     if (code === HYPHEN) {
-      this.emitCharacter(HYPHEN);
+      this.env.buffer.append(code);
       return 'scriptDataEscapedDashDash';
     } else
       return this.scriptData(code);
   }
 
   scriptDataEscaped(code: number): State {
+    const buffer = this.env.buffer;
     while (true) {
       switch (code) {
         case HYPHEN:
-          this.emitCharacter(HYPHEN);
+          buffer.append(code);
           return 'scriptDataEscapedDash';
         case LT:
           return 'scriptDataEscapedLessThanSign';
         case EOF:
           this.error('eof-in-script-html-comment-like-text');
-          this.emit(EOF);
+          this.emitAccumulatedCharacters();
+          this.emit(EOF_TOKEN);
           return 'eof';
         case NUL:
           this.error('unexpected-null-character');
           code = REPLACEMENT_CHAR;
         default:
-          this.emitCharacter(code);
+          buffer.append(code);
           code = this.nextCode();
       }
     }
   }
 
   scriptDataEscapedDash(code: number): State {
+    const buffer = this.env.buffer;
     switch (code) {
       case HYPHEN:
-        this.emitCharacter(HYPHEN);
+        buffer.append(code);
         return 'scriptDataEscapedDashDash';
       case LT:
         return 'scriptDataEscapedLessThanSign';
       case EOF:
         this.error('eof-in-script-html-comment-like-text');
-        this.emit(EOF);
+        this.emitAccumulatedCharacters();
+        this.emit(EOF_TOKEN);
         return 'eof';
       case NUL:
         this.error('unexpected-null-character');
         code = REPLACEMENT_CHAR;
       default:
-        this.emitCharacter(code);
+        buffer.append(code);
         return 'scriptDataEscaped';
     }
   }
 
   scriptDataEscapedDashDash(code: number): State {
+    const buffer = this.env.buffer;
     while (true) {
       switch (code) {
         case HYPHEN:
-          this.emitCharacter(HYPHEN);
+          buffer.append(code);
           code = this.nextCode();
           break;
         case LT:
           return 'scriptDataEscapedLessThanSign';
         case GT:
-          this.emitCharacter(GT);
+          buffer.append(code);
           return 'scriptData';
         case EOF:
           this.error('eof-in-script-html-comment-like-text');
-          this.emit(EOF);
+          this.emitAccumulatedCharacters();
+          this.emit(EOF_TOKEN);
           return 'eof';
         case NUL:
           this.error('unexpected-null-character');
           code = REPLACEMENT_CHAR;
         default:
-          this.emitCharacter(code);
+          buffer.append(code);
           return 'scriptDataEscaped';
       }
     }
   }
 
   scriptDataEscapedLessThanSign(code: number): State {
+    const buffer = this.env.buffer;
     if (code === SOLIDUS) {
-      // TODO reset buffer
       return 'scriptDataEscapedEndTagOpen';
     } else if (isAsciiAlpha(code)) {
-      // TODO reset buffer
+      this.emitAccumulatedCharacters();
+      buffer.append(LT);
       return this.scriptDataDoubleEscapeStart(code);
     } else {
-      this.emitCharacter(LT);
+      buffer.append(LT);
       return this.scriptDataEscaped(code);
     }
   }
 
   scriptDataEscapedEndTagOpen(code: number): State {
+    const buffer = this.env.buffer;
     if (isAsciiAlpha(code)) {
-      // TODO create tag token
+      this.emitAccumulatedCharacters();
+      buffer.append(LT);
+      buffer.append(SOLIDUS);
       return this.scriptDataEscapedEndTagName(code);
     } else {
-      this.emitCharacter2(LT, SOLIDUS);
+      buffer.append(LT);
+      buffer.append(SOLIDUS);
       return this.scriptDataEscaped(code);
     }
   }
@@ -202,29 +249,33 @@ export abstract class ScriptDataParser extends ParserBase {
   scriptDataEscapedEndTagName(code: number): State {
     // TODO replace with common call
     // return this.specialEndTagName(code, 'scriptData');
+    const buffer = this.env.buffer;
     while (true) {
       switch (code) {
         case TAB:
         case LF:
         case FF:
         case SPACE:
-          // TODO check for corresponding start tag
-          return 'beforeAttributeName';
+          if (this.startTagIfMatches('script'))
+            return 'beforeAttributeName';
+          else
+            return this.scriptDataEscaped(code);
         case SOLIDUS:
-          return 'selfClosingStartTag';
+          if (this.startTagIfMatches('script'))
+            return 'selfClosingStartTag';
+          else
+            return this.scriptDataEscaped(code);
         case GT:
-          // TODO check for corresponding start tag
-          // TODO create tag token
-          this.emit({type: 'tag'});
-          return 'data';
+          if (this.startTagIfMatches('script', true))
+            return 'data';
+          else
+            return this.scriptDataEscaped(code);
         default:
           if (isAsciiUpperAlpha(code)) code += 0x20;
           if (isAsciiLowerAlpha(code)) {
-            // TODO append current code
+            buffer.append(code);
             code = this.nextCode();
           } else {
-            this.emitCharacter2(LT, SOLIDUS);
-            // TODO emit current buffer as text
             return this.scriptDataEscaped(code);
           }
       }
@@ -232,6 +283,7 @@ export abstract class ScriptDataParser extends ParserBase {
   }
 
   scriptDataDoubleEscapeStart(code: number): State {
+    const buffer = this.env.buffer;
     while (true) {
       switch (code) {
         case TAB:
@@ -240,18 +292,13 @@ export abstract class ScriptDataParser extends ParserBase {
         case SPACE:
         case SOLIDUS:
         case GT:
-          this.emitCharacter(code);
-          let isScript: boolean = true; // TODO check for buffer content to be "script"
-          if (isScript) {
-            return 'scriptDataDoubleEscaped';
-          } else {
-            return 'scriptDataEscaped';
-          }
+          const name = buffer.getString(1);
+          buffer.append(code);
+          return name === 'script' ? 'scriptDataDoubleEscaped' : 'scriptDataEscaped';
         default:
           if (isAsciiUpperAlpha(code)) code += 0x20;
           if (isAsciiLowerAlpha(code)) {
-            // TODO append current code
-            this.emitCharacter(code);
+            buffer.append(code);
             code = this.nextCode();
           } else {
             return this.scriptDataEscaped(code);
@@ -261,23 +308,25 @@ export abstract class ScriptDataParser extends ParserBase {
   }
 
   scriptDataDoubleEscaped(code: number): State {
+    const buffer = this.env.buffer;
     while (true) {
       switch (code) {
         case HYPHEN:
-          this.emitCharacter(HYPHEN);
+          buffer.append(code);
           return 'scriptDataDoubleEscapedDash';
         case LT:
-          this.emitCharacter(LT);
+          buffer.append(code);
           return 'scriptDataDoubleEscapedLessThanSign';
         case EOF:
           this.error('eof-in-script-html-comment-like-text');
-          this.emit(EOF);
+          this.emitAccumulatedCharacters();
+          this.emit(EOF_TOKEN);
           return 'eof';
         case NUL:
           this.error('unexpected-null-character');
           code = REPLACEMENT_CHAR;
         default:
-          this.emitCharacter(code);
+          buffer.append(code);
           code = this.nextCode();
           break;
       }
@@ -285,59 +334,64 @@ export abstract class ScriptDataParser extends ParserBase {
   }
 
   scriptDataDoubleEscapedDash(code: number): State {
+    const buffer = this.env.buffer;
     switch (code) {
       case HYPHEN:
-        this.emitCharacter(HYPHEN);
+        buffer.append(code);
         return 'scriptDataDoubleEscapedDashDash';
       case LT:
-        this.emitCharacter(LT);
+        buffer.append(code);
         return 'scriptDataDoubleEscapedLessThanSign';
       case NUL:
         this.error('unexpected-null-character');
-        this.emitCharacter(REPLACEMENT_CHAR);
+        buffer.append(REPLACEMENT_CHAR);
         return 'scriptDataDoubleEscaped';
       case EOF:
         this.error('eof-in-script-html-comment-like-text');
-        this.emit(EOF);
+        this.emitAccumulatedCharacters();
+        this.emit(EOF_TOKEN);
         return 'eof';
       default:
-        this.emitCharacter(code);
+        buffer.append(code);
         return 'scriptDataDoubleEscaped';
     }
   }
 
   scriptDataDoubleEscapedDashDash(code: number): State {
+    const buffer = this.env.buffer;
     while (true) {
       switch (code) {
         case HYPHEN:
-          this.emitCharacter(HYPHEN);
+          buffer.append(code);
           code = this.nextCode();
           break;
         case LT:
-          this.emitCharacter(LT);
+          buffer.append(code);
           return 'scriptDataDoubleEscapedLessThanSign';
         case GT:
-          this.emitCharacter(GT);
+          buffer.append(code);
           return 'scriptData';
         case NUL:
           this.error('unexpected-null-character');
-          this.emitCharacter(REPLACEMENT_CHAR);
+          buffer.append(REPLACEMENT_CHAR);
           return 'scriptDataDoubleEscaped';
         case EOF:
           this.error('eof-in-script-html-comment-like-text');
-          this.emit(EOF);
+          this.emitAccumulatedCharacters();
+          this.emit(EOF_TOKEN);
           return 'eof';
         default:
-          this.emitCharacter(code);
+          buffer.append(code);
           return 'scriptDataDoubleEscaped';
       }
     }
   }
 
   scriptDataDoubleEscapedLessThanSign(code: number): State {
+    const buffer = this.env.buffer;
     if (code === SOLIDUS) {
-      // TODO reset buffer
-      this.emitCharacter(SOLIDUS);
+      buffer.append(code);
+      this.emitAccumulatedCharacters();
       return 'scriptDataDoubleEscapeEnd';
     } else {
       return this.scriptDataDoubleEscaped(code);
@@ -345,6 +399,7 @@ export abstract class ScriptDataParser extends ParserBase {
   }
 
   scriptDataDoubleEscapeEnd(code: number): State {
+    const buffer = this.env.buffer;
     while (true) {
       switch (code) {
         case TAB:
@@ -353,18 +408,13 @@ export abstract class ScriptDataParser extends ParserBase {
         case SPACE:
         case SOLIDUS:
         case GT:
-          this.emitCharacter(code);
-          let isScript: boolean = true; // TODO check for buffer content to be "script"
-          if (isScript) {
-            return 'scriptDataEscaped';
-          } else {
-            return 'scriptDataDoubleEscaped';
-          }
+          const name = buffer.getString();
+          buffer.append(code);
+          return name === 'script' ? 'scriptDataEscaped' : 'scriptDataDoubleEscaped';
         default:
           if (isAsciiUpperAlpha(code)) code += 0x20;
           if (isAsciiLowerAlpha(code)) {
-            // TODO append current code
-            this.emitCharacter(code);
+            buffer.append(code);
             code = this.nextCode();
           } else {
             return this.scriptDataDoubleEscaped(code);
