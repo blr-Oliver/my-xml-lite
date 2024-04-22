@@ -1,22 +1,7 @@
-import {
-  AMPERSAND,
-  EOF,
-  FF,
-  GT,
-  isAsciiAlpha,
-  isAsciiLowerAlpha,
-  isAsciiUpperAlpha,
-  LF,
-  LT,
-  NUL,
-  REPLACEMENT_CHAR,
-  SOLIDUS,
-  SPACE,
-  TAB
-} from '../../common/code-points';
+import {AMPERSAND, EOF, isAsciiAlpha, LT, NUL, REPLACEMENT_CHAR, SOLIDUS} from '../../common/code-points';
 import {EOF_TOKEN} from '../tokens';
-import {State} from './states';
 import {ParserBase} from './ParserBase';
+import {State} from './states';
 
 export abstract class RCDataParser extends ParserBase {
 
@@ -44,6 +29,7 @@ export abstract class RCDataParser extends ParserBase {
       }
     }
   }
+
   rcdataLessThanSign(code: number): State {
     const buffer = this.env.buffer;
     while (true) {
@@ -76,34 +62,7 @@ export abstract class RCDataParser extends ParserBase {
   }
 
   rcdataEndTagName(code: number): State {
-    // TODO replace with common call
-    const buffer = this.env.buffer;
-    while (true) {
-      switch (code) {
-        case TAB:
-        case LF:
-        case FF:
-        case SPACE:
-          // TODO check for corresponding start tag
-          if (this.startTagIfMatches('textarea'))
-            return 'beforeAttributeName';
-          else return this.rcdata(code);
-        case SOLIDUS:
-          if (this.startTagIfMatches('textarea'))
-            return 'selfClosingStartTag';
-          else return this.rcdata(code);
-        case GT:
-          if (this.startTagIfMatches('textarea', true))
-            return 'data';
-          else return this.rcdata(code);
-        default:
-          if (isAsciiUpperAlpha(code)) code += 0x20;
-          if (isAsciiLowerAlpha(code)) {
-            buffer.append(code);
-            code = this.nextCode();
-          } else return this.rcdata(code);
-      }
-    }
+    return this.expectAsciiTag(code, 'textarea', 'rcdata');
   }
 
 }

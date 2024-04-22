@@ -16,8 +16,8 @@ import {
   TAB
 } from '../../common/code-points';
 import {EOF_TOKEN} from '../tokens';
-import {State} from './states';
 import {ParserBase} from './ParserBase';
+import {State} from './states';
 
 // @formatter:off
 /**
@@ -93,40 +93,7 @@ export abstract class ScriptDataParser extends ParserBase {
   }
 
   scriptDataEndTagName(code: number): State {
-    // TODO replace with common call
-    // return this.specialEndTagName(code, 'scriptData');
-    const buffer = this.env.buffer;
-    while (true) {
-      switch (code) {
-        case TAB:
-        case LF:
-        case FF:
-        case SPACE:
-          // TODO check for corresponding start tag
-          if (this.startTagIfMatches('script'))
-            return 'beforeAttributeName';
-          else
-            return this.scriptData(code);
-        case SOLIDUS:
-          if (this.startTagIfMatches('script'))
-            return 'selfClosingStartTag';
-          else
-            return this.scriptData(code);
-        case GT:
-          if (this.startTagIfMatches('script', true))
-            return 'data';
-          else
-            return this.scriptData(code);
-        default:
-          if (isAsciiUpperAlpha(code)) code += 0x20;
-          if (isAsciiLowerAlpha(code)) {
-            buffer.append(code);
-            code = this.nextCode();
-          } else {
-            return this.scriptData(code);
-          }
-      }
-    }
+    return this.expectAsciiTag(code, 'script', 'scriptData');
   }
 
   scriptDataEscapeStart(code: number): State {
@@ -248,39 +215,7 @@ export abstract class ScriptDataParser extends ParserBase {
   }
 
   scriptDataEscapedEndTagName(code: number): State {
-    // TODO replace with common call
-    // return this.specialEndTagName(code, 'scriptData');
-    const buffer = this.env.buffer;
-    while (true) {
-      switch (code) {
-        case TAB:
-        case LF:
-        case FF:
-        case SPACE:
-          if (this.startTagIfMatches('script'))
-            return 'beforeAttributeName';
-          else
-            return this.scriptDataEscaped(code);
-        case SOLIDUS:
-          if (this.startTagIfMatches('script'))
-            return 'selfClosingStartTag';
-          else
-            return this.scriptDataEscaped(code);
-        case GT:
-          if (this.startTagIfMatches('script', true))
-            return 'data';
-          else
-            return this.scriptDataEscaped(code);
-        default:
-          if (isAsciiUpperAlpha(code)) code += 0x20;
-          if (isAsciiLowerAlpha(code)) {
-            buffer.append(code);
-            code = this.nextCode();
-          } else {
-            return this.scriptDataEscaped(code);
-          }
-      }
-    }
+    return this.expectAsciiTag(code, 'script', 'scriptDataEscaped');
   }
 
   scriptDataDoubleEscapeStart(code: number): State {
