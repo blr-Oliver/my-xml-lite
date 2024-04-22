@@ -1,40 +1,27 @@
 import {AMPERSAND, EOF, GT, LT, NUL, REPLACEMENT_CHAR} from '../../common/code-points';
-import {ParserEnvironment} from '../../decl/ParserEnvironment';
+import {EOF_TOKEN} from '../tokens';
+import {ParserBase} from './ParserBase';
 import {State} from './states';
 
-export class CompleteParser {
-  private env!: ParserEnvironment;
-  private returnState!: State;
-
-  private error(name: string) {
-  }
-  private emit(token: any) {
-  }
-  private emitCharacter(code: number) {
-  }
-  private emitCharacter2(code1: number, code2: number) {
-  }
-  private emitCharacter3(code1: number, code2: number, code3: number) {
-  }
-  private nextCode(): number {
-    return this.env.input.next();
-  }
-
+export class CompleteParser extends ParserBase {
   data(code: number): State {
+    const buffer = this.env.buffer;
     while (true) {
       switch (code) {
         case AMPERSAND:
           this.returnState = 'data';
+          // TODO call refParser
           return 'characterReference';
         case LT:
           return 'tagOpen';
         case EOF:
-          this.emit(EOF);
+          this.emitAccumulatedCharacters();
+          this.emit(EOF_TOKEN);
           return 'eof';
         case NUL:
           this.error('unexpected-null-character');
         default:
-          this.emitCharacter(code);
+          buffer.append(code);
           code = this.nextCode();
           break;
       }
@@ -42,16 +29,18 @@ export class CompleteParser {
   }
 
   plaintext(code: number): State {
+    const buffer = this.env.buffer;
     while (true) {
       switch (code) {
         case EOF:
-          this.emit(EOF);
+          this.emitAccumulatedCharacters();
+          this.emit(EOF_TOKEN);
           return 'eof';
         case NUL:
           this.error('unexpected-null-character');
           code = REPLACEMENT_CHAR;
         default:
-          this.emitCharacter(code);
+          buffer.append(code);
           code = this.nextCode();
           break;
       }
@@ -59,21 +48,21 @@ export class CompleteParser {
   }
 
   bogusComment(code: number): State {
-    // TODO emit comment
+    const buffer = this.env.buffer;
     while (true) {
       switch (code) {
         case GT:
-          this.emit({type: 'comment'});
+          this.emit({type: 'comment', data: buffer.takeString()});
           return 'data';
         case EOF:
-          this.emit({type: 'comment'});
-          this.emit(EOF);
+          this.emit({type: 'comment', data: buffer.takeString()});
+          this.emit(EOF_TOKEN);
           return 'eof';
         case NUL:
           this.error('unexpected-null-character');
           code = REPLACEMENT_CHAR;
         default:
-          // TODO append code
+          buffer.append(code);
           code = this.nextCode();
       }
     }
