@@ -10,7 +10,7 @@ export const LT = '<'.charCodeAt(0);
 export const GT = '>'.charCodeAt(0);
 export const QUESTION = '?'.charCodeAt(0);
 export const EXCLAMATION = '!'.charCodeAt(0);
-export const HYPHEN = '-'.charCodeAt(0);
+export const HYPHEN = 0x2D;
 export const EQ = '='.charCodeAt(0);
 export const APOSTROPHE = '\''.charCodeAt(0);
 export const SINGLE_QUOTE = APOSTROPHE;
@@ -24,8 +24,8 @@ export const COLON = ':'.charCodeAt(0);
 export const SHARP = '#'.charCodeAt(0);
 export const X_REGULAR = 'x'.charCodeAt(0);
 export const X_CAPITAL = 'X'.charCodeAt(0);
-export const OPEN_SQUARE_BRACKET = '['.charCodeAt(0);
-export const CLOSE_SQUARE_BRACKET = ']'.charCodeAt(0);
+export const OPEN_SQUARE_BRACKET = 0x5B;
+export const CLOSE_SQUARE_BRACKET = 0x5D;
 export const REPLACEMENT_CHAR = 0xFFFD;
 
 export const CMT_START = stringToArray('<!--');
@@ -34,9 +34,12 @@ export const CD_START = stringToArray('<![CDATA[');
 export const CD_END = stringToArray(']]>');
 export const PI_START = stringToArray('<?');
 export const PI_END = stringToArray('?>');
-export const DOCTYPE = stringToArray('DOCTYPE');
 export const PUBLIC_ID = stringToArray('PUBLIC');
 export const SYSTEM_ID = stringToArray('SYSTEM');
+
+export const TWO_HYPHENS: readonly number[] = [HYPHEN, HYPHEN] as const;
+export const DOCTYPE: readonly number[] = [0x44, 0x4F, 0x43, 0x54, 0x59, 0x50, 0x45] as const;
+export const CDATA: readonly number[] = [0x5B, 0x43, 0x44, 0x41, 0x54, 0x41, 0x5B] as const;
 
 export type CharCodePredicate = (code: number) => boolean;
 export function range(lo: number, hi: number, loInclusive: boolean = true, hiInclusive: boolean = true): CharCodePredicate {

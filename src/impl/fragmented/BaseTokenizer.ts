@@ -44,7 +44,9 @@ export abstract class BaseTokenizer {
   protected emitCurrentTag() {
     throw new TypeError('Malformed inheritance');
   }
-
+  protected matchSequence(code: number, seq: readonly number[], caseInsensitive: boolean, positiveState: State, negativeState: State): State{
+    throw new TypeError('Malformed inheritance');
+  }
   protected startNewComment() {
     this.currentComment = {
       type: 'comment',

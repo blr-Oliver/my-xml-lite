@@ -4,11 +4,20 @@ import {State} from './states';
 
 export class SequenceMatcher extends BaseTokenizer {
   sequenceBufferOffset!: number;
-  sequenceData!: number[];
+  sequenceData!: readonly number[];
   sequenceIndex!: number;
   sequenceCI!: boolean;
   sequencePositiveState!: State;
   sequenceNegativeState!: State;
+
+  matchSequence(code: number, seq: readonly number[], caseInsensitive: boolean, positiveState: State, negativeState: State): State {
+    this.sequenceBufferOffset = this.env.buffer.position;
+    this.sequenceData = seq;
+    this.sequenceIndex = 0;
+    this.sequencePositiveState = positiveState;
+    this.sequenceNegativeState = negativeState;
+    return (this.sequenceCI = caseInsensitive) ? this.sequenceCaseInsensitive(code) : this.sequenceCaseSensitive(code);
+  }
 
   sequence(code: number): State {
     return this.sequenceCI ? this.sequenceCaseInsensitive(code) : this.sequenceCaseSensitive(code);
