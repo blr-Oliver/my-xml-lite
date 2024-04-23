@@ -11,7 +11,7 @@ export abstract class RCDataParser extends ParserBase {
       switch (code) {
         case AMPERSAND:
           this.returnState = 'rcdata';
-          // TODO call refParser
+          this.isInAttribute = false;
           return 'characterReference';
         case LT:
           return 'rcdataLessThanSign';

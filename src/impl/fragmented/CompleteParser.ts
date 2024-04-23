@@ -10,6 +10,7 @@ export class CompleteParser extends ParserBase {
       switch (code) {
         case AMPERSAND:
           this.returnState = 'data';
+          this.isInAttribute = false;
           // TODO call refParser
           return 'characterReference';
         case LT:

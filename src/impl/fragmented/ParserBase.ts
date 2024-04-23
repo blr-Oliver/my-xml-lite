@@ -4,10 +4,11 @@ import {Attribute, TagToken} from '../tokens';
 import {State} from './states';
 
 export abstract class ParserBase {
-  protected env!: ParserEnvironment;
-  protected returnState!: State;
+  env!: ParserEnvironment;
+  returnState!: State;
   currentTag!: TagToken;
   currentAttribute!: Attribute;
+  isInAttribute!: boolean;
 
   protected error(name: string) {
   }
@@ -36,6 +37,7 @@ export abstract class ParserBase {
     // @ts-ignore
     this.currentAttribute = undefined;
   }
+
   protected startNewTag(name: string = '') {
     this.currentTag = {
       name,
@@ -57,9 +59,8 @@ export abstract class ParserBase {
     if (buffer.position) {
       this.emit({
         type: 'characters',
-        data: buffer.getString()
+        data: buffer.takeString()
       });
-      buffer.clear();
     }
   }
 

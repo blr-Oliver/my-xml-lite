@@ -18,9 +18,9 @@ import {
   SPACE,
   TAB
 } from '../../common/code-points';
-import {Attribute, EOF_TOKEN, TagToken} from '../tokens';
-import {State} from './states';
+import {EOF_TOKEN} from '../tokens';
 import {ParserBase} from './ParserBase';
+import {State} from './states';
 
 export abstract class TagParser extends ParserBase {
 
@@ -169,7 +169,7 @@ export abstract class TagParser extends ParserBase {
         case LF:
         case FF:
         case SPACE:
-          code = this.env.input.next();
+          code = this.nextCode();
           break;
         case GT:
           this.emitCurrentTag();
@@ -211,10 +211,12 @@ export abstract class TagParser extends ParserBase {
 
 
   attributeValueDoubleQuoted(code: number): State {
+    this.returnState = 'attributeValueDoubleQuoted';
     return this.attributeValueQuoted(code, DOUBLE_QUOTE);
   }
 
   attributeValueSingleQuoted(code: number): State {
+    this.returnState = 'attributeValueSingleQuoted';
     return this.attributeValueQuoted(code, SINGLE_QUOTE);
   }
 
@@ -226,8 +228,8 @@ export abstract class TagParser extends ParserBase {
           this.currentAttribute.value = buffer.takeString();
           return 'afterAttributeValueQuoted';
         case AMPERSAND:
-          // TODO call refParser
-          break;
+          this.isInAttribute = true;
+          return 'characterReference';
         case EOF:
           this.error('eof-in-tag');
           this.emit(EOF_TOKEN);
@@ -254,8 +256,9 @@ export abstract class TagParser extends ParserBase {
           this.currentAttribute.value = buffer.takeString();
           return 'beforeAttributeName';
         case AMPERSAND:
-          // TODO call refParser
-          break;
+          this.returnState = 'attributeValueUnquoted';
+          this.isInAttribute = true;
+          return 'characterReference';
         case GT:
           this.currentAttribute.value = buffer.takeString();
           this.emitCurrentTag();
@@ -263,7 +266,7 @@ export abstract class TagParser extends ParserBase {
         case NUL:
           this.error('unexpected-null-character');
           buffer.append(REPLACEMENT_CHAR);
-          code = this.env.input.next();
+          code = this.nextCode();
           break;
         case EOF:
           this.error('eof-in-tag');
@@ -277,7 +280,7 @@ export abstract class TagParser extends ParserBase {
           this.error('unexpected-character-in-unquoted-attribute-value');
         default:
           buffer.append(code);
-          code = this.env.input.next();
+          code = this.nextCode();
       }
     }
   }
