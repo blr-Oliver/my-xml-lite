@@ -16,8 +16,8 @@ import {
   TAB
 } from '../../common/code-points';
 import {EOF_TOKEN} from '../tokens';
-import {BaseTokenizer} from './BaseTokenizer';
 import {State} from './states';
+import {TextTokenizer} from './TextTokenizer';
 
 // @formatter:off
 /**
@@ -33,7 +33,7 @@ import {State} from './states';
     - exits back to "data" after an end `</script>` tag
  2. script data escaped: after `<!--`
     - returns to "script data" after `-->`
-    - enters "script data double escaped" after a start `<script>`tag
+    - enters "script data double escaped" after a start `<script>` tag
     - exits back to "data" after an end `</script>` tag
  3. script data double escaped: after `<!--` AND start `<script>` tag
     - returns to "script data" after `-->`
@@ -41,26 +41,9 @@ import {State} from './states';
  </pre>
  */
 // @formatter:on
-export abstract class ScriptDataParser extends BaseTokenizer {
+export abstract class ScriptDataTokenizer extends TextTokenizer {
   scriptData(code: number): State {
-    const buffer = this.env.buffer;
-    while (true) {
-      switch (code) {
-        case LT:
-          return 'scriptDataLessThanSign';
-        case EOF:
-          this.emitAccumulatedCharacters();
-          this.emit(EOF_TOKEN);
-          return 'eof';
-        case NUL:
-          this.error('unexpected-null-character');
-          code = REPLACEMENT_CHAR;
-        default:
-          buffer.append(code);
-          code = this.nextCode();
-          break;
-      }
-    }
+    return this.textDataNoRefs(code, 'scriptDataLessThanSign');
   }
 
   scriptDataLessThanSign(code: number): State {
@@ -79,17 +62,7 @@ export abstract class ScriptDataParser extends BaseTokenizer {
   }
 
   scriptDataEndTagOpen(code: number): State {
-    const buffer = this.env.buffer;
-    if (isAsciiAlpha(code)) {
-      this.emitAccumulatedCharacters();
-      buffer.append(LT);
-      buffer.append(SOLIDUS);
-      return this.scriptDataEndTagName(code);
-    } else {
-      buffer.append(LT);
-      buffer.append(SOLIDUS);
-      return this.scriptData(code);
-    }
+    return this.textDataEndTagOpen(code, 'scriptDataEndTagName', 'scriptData');
   }
 
   scriptDataEndTagName(code: number): State {
