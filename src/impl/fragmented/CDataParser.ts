@@ -1,9 +1,9 @@
 import {CLOSE_SQUARE_BRACKET, EOF, GT} from '../../common/code-points';
 import {EOF_TOKEN} from '../tokens';
 import {State} from './states';
-import {ParserBase} from './ParserBase';
+import {BaseTokenizer} from './BaseTokenizer';
 
-export abstract class CDataParser extends ParserBase {
+export abstract class CDataParser extends BaseTokenizer {
   cdataSection(code: number): State {
     const buffer = this.env.buffer;
     while (true) {

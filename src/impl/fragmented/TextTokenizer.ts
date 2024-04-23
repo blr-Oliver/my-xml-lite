@@ -1,20 +1,16 @@
 import {AMPERSAND, EOF, isAsciiAlpha, LT, NUL, REPLACEMENT_CHAR, SOLIDUS} from '../../common/code-points';
 import {EOF_TOKEN} from '../tokens';
-import {ParserBase} from './ParserBase';
+import {BaseTokenizer} from './BaseTokenizer';
 import {State} from './states';
 
-export abstract class RCDataParser extends ParserBase {
+export abstract class TextTokenizer extends BaseTokenizer {
 
-  rcdata(code: number): State {
+  protected textDataNoRefs(code: number, ltState: State): State {
     const buffer = this.env.buffer;
     while (true) {
       switch (code) {
-        case AMPERSAND:
-          this.returnState = 'rcdata';
-          this.isInAttribute = false;
-          return 'characterReference';
         case LT:
-          return 'rcdataLessThanSign';
+          return ltState;
         case EOF:
           this.emitAccumulatedCharacters();
           this.emit(EOF_TOKEN);
@@ -30,39 +26,59 @@ export abstract class RCDataParser extends ParserBase {
     }
   }
 
-  rcdataLessThanSign(code: number): State {
+  protected textDataWithRefs(code: number, ltState: State, returnState: State): State {
+    const buffer = this.env.buffer;
+    while (true) {
+      switch (code) {
+        case AMPERSAND:
+          this.returnState = returnState;
+          this.isInAttribute = false;
+          return 'characterReference';
+        case LT:
+          return ltState;
+        case EOF:
+          this.emitAccumulatedCharacters();
+          this.emit(EOF_TOKEN);
+          return 'eof';
+        case NUL:
+          this.error('unexpected-null-character');
+          code = REPLACEMENT_CHAR;
+        default:
+          buffer.append(code);
+          code = this.nextCode();
+          break;
+      }
+    }
+  }
+
+  protected textDataLessThanSign(code: number, solidusState: State, dataState: State): State {
     const buffer = this.env.buffer;
     while (true) {
       switch (code) {
         case SOLIDUS:
-          return 'rcdataEndTagOpen';
+          return solidusState;
         case LT:
           buffer.append(code);
           code = this.nextCode();
           break;
         default:
           buffer.append(LT);
-          return this.rcdata(code);
+          return this.callState(code, dataState);
       }
     }
   }
 
-  rcdataEndTagOpen(code: number): State {
+  protected textDataEndTagOpen(code: number, tagNameState: State, dataState: State): State {
     const buffer = this.env.buffer;
     if (isAsciiAlpha(code)) {
       this.emitAccumulatedCharacters();
       buffer.append(LT);
       buffer.append(SOLIDUS);
-      return this.rcdataEndTagName(code);
+      return this.callState(code, tagNameState);
     } else {
       buffer.append(LT);
       buffer.append(SOLIDUS);
-      return this.rcdata(code);
+      return this.callState(code, dataState);
     }
   }
-
-  rcdataEndTagName(code: number): State {
-    return this.expectAsciiTag(code, 'textarea', 'rcdata');
-  }
-
 }

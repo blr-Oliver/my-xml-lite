@@ -16,7 +16,7 @@ import {
   TAB
 } from '../../common/code-points';
 import {EOF_TOKEN} from '../tokens';
-import {ParserBase} from './ParserBase';
+import {BaseTokenizer} from './BaseTokenizer';
 import {State} from './states';
 
 // @formatter:off
@@ -41,7 +41,7 @@ import {State} from './states';
  </pre>
  */
 // @formatter:on
-export abstract class ScriptDataParser extends ParserBase {
+export abstract class ScriptDataParser extends BaseTokenizer {
   scriptData(code: number): State {
     const buffer = this.env.buffer;
     while (true) {

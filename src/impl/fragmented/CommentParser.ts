@@ -1,9 +1,9 @@
 import {EOF, EXCLAMATION, GT, HYPHEN, LT, NUL, REPLACEMENT_CHAR} from '../../common/code-points';
 import {CommentToken, EOF_TOKEN} from '../tokens';
 import {State} from './states';
-import {ParserBase} from './ParserBase';
+import {BaseTokenizer} from './BaseTokenizer';
 
-export abstract class CommentParser extends ParserBase {
+export abstract class CommentParser extends BaseTokenizer {
   private currentComment!: CommentToken;
 
   commentStart(code: number): State {

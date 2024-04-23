@@ -17,10 +17,10 @@ import {
   X_REGULAR
 } from '../../common/code-points';
 import {CHAR_REF_REPLACEMENT, PrefixNode} from '../character-reference/entity-ref-index';
-import {ParserBase} from './ParserBase';
+import {BaseTokenizer} from './BaseTokenizer';
 import {State} from './states';
 
-export class CharacterReferenceParser extends ParserBase {
+export class CharacterReferenceParser extends BaseTokenizer {
   referenceStartMark!: number;
   charCode!: number;
 

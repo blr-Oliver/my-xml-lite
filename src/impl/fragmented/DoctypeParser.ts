@@ -1,9 +1,9 @@
 import {DOUBLE_QUOTE, EOF, FF, GT, isAsciiUpperAlpha, LF, NUL, REPLACEMENT_CHAR, SINGLE_QUOTE, SPACE, TAB} from '../../common/code-points';
 import {DoctypeToken, EOF_TOKEN} from '../tokens';
 import {State} from './states';
-import {ParserBase} from './ParserBase';
+import {BaseTokenizer} from './BaseTokenizer';
 
-export abstract class DoctypeParser extends ParserBase {
+export abstract class DoctypeParser extends BaseTokenizer {
   private currentDoctype!: DoctypeToken;
 
   doctype(code: number): State {

@@ -1,9 +1,9 @@
 import {AMPERSAND, EOF, GT, LT, NUL, REPLACEMENT_CHAR} from '../../common/code-points';
 import {EOF_TOKEN} from '../tokens';
-import {ParserBase} from './ParserBase';
+import {BaseTokenizer} from './BaseTokenizer';
 import {State} from './states';
 
-export class CompleteParser extends ParserBase {
+export class CompleteParser extends BaseTokenizer {
   data(code: number): State {
     const buffer = this.env.buffer;
     while (true) {

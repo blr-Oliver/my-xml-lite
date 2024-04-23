@@ -19,10 +19,10 @@ import {
   TAB
 } from '../../common/code-points';
 import {EOF_TOKEN} from '../tokens';
-import {ParserBase} from './ParserBase';
+import {BaseTokenizer} from './BaseTokenizer';
 import {State} from './states';
 
-export abstract class TagParser extends ParserBase {
+export abstract class TagParser extends BaseTokenizer {
 
   tagOpen(code: number): State {
     switch (code) {

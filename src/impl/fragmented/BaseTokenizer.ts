@@ -3,7 +3,7 @@ import {ParserEnvironment} from '../../decl/ParserEnvironment';
 import {Attribute, TagToken} from '../tokens';
 import {State} from './states';
 
-export abstract class ParserBase {
+export abstract class BaseTokenizer {
   env!: ParserEnvironment;
   returnState!: State;
   currentTag!: TagToken;
