@@ -79,4 +79,5 @@ export type State =
     'hexadecimalCharacterReference' |
     'decimalCharacterReference' |
     'eof' |
-    'eoc';
+    'eoc' |
+    'sequence';
