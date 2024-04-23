@@ -22,7 +22,7 @@ import {EOF_TOKEN} from '../tokens';
 import {BaseTokenizer} from './BaseTokenizer';
 import {State} from './states';
 
-export abstract class TagParser extends BaseTokenizer {
+export abstract class TagTokenizer extends BaseTokenizer {
 
   tagOpen(code: number): State {
     switch (code) {
@@ -211,12 +211,10 @@ export abstract class TagParser extends BaseTokenizer {
 
 
   attributeValueDoubleQuoted(code: number): State {
-    this.returnState = 'attributeValueDoubleQuoted';
     return this.attributeValueQuoted(code, DOUBLE_QUOTE);
   }
 
   attributeValueSingleQuoted(code: number): State {
-    this.returnState = 'attributeValueSingleQuoted';
     return this.attributeValueQuoted(code, SINGLE_QUOTE);
   }
 
@@ -228,7 +226,8 @@ export abstract class TagParser extends BaseTokenizer {
           this.currentAttribute.value = buffer.takeString();
           return 'afterAttributeValueQuoted';
         case AMPERSAND:
-          this.isInAttribute = true;
+          this.returnState = this.state;
+          this.inAttribute = true;
           return 'characterReference';
         case EOF:
           this.error('eof-in-tag');
@@ -256,8 +255,8 @@ export abstract class TagParser extends BaseTokenizer {
           this.currentAttribute.value = buffer.takeString();
           return 'beforeAttributeName';
         case AMPERSAND:
-          this.returnState = 'attributeValueUnquoted';
-          this.isInAttribute = true;
+          this.returnState = this.state;
+          this.inAttribute = true;
           return 'characterReference';
         case GT:
           this.currentAttribute.value = buffer.takeString();

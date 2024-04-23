@@ -20,7 +20,7 @@ import {CHAR_REF_REPLACEMENT, PrefixNode} from '../character-reference/entity-re
 import {BaseTokenizer} from './BaseTokenizer';
 import {State} from './states';
 
-export class CharacterReferenceParser extends BaseTokenizer {
+export class CharacterReferenceTokenizer extends BaseTokenizer {
   referenceStartMark!: number;
   charCode!: number;
 
@@ -81,7 +81,7 @@ export class CharacterReferenceParser extends BaseTokenizer {
       code = this.nextCode();
     }
     if (node.value) {
-      if (this.isInAttribute && lastMatch !== SEMICOLON && (code === EQ || isAsciiAlphaNum(code))) { // for historical reasons
+      if (this.inAttribute && lastMatch !== SEMICOLON && (code === EQ || isAsciiAlphaNum(code))) { // for historical reasons
         return this.callState(this.returnState, code);
       } else {
         if (lastMatch !== SEMICOLON)

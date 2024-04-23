@@ -3,7 +3,7 @@ import {TextTokenizer} from './TextTokenizer';
 
 export abstract class RCDataTokenizer extends TextTokenizer {
   rcdata(code: number): State {
-    return this.textDataWithRefs(code, 'rcdataLessThanSign', 'rcdata');
+    return this.textDataWithRefs(code, 'rcdataLessThanSign');
   }
 
   rcdataLessThanSign(code: number): State {

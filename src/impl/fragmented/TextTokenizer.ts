@@ -26,13 +26,13 @@ export abstract class TextTokenizer extends BaseTokenizer {
     }
   }
 
-  protected textDataWithRefs(code: number, ltState: State, returnState: State): State {
+  protected textDataWithRefs(code: number, ltState: State): State {
     const buffer = this.env.buffer;
     while (true) {
       switch (code) {
         case AMPERSAND:
-          this.returnState = returnState;
-          this.isInAttribute = false;
+          this.returnState = this.state;
+          this.inAttribute = false;
           return 'characterReference';
         case LT:
           return ltState;

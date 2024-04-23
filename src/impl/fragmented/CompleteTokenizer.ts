@@ -3,15 +3,14 @@ import {EOF_TOKEN} from '../tokens';
 import {BaseTokenizer} from './BaseTokenizer';
 import {State} from './states';
 
-export class CompleteParser extends BaseTokenizer {
+export class CompleteTokenizer extends BaseTokenizer {
   data(code: number): State {
     const buffer = this.env.buffer;
     while (true) {
       switch (code) {
         case AMPERSAND:
-          this.returnState = 'data';
-          this.isInAttribute = false;
-          // TODO call refParser
+          this.returnState = this.state;
+          this.inAttribute = false;
           return 'characterReference';
         case LT:
           return 'tagOpen';

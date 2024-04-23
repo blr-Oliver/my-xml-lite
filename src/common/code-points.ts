@@ -1,4 +1,5 @@
 export const EOF = -1;
+export const EOC = -2;
 export const NUL = 0;
 export const TAB = 0x9;
 export const LF = 0xA;

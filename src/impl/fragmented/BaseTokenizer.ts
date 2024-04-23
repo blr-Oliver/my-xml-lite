@@ -1,4 +1,4 @@
-import {FF, GT, isAsciiLowerAlpha, isAsciiUpperAlpha, LF, SOLIDUS, SPACE, TAB} from '../../common/code-points';
+import {EOC, FF, GT, isAsciiLowerAlpha, isAsciiUpperAlpha, LF, SOLIDUS, SPACE, TAB} from '../../common/code-points';
 import {ParserEnvironment} from '../../decl/ParserEnvironment';
 import {Attribute, TagToken} from '../tokens';
 import {State} from './states';
@@ -6,13 +6,23 @@ import {State} from './states';
 export abstract class BaseTokenizer {
   env!: ParserEnvironment;
   returnState!: State;
+  state!: State;
   currentTag!: TagToken;
   currentAttribute!: Attribute;
-  isInAttribute!: boolean;
+  inAttribute!: boolean;
+
+  proceed() {
+    // TODO imply possibility of changing state BEFORE state handler returned
+    let code: number = 0;
+    while (this.state) {
+      code = this.nextCode();
+      if (code === EOC) break;
+      this.state = this.callState(this.state, code);
+    }
+  }
 
   protected error(name: string) {
   }
-
   protected emit(token: any) {
   }
   protected emitCharacter(code: number) {
@@ -80,6 +90,7 @@ export abstract class BaseTokenizer {
   }
 
   protected callState(state: State, code: number): State {
+    this.state = state;
     // @ts-ignore
     return this[state](code);
   }
