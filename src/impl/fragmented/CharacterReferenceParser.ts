@@ -38,7 +38,7 @@ export class CharacterReferenceParser extends BaseTokenizer {
     } else if (isAsciiAlphaNum(code))
       return this.numericCharacterReference(code);
     else
-      return this.callState(code, this.returnState);
+      return this.callState(this.returnState, code);
   }
 
   numericCharacterReference(code: number): State {
@@ -82,13 +82,13 @@ export class CharacterReferenceParser extends BaseTokenizer {
     }
     if (node.value) {
       if (this.isInAttribute && lastMatch !== SEMICOLON && (code === EQ || isAsciiAlphaNum(code))) { // for historical reasons
-        return this.callState(code, this.returnState);
+        return this.callState(this.returnState, code);
       } else {
         if (lastMatch !== SEMICOLON)
           this.error('missing-semicolon-after-character-reference');
         buffer.position = this.referenceStartMark;
         buffer.appendSequence(node.value);
-        return this.callState(code, this.returnState);
+        return this.callState(this.returnState, code);
       }
     } else
       return this.ambiguousAmpersand(code);
@@ -97,7 +97,7 @@ export class CharacterReferenceParser extends BaseTokenizer {
   hexadecimalCharacterReferenceStart(code: number): State {
     if (!isHexDigit(code)) {
       this.error('absence-of-digits-in-numeric-character-reference');
-      return this.callState(code, this.returnState);
+      return this.callState(this.returnState, code);
     } else
       return this.hexadecimalCharacterReference(code);
   }
@@ -116,7 +116,7 @@ export class CharacterReferenceParser extends BaseTokenizer {
       } else {
         this.error('missing-semicolon-after-character-reference');
         this.numericCharacterReferenceEnd();
-        return this.callState(code, this.returnState);
+        return this.callState(this.returnState, code);
       }
       code = this.nextCode();
     }
@@ -125,7 +125,7 @@ export class CharacterReferenceParser extends BaseTokenizer {
   decimalCharacterReferenceStart(code: number): State {
     if (!isDigit(code)) {
       this.error('absence-of-digits-in-numeric-character-reference');
-      return this.callState(code, this.returnState);
+      return this.callState(this.returnState, code);
     } else
       return this.decimalCharacterReference(code);
   }
@@ -140,7 +140,7 @@ export class CharacterReferenceParser extends BaseTokenizer {
       } else {
         this.error('missing-semicolon-after-character-reference');
         this.numericCharacterReferenceEnd();
-        return this.callState(code, this.returnState);
+        return this.callState(this.returnState, code);
       }
       code = this.nextCode();
     }
@@ -151,12 +151,12 @@ export class CharacterReferenceParser extends BaseTokenizer {
     while (true) {
       if (code === SEMICOLON) {
         this.error('unknown-named-character-reference');
-        return this.callState(code, this.returnState);
+        return this.callState(this.returnState, code);
       } else if (isAsciiAlphaNum(code)) {
         buffer.append(code);
         code = this.nextCode();
       } else
-        return this.callState(code, this.returnState);
+        return this.callState(this.returnState, code);
     }
   }
 }

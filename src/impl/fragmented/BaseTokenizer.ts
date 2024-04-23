@@ -79,7 +79,7 @@ export abstract class BaseTokenizer {
     return false;
   }
 
-  protected callState(code: number, state: State): State {
+  protected callState(state: State, code: number): State {
     // @ts-ignore
     return this[state](code);
   }
@@ -95,20 +95,20 @@ export abstract class BaseTokenizer {
         case FF:
         case SPACE:
           if (this.startTagIfMatches(tag, false, mark)) return 'beforeAttributeName';
-          else return this.callState(code, failedState);
+          else return this.callState(failedState, code);
         case SOLIDUS:
           if (this.startTagIfMatches(tag, false, mark)) return 'selfClosingStartTag';
-          else return this.callState(code, failedState);
+          else return this.callState(failedState, code);
         case GT:
           if (this.startTagIfMatches(tag, false, mark)) return 'data';
-          else return this.callState(code, failedState);
+          else return this.callState(failedState, code);
         default:
           if (isAsciiUpperAlpha(code)) code += 0x20;
           if (isAsciiLowerAlpha(code)) {
             buffer.append(code);
             code = this.nextCode();
           } else
-            return this.callState(code, failedState);
+            return this.callState(failedState, code);
       }
     }
   }

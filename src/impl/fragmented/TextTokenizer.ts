@@ -63,7 +63,7 @@ export abstract class TextTokenizer extends BaseTokenizer {
           break;
         default:
           buffer.append(LT);
-          return this.callState(code, dataState);
+          return this.callState(dataState, code);
       }
     }
   }
@@ -74,11 +74,11 @@ export abstract class TextTokenizer extends BaseTokenizer {
       this.emitAccumulatedCharacters();
       buffer.append(LT);
       buffer.append(SOLIDUS);
-      return this.callState(code, tagNameState);
+      return this.callState(tagNameState, code);
     } else {
       buffer.append(LT);
       buffer.append(SOLIDUS);
-      return this.callState(code, dataState);
+      return this.callState(dataState, code);
     }
   }
 }
