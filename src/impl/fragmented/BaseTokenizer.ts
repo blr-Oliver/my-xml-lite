@@ -1,6 +1,6 @@
 import {EOC} from '../../common/code-points';
 import {ParserEnvironment} from '../../decl/ParserEnvironment';
-import {Attribute, CommentToken, TagToken} from '../tokens';
+import {Attribute, CommentToken, TagToken, TextToken, Token} from '../tokens';
 import {State} from './states';
 
 export abstract class BaseTokenizer {
@@ -24,13 +24,7 @@ export abstract class BaseTokenizer {
 
   protected error(name: string) {
   }
-  protected emit(token: any) {
-  }
-  protected emitCharacter(code: number) {
-  }
-  protected emitCharacter2(code1: number, code2: number) {
-  }
-  protected emitCharacter3(code1: number, code2: number, code3: number) {
+  protected emit(token: Token) {
   }
   protected nextCode(): number {
     return this.env.input.next();
@@ -44,7 +38,7 @@ export abstract class BaseTokenizer {
   protected emitCurrentTag() {
     throw new TypeError('Malformed inheritance');
   }
-  protected matchSequence(code: number, seq: readonly number[], caseInsensitive: boolean, positiveState: State, negativeState: State): State{
+  protected matchSequence(code: number, seq: readonly number[], caseInsensitive: boolean, positiveState: State, negativeState: State): State {
     throw new TypeError('Malformed inheritance');
   }
   protected startNewComment() {
@@ -76,7 +70,7 @@ export abstract class BaseTokenizer {
       this.emit({
         type: 'characters',
         data: buffer.takeString()
-      });
+      } as TextToken);
     }
   }
 

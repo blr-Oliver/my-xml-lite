@@ -25,18 +25,21 @@ import {State} from './states';
 export abstract class TagTokenizer extends BaseTokenizer {
 
   tagOpen(code: number): State {
+    const buffer = this.env.buffer;
     switch (code) {
       case EXCLAMATION:
         return 'markupDeclarationOpen';
       case SOLIDUS:
         return 'endTagOpen';
       case QUESTION:
+        this.emitAccumulatedCharacters();
         this.error('unexpected-question-mark-instead-of-tag-name');
         this.startNewComment();
         return this.bogusComment(code);
       case EOF:
+        buffer.append(LT);
+        this.emitAccumulatedCharacters();
         this.error('eof-before-tag-name');
-        this.emitCharacter(LT);
         this.emit(EOF_TOKEN);
         return 'eof';
       default:
@@ -46,7 +49,7 @@ export abstract class TagTokenizer extends BaseTokenizer {
           return this.tagName(code);
         }
         this.error('invalid-first-character-of-tag-name');
-        this.emitCharacter(LT);
+        buffer.append(LT);
         return this.data(code);
     }
   }
@@ -54,11 +57,15 @@ export abstract class TagTokenizer extends BaseTokenizer {
   endTagOpen(code: number): State {
     switch (code) {
       case GT:
+        this.emitAccumulatedCharacters();
         this.error('missing-end-tag-name');
         return 'data';
       case EOF:
+        const buffer = this.env.buffer;
+        buffer.append(LT);
+        buffer.append(SOLIDUS);
+        this.emitAccumulatedCharacters();
         this.error('eof-before-tag-name');
-        this.emitCharacter2(LT, SOLIDUS);
         this.emit(EOF_TOKEN);
         return 'eof';
       default:
@@ -67,6 +74,7 @@ export abstract class TagTokenizer extends BaseTokenizer {
           this.currentTag.type = 'endTag';
           return this.tagName(code);
         }
+        this.emitAccumulatedCharacters();
         this.error('invalid-first-character-of-tag-name');
         this.startNewComment();
         return this.bogusComment(code);
@@ -100,7 +108,7 @@ export abstract class TagTokenizer extends BaseTokenizer {
         default:
           if (isAsciiUpperAlpha(code)) code += 0x20; // toLowerCase
           buffer.append(code);
-          code = this.env.input.next();
+          code = this.nextCode();
       }
     }
   }
@@ -112,7 +120,7 @@ export abstract class TagTokenizer extends BaseTokenizer {
         case LF:
         case FF:
         case SPACE:
-          code = this.env.input.next();
+          code = this.nextCode();
           break;
         case SOLIDUS:
         case GT:
@@ -158,7 +166,7 @@ export abstract class TagTokenizer extends BaseTokenizer {
           if (isAsciiUpperAlpha(code)) code += 0x20; // toLowerCase
           buffer.append(code);
       }
-      code = this.env.input.next();
+      code = this.nextCode();
     }
   }
 
@@ -240,7 +248,7 @@ export abstract class TagTokenizer extends BaseTokenizer {
           code = REPLACEMENT_CHAR;
         default:
           buffer.append(code);
-          code = this.env.input.next();
+          code = this.nextCode();
           break;
       }
     }
