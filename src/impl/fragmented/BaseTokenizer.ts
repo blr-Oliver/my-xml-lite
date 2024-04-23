@@ -1,15 +1,16 @@
 import {EOC} from '../../common/code-points';
 import {ParserEnvironment} from '../../decl/ParserEnvironment';
-import {Attribute, TagToken} from '../tokens';
+import {Attribute, CommentToken, TagToken} from '../tokens';
 import {State} from './states';
 
 export abstract class BaseTokenizer {
   env!: ParserEnvironment;
-  returnState!: State;
   state!: State;
+  returnState!: State;
+  inAttribute!: boolean;
+  currentComment!: CommentToken;
   currentTag!: TagToken;
   currentAttribute!: Attribute;
-  inAttribute!: boolean;
 
   proceed() {
     // TODO imply possibility of changing state BEFORE state handler returned
@@ -41,11 +42,14 @@ export abstract class BaseTokenizer {
     throw new TypeError('Malformed inheritance');
   }
   protected emitCurrentTag() {
-    this.emit(this.currentTag);
-    // @ts-ignore
-    this.currentTag = undefined;
-    // @ts-ignore
-    this.currentAttribute = undefined;
+    throw new TypeError('Malformed inheritance');
+  }
+
+  protected startNewComment() {
+    this.currentComment = {
+      type: 'comment',
+      data: ''
+    };
   }
 
   protected startNewTag(name: string = '') {

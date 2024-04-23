@@ -32,6 +32,7 @@ export abstract class TagTokenizer extends BaseTokenizer {
         return 'endTagOpen';
       case QUESTION:
         this.error('unexpected-question-mark-instead-of-tag-name');
+        this.startNewComment();
         return this.bogusComment(code);
       case EOF:
         this.error('eof-before-tag-name');
@@ -67,6 +68,7 @@ export abstract class TagTokenizer extends BaseTokenizer {
           return this.tagName(code);
         }
         this.error('invalid-first-character-of-tag-name');
+        this.startNewComment();
         return this.bogusComment(code);
     }
   }
@@ -320,5 +322,13 @@ export abstract class TagTokenizer extends BaseTokenizer {
         this.error('unexpected-solidus-in-tag');
         return this.beforeAttributeName(code);
     }
+  }
+
+  emitCurrentTag() {
+    this.emit(this.currentTag);
+    // @ts-ignore
+    this.currentTag = undefined;
+    // @ts-ignore
+    this.currentAttribute = undefined;
   }
 }

@@ -1,11 +1,9 @@
 import {EOF, EXCLAMATION, GT, HYPHEN, LT, NUL, REPLACEMENT_CHAR} from '../../common/code-points';
-import {CommentToken, EOF_TOKEN} from '../tokens';
-import {State} from './states';
+import {EOF_TOKEN} from '../tokens';
 import {BaseTokenizer} from './BaseTokenizer';
+import {State} from './states';
 
-export abstract class CommentParser extends BaseTokenizer {
-  private currentComment!: CommentToken;
-
+export abstract class CommentTokenizer extends BaseTokenizer {
   commentStart(code: number): State {
     switch (code) {
       case HYPHEN:
@@ -172,7 +170,28 @@ export abstract class CommentParser extends BaseTokenizer {
     }
   }
 
-  private emitCurrentComment() {
+  bogusComment(code: number): State {
+    const buffer = this.env.buffer;
+    while (true) {
+      switch (code) {
+        case GT:
+          this.emitCurrentComment();
+          return 'data';
+        case EOF:
+          this.emitCurrentComment();
+          this.emit(EOF_TOKEN);
+          return 'eof';
+        case NUL:
+          this.error('unexpected-null-character');
+          code = REPLACEMENT_CHAR;
+        default:
+          buffer.append(code);
+          code = this.nextCode();
+      }
+    }
+  }
+
+  emitCurrentComment() {
     this.currentComment.data = this.env.buffer.takeString();
     this.emit(this.currentComment);
     // @ts-ignore

@@ -47,27 +47,6 @@ export class CompleteTokenizer extends BaseTokenizer {
     }
   }
 
-  bogusComment(code: number): State {
-    const buffer = this.env.buffer;
-    while (true) {
-      switch (code) {
-        case GT:
-          this.emit({type: 'comment', data: buffer.takeString()});
-          return 'data';
-        case EOF:
-          this.emit({type: 'comment', data: buffer.takeString()});
-          this.emit(EOF_TOKEN);
-          return 'eof';
-        case NUL:
-          this.error('unexpected-null-character');
-          code = REPLACEMENT_CHAR;
-        default:
-          buffer.append(code);
-          code = this.nextCode();
-      }
-    }
-  }
-
   markupDeclarationOpen(code: number): State {
     // TODO make possible to check for sequence
     return 'bogusComment';
