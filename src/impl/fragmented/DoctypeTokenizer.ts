@@ -1,5 +1,5 @@
 import {DOUBLE_QUOTE, EOF, FF, GT, isAsciiUpperAlpha, LF, NUL, REPLACEMENT_CHAR, SINGLE_QUOTE, SPACE, TAB} from '../../common/code-points';
-import {DoctypeToken, EOF_TOKEN} from '../tokens';
+import {DoctypeToken} from '../tokens';
 import {BaseTokenizer} from './BaseTokenizer';
 import {State} from './states';
 
@@ -17,8 +17,7 @@ export abstract class DoctypeTokenizer extends BaseTokenizer {
         this.startNewDoctype(true);
         this.error('eof-in-doctype');
         this.emitCurrentDoctype();
-        this.emit(EOF_TOKEN);
-        return 'eof';
+        return this.eof();
       default:
         this.error('missing-whitespace-before-doctype-name');
       case GT:
@@ -45,8 +44,7 @@ export abstract class DoctypeTokenizer extends BaseTokenizer {
           this.error('eof-in-doctype');
           this.startNewDoctype(true);
           this.emitCurrentDoctype();
-          this.emit(EOF_TOKEN);
-          return 'eof';
+          return this.eof();
         case NUL:
           this.error('unexpected-null-character');
           code = REPLACEMENT_CHAR;
@@ -102,8 +100,7 @@ export abstract class DoctypeTokenizer extends BaseTokenizer {
         case EOF:
           this.error('eof-in-doctype');
           this.emitCurrentDoctype();
-          this.emit(EOF_TOKEN);
-          return 'eof';
+          return this.eof();
         default:
           // TODO make possible to check for sequence
           let sequence: string = '';
@@ -143,8 +140,7 @@ export abstract class DoctypeTokenizer extends BaseTokenizer {
         this.currentDoctype.forceQuirks = true;
         this.error('eof-in-doctype');
         this.emitCurrentDoctype();
-        this.emit(EOF_TOKEN);
-        return 'eof';
+        return this.eof();
       default:
         this.currentDoctype.forceQuirks = true;
         this.error('missing-quote-before-doctype-public-identifier');
@@ -234,8 +230,7 @@ export abstract class DoctypeTokenizer extends BaseTokenizer {
         this.currentDoctype.forceQuirks = true;
         this.error('eof-in-doctype');
         this.emitCurrentDoctype();
-        this.emit(EOF_TOKEN);
-        return 'eof';
+        return this.eof();
       default:
         this.currentDoctype.forceQuirks = true;
         this.error('missing-quote-before-doctype-system-identifier');
@@ -291,8 +286,7 @@ export abstract class DoctypeTokenizer extends BaseTokenizer {
         this.currentDoctype.forceQuirks = true;
         this.error('eof-in-doctype');
         this.emitCurrentDoctype();
-        this.emit(EOF_TOKEN);
-        return 'eof';
+        return this.eof();
       default:
         this.currentDoctype.forceQuirks = true;
         this.error('missing-quote-before-doctype-system-identifier');
@@ -390,8 +384,7 @@ export abstract class DoctypeTokenizer extends BaseTokenizer {
           return 'data';
         case EOF:
           this.emitCurrentDoctype();
-          this.emit(EOF_TOKEN);
-          return 'eof';
+          return this.eof();
         case NUL:
           this.error('unexpected-null-character');
         default:
@@ -419,7 +412,6 @@ export abstract class DoctypeTokenizer extends BaseTokenizer {
     this.currentDoctype.forceQuirks = true;
     this.error('eof-in-doctype');
     this.emitCurrentDoctype();
-    this.emit(EOF_TOKEN);
-    return 'eof';
+    return this.eof();
   }
 }

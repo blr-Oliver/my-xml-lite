@@ -1,5 +1,4 @@
 import {CLOSE_SQUARE_BRACKET, EOF, GT} from '../../common/code-points';
-import {EOF_TOKEN} from '../tokens';
 import {BaseTokenizer} from './BaseTokenizer';
 import {State} from './states';
 
@@ -13,8 +12,7 @@ export abstract class CDataTokenizer extends BaseTokenizer {
         case EOF:
           this.emitAccumulatedCharacters();
           this.error('eof-in-cdata');
-          this.emit(EOF_TOKEN);
-          return 'eof';
+          return this.eof();
         default:
           buffer.append(code);
           code = this.nextCode();

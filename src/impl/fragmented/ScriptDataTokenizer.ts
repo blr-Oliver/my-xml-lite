@@ -15,7 +15,6 @@ import {
   SPACE,
   TAB
 } from '../../common/code-points';
-import {EOF_TOKEN} from '../tokens';
 import {State} from './states';
 import {TextTokenizer} from './TextTokenizer';
 
@@ -97,8 +96,7 @@ export abstract class ScriptDataTokenizer extends TextTokenizer {
         case EOF:
           this.error('eof-in-script-html-comment-like-text');
           this.emitAccumulatedCharacters();
-          this.emit(EOF_TOKEN);
-          return 'eof';
+          return this.eof();
         case NUL:
           this.error('unexpected-null-character');
           code = REPLACEMENT_CHAR;
@@ -120,8 +118,7 @@ export abstract class ScriptDataTokenizer extends TextTokenizer {
       case EOF:
         this.error('eof-in-script-html-comment-like-text');
         this.emitAccumulatedCharacters();
-        this.emit(EOF_TOKEN);
-        return 'eof';
+        return this.eof();
       case NUL:
         this.error('unexpected-null-character');
         code = REPLACEMENT_CHAR;
@@ -147,8 +144,7 @@ export abstract class ScriptDataTokenizer extends TextTokenizer {
         case EOF:
           this.error('eof-in-script-html-comment-like-text');
           this.emitAccumulatedCharacters();
-          this.emit(EOF_TOKEN);
-          return 'eof';
+          return this.eof();
         case NUL:
           this.error('unexpected-null-character');
           code = REPLACEMENT_CHAR;
@@ -229,8 +225,7 @@ export abstract class ScriptDataTokenizer extends TextTokenizer {
         case EOF:
           this.error('eof-in-script-html-comment-like-text');
           this.emitAccumulatedCharacters();
-          this.emit(EOF_TOKEN);
-          return 'eof';
+          return this.eof();
         case NUL:
           this.error('unexpected-null-character');
           code = REPLACEMENT_CHAR;
@@ -258,8 +253,7 @@ export abstract class ScriptDataTokenizer extends TextTokenizer {
       case EOF:
         this.error('eof-in-script-html-comment-like-text');
         this.emitAccumulatedCharacters();
-        this.emit(EOF_TOKEN);
-        return 'eof';
+        return this.eof();
       default:
         buffer.append(code);
         return 'scriptDataDoubleEscaped';
@@ -287,8 +281,7 @@ export abstract class ScriptDataTokenizer extends TextTokenizer {
         case EOF:
           this.error('eof-in-script-html-comment-like-text');
           this.emitAccumulatedCharacters();
-          this.emit(EOF_TOKEN);
-          return 'eof';
+          return this.eof();
         default:
           buffer.append(code);
           return 'scriptDataDoubleEscaped';

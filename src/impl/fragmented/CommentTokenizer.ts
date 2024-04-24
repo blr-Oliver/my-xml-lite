@@ -1,5 +1,4 @@
 import {EOF, EXCLAMATION, GT, HYPHEN, LT, NUL, REPLACEMENT_CHAR} from '../../common/code-points';
-import {EOF_TOKEN} from '../tokens';
 import {BaseTokenizer} from './BaseTokenizer';
 import {State} from './states';
 
@@ -28,8 +27,7 @@ export abstract class CommentTokenizer extends BaseTokenizer {
       case EOF:
         this.error('eof-in-comment');
         this.emitCurrentComment();
-        this.emit(EOF_TOKEN);
-        return 'eof';
+        return this.eof();
       default:
         this.env.buffer.append(HYPHEN);
         return this.comment(code);
@@ -48,8 +46,7 @@ export abstract class CommentTokenizer extends BaseTokenizer {
         case EOF:
           this.error('eof-in-comment');
           this.emitCurrentComment();
-          this.emit(EOF_TOKEN);
-          return 'eof';
+          return this.eof();
         case NUL:
           this.error('unexpected-null-character');
           code = REPLACEMENT_CHAR;
@@ -104,8 +101,7 @@ export abstract class CommentTokenizer extends BaseTokenizer {
       case EOF:
         this.error('eof-in-comment');
         this.emitCurrentComment();
-        this.emit(EOF_TOKEN);
-        return 'eof';
+        return this.eof();
       default:
         this.env.buffer.append(HYPHEN);
         return this.comment(code);
@@ -124,8 +120,7 @@ export abstract class CommentTokenizer extends BaseTokenizer {
         case EOF:
           this.error('eof-in-comment');
           this.emitCurrentComment();
-          this.emit(EOF_TOKEN);
-          return 'eof';
+          return this.eof();
         case HYPHEN:
           buffer.append(code);
           code = this.nextCode();
@@ -158,8 +153,7 @@ export abstract class CommentTokenizer extends BaseTokenizer {
       case EOF:
         this.error('eof-in-comment');
         this.emitCurrentComment();
-        this.emit(EOF_TOKEN);
-        return 'eof';
+        return this.eof();
       default:
         position = buffer.position;
         data[position++] = HYPHEN;
@@ -179,8 +173,7 @@ export abstract class CommentTokenizer extends BaseTokenizer {
           return 'data';
         case EOF:
           this.emitCurrentComment();
-          this.emit(EOF_TOKEN);
-          return 'eof';
+          return this.eof();
         case NUL:
           this.error('unexpected-null-character');
           code = REPLACEMENT_CHAR;

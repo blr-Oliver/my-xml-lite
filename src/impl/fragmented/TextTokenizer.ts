@@ -14,7 +14,6 @@ import {
   SPACE,
   TAB
 } from '../../common/code-points';
-import {EOF_TOKEN} from '../tokens';
 import {BaseTokenizer} from './BaseTokenizer';
 import {State} from './states';
 
@@ -28,8 +27,7 @@ export abstract class TextTokenizer extends BaseTokenizer {
           return ltState;
         case EOF:
           this.emitAccumulatedCharacters();
-          this.emit(EOF_TOKEN);
-          return 'eof';
+          return this.eof();
         case NUL:
           this.error('unexpected-null-character');
           code = REPLACEMENT_CHAR;
@@ -53,8 +51,7 @@ export abstract class TextTokenizer extends BaseTokenizer {
           return ltState;
         case EOF:
           this.emitAccumulatedCharacters();
-          this.emit(EOF_TOKEN);
-          return 'eof';
+          return this.eof();
         case NUL:
           this.error('unexpected-null-character');
           code = REPLACEMENT_CHAR;

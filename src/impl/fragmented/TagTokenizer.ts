@@ -18,12 +18,10 @@ import {
   SPACE,
   TAB
 } from '../../common/code-points';
-import {EOF_TOKEN} from '../tokens';
 import {BaseTokenizer} from './BaseTokenizer';
 import {State} from './states';
 
 export abstract class TagTokenizer extends BaseTokenizer {
-
   tagOpen(code: number): State {
     const buffer = this.env.buffer;
     switch (code) {
@@ -40,8 +38,7 @@ export abstract class TagTokenizer extends BaseTokenizer {
         buffer.append(LT);
         this.emitAccumulatedCharacters();
         this.error('eof-before-tag-name');
-        this.emit(EOF_TOKEN);
-        return 'eof';
+        return this.eof();
       default:
         if (isAsciiAlpha(code)) {
           this.emitAccumulatedCharacters();
@@ -66,8 +63,7 @@ export abstract class TagTokenizer extends BaseTokenizer {
         buffer.append(SOLIDUS);
         this.emitAccumulatedCharacters();
         this.error('eof-before-tag-name');
-        this.emit(EOF_TOKEN);
-        return 'eof';
+        return this.eof();
       default:
         if (isAsciiAlpha(code)) {
           this.emitAccumulatedCharacters();
@@ -100,8 +96,7 @@ export abstract class TagTokenizer extends BaseTokenizer {
           return 'data';
         case EOF:
           this.error('eof-in-tag');
-          this.emit(EOF_TOKEN);
-          return 'eof';
+          return this.eof();
         case NUL:
           this.error('unexpected-null-character');
           code = REPLACEMENT_CHAR;
@@ -188,8 +183,7 @@ export abstract class TagTokenizer extends BaseTokenizer {
           return 'selfClosingStartTag';
         case EOF:
           this.error('eof-in-tag');
-          this.emit(EOF_TOKEN);
-          return 'eof';
+          return this.eof();
         default:
           this.startNewAttribute();
           return this.attributeName(code);
@@ -241,8 +235,7 @@ export abstract class TagTokenizer extends BaseTokenizer {
           return 'characterReference';
         case EOF:
           this.error('eof-in-tag');
-          this.emit(EOF_TOKEN);
-          return 'eof';
+          return this.eof();
         case NUL:
           this.error('unexpected-null-character');
           code = REPLACEMENT_CHAR;
@@ -279,8 +272,7 @@ export abstract class TagTokenizer extends BaseTokenizer {
           break;
         case EOF:
           this.error('eof-in-tag');
-          this.emit(EOF_TOKEN);
-          return 'eof';
+          return this.eof();
         case DOUBLE_QUOTE:
         case SINGLE_QUOTE:
         case LT:
@@ -308,8 +300,7 @@ export abstract class TagTokenizer extends BaseTokenizer {
         return 'data';
       case EOF:
         this.error('eof-in-tag');
-        this.emit(EOF_TOKEN);
-        return 'eof';
+        return this.eof();
       default:
         this.error('missing-whitespace-between-attributes');
         return this.beforeAttributeName(code);
@@ -324,8 +315,7 @@ export abstract class TagTokenizer extends BaseTokenizer {
         return 'data';
       case EOF:
         this.error('eof-in-tag');
-        this.emit(EOF_TOKEN);
-        return 'eof';
+        return this.eof();
       default:
         this.error('unexpected-solidus-in-tag');
         return this.beforeAttributeName(code);

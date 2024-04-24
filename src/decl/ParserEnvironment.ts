@@ -12,5 +12,5 @@ export interface ParserEnvironment {
 }
 
 export interface TokenSink {
-  emit(token: Token): void;
+  accept(token: Token): void;
 }

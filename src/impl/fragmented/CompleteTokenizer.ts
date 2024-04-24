@@ -1,5 +1,4 @@
 import {AMPERSAND, CDATA, DOCTYPE, EOF, HYPHEN, LT, NUL, OPEN_SQUARE_BRACKET, REPLACEMENT_CHAR, TWO_HYPHENS} from '../../common/code-points';
-import {EOF_TOKEN} from '../tokens';
 import {BaseTokenizer} from './BaseTokenizer';
 import {State} from './states';
 
@@ -16,8 +15,7 @@ export class CompleteTokenizer extends BaseTokenizer {
           return 'tagOpen';
         case EOF:
           this.emitAccumulatedCharacters();
-          this.emit(EOF_TOKEN);
-          return 'eof';
+          return this.eof();
         case NUL:
           this.error('unexpected-null-character');
         default:
@@ -34,8 +32,7 @@ export class CompleteTokenizer extends BaseTokenizer {
       switch (code) {
         case EOF:
           this.emitAccumulatedCharacters();
-          this.emit(EOF_TOKEN);
-          return 'eof';
+          return this.eof();
         case NUL:
           this.error('unexpected-null-character');
           code = REPLACEMENT_CHAR;
