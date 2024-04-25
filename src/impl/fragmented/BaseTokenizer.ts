@@ -20,7 +20,7 @@ export abstract class BaseTokenizer {
     while (this.active) {
       code = this.nextCode();
       if (code === EOC) break;
-      this.state = this.callState(this.state, code);
+      this.state = this.execState(this.state, code);
       this.commitTokens();
     }
   }
@@ -39,6 +39,7 @@ export abstract class BaseTokenizer {
   }
 
   protected error(name: string) {
+    this.env.errors.push(name);
   }
   protected emit(token: Token) {
     this.tokenQueue.push(token);

@@ -99,6 +99,8 @@ export abstract class CommentTokenizer extends BaseTokenizer {
       case HYPHEN:
         return 'commentEnd';
       case EOF:
+        // by the spec extra dash is NOT appended here
+        // so unfinished comments ending with single dash do NOT include that dash in data
         this.error('eof-in-comment');
         this.emitCurrentComment();
         return this.eof();

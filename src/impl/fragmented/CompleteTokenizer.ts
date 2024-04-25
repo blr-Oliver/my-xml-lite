@@ -48,7 +48,7 @@ export class CompleteTokenizer extends BaseTokenizer {
     // TODO deal with reconsuming the buffer when sequence fails
     switch (code) {
       case HYPHEN:
-        return this.matchSequence(code, TWO_HYPHENS, false, 'comment', 'bogusComment');
+        return this.matchSequence(code, TWO_HYPHENS, false, 'commentStart', 'bogusComment');
       case 0x44: // D
       case 0x64: // d
         return this.matchSequence(code, DOCTYPE, true, 'doctype', 'bogusComment');
