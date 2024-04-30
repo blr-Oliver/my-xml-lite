@@ -18,6 +18,7 @@ import {BaseTokenizer} from './BaseTokenizer';
 import {State} from './states';
 
 export abstract class TextTokenizer extends BaseTokenizer {
+  protected tagStartMark!: number;
 
   protected textDataNoRefs(code: number, ltState: State): State {
     const buffer = this.env.buffer;
@@ -80,37 +81,36 @@ export abstract class TextTokenizer extends BaseTokenizer {
     }
   }
 
-  protected textDataEndTagOpen(code: number, tagNameState: State, dataState: State): State {
+  protected textDataEndTagOpen(code: number, tagNameState: State, fallbackState: State): State {
     const buffer = this.env.buffer;
     if (isAsciiAlpha(code)) {
-      this.emitAccumulatedCharacters();
+      this.tagStartMark = buffer.position;
       buffer.append(LT);
       buffer.append(SOLIDUS);
       return this.callState(tagNameState, code);
     } else {
       buffer.append(LT);
       buffer.append(SOLIDUS);
-      return this.callState(dataState, code);
+      return this.callState(fallbackState, code);
     }
   }
 
-  protected expectAsciiTag(code: number, tag: string, failedState: State): State {
+  protected expectAsciiEndTag(code: number, tag: string, failedState: State): State {
     // TODO instead of tag parameter actually use last open tag
     const buffer = this.env.buffer;
-    const mark = buffer.position;
     while (true) {
       switch (code) {
         case TAB:
         case LF:
         case FF:
         case SPACE:
-          if (this.startTagIfMatches(tag, false, mark)) return 'beforeAttributeName';
+          if (this.createEndTagIfMatches(tag, false)) return 'beforeAttributeName';
           else return this.callState(failedState, code);
         case SOLIDUS:
-          if (this.startTagIfMatches(tag, false, mark)) return 'selfClosingStartTag';
+          if (this.createEndTagIfMatches(tag, false)) return 'selfClosingStartTag';
           else return this.callState(failedState, code);
         case GT:
-          if (this.startTagIfMatches(tag, false, mark)) return 'data';
+          if (this.createEndTagIfMatches(tag, true)) return 'data';
           else return this.callState(failedState, code);
         default:
           if (isAsciiUpperAlpha(code)) code += 0x20;
@@ -123,14 +123,14 @@ export abstract class TextTokenizer extends BaseTokenizer {
     }
   }
 
-  private startTagIfMatches(expectedTag: string, emitIfMatched: boolean = false, fromPosition: number): boolean {
+  private createEndTagIfMatches(expectedTag: string, emitIfMatched: boolean = false): boolean {
     const buffer = this.env.buffer;
-    const name = buffer.getString(fromPosition);
+    const name = buffer.getString(this.tagStartMark + 2);
     const matches = name === expectedTag;
     if (matches) {
+      buffer.position = this.tagStartMark;
       this.emitAccumulatedCharacters();
       this.startNewTag(name);
-      buffer.clear();
       if (emitIfMatched)
         this.emitCurrentTag();
       return true;

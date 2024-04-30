@@ -15,6 +15,6 @@ export abstract class RawTextTokenizer extends TextTokenizer {
   }
 
   rawtextEndTagName(code: number): State {
-    return this.expectAsciiTag(code, 'noscript', 'rawtext');
+    return this.expectAsciiEndTag(code, 'noscript', 'rawtext');
   }
 }

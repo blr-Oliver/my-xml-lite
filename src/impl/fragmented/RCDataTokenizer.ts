@@ -15,6 +15,6 @@ export abstract class RCDataTokenizer extends TextTokenizer {
   }
 
   rcdataEndTagName(code: number): State {
-    return this.expectAsciiTag(code, 'textarea', 'rcdata');
+    return this.expectAsciiEndTag(code, 'textarea', 'rcdata');
   }
 }

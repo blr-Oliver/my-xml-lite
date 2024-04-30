@@ -65,7 +65,7 @@ export abstract class ScriptDataTokenizer extends TextTokenizer {
   }
 
   scriptDataEndTagName(code: number): State {
-    return this.expectAsciiTag(code, 'script', 'scriptData');
+    return this.expectAsciiEndTag(code, 'script', 'scriptData');
   }
 
   scriptDataEscapeStart(code: number): State {
@@ -170,21 +170,11 @@ export abstract class ScriptDataTokenizer extends TextTokenizer {
   }
 
   scriptDataEscapedEndTagOpen(code: number): State {
-    const buffer = this.env.buffer;
-    if (isAsciiAlpha(code)) {
-      this.emitAccumulatedCharacters();
-      buffer.append(LT);
-      buffer.append(SOLIDUS);
-      return this.scriptDataEscapedEndTagName(code);
-    } else {
-      buffer.append(LT);
-      buffer.append(SOLIDUS);
-      return this.scriptDataEscaped(code);
-    }
+    return this.textDataEndTagOpen(code, 'scriptDataEscapedEndTagName', 'scriptDataEscaped')
   }
 
   scriptDataEscapedEndTagName(code: number): State {
-    return this.expectAsciiTag(code, 'script', 'scriptDataEscaped');
+    return this.expectAsciiEndTag(code, 'script', 'scriptDataEscaped');
   }
 
   scriptDataDoubleEscapeStart(code: number): State {
@@ -220,6 +210,7 @@ export abstract class ScriptDataTokenizer extends TextTokenizer {
           buffer.append(code);
           return 'scriptDataDoubleEscapedDash';
         case LT:
+          this.tagStartMark = buffer.position;
           buffer.append(code);
           return 'scriptDataDoubleEscapedLessThanSign';
         case EOF:
@@ -244,6 +235,7 @@ export abstract class ScriptDataTokenizer extends TextTokenizer {
         buffer.append(code);
         return 'scriptDataDoubleEscapedDashDash';
       case LT:
+        this.tagStartMark = buffer.position;
         buffer.append(code);
         return 'scriptDataDoubleEscapedLessThanSign';
       case NUL:
@@ -269,6 +261,7 @@ export abstract class ScriptDataTokenizer extends TextTokenizer {
           code = this.nextCode();
           break;
         case LT:
+          this.tagStartMark = buffer.position;
           buffer.append(code);
           return 'scriptDataDoubleEscapedLessThanSign';
         case GT:
@@ -293,7 +286,6 @@ export abstract class ScriptDataTokenizer extends TextTokenizer {
     const buffer = this.env.buffer;
     if (code === SOLIDUS) {
       buffer.append(code);
-      this.emitAccumulatedCharacters();
       return 'scriptDataDoubleEscapeEnd';
     } else {
       return this.scriptDataDoubleEscaped(code);
@@ -310,7 +302,7 @@ export abstract class ScriptDataTokenizer extends TextTokenizer {
         case SPACE:
         case SOLIDUS:
         case GT:
-          const name = buffer.getString();
+          const name = buffer.getString(this.tagStartMark + 2);
           buffer.append(code);
           return name === 'script' ? 'scriptDataEscaped' : 'scriptDataDoubleEscaped';
         default:
