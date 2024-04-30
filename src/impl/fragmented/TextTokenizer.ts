@@ -131,6 +131,7 @@ export abstract class TextTokenizer extends BaseTokenizer {
       buffer.position = this.tagStartMark;
       this.emitAccumulatedCharacters();
       this.startNewTag(name);
+      this.currentTag.type = 'endTag';
       if (emitIfMatched)
         this.emitCurrentTag();
       return true;

@@ -1,0 +1,5 @@
+[
+  ["empty", "<script></script>", "", [], true],
+  ["normal content", "<script>A</script>", "A", [], true],
+  ["fake comment", "<script>A<!--B-->C</script>", "A<!--B-->C", [], true]
+]
