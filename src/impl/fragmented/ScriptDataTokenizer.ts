@@ -160,7 +160,7 @@ export abstract class ScriptDataTokenizer extends TextTokenizer {
     if (code === SOLIDUS) {
       return 'scriptDataEscapedEndTagOpen';
     } else if (isAsciiAlpha(code)) {
-      this.emitAccumulatedCharacters();
+      this.tagStartMark = buffer.position;
       buffer.append(LT);
       return this.scriptDataDoubleEscapeStart(code);
     } else {
@@ -187,11 +187,11 @@ export abstract class ScriptDataTokenizer extends TextTokenizer {
         case SPACE:
         case SOLIDUS:
         case GT:
-          const name = buffer.getString(1);
+          const name = buffer.getString(this.tagStartMark + 1);
           buffer.append(code);
           return name === 'script' ? 'scriptDataDoubleEscaped' : 'scriptDataEscaped';
         default:
-          if (isAsciiUpperAlpha(code)) code += 0x20;
+          if (isAsciiUpperAlpha(code)) code += 0x20; // TODO uppercase code should be appended verbatim but checked as lowercase
           if (isAsciiLowerAlpha(code)) {
             buffer.append(code);
             code = this.nextCode();
@@ -306,7 +306,7 @@ export abstract class ScriptDataTokenizer extends TextTokenizer {
           buffer.append(code);
           return name === 'script' ? 'scriptDataEscaped' : 'scriptDataDoubleEscaped';
         default:
-          if (isAsciiUpperAlpha(code)) code += 0x20;
+          if (isAsciiUpperAlpha(code)) code += 0x20;  // TODO uppercase code should be appended verbatim but checked as lowercase
           if (isAsciiLowerAlpha(code)) {
             buffer.append(code);
             code = this.nextCode();

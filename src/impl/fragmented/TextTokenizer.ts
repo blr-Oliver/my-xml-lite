@@ -113,7 +113,7 @@ export abstract class TextTokenizer extends BaseTokenizer {
           if (this.createEndTagIfMatches(tag, true)) return 'data';
           else return this.callState(failedState, code);
         default:
-          if (isAsciiUpperAlpha(code)) code += 0x20;
+          if (isAsciiUpperAlpha(code)) code += 0x20; // TODO uppercase code should be appended verbatim but checked as lowercase
           if (isAsciiLowerAlpha(code)) {
             buffer.append(code);
             code = this.nextCode();
