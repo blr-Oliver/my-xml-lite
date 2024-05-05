@@ -1,22 +1,8 @@
-import {
-  EOF,
-  EXCLAMATION,
-  FF,
-  GT,
-  HYPHEN,
-  isAsciiAlpha,
-  isAsciiLowerAlpha,
-  isAsciiUpperAlpha,
-  LF,
-  LT,
-  NUL,
-  REPLACEMENT_CHAR,
-  SOLIDUS,
-  SPACE,
-  TAB
-} from '../../common/code-points';
+import {EOF, EXCLAMATION, FF, GT, HYPHEN, isAsciiAlpha, LF, LT, NUL, REPLACEMENT_CHAR, SOLIDUS, SPACE, TAB} from '../../common/code-points';
 import {State} from './states';
 import {TextTokenizer} from './TextTokenizer';
+
+const SCRIPT = [0x73, 0x63, 0x72, 0x69, 0x70, 0x74] as const;
 
 // @formatter:off
 /**
@@ -65,7 +51,11 @@ export abstract class ScriptDataTokenizer extends TextTokenizer {
   }
 
   scriptDataEndTagName(code: number): State {
-    return this.expectAsciiEndTag(code, 'script', 'scriptData');
+    return this.matchSequence(code, SCRIPT, true, 'scriptDataEndTagNameMatched', 'scriptData');
+  }
+
+  scriptDataEndTagNameMatched(code: number): State {
+    return this.endTagMatched(code, 'script', 'scriptData');
   }
 
   scriptDataEscapeStart(code: number): State {
@@ -174,31 +164,29 @@ export abstract class ScriptDataTokenizer extends TextTokenizer {
   }
 
   scriptDataEscapedEndTagName(code: number): State {
-    return this.expectAsciiEndTag(code, 'script', 'scriptDataEscaped');
+    return this.matchSequence(code, SCRIPT, true, 'scriptDataEndTagNameMatched', 'scriptDataEscaped');
+  }
+
+  scriptDataEscapedEndTagNameMatched(code: number): State {
+    return this.endTagMatched(code, 'script', 'scriptDataEscaped');
   }
 
   scriptDataDoubleEscapeStart(code: number): State {
-    const buffer = this.env.buffer;
-    while (true) {
-      switch (code) {
-        case TAB:
-        case LF:
-        case FF:
-        case SPACE:
-        case SOLIDUS:
-        case GT:
-          const name = buffer.getString(this.tagStartMark + 1);
-          buffer.append(code);
-          return name === 'script' ? 'scriptDataDoubleEscaped' : 'scriptDataEscaped';
-        default:
-          if (isAsciiUpperAlpha(code)) code += 0x20; // TODO uppercase code should be appended verbatim but checked as lowercase
-          if (isAsciiLowerAlpha(code)) {
-            buffer.append(code);
-            code = this.nextCode();
-          } else {
-            return this.scriptDataEscaped(code);
-          }
-      }
+    return this.matchSequence(code, SCRIPT, true, 'scriptDataDoubleEscapeStartMatched', 'scriptDataEscaped');
+  }
+
+  scriptDataDoubleEscapeStartMatched(code: number): State {
+    switch (code) {
+      case TAB:
+      case LF:
+      case FF:
+      case SPACE:
+      case SOLIDUS:
+      case GT:
+        this.env.buffer.append(code);
+        return 'scriptDataDoubleEscaped';
+      default:
+        return this.scriptDataEscaped(code);
     }
   }
 
@@ -292,28 +280,22 @@ export abstract class ScriptDataTokenizer extends TextTokenizer {
     }
   }
 
-  scriptDataDoubleEscapeEnd(code: number): State {
-    const buffer = this.env.buffer;
-    while (true) {
-      switch (code) {
-        case TAB:
-        case LF:
-        case FF:
-        case SPACE:
-        case SOLIDUS:
-        case GT:
-          const name = buffer.getString(this.tagStartMark + 2);
-          buffer.append(code);
-          return name === 'script' ? 'scriptDataEscaped' : 'scriptDataDoubleEscaped';
-        default:
-          if (isAsciiUpperAlpha(code)) code += 0x20;  // TODO uppercase code should be appended verbatim but checked as lowercase
-          if (isAsciiLowerAlpha(code)) {
-            buffer.append(code);
-            code = this.nextCode();
-          } else {
-            return this.scriptDataDoubleEscaped(code);
-          }
-      }
+  scriptDataDoubleEscapeEnd(code: number) {
+    return this.matchSequence(code, SCRIPT, true, 'scriptDataDoubleEscapeEndMatched', 'scriptDataDoubleEscaped');
+  }
+
+  scriptDataDoubleEscapeEndMatched(code: number): State {
+    switch (code) {
+      case TAB:
+      case LF:
+      case FF:
+      case SPACE:
+      case SOLIDUS:
+      case GT:
+        this.env.buffer.append(code);
+        return 'scriptDataEscaped';
+      default:
+        return this.scriptDataDoubleEscaped(code);
     }
   }
 }

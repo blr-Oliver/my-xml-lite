@@ -1,4 +1,4 @@
-import {isAsciiUpperAlpha} from '../../common/code-points';
+import {EOC, isAsciiUpperAlpha} from '../../common/code-points';
 import {BaseTokenizer} from './BaseTokenizer';
 import {State} from './states';
 
@@ -11,6 +11,7 @@ export class SequenceMatcher extends BaseTokenizer {
   sequenceNegativeState!: State;
 
   matchSequence(code: number, seq: readonly number[], caseInsensitive: boolean, positiveState: State, negativeState: State): State {
+    this.state = 'sequence';
     this.sequenceBufferOffset = this.env.buffer.position;
     this.sequenceData = seq;
     this.sequenceIndex = 0;
@@ -28,6 +29,7 @@ export class SequenceMatcher extends BaseTokenizer {
     const buffer = this.env.buffer;
     const len = this.sequenceData.length;
     while (this.sequenceIndex < len) {
+      if (code === EOC) return 'sequence';
       if (code !== seqData[this.sequenceIndex++])
         return this.callState(this.sequenceNegativeState, code);
       buffer.append(code);
@@ -41,6 +43,7 @@ export class SequenceMatcher extends BaseTokenizer {
     const buffer = this.env.buffer;
     const len = this.sequenceData.length;
     while (this.sequenceIndex < len) {
+      if (code === EOC) return 'sequence';
       let ciCode = code;
       if (isAsciiUpperAlpha(ciCode)) ciCode += 0x20;
       if (ciCode !== seqData[this.sequenceIndex++])

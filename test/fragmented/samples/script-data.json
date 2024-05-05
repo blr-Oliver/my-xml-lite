@@ -1,6 +1,7 @@
 [
   ["empty", "<script></script>", "", [], true],
   ["normal content", "<script>A</script>", "A", [], true],
+  ["ci closed tag", "<script>A</ScRiPt>", "A", [], true],
   ["NUL in content", "<script>\u0000</script>", "\uFFFD", ["unexpected-null-character"], true],
   ["fake comment", "<script>A<!--B-->C</script>", "A<!--B-->C", [], true],
   ["fake comment -", "<script>A<!----->B</script>", "A<!----->B", [], true],

@@ -16,6 +16,7 @@ export type State =
     'scriptDataLessThanSign' |
     'scriptDataEndTagOpen' |
     'scriptDataEndTagName' |
+    'scriptDataEndTagNameMatched' |
     'scriptDataEscapeStart' |
     'scriptDataEscapeStartDash' |
     'scriptDataEscaped' |
@@ -24,12 +25,15 @@ export type State =
     'scriptDataEscapedLessThanSign' |
     'scriptDataEscapedEndTagOpen' |
     'scriptDataEscapedEndTagName' |
+    'scriptDataEscapedEndTagNameMatched' |
     'scriptDataDoubleEscapeStart' |
+    'scriptDataDoubleEscapeStartMatched' |
     'scriptDataDoubleEscaped' |
     'scriptDataDoubleEscapedDash' |
     'scriptDataDoubleEscapedDashDash' |
     'scriptDataDoubleEscapedLessThanSign' |
     'scriptDataDoubleEscapeEnd' |
+    'scriptDataDoubleEscapeEndMatched' |
     'beforeAttributeName' |
     'attributeName' |
     'afterAttributeName' |

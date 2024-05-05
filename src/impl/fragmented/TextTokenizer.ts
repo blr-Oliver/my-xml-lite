@@ -128,14 +128,38 @@ export abstract class TextTokenizer extends BaseTokenizer {
     const name = buffer.getString(this.tagStartMark + 2);
     const matches = name === expectedTag;
     if (matches) {
-      buffer.position = this.tagStartMark;
-      this.emitAccumulatedCharacters();
-      this.startNewTag(name);
-      this.currentTag.type = 'endTag';
-      if (emitIfMatched)
-        this.emitCurrentTag();
+      this.createEndTag(expectedTag, emitIfMatched);
       return true;
     }
     return false;
+  }
+
+  protected endTagMatched(code: number, tag: string, failedState: State): State {
+    switch (code) {
+      case TAB:
+      case LF:
+      case FF:
+      case SPACE:
+        this.createEndTag(tag, false);
+        return 'beforeAttributeName';
+      case SOLIDUS:
+        this.createEndTag(tag, false);
+        return 'selfClosingStartTag';
+      case GT:
+        this.createEndTag(tag, true);
+        return 'data';
+      default:
+        return this.callState(failedState, code);
+    }
+  }
+
+  protected createEndTag(tag: string, emitIt: boolean): void {
+    const buffer = this.env.buffer;
+    buffer.position = this.tagStartMark;
+    this.emitAccumulatedCharacters();
+    this.startNewTag(tag);
+    this.currentTag.type = 'endTag';
+    if (emitIt)
+      this.emitCurrentTag();
   }
 }

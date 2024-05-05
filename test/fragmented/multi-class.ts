@@ -6,6 +6,7 @@ export function combine<A, B>(name: string, a: Class<A>, b: Class<B>): Class<A &
 export function combine<A, B, C>(name: string, a: Class<A>, b: Class<B>, c: Class<C>): Class<A & B & C>;
 export function combine<A, B, C, D>(name: string, a: Class<A>, b: Class<B>, c: Class<C>, d: Class<D>): Class<A & B & C & D>;
 export function combine<A, B, C, D, E>(name: string, a: Class<A>, b: Class<B>, c: Class<C>, d: Class<D>, e: Class<E>): Class<A & B & C & D & E>;
+export function combine<A, B, C, D, E, F>(name: string, a: Class<A>, b: Class<B>, c: Class<C>, d: Class<D>, e: Class<E>, f: Class<F>): Class<A & B & C & D & E & F>;
 export function combine(name: string, ...classes: Class<unknown>[]): Class<unknown> {
   const result = {
     [name]: function () {
