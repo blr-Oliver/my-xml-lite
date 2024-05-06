@@ -3,7 +3,7 @@ import {BaseTokenizer} from './BaseTokenizer';
 import {State} from './states';
 
 export abstract class TextTokenizer extends BaseTokenizer {
-  protected tagStartMark!: number;
+  protected textEndMark!: number;
 
   protected textDataNoRefs(code: number, ltState: State): State {
     const buffer = this.env.buffer;
@@ -69,7 +69,7 @@ export abstract class TextTokenizer extends BaseTokenizer {
   protected textDataEndTagOpen(code: number, tagNameState: State, fallbackState: State): State {
     const buffer = this.env.buffer;
     if (isAsciiAlpha(code)) {
-      this.tagStartMark = buffer.position;
+      this.textEndMark = buffer.position;
       buffer.append(LT);
       buffer.append(SOLIDUS);
       return this.callState(tagNameState, code);
@@ -102,7 +102,7 @@ export abstract class TextTokenizer extends BaseTokenizer {
 
   private createEndTag(tag: string): void {
     const buffer = this.env.buffer;
-    buffer.position = this.tagStartMark;
+    buffer.position = this.textEndMark;
     this.emitAccumulatedCharacters();
     this.startNewTag(tag);
     this.currentTag.type = 'endTag';

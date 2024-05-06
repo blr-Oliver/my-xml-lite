@@ -150,7 +150,6 @@ export abstract class ScriptDataTokenizer extends TextTokenizer {
     if (code === SOLIDUS) {
       return 'scriptDataEscapedEndTagOpen';
     } else if (isAsciiAlpha(code)) {
-      this.tagStartMark = buffer.position;
       buffer.append(LT);
       return this.scriptDataDoubleEscapeStart(code);
     } else {
@@ -198,7 +197,6 @@ export abstract class ScriptDataTokenizer extends TextTokenizer {
           buffer.append(code);
           return 'scriptDataDoubleEscapedDash';
         case LT:
-          this.tagStartMark = buffer.position;
           buffer.append(code);
           return 'scriptDataDoubleEscapedLessThanSign';
         case EOF:
@@ -223,7 +221,6 @@ export abstract class ScriptDataTokenizer extends TextTokenizer {
         buffer.append(code);
         return 'scriptDataDoubleEscapedDashDash';
       case LT:
-        this.tagStartMark = buffer.position;
         buffer.append(code);
         return 'scriptDataDoubleEscapedLessThanSign';
       case NUL:
@@ -249,7 +246,6 @@ export abstract class ScriptDataTokenizer extends TextTokenizer {
           code = this.nextCode();
           break;
         case LT:
-          this.tagStartMark = buffer.position;
           buffer.append(code);
           return 'scriptDataDoubleEscapedLessThanSign';
         case GT:
