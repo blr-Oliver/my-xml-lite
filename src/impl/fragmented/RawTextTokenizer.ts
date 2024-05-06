@@ -1,3 +1,4 @@
+import {stringToArray} from '../../common/code-points';
 import {State} from './states';
 import {TextTokenizer} from './TextTokenizer';
 
@@ -15,6 +16,10 @@ export abstract class RawTextTokenizer extends TextTokenizer {
   }
 
   rawtextEndTagName(code: number): State {
-    return this.expectAsciiEndTag(code, 'noscript', 'rawtext');
+    return this.matchSequence(code, stringToArray('noscript'), true, 'rawtextEndTagNameMatched', 'rawtext');
+  }
+
+  rawtextEndTagNameMatched(code: number): State {
+    return this.textDataEndTagMatched(code, 'noscript', 'rawtext')
   }
 }

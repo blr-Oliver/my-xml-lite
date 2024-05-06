@@ -1,19 +1,4 @@
-import {
-  AMPERSAND,
-  EOF,
-  FF,
-  GT,
-  isAsciiAlpha,
-  isAsciiLowerAlpha,
-  isAsciiUpperAlpha,
-  LF,
-  LT,
-  NUL,
-  REPLACEMENT_CHAR,
-  SOLIDUS,
-  SPACE,
-  TAB
-} from '../../common/code-points';
+import {AMPERSAND, EOF, FF, GT, isAsciiAlpha, LF, LT, NUL, REPLACEMENT_CHAR, SOLIDUS, SPACE, TAB} from '../../common/code-points';
 import {BaseTokenizer} from './BaseTokenizer';
 import {State} from './states';
 
@@ -95,71 +80,31 @@ export abstract class TextTokenizer extends BaseTokenizer {
     }
   }
 
-  protected expectAsciiEndTag(code: number, tag: string, failedState: State): State {
-    // TODO instead of tag parameter actually use last open tag
-    const buffer = this.env.buffer;
-    while (true) {
-      switch (code) {
-        case TAB:
-        case LF:
-        case FF:
-        case SPACE:
-          if (this.createEndTagIfMatches(tag, false)) return 'beforeAttributeName';
-          else return this.callState(failedState, code);
-        case SOLIDUS:
-          if (this.createEndTagIfMatches(tag, false)) return 'selfClosingStartTag';
-          else return this.callState(failedState, code);
-        case GT:
-          if (this.createEndTagIfMatches(tag, true)) return 'data';
-          else return this.callState(failedState, code);
-        default:
-          if (isAsciiUpperAlpha(code)) code += 0x20; // TODO uppercase code should be appended verbatim but checked as lowercase
-          if (isAsciiLowerAlpha(code)) {
-            buffer.append(code);
-            code = this.nextCode();
-          } else
-            return this.callState(failedState, code);
-      }
-    }
-  }
-
-  private createEndTagIfMatches(expectedTag: string, emitIfMatched: boolean = false): boolean {
-    const buffer = this.env.buffer;
-    const name = buffer.getString(this.tagStartMark + 2);
-    const matches = name === expectedTag;
-    if (matches) {
-      this.createEndTag(expectedTag, emitIfMatched);
-      return true;
-    }
-    return false;
-  }
-
-  protected endTagMatched(code: number, tag: string, failedState: State): State {
+  protected textDataEndTagMatched(code: number, tag: string, failedState: State): State {
     switch (code) {
       case TAB:
       case LF:
       case FF:
       case SPACE:
-        this.createEndTag(tag, false);
+        this.createEndTag(tag);
         return 'beforeAttributeName';
       case SOLIDUS:
-        this.createEndTag(tag, false);
+        this.createEndTag(tag);
         return 'selfClosingStartTag';
       case GT:
-        this.createEndTag(tag, true);
+        this.createEndTag(tag);
+        this.emitCurrentTag();
         return 'data';
       default:
         return this.callState(failedState, code);
     }
   }
 
-  protected createEndTag(tag: string, emitIt: boolean): void {
+  private createEndTag(tag: string): void {
     const buffer = this.env.buffer;
     buffer.position = this.tagStartMark;
     this.emitAccumulatedCharacters();
     this.startNewTag(tag);
     this.currentTag.type = 'endTag';
-    if (emitIt)
-      this.emitCurrentTag();
   }
 }

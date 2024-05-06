@@ -55,7 +55,7 @@ export abstract class ScriptDataTokenizer extends TextTokenizer {
   }
 
   scriptDataEndTagNameMatched(code: number): State {
-    return this.endTagMatched(code, 'script', 'scriptData');
+    return this.textDataEndTagMatched(code, 'script', 'scriptData');
   }
 
   scriptDataEscapeStart(code: number): State {
@@ -168,7 +168,7 @@ export abstract class ScriptDataTokenizer extends TextTokenizer {
   }
 
   scriptDataEscapedEndTagNameMatched(code: number): State {
-    return this.endTagMatched(code, 'script', 'scriptDataEscaped');
+    return this.textDataEndTagMatched(code, 'script', 'scriptDataEscaped');
   }
 
   scriptDataDoubleEscapeStart(code: number): State {

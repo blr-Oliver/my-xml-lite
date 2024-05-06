@@ -10,9 +10,11 @@ export type State =
     'rcdataLessThanSign' |
     'rcdataEndTagOpen' |
     'rcdataEndTagName' |
+    'rcdataEndTagNameMatched' |
     'rawtextLessThanSign' |
     'rawtextEndTagOpen' |
     'rawtextEndTagName' |
+    'rawtextEndTagNameMatched' |
     'scriptDataLessThanSign' |
     'scriptDataEndTagOpen' |
     'scriptDataEndTagName' |

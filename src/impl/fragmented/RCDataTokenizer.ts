@@ -1,3 +1,4 @@
+import {stringToArray} from '../../common/code-points';
 import {State} from './states';
 import {TextTokenizer} from './TextTokenizer';
 
@@ -15,6 +16,10 @@ export abstract class RCDataTokenizer extends TextTokenizer {
   }
 
   rcdataEndTagName(code: number): State {
-    return this.expectAsciiEndTag(code, 'textarea', 'rcdata');
+    return this.matchSequence(code, stringToArray('textarea'), true, 'rcdataEndTagNameMatched', 'rcdata');
+  }
+
+  rcdataEndTagNameMatched(code: number): State {
+    return this.textDataEndTagMatched(code, 'textarea', 'rcdata');
   }
 }

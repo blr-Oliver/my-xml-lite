@@ -56,6 +56,18 @@ export abstract class BaseTokenizer {
   protected emitCurrentTag() {
     throw new TypeError('Malformed inheritance');
   }
+  /**
+   Initiates "sequence matching" mode. In this mode input is checked against provided sequence, verbatim or case-insensitive.
+   Sequence mode either completes "positively" when input completely matches the expected sequence or exits "negatively" when first difference occurs.
+   In both outcomes all processed characters are appended to the accumulating buffer verbatim (even in case-insensitive mode).
+   During this mode the parser state is "sequence" and several fields track information about the process.
+
+   @param code current input character
+   @param seq the sequence to check input against
+   @param caseInsensitive match ASCII upper alpha characters from input as they were lower alpha
+   @param positiveState state to continue when the sequence is confirmed; first character in that state will be the character immediately AFTER the sequence
+   @param negativeState state to continue when the sequence is failed; first character in that state will be the first character that differs
+   */
   protected matchSequence(code: number, seq: readonly number[], caseInsensitive: boolean, positiveState: State, negativeState: State): State {
     throw new TypeError('Malformed inheritance');
   }
