@@ -42,7 +42,7 @@ export abstract class ScriptDataTokenizer extends TextTokenizer {
         return 'scriptDataEscapeStart';
       default:
         buffer.append(LT);
-        return this.scriptData(code);
+        return this.callState('scriptData', code);
     }
   }
 
@@ -63,7 +63,7 @@ export abstract class ScriptDataTokenizer extends TextTokenizer {
       this.env.buffer.append(code);
       return 'scriptDataEscapeStartDash';
     } else
-      return this.scriptData(code);
+      return this.callState('scriptData', code);
   }
 
   scriptDataEscapeStartDash(code: number): State {
@@ -71,7 +71,7 @@ export abstract class ScriptDataTokenizer extends TextTokenizer {
       this.env.buffer.append(code);
       return 'scriptDataEscapedDashDash';
     } else
-      return this.scriptData(code);
+      return this.callState('scriptData', code);
   }
 
   scriptDataEscaped(code: number): State {
@@ -154,7 +154,7 @@ export abstract class ScriptDataTokenizer extends TextTokenizer {
       return this.scriptDataDoubleEscapeStart(code);
     } else {
       buffer.append(LT);
-      return this.scriptDataEscaped(code);
+      return this.callState('scriptDataEscaped', code);
     }
   }
 
@@ -185,7 +185,7 @@ export abstract class ScriptDataTokenizer extends TextTokenizer {
         this.env.buffer.append(code);
         return 'scriptDataDoubleEscaped';
       default:
-        return this.scriptDataEscaped(code);
+        return this.callState('scriptDataEscaped', code);
     }
   }
 
@@ -272,7 +272,7 @@ export abstract class ScriptDataTokenizer extends TextTokenizer {
       buffer.append(code);
       return 'scriptDataDoubleEscapeEnd';
     } else {
-      return this.scriptDataDoubleEscaped(code);
+      return this.callState('scriptDataDoubleEscaped', code);
     }
   }
 
@@ -291,7 +291,7 @@ export abstract class ScriptDataTokenizer extends TextTokenizer {
         this.env.buffer.append(code);
         return 'scriptDataEscaped';
       default:
-        return this.scriptDataDoubleEscaped(code);
+        return this.callState('scriptDataDoubleEscaped', code);
     }
   }
 }

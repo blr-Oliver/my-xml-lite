@@ -57,7 +57,7 @@ export class CompleteTokenizer extends BaseTokenizer {
       default:
         this.emitAccumulatedCharacters();
         this.error('incorrectly-opened-comment');
-        return this.bogusComment(code);
+        return this.callState('bogusComment', code);
     }
   }
 }

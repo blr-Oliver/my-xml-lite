@@ -36,7 +36,7 @@ export class CharacterReferenceTokenizer extends BaseTokenizer {
       buffer.append(code);
       return 'numericCharacterReference';
     } else if (isAsciiAlphaNum(code))
-      return this.numericCharacterReference(code);
+      return this.callState('numericCharacterReference', code);
     else
       return this.callState(this.returnState, code);
   }
@@ -46,7 +46,7 @@ export class CharacterReferenceTokenizer extends BaseTokenizer {
       this.env.buffer.append(code);
       return 'hexadecimalCharacterReferenceStart';
     } else
-      return this.decimalCharacterReferenceStart(code);
+      return this.callState('decimalCharacterReferenceStart', code);
   }
 
   numericCharacterReferenceEnd(): void {
@@ -91,7 +91,7 @@ export class CharacterReferenceTokenizer extends BaseTokenizer {
         return this.callState(this.returnState, code);
       }
     } else
-      return this.ambiguousAmpersand(code);
+      return this.callState('ambiguousAmpersand', code);
   }
 
   hexadecimalCharacterReferenceStart(code: number): State {
@@ -99,7 +99,7 @@ export class CharacterReferenceTokenizer extends BaseTokenizer {
       this.error('absence-of-digits-in-numeric-character-reference');
       return this.callState(this.returnState, code);
     } else
-      return this.hexadecimalCharacterReference(code);
+      return this.callState('hexadecimalCharacterReference', code);
   }
 
   hexadecimalCharacterReference(code: number): State {
@@ -127,7 +127,7 @@ export class CharacterReferenceTokenizer extends BaseTokenizer {
       this.error('absence-of-digits-in-numeric-character-reference');
       return this.callState(this.returnState, code);
     } else
-      return this.decimalCharacterReference(code);
+      return this.callState('decimalCharacterReference', code);
   }
 
   decimalCharacterReference(code: number): State {

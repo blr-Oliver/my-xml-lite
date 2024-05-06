@@ -25,7 +25,7 @@ export abstract class CDataTokenizer extends BaseTokenizer {
       return 'cdataSectionEnd';
     else {
       this.env.buffer.append(CLOSE_SQUARE_BRACKET);
-      return this.cdataSection(code);
+      return this.callState('cdataSection', code);
     }
   }
 
@@ -43,7 +43,7 @@ export abstract class CDataTokenizer extends BaseTokenizer {
         default:
           buffer.append(CLOSE_SQUARE_BRACKET);
           buffer.append(CLOSE_SQUARE_BRACKET);
-          return this.cdataSection(code);
+          return this.callState('cdataSection', code);
       }
     }
   }

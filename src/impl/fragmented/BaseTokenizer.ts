@@ -108,7 +108,7 @@ export abstract class BaseTokenizer {
       } as TextToken);
     }
   }
-
+  // TODO inline this for static transitions
   protected callState(state: State, code: number): State {
     return this.execState(this.state = state, code);
   }

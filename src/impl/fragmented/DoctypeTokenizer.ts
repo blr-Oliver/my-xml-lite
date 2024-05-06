@@ -21,7 +21,7 @@ export abstract class DoctypeTokenizer extends BaseTokenizer {
       default:
         this.error('missing-whitespace-before-doctype-name');
       case GT:
-        return this.beforeDoctypeName(code);
+        return this.callState('beforeDoctypeName', code);
     }
   }
 
@@ -112,7 +112,7 @@ export abstract class DoctypeTokenizer extends BaseTokenizer {
             default:
               this.currentDoctype.forceQuirks = true;
               this.error('invalid-character-sequence-after-doctype-name');
-              return this.bogusDoctype(code);
+              return this.callState('bogusDoctype', code);
           }
       }
     }
@@ -144,7 +144,7 @@ export abstract class DoctypeTokenizer extends BaseTokenizer {
       default:
         this.currentDoctype.forceQuirks = true;
         this.error('missing-quote-before-doctype-public-identifier');
-        return this.bogusDoctype(code);
+        return this.callState('bogusDoctype', code);
     }
   }
 
@@ -171,7 +171,7 @@ export abstract class DoctypeTokenizer extends BaseTokenizer {
         default:
           this.currentDoctype.forceQuirks = true;
           this.error('missing-quote-before-doctype-public-identifier');
-          return this.bogusDoctype(code);
+          return this.callState('bogusDoctype', code);
       }
     }
   }
@@ -234,7 +234,7 @@ export abstract class DoctypeTokenizer extends BaseTokenizer {
       default:
         this.currentDoctype.forceQuirks = true;
         this.error('missing-quote-before-doctype-system-identifier');
-        return this.bogusDoctype(code);
+        return this.callState('bogusDoctype', code);
     }
   }
 
@@ -259,7 +259,7 @@ export abstract class DoctypeTokenizer extends BaseTokenizer {
         default:
           this.currentDoctype.forceQuirks = true;
           this.error('missing-quote-before-doctype-system-identifier');
-          return this.bogusDoctype(code);
+          return this.callState('bogusDoctype', code);
       }
     }
   }
@@ -290,7 +290,7 @@ export abstract class DoctypeTokenizer extends BaseTokenizer {
       default:
         this.currentDoctype.forceQuirks = true;
         this.error('missing-quote-before-doctype-system-identifier');
-        return this.bogusDoctype(code);
+        return this.callState('bogusDoctype', code);
     }
   }
 
@@ -317,7 +317,7 @@ export abstract class DoctypeTokenizer extends BaseTokenizer {
         default:
           this.currentDoctype.forceQuirks = true;
           this.error('missing-quote-before-doctype-system-identifier');
-          return this.bogusDoctype(code);
+          return this.callState('bogusDoctype', code);
       }
     }
   }
@@ -371,7 +371,7 @@ export abstract class DoctypeTokenizer extends BaseTokenizer {
           return this.eofInDoctype();
         default:
           this.error('unexpected-character-after-doctype-system-identifier');
-          return this.bogusDoctype(code);
+          return this.callState('bogusDoctype', code);
       }
     }
   }
@@ -402,6 +402,7 @@ export abstract class DoctypeTokenizer extends BaseTokenizer {
       forceQuirks
     };
   }
+
   private emitCurrentDoctype() {
     this.emit(this.currentDoctype);
     // @ts-ignore

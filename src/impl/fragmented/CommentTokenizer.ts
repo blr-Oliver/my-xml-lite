@@ -12,7 +12,7 @@ export abstract class CommentTokenizer extends BaseTokenizer {
         this.emitCurrentComment();
         return 'data';
       default:
-        return this.comment(code);
+        return this.callState('comment', code);
     }
   }
 
@@ -30,7 +30,7 @@ export abstract class CommentTokenizer extends BaseTokenizer {
         return this.eof();
       default:
         this.env.buffer.append(HYPHEN);
-        return this.comment(code);
+        return this.callState('comment', code);
     }
   }
 
@@ -69,7 +69,7 @@ export abstract class CommentTokenizer extends BaseTokenizer {
           code = this.nextCode();
           break;
         default:
-          return this.comment(code);
+          return this.callState('comment', code);
       }
     }
   }
@@ -78,20 +78,20 @@ export abstract class CommentTokenizer extends BaseTokenizer {
     if (code === HYPHEN)
       return 'commentLessThanSignBangDash';
     else
-      return this.comment(code);
+      return this.callState('comment', code);
   }
 
   commentLessThanSignBangDash(code: number): State {
     if (code === HYPHEN)
       return 'commentLessThanSignBangDashDash';
     else
-      return this.commentEndDash(code);
+      return this.callState('commentEndDash', code);
   }
 
   commentLessThanSignBangDashDash(code: number): State {
     if (code !== GT && code !== EOF)
       this.error('nested-comment');
-    return this.commentEnd(code);
+    return this.callState('commentEnd', code);
   }
 
   commentEndDash(code: number): State {
@@ -106,7 +106,7 @@ export abstract class CommentTokenizer extends BaseTokenizer {
         return this.eof();
       default:
         this.env.buffer.append(HYPHEN);
-        return this.comment(code);
+        return this.callState('comment', code);
     }
   }
 
@@ -130,7 +130,7 @@ export abstract class CommentTokenizer extends BaseTokenizer {
         default:
           buffer.append(HYPHEN);
           buffer.append(HYPHEN);
-          return this.comment(code);
+          return this.callState('comment', code);
       }
     }
   }
@@ -162,7 +162,7 @@ export abstract class CommentTokenizer extends BaseTokenizer {
         data[position++] = HYPHEN;
         data[position++] = EXCLAMATION;
         buffer.position += 3;
-        return this.comment(code);
+        return this.callState('comment', code);
     }
   }
 

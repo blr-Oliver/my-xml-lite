@@ -33,7 +33,7 @@ export abstract class TagTokenizer extends BaseTokenizer {
         this.emitAccumulatedCharacters();
         this.error('unexpected-question-mark-instead-of-tag-name');
         this.startNewComment();
-        return this.bogusComment(code);
+        return this.callState('bogusComment', code);
       case EOF:
         buffer.append(LT);
         this.emitAccumulatedCharacters();
@@ -43,7 +43,7 @@ export abstract class TagTokenizer extends BaseTokenizer {
         if (isAsciiAlpha(code)) {
           this.emitAccumulatedCharacters();
           this.startNewTag();
-          return this.tagName(code);
+          return this.callState('tagName', code);
         }
         this.error('invalid-first-character-of-tag-name');
         buffer.append(LT);
@@ -68,12 +68,12 @@ export abstract class TagTokenizer extends BaseTokenizer {
         if (isAsciiAlpha(code)) {
           this.emitAccumulatedCharacters();
           this.currentTag.type = 'endTag';
-          return this.tagName(code);
+          return this.callState('tagName', code);
         }
         this.emitAccumulatedCharacters();
         this.error('invalid-first-character-of-tag-name');
         this.startNewComment();
-        return this.bogusComment(code);
+        return this.callState('bogusComment', code);
     }
   }
 
@@ -208,7 +208,7 @@ export abstract class TagTokenizer extends BaseTokenizer {
           this.emitCurrentTag();
           return 'data';
         default:
-          return this.attributeValueUnquoted(code);
+          return this.callState('attributeValueUnquoted', code);
       }
     }
   }
@@ -303,7 +303,7 @@ export abstract class TagTokenizer extends BaseTokenizer {
         return this.eof();
       default:
         this.error('missing-whitespace-between-attributes');
-        return this.beforeAttributeName(code);
+        return this.callState('beforeAttributeName', code);
     }
   }
 
@@ -318,7 +318,7 @@ export abstract class TagTokenizer extends BaseTokenizer {
         return this.eof();
       default:
         this.error('unexpected-solidus-in-tag');
-        return this.beforeAttributeName(code);
+        return this.callState('beforeAttributeName', code);
     }
   }
 
