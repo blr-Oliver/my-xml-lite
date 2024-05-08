@@ -7,7 +7,7 @@ import {CommentTokenizer} from '../../src/impl/fragmented/CommentTokenizer';
 import {CompleteTokenizer} from '../../src/impl/fragmented/CompleteTokenizer';
 import {State} from '../../src/impl/fragmented/states';
 import {CommentToken, EOF_TOKEN, Token} from '../../src/impl/tokens';
-import {Class, combine} from './multi-class';
+import {Class, combine} from './common/multi-class';
 import {default as rawTests} from './samples/comment.json';
 
 type TestCase = [string/*name*/, string/*input*/, string/*comment data*/, string[]/*errors*/];
