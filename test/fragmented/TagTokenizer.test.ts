@@ -6,10 +6,11 @@ import {buildIndex, PrefixNode} from '../../src/impl/character-reference/entity-
 import {FixedSizeStringBuilder} from '../../src/impl/FixedSizeStringBuilder';
 import {BaseTokenizer} from '../../src/impl/fragmented/BaseTokenizer';
 import {CharacterReferenceTokenizer} from '../../src/impl/fragmented/CharacterReferenceTokenizer';
+import {CommentTokenizer} from '../../src/impl/fragmented/CommentTokenizer';
 import {CompleteTokenizer} from '../../src/impl/fragmented/CompleteTokenizer';
 import {State} from '../../src/impl/fragmented/states';
 import {TagTokenizer} from '../../src/impl/fragmented/TagTokenizer';
-import {EOF_TOKEN, TagToken, Token} from '../../src/impl/tokens';
+import {CharactersToken, CommentToken, EOF_TOKEN, TagToken, Token} from '../../src/impl/tokens';
 import {Class, combine} from './common/multi-class';
 import {default as rawTests} from './samples/tags.json';
 
@@ -38,6 +39,7 @@ function suite() {
         BaseTokenizer as Class<BaseTokenizer>,
         CharacterReferenceTokenizer as Class<CharacterReferenceTokenizer>,
         TagTokenizer as Class<TagTokenizer>,
+        CommentTokenizer as Class<CommentTokenizer>,
         CompleteTokenizer as Class<CompleteTokenizer>);
 
     class PartialTagTokenizer extends SyntheticTagTokenizer {
@@ -78,15 +80,77 @@ function suite() {
     for (let test of testCases) {
       createTest(test);
     }
+    it('eof before start tag name', () => {
+      processInput('<');
+      expect(parser.state).toStrictEqual('eof');
+      expect(tokenList).toHaveLength(2);
+      expect(tokenList[1]).toBe(EOF_TOKEN);
+      expect(tokenList[0].type).toStrictEqual('characters');
+      expect((tokenList[0] as CharactersToken).data).toStrictEqual('<');
+      expect(errorList).toStrictEqual(['eof-before-tag-name']);
+    });
+
+    it('eof before end tag name', () => {
+      processInput('</');
+      expect(parser.state).toStrictEqual('eof');
+      expect(tokenList).toHaveLength(2);
+      expect(tokenList[1]).toBe(EOF_TOKEN);
+      expect(tokenList[0].type).toStrictEqual('characters');
+      expect((tokenList[0] as CharactersToken).data).toStrictEqual('</');
+      expect(errorList).toStrictEqual(['eof-before-tag-name']);
+    });
+
+    it('missing start tag name', () => {
+      processInput('<>');
+      expect(parser.state).toStrictEqual('eof');
+      expect(tokenList).toHaveLength(2);
+      expect(tokenList[1]).toBe(EOF_TOKEN);
+      expect(tokenList[0].type).toStrictEqual('characters');
+      expect((tokenList[0] as CharactersToken).data).toStrictEqual('<>');
+      expect(errorList).toStrictEqual(['invalid-first-character-of-tag-name']);
+    });
+
+    it('missing end tag name', () => {
+      processInput('</>');
+      expect(parser.state).toStrictEqual('eof');
+      expect(tokenList).toHaveLength(1);
+      expect(tokenList[0]).toBe(EOF_TOKEN);
+      expect(errorList).toStrictEqual(['missing-end-tag-name']);
+    });
+
+    it('invalid start tag name', () => {
+      processInput('< >');
+      expect(parser.state).toStrictEqual('eof');
+      expect(tokenList).toHaveLength(2);
+      expect(tokenList[1]).toBe(EOF_TOKEN);
+      expect(tokenList[0].type).toStrictEqual('characters');
+      expect((tokenList[0] as CharactersToken).data).toStrictEqual('< >');
+      expect(errorList).toStrictEqual(['invalid-first-character-of-tag-name']);
+    });
+
+    it('invalid end tag name', () => {
+      processInput('</ >');
+      expect(parser.state).toStrictEqual('eof');
+      expect(tokenList).toHaveLength(2);
+      expect(tokenList[1]).toBe(EOF_TOKEN);
+      expect(tokenList[0].type).toStrictEqual('comment');
+      expect((tokenList[0] as CommentToken).data).toStrictEqual(' ');
+      expect(errorList).toStrictEqual(['invalid-first-character-of-tag-name']);
+    });
+
   });
+
+  function processInput(input: string) {
+    const newInput = new DirectCharacterSource(new Uint16Array(stringToArray(input)));
+    // @ts-ignore
+    parser.env.input = newInput;
+    parser.proceed();
+  }
 
   function createTest(test: TestCase) {
     const [name, input, expectedTagName, expectedIsStart, expectedSelfClosing, expectedAttributes, expectedErrors, completed] = test;
     it(name, () => {
-      const newInput = new DirectCharacterSource(new Uint16Array(stringToArray(input)));
-      // @ts-ignore
-      parser.env.input = newInput;
-      parser.proceed();
+      processInput(input);
       expect(parser.state).toStrictEqual('eof');
       if (!completed) {
         expect(tokenList).toHaveLength(1);

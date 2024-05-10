@@ -61,5 +61,15 @@
   ["two unquoted attributes by TAB", "<tag first=foo\tsecond=bar>", "tag", true, false, [["first", "foo"], ["second", "bar"]], [], true],
   ["two unquoted attributes by LF", "<tag first=foo\nsecond=bar>", "tag", true, false, [["first", "foo"], ["second", "bar"]], [], true],
   ["two unquoted attributes by FF", "<tag first=foo\fsecond=bar>", "tag", true, false, [["first", "foo"], ["second", "bar"]], [], true],
-  ["orphan /", "<tag first='foo'/second='bar'>", "tag", true, false, [["first", "foo"], ["second", "bar"]], ["unexpected-solidus-in-tag"], true]
+  ["orphan /", "<tag first='foo'/second='bar'>", "tag", true, false, [["first", "foo"], ["second", "bar"]], ["unexpected-solidus-in-tag"], true],
+  ["eof in tag name", "<ta", "", true, false, [], ["eof-in-tag"], false],
+  ["eof after tag name", "<tag ", "", true, false, [], ["eof-in-tag"], false],
+  ["eof in attribute name", "<tag fir", "", true, false, [], ["eof-in-tag"], false],
+  ["eof after attribute name", "<tag first ", "", true, false, [], ["eof-in-tag"], false],
+  ["eof before attribute value", "<tag first= ", "", true, false, [], ["eof-in-tag"], false],
+  ["eof in quoted attribute value", "<tag first='fo", "", true, false, [], ["eof-in-tag"], false],
+  ["eof in unquoted attribute value", "<tag first=fo", "", true, false, [], ["eof-in-tag"], false],
+  ["eof after quoted attribute", "<tag first='foo'", "", true, false, [], ["eof-in-tag"], false],
+  ["eof after unquoted attribute", "<tag first=foo ", "", true, false, [], ["eof-in-tag"], false],
+  ["eof inside />", "<tag /", "", true, false, [], ["eof-in-tag"], false]
 ]
