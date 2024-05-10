@@ -47,7 +47,7 @@ export abstract class TagTokenizer extends BaseTokenizer {
         }
         this.error('invalid-first-character-of-tag-name');
         buffer.append(LT);
-        return this.data(code);
+        return this.callState('data', code);
     }
   }
 
@@ -120,7 +120,7 @@ export abstract class TagTokenizer extends BaseTokenizer {
         case SOLIDUS:
         case GT:
         case EOF:
-          return this.afterAttributeName(code);
+          return this.callState('afterAttributeName', code);
         case EQ:
           this.error('unexpected-equals-sign-before-attribute-name');
           this.startNewAttribute();
@@ -128,7 +128,7 @@ export abstract class TagTokenizer extends BaseTokenizer {
           return 'attributeName';
         default:
           this.startNewAttribute();
-          return this.attributeName(code);
+          return this.callState('attributeName', code);
       }
     }
   }
@@ -148,7 +148,7 @@ export abstract class TagTokenizer extends BaseTokenizer {
         case SOLIDUS:
         case EOF:
           this.currentAttribute.name = buffer.takeString();
-          return this.afterAttributeName(code);
+          return this.callState('afterAttributeName', code);
         case NUL:
           this.error('unexpected-null-character');
           buffer.append(REPLACEMENT_CHAR);
@@ -186,7 +186,7 @@ export abstract class TagTokenizer extends BaseTokenizer {
           return this.eof();
         default:
           this.startNewAttribute();
-          return this.attributeName(code);
+          return this.callState('attributeName', code);
       }
     }
   }
@@ -198,6 +198,7 @@ export abstract class TagTokenizer extends BaseTokenizer {
         case LF:
         case FF:
         case SPACE:
+          code = this.nextCode();
           break;
         case DOUBLE_QUOTE:
           return 'attributeValueDoubleQuoted';

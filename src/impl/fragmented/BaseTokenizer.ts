@@ -47,12 +47,6 @@ export abstract class BaseTokenizer {
   protected nextCode(): number {
     return this.env.input.next();
   }
-  protected bogusComment(code: number): State {
-    throw new TypeError('Malformed inheritance');
-  }
-  protected data(code: number): State {
-    throw new TypeError('Malformed inheritance');
-  }
   protected emitCurrentTag() {
     throw new TypeError('Malformed inheritance');
   }
