@@ -28,6 +28,7 @@ export abstract class TagTokenizer extends BaseTokenizer {
       case EXCLAMATION:
         return 'markupDeclarationOpen';
       case SOLIDUS:
+        this.startNewTag();
         return 'endTagOpen';
       case QUESTION:
         this.emitAccumulatedCharacters();
@@ -54,7 +55,6 @@ export abstract class TagTokenizer extends BaseTokenizer {
   endTagOpen(code: number): State {
     switch (code) {
       case GT:
-        this.emitAccumulatedCharacters();
         this.error('missing-end-tag-name');
         return 'data';
       case EOF:

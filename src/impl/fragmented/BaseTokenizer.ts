@@ -89,7 +89,7 @@ export abstract class BaseTokenizer {
   protected startNewAttribute() {
     this.currentTag.attributes.push(this.currentAttribute = {
       name: '',
-      value: undefined
+      value: null
     });
   }
 

@@ -23,9 +23,11 @@ import {State} from './states';
 export class CharacterReferenceTokenizer extends BaseTokenizer {
   referenceStartMark!: number;
   charCode!: number;
+  refsIndex!: PrefixNode<number[]>;
 
-  constructor(private refsIndex: PrefixNode<number[]>) {
+  constructor(refsIndex: PrefixNode<number[]>) {
     super();
+    this.refsIndex = refsIndex;
   }
 
   characterReference(code: number): State {
@@ -36,7 +38,7 @@ export class CharacterReferenceTokenizer extends BaseTokenizer {
       buffer.append(code);
       return 'numericCharacterReference';
     } else if (isAsciiAlphaNum(code))
-      return this.callState('numericCharacterReference', code);
+      return this.callState('namedCharacterReference', code);
     else
       return this.callState(this.returnState, code);
   }
