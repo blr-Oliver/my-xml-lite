@@ -15,6 +15,8 @@ export abstract class BaseTokenizer {
   currentTag!: TagToken;
   currentAttribute!: Attribute;
 
+  sequenceBufferOffset!: number;
+
   proceed() {
     let code: number = 0;
     while (this.active) {

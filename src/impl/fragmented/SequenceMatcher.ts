@@ -3,7 +3,6 @@ import {BaseTokenizer} from './BaseTokenizer';
 import {State} from './states';
 
 export class SequenceMatcher extends BaseTokenizer {
-  sequenceBufferOffset!: number;
   sequenceData!: readonly number[];
   sequenceIndex!: number;
   sequenceCI!: boolean;

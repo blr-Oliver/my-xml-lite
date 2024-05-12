@@ -38,7 +38,7 @@ export const PUBLIC_ID = stringToArray('PUBLIC');
 export const SYSTEM_ID = stringToArray('SYSTEM');
 
 export const TWO_HYPHENS: readonly number[] = [HYPHEN, HYPHEN] as const;
-export const DOCTYPE: readonly number[] = [0x44, 0x4F, 0x43, 0x54, 0x59, 0x50, 0x45] as const;
+export const DOCTYPE: readonly number[] = [0x64, 0x6F, 0x63, 0x74, 0x79, 0x70, 0x65] as const;
 export const CDATA: readonly number[] = [0x5B, 0x43, 0x44, 0x41, 0x54, 0x41, 0x5B] as const;
 
 export type CharCodePredicate = (code: number) => boolean;

@@ -61,6 +61,7 @@ export type State =
     'beforeDoctypeName' |
     'doctypeName' |
     'afterDoctypeName' |
+    'afterDoctypeNameFailedSequence' |
     'afterDoctypePublicKeyword' |
     'beforeDoctypePublicIdentifier' |
     'doctypePublicIdentifierDoubleQuoted' |

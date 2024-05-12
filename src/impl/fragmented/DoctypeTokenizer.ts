@@ -3,10 +3,16 @@ import {DoctypeToken} from '../tokens';
 import {BaseTokenizer} from './BaseTokenizer';
 import {State} from './states';
 
+const PUBLIC: number[] = [0x70, 0x75, 0x62, 0x6C, 0x69, 0x63] as const;
+const SYSTEM: number[] = [0x73, 0x79, 0x73, 0x74, 0x65, 0x6D] as const;
+
 export abstract class DoctypeTokenizer extends BaseTokenizer {
   private currentDoctype!: DoctypeToken;
 
   doctype(code: number): State {
+    this.env.buffer.position = this.sequenceBufferOffset;
+    this.emitAccumulatedCharacters();
+    this.startNewDoctype();
     switch (code) {
       case TAB:
       case LF:
@@ -14,10 +20,7 @@ export abstract class DoctypeTokenizer extends BaseTokenizer {
       case SPACE:
         return 'beforeDoctypeName';
       case EOF:
-        this.startNewDoctype(true);
-        this.error('eof-in-doctype');
-        this.emitCurrentDoctype();
-        return this.eof();
+        return this.eofInDoctype();
       default:
         this.error('missing-whitespace-before-doctype-name');
       case GT:
@@ -37,19 +40,15 @@ export abstract class DoctypeTokenizer extends BaseTokenizer {
           break;
         case GT:
           this.error('missing-doctype-name');
-          this.startNewDoctype(true);
+          this.currentDoctype.forceQuirks = true;
           this.emitCurrentDoctype();
           return 'data';
         case EOF:
-          this.error('eof-in-doctype');
-          this.startNewDoctype(true);
-          this.emitCurrentDoctype();
-          return this.eof();
+          return this.eofInDoctype();
         case NUL:
           this.error('unexpected-null-character');
           code = REPLACEMENT_CHAR;
         default:
-          this.startNewDoctype();
           if (isAsciiUpperAlpha(code)) code += 0x20;
           buffer.append(code);
           return 'doctypeName';
@@ -98,27 +97,28 @@ export abstract class DoctypeTokenizer extends BaseTokenizer {
           this.emitCurrentDoctype();
           return 'data';
         case EOF:
-          this.error('eof-in-doctype');
-          this.emitCurrentDoctype();
-          return this.eof();
+          return this.eofInDoctype();
+        case 0x50: // P
+        case 0x70: // p
+          return this.matchSequence(code, PUBLIC, true, 'afterDoctypePublicKeyword', 'afterDoctypeNameFailedSequence');
+        case 0x53: // S
+        case 0x73: // s
+          return this.matchSequence(code, SYSTEM, true, 'afterDoctypeSystemKeyword', 'afterDoctypeNameFailedSequence');
         default:
-          // TODO make possible to check for sequence
-          let sequence: string = '';
-          switch (sequence) {
-            case 'public':
-              return 'afterDoctypePublicKeyword';
-            case 'system':
-              return 'afterDoctypeSystemKeyword';
-            default:
-              this.currentDoctype.forceQuirks = true;
-              this.error('invalid-character-sequence-after-doctype-name');
-              return this.callState('bogusDoctype', code);
-          }
+          return this.callState('afterDoctypeNameFailedSequence', code);
       }
     }
   }
 
+  afterDoctypeNameFailedSequence(code: number): State {
+    this.env.buffer.position = this.sequenceBufferOffset;
+    this.currentDoctype.forceQuirks = true;
+    this.error('invalid-character-sequence-after-doctype-name');
+    return this.callState('bogusDoctype', code);
+  }
+
   afterDoctypePublicKeyword(code: number): State {
+    this.env.buffer.position = this.sequenceBufferOffset;
     switch (code) {
       case TAB:
       case LF:
@@ -137,10 +137,7 @@ export abstract class DoctypeTokenizer extends BaseTokenizer {
         this.emitCurrentDoctype();
         return 'data';
       case EOF:
-        this.currentDoctype.forceQuirks = true;
-        this.error('eof-in-doctype');
-        this.emitCurrentDoctype();
-        return this.eof();
+        return this.eofInDoctype();
       default:
         this.currentDoctype.forceQuirks = true;
         this.error('missing-quote-before-doctype-public-identifier');
@@ -227,10 +224,7 @@ export abstract class DoctypeTokenizer extends BaseTokenizer {
         this.error('missing-whitespace-between-doctype-public-and-system-identifiers');
         return 'doctypeSystemIdentifierSingleQuoted';
       case EOF:
-        this.currentDoctype.forceQuirks = true;
-        this.error('eof-in-doctype');
-        this.emitCurrentDoctype();
-        return this.eof();
+        return this.eofInDoctype();
       default:
         this.currentDoctype.forceQuirks = true;
         this.error('missing-quote-before-doctype-system-identifier');
@@ -265,6 +259,7 @@ export abstract class DoctypeTokenizer extends BaseTokenizer {
   }
 
   afterDoctypeSystemKeyword(code: number): State {
+    this.env.buffer.position = this.sequenceBufferOffset;
     switch (code) {
       case TAB:
       case LF:
@@ -283,10 +278,7 @@ export abstract class DoctypeTokenizer extends BaseTokenizer {
         this.emitCurrentDoctype();
         return 'data';
       case EOF:
-        this.currentDoctype.forceQuirks = true;
-        this.error('eof-in-doctype');
-        this.emitCurrentDoctype();
-        return this.eof();
+        return this.eofInDoctype();
       default:
         this.currentDoctype.forceQuirks = true;
         this.error('missing-quote-before-doctype-system-identifier');
