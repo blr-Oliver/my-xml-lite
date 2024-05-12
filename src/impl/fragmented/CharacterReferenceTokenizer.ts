@@ -44,6 +44,7 @@ export class CharacterReferenceTokenizer extends BaseTokenizer {
   }
 
   numericCharacterReference(code: number): State {
+    this.charCode = 0;
     if (code === X_CAPITAL || code === X_REGULAR) {
       this.env.buffer.append(code);
       return 'hexadecimalCharacterReferenceStart';

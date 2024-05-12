@@ -54,7 +54,7 @@ export function stringToArray(s: string): number[] {
   return [...s].map(c => c.codePointAt(0)!);
 }
 export function isSpace(code: number): boolean {
-  return code === 0x20 || code === 9 || code === 10 || code === 13;
+  return code === 0x20 || code === 9 || code === 10 || code === 13 || code === 12;
 }
 export const isAsciiLowerAlpha = range(0x61, 0x7A);
 export const isAsciiUpperAlpha = range(0x41, 0x5A);
