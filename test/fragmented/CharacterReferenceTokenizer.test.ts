@@ -3,37 +3,25 @@ import {DirectCharacterSource} from '../../src/common/stream-source';
 import {HTML_SPECIAL} from '../../src/decl/known-named-refs';
 import {ParserEnvironment} from '../../src/decl/ParserEnvironment';
 import {buildIndex, PrefixNode} from '../../src/impl/character-reference/entity-ref-index';
+import {CompositeTokenizer} from '../../src/impl/CompositeTokenizer';
 import {FixedSizeStringBuilder} from '../../src/impl/FixedSizeStringBuilder';
-import {BaseTokenizer} from '../../src/impl/fragmented/BaseTokenizer';
-import {CharacterReferenceTokenizer} from '../../src/impl/fragmented/CharacterReferenceTokenizer';
-import {CompleteTokenizer} from '../../src/impl/fragmented/CompleteTokenizer';
 import {State} from '../../src/impl/states';
-import {TagTokenizer} from '../../src/impl/fragmented/TagTokenizer';
 import {EOF_TOKEN, Token} from '../../src/impl/tokens';
-import {Class, combine} from './common/multi-class';
 import {default as rawTests} from './samples/char-ref.json';
 
 type TestCase = [string/*name*/, string/*input*/, string/*output*/, string[]/*errors*/, boolean? /*in attribute*/];
 const testCases = rawTests as TestCase[];
 
 function suite() {
-  let parser!: CharacterReferenceTokenizer;
+  let parser!: CompositeTokenizer;
   let tokenList: Token[] = [];
   let errorList: string[] = [];
   let lastState!: State;
 
   beforeAll(() => {
-    const SyntheticCharacterReferenceTokenizer = combine(
-        'SyntheticCharacterReferenceTokenizer',
-        BaseTokenizer as Class<BaseTokenizer>,
-        TagTokenizer as Class<TagTokenizer>,
-        CharacterReferenceTokenizer as Class<CharacterReferenceTokenizer>,
-        CompleteTokenizer);
-
-    class PartialCharacterReferenceTokenizer extends SyntheticCharacterReferenceTokenizer {
+    class MockCompositeTokenizer extends CompositeTokenizer {
       constructor(refsIndex: PrefixNode<number[]>) {
-        super();
-        this.refsIndex = refsIndex;
+        super(refsIndex);
       }
       attributeValueUnquoted(code: number): State {
         switch (code) {
@@ -46,7 +34,7 @@ function suite() {
             return 'attributeValueUnquoted';
         }
       }
-      protected emitAccumulatedCharacters() {
+      emitAccumulatedCharacters() {
         // do nothing
       }
       eof(): State {
@@ -55,7 +43,7 @@ function suite() {
       }
     }
 
-    parser = new PartialCharacterReferenceTokenizer(buildIndex(HTML_SPECIAL));
+    parser = new MockCompositeTokenizer(buildIndex(HTML_SPECIAL));
     parser.env = {
       buffer: new FixedSizeStringBuilder(1000),
       state: 'data',
