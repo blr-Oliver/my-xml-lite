@@ -2,16 +2,11 @@ import {stringToArray} from '../../src/common/code-points';
 import {DirectCharacterSource} from '../../src/common/stream-source';
 import {HTML_SPECIAL} from '../../src/decl/known-named-refs';
 import {ParserEnvironment} from '../../src/decl/ParserEnvironment';
-import {buildIndex, PrefixNode} from '../../src/impl/character-reference/entity-ref-index';
+import {buildIndex} from '../../src/impl/character-reference/entity-ref-index';
+import {CompositeTokenizer} from '../../src/impl/CompositeTokenizer';
 import {FixedSizeStringBuilder} from '../../src/impl/FixedSizeStringBuilder';
-import {BaseTokenizer} from '../../src/impl/fragmented/BaseTokenizer';
-import {CharacterReferenceTokenizer} from '../../src/impl/fragmented/CharacterReferenceTokenizer';
-import {CommentTokenizer} from '../../src/impl/fragmented/CommentTokenizer';
-import {CompleteTokenizer} from '../../src/impl/fragmented/CompleteTokenizer';
 import {State} from '../../src/impl/states';
-import {TagTokenizer} from '../../src/impl/fragmented/TagTokenizer';
 import {CharactersToken, CommentToken, EOF_TOKEN, TagToken, Token} from '../../src/impl/tokens';
-import {Class, combine} from './common/multi-class';
 import {default as rawTests} from './samples/tags.json';
 
 type AttributeData = [string, string | null];
@@ -28,32 +23,20 @@ type TestCase = [
 const testCases = rawTests as TestCase[];
 
 function suite() {
-  let parser!: TagTokenizer;
+  let parser!: CompositeTokenizer;
   let tokenList: Token[] = [];
   let errorList: string[] = [];
   let lastState!: State;
 
   beforeAll(() => {
-    const SyntheticTagTokenizer = combine(
-        'SyntheticTagTokenizer',
-        BaseTokenizer as Class<BaseTokenizer>,
-        CharacterReferenceTokenizer as Class<CharacterReferenceTokenizer>,
-        TagTokenizer as Class<TagTokenizer>,
-        CommentTokenizer as Class<CommentTokenizer>,
-        CompleteTokenizer as Class<CompleteTokenizer>);
-
-    class PartialTagTokenizer extends SyntheticTagTokenizer {
-      constructor(refsIndex: PrefixNode<number[]>) {
-        super();
-        this.refsIndex = refsIndex;
-      }
+    class MockCompositeTokenizer extends CompositeTokenizer {
       eof(): State {
         lastState = this.state;
         return super.eof();
       }
     }
 
-    parser = new PartialTagTokenizer(buildIndex(HTML_SPECIAL));
+    parser = new MockCompositeTokenizer(buildIndex(HTML_SPECIAL));
     parser.env = {
       buffer: new FixedSizeStringBuilder(1000),
       state: 'data',
