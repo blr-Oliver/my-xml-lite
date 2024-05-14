@@ -8,7 +8,8 @@ export interface CharacterSource {
 
 export interface ReconsumableCharacterSource extends CharacterSource {
   /**
-   * @return current (last returned) valid Unicode code point (including characters outside BMP) or -1 if the source is exhausted or -2 if no code point was drained yet
+   * @return current (last returned) valid Unicode code point (including characters outside BMP) or -1 if the source is exhausted or -2 if no code point was
+   *     drained yet
    */
   get(): number;
   /**

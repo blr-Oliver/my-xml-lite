@@ -1,16 +1,4 @@
 import {
-  AMPERSAND,
-  CDATA,
-  CLOSE_SQUARE_BRACKET,
-  DOCTYPE,
-  DOUBLE_QUOTE,
-  EOC,
-  EOF,
-  EQ,
-  EXCLAMATION,
-  FF,
-  GT,
-  HYPHEN,
   isAsciiAlpha,
   isAsciiAlphaNum,
   isAsciiUpperAlpha,
@@ -21,7 +9,19 @@ import {
   isNonCharacter,
   isSpace,
   isSurrogate,
-  isUpperHexDigit,
+  isUpperHexDigit
+} from '../common/code-checks';
+import {
+  AMPERSAND,
+  CLOSE_SQUARE_BRACKET,
+  DOUBLE_QUOTE,
+  EOC,
+  EOF,
+  EQ,
+  EXCLAMATION,
+  FF,
+  GT,
+  HYPHEN,
   LF,
   LT,
   NUL,
@@ -33,20 +33,29 @@ import {
   SINGLE_QUOTE,
   SOLIDUS,
   SPACE,
-  stringToArray,
   TAB,
-  TWO_HYPHENS,
   X_CAPITAL,
   X_REGULAR
 } from '../common/code-points';
+import {stringToArray} from '../common/code-sequences';
+import {PrefixNode} from '../decl/entity-ref-index';
 import {ParserEnvironment} from '../decl/ParserEnvironment';
-import {CHAR_REF_REPLACEMENT, PrefixNode} from './character-reference/entity-ref-index';
 import {State} from './states';
 import {Attribute, CommentToken, DoctypeToken, EOF_TOKEN, TagToken, TextToken, Token} from './tokens';
 
 const SCRIPT: number[] = [0x73, 0x63, 0x72, 0x69, 0x70, 0x74] as const;
+const TWO_HYPHENS: number[] = [HYPHEN, HYPHEN] as const;
+const CDATA: number[] = [0x5B, 0x43, 0x44, 0x41, 0x54, 0x41, 0x5B] as const;
+const DOCTYPE: number[] = [0x64, 0x6F, 0x63, 0x74, 0x79, 0x70, 0x65] as const;
 const PUBLIC: number[] = [0x70, 0x75, 0x62, 0x6C, 0x69, 0x63] as const;
 const SYSTEM: number[] = [0x73, 0x79, 0x73, 0x74, 0x65, 0x6D] as const;
+
+const CHAR_REF_REPLACEMENT: number[] = [
+  0x20AC, 0x0000, 0x201A, 0x0192, 0x201E, 0x2026, 0x2020, 0x2021,
+  0x02C6, 0x2030, 0x0160, 0x2039, 0x0152, 0x0000, 0x017D, 0x0000,
+  0x0000, 0x2018, 0x2019, 0x201C, 0x201D, 0x2022, 0x2013, 0x2014,
+  0x02DC, 0x2122, 0x0161, 0x203A, 0x0153, 0x0000, 0x017E, 0x0178
+] as const;
 
 export class CompositeTokenizer {
   env!: ParserEnvironment;
@@ -332,6 +341,7 @@ export class CompositeTokenizer {
   }
 
   textDataEndTagMatched(code: number, tag: string, textState: State): State {
+    // TODO use last open tag instead of explicit parameter
     switch (code) {
       case TAB:
       case LF:

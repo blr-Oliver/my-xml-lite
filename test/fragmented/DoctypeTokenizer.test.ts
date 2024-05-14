@@ -1,8 +1,9 @@
-import {stringToArray} from '../../src/common/code-points';
+import {stringToArray} from '../../src/common/code-sequences';
 import {DirectCharacterSource} from '../../src/common/stream-source';
 import {HTML_SPECIAL} from '../../src/decl/known-named-refs';
 import {ParserEnvironment} from '../../src/decl/ParserEnvironment';
-import {buildIndex, PrefixNode} from '../../src/impl/character-reference/entity-ref-index';
+import {PrefixNode} from '../../src/decl/entity-ref-index';
+import {buildIndex} from '../../src/impl/build-index';
 import {CompositeTokenizer} from '../../src/impl/CompositeTokenizer';
 import {FixedSizeStringBuilder} from '../../src/impl/FixedSizeStringBuilder';
 import {State} from '../../src/impl/states';

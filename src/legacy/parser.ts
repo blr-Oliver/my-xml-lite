@@ -1,26 +1,8 @@
-import {
-  AMPERSAND,
-  CD_END,
-  CD_START,
-  CMT_END,
-  CMT_START,
-  DOUBLE_QUOTE,
-  EQ,
-  EXCLAMATION,
-  GT,
-  isNameChar,
-  isNameStartChar,
-  isSpace,
-  LT,
-  PI_END,
-  PI_START,
-  QUESTION,
-  SINGLE_QUOTE,
-  SEMICOLON,
-  SLASH,
-  stringToArray
-} from '../common/code-points';
+import {isSpace} from '../common/code-checks';
+import {AMPERSAND, DOUBLE_QUOTE, EQ, EXCLAMATION, GT, LT, QUESTION, SEMICOLON, SINGLE_QUOTE, SLASH} from '../common/code-points';
+import {CD_END, CD_START, CMT_END, CMT_START, PI_END, PI_START, stringToArray} from '../common/code-sequences';
 import {StringSource} from '../common/stream-source';
+import {isNameChar, isNameStartChar} from '../common/xml-code-checks';
 import {Declaration, Document, Element, Node, NodeContainer, NodeType, Text, ValueNode} from '../common/xml-node';
 
 const ALWAYS_EMPTY: { [tag: string]: boolean } = {
