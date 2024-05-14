@@ -889,6 +889,8 @@ export class CompositeTokenizer {
 
   // -----comment states-----
   commentStart(code: number): State {
+    this.env.buffer.position = this.sequenceBufferOffset;
+    this.startNewComment();
     switch (code) {
       case HYPHEN:
         return 'commentStartDash';

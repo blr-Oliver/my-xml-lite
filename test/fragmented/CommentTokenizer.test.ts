@@ -1,44 +1,23 @@
-import {EOF, stringToArray} from '../../src/common/code-points';
+import {stringToArray} from '../../src/common/code-points';
 import {DirectCharacterSource} from '../../src/common/stream-source';
+import {HTML_SPECIAL} from '../../src/decl/known-named-refs';
 import {ParserEnvironment} from '../../src/decl/ParserEnvironment';
+import {buildIndex} from '../../src/impl/character-reference/entity-ref-index';
+import {CompositeTokenizer} from '../../src/impl/CompositeTokenizer';
 import {FixedSizeStringBuilder} from '../../src/impl/FixedSizeStringBuilder';
-import {BaseTokenizer} from '../../src/impl/fragmented/BaseTokenizer';
-import {CommentTokenizer} from '../../src/impl/fragmented/CommentTokenizer';
-import {CompleteTokenizer} from '../../src/impl/fragmented/CompleteTokenizer';
-import {State} from '../../src/impl/states';
 import {CommentToken, EOF_TOKEN, Token} from '../../src/impl/tokens';
-import {Class, combine} from './common/multi-class';
 import {default as rawTests} from './samples/comment.json';
 
 type TestCase = [string/*name*/, string/*input*/, string/*comment data*/, string[]/*errors*/];
 const testCases = rawTests as TestCase[];
 
 function suite() {
-  let parser!: CommentTokenizer;
+  let parser!: CompositeTokenizer;
   let tokenList: Token[] = [];
   let errorList: string[] = [];
 
   beforeAll(() => {
-    class PartialCommentTokenizer extends CommentTokenizer {
-      data(code: number): State {
-        if (code === EOF) return this.eof();
-        // skip first four characters and go straight to comment start
-        this.nextCode();
-        this.nextCode();
-        this.nextCode();
-        this.startNewComment();
-        this.state = 'commentStart';
-        return this.commentStart(this.nextCode());
-      }
-    }
-
-    const SyntheticCommentTokenizer = combine(
-        'SyntheticCommentTokenizer',
-        BaseTokenizer as Class<BaseTokenizer>,
-        CommentTokenizer as Class<CommentTokenizer>,
-        CompleteTokenizer,
-        PartialCommentTokenizer);
-    parser = new SyntheticCommentTokenizer();
+    parser = new CompositeTokenizer(buildIndex(HTML_SPECIAL));
     parser.env = {
       buffer: new FixedSizeStringBuilder(1000),
       state: 'data',
@@ -66,13 +45,17 @@ function suite() {
     }
   });
 
+  function processInput(input: string) {
+    const newInput = new DirectCharacterSource(new Uint16Array(stringToArray(input)));
+    // @ts-ignore
+    parser.env.input = newInput;
+    parser.proceed();
+  }
+
   function createTest(test: TestCase) {
     const [name, input, expectedData, expectedErrors] = test;
     it(name, () => {
-      const newInput = new DirectCharacterSource(new Uint16Array(stringToArray(input)));
-      // @ts-ignore
-      parser.env.input = newInput;
-      parser.proceed();
+      processInput(input);
       expect(parser.state).toStrictEqual('eof');
       expect(tokenList.length).toStrictEqual(2);
       expect(tokenList[0].type).toStrictEqual('comment');
