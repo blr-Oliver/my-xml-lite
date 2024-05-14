@@ -1,48 +1,29 @@
-import {EOF, stringToArray} from '../../src/common/code-points';
+import {stringToArray} from '../../src/common/code-points';
 import {DirectCharacterSource} from '../../src/common/stream-source';
+import {HTML_SPECIAL} from '../../src/decl/known-named-refs';
 import {ParserEnvironment} from '../../src/decl/ParserEnvironment';
+import {buildIndex} from '../../src/impl/character-reference/entity-ref-index';
+import {CompositeTokenizer} from '../../src/impl/CompositeTokenizer';
 import {FixedSizeStringBuilder} from '../../src/impl/FixedSizeStringBuilder';
-import {BaseTokenizer} from '../../src/impl/fragmented/BaseTokenizer';
-import {CompleteTokenizer} from '../../src/impl/fragmented/CompleteTokenizer';
-import {ScriptDataTokenizer} from '../../src/impl/fragmented/ScriptDataTokenizer';
-import {SequenceMatcher} from '../../src/impl/fragmented/SequenceMatcher';
 import {State} from '../../src/impl/states';
-import {TagTokenizer} from '../../src/impl/fragmented/TagTokenizer';
-import {TextTokenizer} from '../../src/impl/fragmented/TextTokenizer';
 import {CharactersToken, EOF_TOKEN, TagToken, Token} from '../../src/impl/tokens';
-import {Class, combine} from './common/multi-class';
 import {default as rawTests} from './samples/script-data.json';
 
 type TestCase = [string/*name*/, string/*input*/, string/*comment data*/, string[]/*errors*/, boolean/*completed*/];
 const testCases = rawTests as TestCase[];
 
 function suite() {
-  let parser!: ScriptDataTokenizer;
+  let parser!: CompositeTokenizer;
   let tokenList: Token[] = [];
   let errorList: string[] = [];
   let lastState!: State;
 
   beforeAll(() => {
-    const SyntheticScriptDataTokenizer = combine(
-        'SyntheticScriptDataTokenizer',
-        BaseTokenizer as Class<BaseTokenizer>,
-        SequenceMatcher as Class<SequenceMatcher>,
-        TagTokenizer as Class<TagTokenizer>,
-        TextTokenizer as Class<TextTokenizer>,
-        ScriptDataTokenizer as Class<ScriptDataTokenizer>,
-        CompleteTokenizer);
-
-    class PartialScriptDataTokenizer extends SyntheticScriptDataTokenizer {
+    class MockCompositeTokenizer extends CompositeTokenizer {
       data(code: number): State {
-        if (code === EOF) return this.eof();
-        // skip first <script> tag and go straight to interesting part
-        const len = '<script>'.length;
-        for (let i = 1; i < len; ++i)
-          this.nextCode();
-        this.startNewTag('script');
-        this.emitCurrentTag();
-        this.state = 'scriptData';
-        return this.scriptData(this.nextCode());
+        if (tokenList.length === 1 && tokenList[0].type === 'startTag' && (tokenList[0] as TagToken).name === 'script')
+          return this.callState('scriptData', code);
+        return super.data(code);
       }
       eof(): State {
         lastState = this.state;
@@ -50,7 +31,7 @@ function suite() {
       }
     }
 
-    parser = new PartialScriptDataTokenizer();
+    parser = new MockCompositeTokenizer(buildIndex(HTML_SPECIAL));
     parser.env = {
       buffer: new FixedSizeStringBuilder(1000),
       state: 'data',
@@ -78,14 +59,18 @@ function suite() {
     }
   });
 
+  function processInput(input: string) {
+    const newInput = new DirectCharacterSource(new Uint16Array(stringToArray(input)));
+    // @ts-ignore
+    parser.env.input = newInput;
+    parser.proceed();
+  }
+
   function createTest(test: TestCase) {
     const [name, input, expectedData, expectedErrors, completed] = test;
     it(name, () => {
       let token: Token;
-      const newInput = new DirectCharacterSource(new Uint16Array(stringToArray(input)));
-      // @ts-ignore
-      parser.env.input = newInput;
-      parser.proceed();
+      processInput(input);
       const hasContent = expectedData !== '';
       expect(parser.state).toStrictEqual('eof');
       const expectedTokenCount = 2 + (+hasContent) + (+completed);
