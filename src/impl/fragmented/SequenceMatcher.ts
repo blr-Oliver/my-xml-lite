@@ -1,6 +1,6 @@
 import {EOC, isAsciiUpperAlpha} from '../../common/code-points';
 import {BaseTokenizer} from './BaseTokenizer';
-import {State} from './states';
+import {State} from '../states';
 
 export class SequenceMatcher extends BaseTokenizer {
   sequenceData!: readonly number[];

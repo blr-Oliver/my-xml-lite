@@ -18,7 +18,7 @@ import {
 } from '../../common/code-points';
 import {CHAR_REF_REPLACEMENT, PrefixNode} from '../character-reference/entity-ref-index';
 import {BaseTokenizer} from './BaseTokenizer';
-import {State} from './states';
+import {State} from '../states';
 
 export class CharacterReferenceTokenizer extends BaseTokenizer {
   referenceStartMark!: number;

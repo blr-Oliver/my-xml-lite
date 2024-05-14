@@ -1,6 +1,6 @@
 import {AMPERSAND, CDATA, DOCTYPE, EOF, HYPHEN, LT, NUL, OPEN_SQUARE_BRACKET, REPLACEMENT_CHAR, TWO_HYPHENS} from '../../common/code-points';
 import {BaseTokenizer} from './BaseTokenizer';
-import {State} from './states';
+import {State} from '../states';
 
 export class CompleteTokenizer extends BaseTokenizer {
   data(code: number): State {

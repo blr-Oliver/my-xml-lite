@@ -1,5 +1,5 @@
 import {EOF, EXCLAMATION, FF, GT, HYPHEN, isAsciiAlpha, LF, LT, NUL, REPLACEMENT_CHAR, SOLIDUS, SPACE, TAB} from '../../common/code-points';
-import {State} from './states';
+import {State} from '../states';
 import {TextTokenizer} from './TextTokenizer';
 
 const SCRIPT = [0x73, 0x63, 0x72, 0x69, 0x70, 0x74] as const;

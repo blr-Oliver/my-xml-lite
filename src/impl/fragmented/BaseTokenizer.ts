@@ -1,7 +1,7 @@
 import {EOC} from '../../common/code-points';
 import {ParserEnvironment} from '../../decl/ParserEnvironment';
 import {Attribute, CommentToken, EOF_TOKEN, TagToken, TextToken, Token} from '../tokens';
-import {State} from './states';
+import {State} from '../states';
 
 export abstract class BaseTokenizer {
   env!: ParserEnvironment;

@@ -74,6 +74,7 @@ export type State =
     'doctypeSystemIdentifierSingleQuoted' |
     'afterDoctypeSystemIdentifier' |
     'bogusDoctype' |
+    'cdataSectionStart' |
     'cdataSection' |
     'cdataSectionBracket' |
     'cdataSectionEnd' |

@@ -6,7 +6,7 @@ import {BaseTokenizer} from '../../src/impl/fragmented/BaseTokenizer';
 import {CompleteTokenizer} from '../../src/impl/fragmented/CompleteTokenizer';
 import {ScriptDataTokenizer} from '../../src/impl/fragmented/ScriptDataTokenizer';
 import {SequenceMatcher} from '../../src/impl/fragmented/SequenceMatcher';
-import {State} from '../../src/impl/fragmented/states';
+import {State} from '../../src/impl/states';
 import {TagTokenizer} from '../../src/impl/fragmented/TagTokenizer';
 import {TextTokenizer} from '../../src/impl/fragmented/TextTokenizer';
 import {CharactersToken, EOF_TOKEN, TagToken, Token} from '../../src/impl/tokens';

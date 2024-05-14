@@ -5,7 +5,7 @@ import {FixedSizeStringBuilder} from '../../src/impl/FixedSizeStringBuilder';
 import {BaseTokenizer} from '../../src/impl/fragmented/BaseTokenizer';
 import {CommentTokenizer} from '../../src/impl/fragmented/CommentTokenizer';
 import {CompleteTokenizer} from '../../src/impl/fragmented/CompleteTokenizer';
-import {State} from '../../src/impl/fragmented/states';
+import {State} from '../../src/impl/states';
 import {CommentToken, EOF_TOKEN, Token} from '../../src/impl/tokens';
 import {Class, combine} from './common/multi-class';
 import {default as rawTests} from './samples/comment.json';

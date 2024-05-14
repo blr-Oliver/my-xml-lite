@@ -1,6 +1,6 @@
 import {CLOSE_SQUARE_BRACKET, EOF, GT} from '../../common/code-points';
 import {BaseTokenizer} from './BaseTokenizer';
-import {State} from './states';
+import {State} from '../states';
 
 export abstract class CDataTokenizer extends BaseTokenizer {
   cdataSection(code: number): State {

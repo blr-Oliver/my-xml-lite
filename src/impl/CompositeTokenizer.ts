@@ -41,7 +41,7 @@ import {
 } from '../common/code-points';
 import {ParserEnvironment} from '../decl/ParserEnvironment';
 import {CHAR_REF_REPLACEMENT, PrefixNode} from './character-reference/entity-ref-index';
-import {State} from './fragmented/states';
+import {State} from './states';
 import {Attribute, CommentToken, DoctypeToken, EOF_TOKEN, TagToken, TextToken, Token} from './tokens';
 
 const SCRIPT: number[] = [0x73, 0x63, 0x72, 0x69, 0x70, 0x74] as const;
@@ -703,6 +703,11 @@ export class CompositeTokenizer {
   }
 
   // -----CDATA states-----
+  cdataSectionStart(code: number): State {
+    this.env.buffer.position = this.sequenceBufferOffset;
+    return this.callState('cdataSection', code);
+  }
+
   cdataSection(code: number): State {
     const buffer = this.env.buffer;
     while (true) {
@@ -1075,7 +1080,8 @@ export class CompositeTokenizer {
       case 0x64: // d
         return this.matchSequence(code, DOCTYPE, true, 'doctype', 'bogusComment');
       case OPEN_SQUARE_BRACKET:
-        return this.matchSequence(code, CDATA, false, 'cdataSection', 'bogusComment');
+        this.emitAccumulatedCharacters();
+        return this.matchSequence(code, CDATA, false, 'cdataSectionStart', 'bogusComment');
       default:
         this.emitAccumulatedCharacters();
         this.error('incorrectly-opened-comment');

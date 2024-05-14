@@ -1,6 +1,6 @@
 import {EOF, EXCLAMATION, GT, HYPHEN, LT, NUL, REPLACEMENT_CHAR} from '../../common/code-points';
 import {BaseTokenizer} from './BaseTokenizer';
-import {State} from './states';
+import {State} from '../states';
 
 export abstract class CommentTokenizer extends BaseTokenizer {
   commentStart(code: number): State {

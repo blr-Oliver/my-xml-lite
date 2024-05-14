@@ -19,7 +19,7 @@ import {
   TAB
 } from '../../common/code-points';
 import {BaseTokenizer} from './BaseTokenizer';
-import {State} from './states';
+import {State} from '../states';
 
 export abstract class TagTokenizer extends BaseTokenizer {
   tagOpen(code: number): State {

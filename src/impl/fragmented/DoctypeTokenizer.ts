@@ -1,7 +1,7 @@
 import {DOUBLE_QUOTE, EOF, FF, GT, isAsciiUpperAlpha, LF, NUL, REPLACEMENT_CHAR, SINGLE_QUOTE, SPACE, TAB} from '../../common/code-points';
 import {DoctypeToken} from '../tokens';
 import {BaseTokenizer} from './BaseTokenizer';
-import {State} from './states';
+import {State} from '../states';
 
 const PUBLIC: number[] = [0x70, 0x75, 0x62, 0x6C, 0x69, 0x63] as const;
 const SYSTEM: number[] = [0x73, 0x79, 0x73, 0x74, 0x65, 0x6D] as const;

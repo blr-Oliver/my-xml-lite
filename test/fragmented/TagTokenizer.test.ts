@@ -8,7 +8,7 @@ import {BaseTokenizer} from '../../src/impl/fragmented/BaseTokenizer';
 import {CharacterReferenceTokenizer} from '../../src/impl/fragmented/CharacterReferenceTokenizer';
 import {CommentTokenizer} from '../../src/impl/fragmented/CommentTokenizer';
 import {CompleteTokenizer} from '../../src/impl/fragmented/CompleteTokenizer';
-import {State} from '../../src/impl/fragmented/states';
+import {State} from '../../src/impl/states';
 import {TagTokenizer} from '../../src/impl/fragmented/TagTokenizer';
 import {CharactersToken, CommentToken, EOF_TOKEN, TagToken, Token} from '../../src/impl/tokens';
 import {Class, combine} from './common/multi-class';

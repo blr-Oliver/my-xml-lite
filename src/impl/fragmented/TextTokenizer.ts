@@ -1,6 +1,6 @@
 import {AMPERSAND, EOF, FF, GT, isAsciiAlpha, LF, LT, NUL, REPLACEMENT_CHAR, SOLIDUS, SPACE, TAB} from '../../common/code-points';
 import {BaseTokenizer} from './BaseTokenizer';
-import {State} from './states';
+import {State} from '../states';
 
 export abstract class TextTokenizer extends BaseTokenizer {
   protected textEndMark!: number;

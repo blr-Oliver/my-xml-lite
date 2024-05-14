@@ -1,5 +1,5 @@
 import {stringToArray} from '../../common/code-points';
-import {State} from './states';
+import {State} from '../states';
 import {TextTokenizer} from './TextTokenizer';
 
 export abstract class RawTextTokenizer extends TextTokenizer {
