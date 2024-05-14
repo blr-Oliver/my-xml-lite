@@ -1,26 +1,26 @@
-import {AMPERSAND, DOUBLE_QUOTE, GT, LT, SINGLE_QUOTE} from '../common/code-points';
+import {CodePoints} from '../common/code-points';
 
 export type EntityMapping<T> = {
   [entity: string]: T;
 }
 
 export const HTML_SPECIAL: EntityMapping<number[]> = {
-  'amp;': [AMPERSAND],
-  'amp': [AMPERSAND],
-  'AMP;': [AMPERSAND],
-  'AMP': [AMPERSAND],
-  'lt;': [LT],
-  'lt': [LT],
-  'LT;': [LT],
-  'LT': [LT],
-  'gt;': [GT],
-  'gt': [GT],
-  'GT;': [GT],
-  'GT': [GT],
-  'apos;': [SINGLE_QUOTE],
-  'quot;': [DOUBLE_QUOTE],
-  'quot': [DOUBLE_QUOTE],
-  'QUOT;': [DOUBLE_QUOTE],
-  'QUOT': [DOUBLE_QUOTE]
+  'amp;': [CodePoints.AMPERSAND],
+  'amp': [CodePoints.AMPERSAND],
+  'AMP;': [CodePoints.AMPERSAND],
+  'AMP': [CodePoints.AMPERSAND],
+  'lt;': [CodePoints.LT],
+  'lt': [CodePoints.LT],
+  'LT;': [CodePoints.LT],
+  'LT': [CodePoints.LT],
+  'gt;': [CodePoints.GT],
+  'gt': [CodePoints.GT],
+  'GT;': [CodePoints.GT],
+  'GT': [CodePoints.GT],
+  'apos;': [CodePoints.APOSTROPHE],
+  'quot;': [CodePoints.QUOTE],
+  'quot': [CodePoints.QUOTE],
+  'QUOT;': [CodePoints.QUOTE],
+  'QUOT': [CodePoints.QUOTE]
 }
 

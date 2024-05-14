@@ -1,10 +1,10 @@
 import {isAsciiAlpha, isDigit} from './code-checks';
-import {COLON, HYPHEN} from './code-points';
+import {CodePoints} from './code-points';
 
 function isCommonNameStartChar(code: number) {
   return isAsciiAlpha(code) ||
       code === 0x5F || // underscore (_)
-      code === COLON;  // colon (:)
+      code === CodePoints.COLON;  // colon (:)
 }
 function isExoticNameStartChar(code: number) {
   return (code >= 0xC0 && code <= 0xD6) ||
@@ -22,7 +22,7 @@ function isExoticNameStartChar(code: number) {
 }
 function isCommonNameChar(code: number) {
   return isCommonNameStartChar(code) ||
-      code === HYPHEN ||
+      code === CodePoints.HYPHEN ||
       isDigit(code) ||
       code === 0x2E;// period (.)
 }

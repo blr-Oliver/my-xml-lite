@@ -11,51 +11,26 @@ import {
   isSurrogate,
   isUpperHexDigit
 } from '../common/code-checks';
-import {
-  AMPERSAND,
-  CLOSE_SQUARE_BRACKET,
-  DOUBLE_QUOTE,
-  EOC,
-  EOF,
-  EQ,
-  EXCLAMATION,
-  FF,
-  GT,
-  HYPHEN,
-  LF,
-  LT,
-  NUL,
-  OPEN_SQUARE_BRACKET,
-  QUESTION,
-  REPLACEMENT_CHAR,
-  SEMICOLON,
-  SHARP,
-  SINGLE_QUOTE,
-  SOLIDUS,
-  SPACE,
-  TAB,
-  X_CAPITAL,
-  X_REGULAR
-} from '../common/code-points';
+import {CodePoints} from '../common/code-points';
 import {stringToArray} from '../common/code-sequences';
 import {PrefixNode} from '../decl/entity-ref-index';
 import {ParserEnvironment} from '../decl/ParserEnvironment';
 import {State} from './states';
 import {Attribute, CommentToken, DoctypeToken, EOF_TOKEN, TagToken, TextToken, Token} from './tokens';
 
-const SCRIPT: number[] = [0x73, 0x63, 0x72, 0x69, 0x70, 0x74] as const;
-const TWO_HYPHENS: number[] = [HYPHEN, HYPHEN] as const;
-const CDATA: number[] = [0x5B, 0x43, 0x44, 0x41, 0x54, 0x41, 0x5B] as const;
-const DOCTYPE: number[] = [0x64, 0x6F, 0x63, 0x74, 0x79, 0x70, 0x65] as const;
-const PUBLIC: number[] = [0x70, 0x75, 0x62, 0x6C, 0x69, 0x63] as const;
-const SYSTEM: number[] = [0x73, 0x79, 0x73, 0x74, 0x65, 0x6D] as const;
+const SCRIPT: number[] = [0x73, 0x63, 0x72, 0x69, 0x70, 0x74];
+const TWO_HYPHENS: number[] = [CodePoints.HYPHEN, CodePoints.HYPHEN];
+const CDATA: number[] = [0x5B, 0x43, 0x44, 0x41, 0x54, 0x41, 0x5B];
+const DOCTYPE: number[] = [0x64, 0x6F, 0x63, 0x74, 0x79, 0x70, 0x65];
+const PUBLIC: number[] = [0x70, 0x75, 0x62, 0x6C, 0x69, 0x63];
+const SYSTEM: number[] = [0x73, 0x79, 0x73, 0x74, 0x65, 0x6D];
 
 const CHAR_REF_REPLACEMENT: number[] = [
   0x20AC, 0x0000, 0x201A, 0x0192, 0x201E, 0x2026, 0x2020, 0x2021,
   0x02C6, 0x2030, 0x0160, 0x2039, 0x0152, 0x0000, 0x017D, 0x0000,
   0x0000, 0x2018, 0x2019, 0x201C, 0x201D, 0x2022, 0x2013, 0x2014,
   0x02DC, 0x2122, 0x0161, 0x203A, 0x0153, 0x0000, 0x017E, 0x0178
-] as const;
+];
 
 export class CompositeTokenizer {
   env!: ParserEnvironment;
@@ -92,7 +67,7 @@ export class CompositeTokenizer {
     let code: number = 0;
     while (this.active) {
       code = this.nextCode();
-      if (code === EOC) break;
+      if (code === CodePoints.EOC) break;
       this.state = this.execState(this.state, code);
       this.commitTokens();
     }
@@ -239,7 +214,7 @@ export class CompositeTokenizer {
     const buffer = this.env.buffer;
     const len = this.sequenceData.length;
     while (this.sequenceIndex < len) {
-      if (code === EOC) return 'sequence';
+      if (code === CodePoints.EOC) return 'sequence';
       if (code !== seqData[this.sequenceIndex++])
         return this.callState(this.sequenceNegativeState, code);
       buffer.append(code);
@@ -253,7 +228,7 @@ export class CompositeTokenizer {
     const buffer = this.env.buffer;
     const len = this.sequenceData.length;
     while (this.sequenceIndex < len) {
-      if (code === EOC) return 'sequence';
+      if (code === CodePoints.EOC) return 'sequence';
       let ciCode = code;
       if (isAsciiUpperAlpha(ciCode)) ciCode += 0x20;
       if (ciCode !== seqData[this.sequenceIndex++])
@@ -269,14 +244,14 @@ export class CompositeTokenizer {
     const buffer = this.env.buffer;
     while (true) {
       switch (code) {
-        case LT:
+        case CodePoints.LT:
           return ltState;
-        case EOF:
+        case CodePoints.EOF:
           this.emitAccumulatedCharacters();
           return this.eof();
-        case NUL:
+        case CodePoints.NUL:
           this.error('unexpected-null-character');
-          code = REPLACEMENT_CHAR;
+          code = CodePoints.REPLACEMENT_CHAR;
         default:
           buffer.append(code);
           code = this.nextCode();
@@ -289,18 +264,18 @@ export class CompositeTokenizer {
     const buffer = this.env.buffer;
     while (true) {
       switch (code) {
-        case AMPERSAND:
+        case CodePoints.AMPERSAND:
           this.returnState = this.state;
           this.inAttribute = false;
           return 'characterReference';
-        case LT:
+        case CodePoints.LT:
           return ltState;
-        case EOF:
+        case CodePoints.EOF:
           this.emitAccumulatedCharacters();
           return this.eof();
-        case NUL:
+        case CodePoints.NUL:
           this.error('unexpected-null-character');
-          code = REPLACEMENT_CHAR;
+          code = CodePoints.REPLACEMENT_CHAR;
         default:
           buffer.append(code);
           code = this.nextCode();
@@ -313,14 +288,14 @@ export class CompositeTokenizer {
     const buffer = this.env.buffer;
     while (true) {
       switch (code) {
-        case SOLIDUS:
+        case CodePoints.SLASH:
           return endTagOpenState;
-        case LT:
+        case CodePoints.LT:
           buffer.append(code);
           code = this.nextCode();
           break;
         default:
-          buffer.append(LT);
+          buffer.append(CodePoints.LT);
           return this.callState(textState, code);
       }
     }
@@ -330,12 +305,12 @@ export class CompositeTokenizer {
     const buffer = this.env.buffer;
     if (isAsciiAlpha(code)) {
       this.textEndMark = buffer.position;
-      buffer.append(LT);
-      buffer.append(SOLIDUS);
+      buffer.append(CodePoints.LT);
+      buffer.append(CodePoints.SLASH);
       return this.callState(tagNameState, code);
     } else {
-      buffer.append(LT);
-      buffer.append(SOLIDUS);
+      buffer.append(CodePoints.LT);
+      buffer.append(CodePoints.SLASH);
       return this.callState(textState, code);
     }
   }
@@ -343,16 +318,16 @@ export class CompositeTokenizer {
   textDataEndTagMatched(code: number, tag: string, textState: State): State {
     // TODO use last open tag instead of explicit parameter
     switch (code) {
-      case TAB:
-      case LF:
-      case FF:
-      case SPACE:
+      case CodePoints.TAB:
+      case CodePoints.LF:
+      case CodePoints.FF:
+      case CodePoints.SPACE:
         this.createTextDataEndTag(tag);
         return 'beforeAttributeName';
-      case SOLIDUS:
+      case CodePoints.SLASH:
         this.createTextDataEndTag(tag);
         return 'selfClosingStartTag';
-      case GT:
+      case CodePoints.GT:
         this.createTextDataEndTag(tag);
         this.emitCurrentTag();
         return 'data';
@@ -373,16 +348,16 @@ export class CompositeTokenizer {
     const buffer = this.env.buffer;
     while (true) {
       switch (code) {
-        case AMPERSAND:
+        case CodePoints.AMPERSAND:
           this.returnState = this.state;
           this.inAttribute = false;
           return 'characterReference';
-        case LT:
+        case CodePoints.LT:
           return 'tagOpen';
-        case EOF:
+        case CodePoints.EOF:
           this.emitAccumulatedCharacters();
           return this.eof();
-        case NUL:
+        case CodePoints.NUL:
           this.error('unexpected-null-character');
         default:
           buffer.append(code);
@@ -396,12 +371,12 @@ export class CompositeTokenizer {
     const buffer = this.env.buffer;
     while (true) {
       switch (code) {
-        case EOF:
+        case CodePoints.EOF:
           this.emitAccumulatedCharacters();
           return this.eof();
-        case NUL:
+        case CodePoints.NUL:
           this.error('unexpected-null-character');
-          code = REPLACEMENT_CHAR;
+          code = CodePoints.REPLACEMENT_CHAR;
         default:
           buffer.append(code);
           code = this.nextCode();
@@ -414,18 +389,18 @@ export class CompositeTokenizer {
   tagOpen(code: number): State {
     const buffer = this.env.buffer;
     switch (code) {
-      case EXCLAMATION:
+      case CodePoints.EXCLAMATION:
         return 'markupDeclarationOpen';
-      case SOLIDUS:
+      case CodePoints.SLASH:
         this.startNewTag();
         return 'endTagOpen';
-      case QUESTION:
+      case CodePoints.QUESTION:
         this.emitAccumulatedCharacters();
         this.error('unexpected-question-mark-instead-of-tag-name');
         this.startNewComment();
         return this.callState('bogusComment', code);
-      case EOF:
-        buffer.append(LT);
+      case CodePoints.EOF:
+        buffer.append(CodePoints.LT);
         this.emitAccumulatedCharacters();
         this.error('eof-before-tag-name');
         return this.eof();
@@ -436,20 +411,20 @@ export class CompositeTokenizer {
           return this.callState('tagName', code);
         }
         this.error('invalid-first-character-of-tag-name');
-        buffer.append(LT);
+        buffer.append(CodePoints.LT);
         return this.callState('data', code);
     }
   }
 
   endTagOpen(code: number): State {
     switch (code) {
-      case GT:
+      case CodePoints.GT:
         this.error('missing-end-tag-name');
         return 'data';
-      case EOF:
+      case CodePoints.EOF:
         const buffer = this.env.buffer;
-        buffer.append(LT);
-        buffer.append(SOLIDUS);
+        buffer.append(CodePoints.LT);
+        buffer.append(CodePoints.SLASH);
         this.emitAccumulatedCharacters();
         this.error('eof-before-tag-name');
         return this.eof();
@@ -470,25 +445,25 @@ export class CompositeTokenizer {
     const buffer = this.env.buffer;
     while (true) {
       switch (code) {
-        case TAB:
-        case LF:
-        case FF:
-        case SPACE:
+        case CodePoints.TAB:
+        case CodePoints.LF:
+        case CodePoints.FF:
+        case CodePoints.SPACE:
           this.currentTag.name = buffer.takeString();
           return 'beforeAttributeName';
-        case SOLIDUS:
+        case CodePoints.SLASH:
           this.currentTag.name = buffer.takeString();
           return 'selfClosingStartTag';
-        case GT:
+        case CodePoints.GT:
           this.currentTag.name = buffer.takeString();
           this.emitCurrentTag();
           return 'data';
-        case EOF:
+        case CodePoints.EOF:
           this.error('eof-in-tag');
           return this.eof();
-        case NUL:
+        case CodePoints.NUL:
           this.error('unexpected-null-character');
-          code = REPLACEMENT_CHAR;
+          code = CodePoints.REPLACEMENT_CHAR;
         default:
           if (isAsciiUpperAlpha(code)) code += 0x20; // toLowerCase
           buffer.append(code);
@@ -500,17 +475,17 @@ export class CompositeTokenizer {
   beforeAttributeName(code: number): State {
     while (true) {
       switch (code) {
-        case TAB:
-        case LF:
-        case FF:
-        case SPACE:
+        case CodePoints.TAB:
+        case CodePoints.LF:
+        case CodePoints.FF:
+        case CodePoints.SPACE:
           code = this.nextCode();
           break;
-        case SOLIDUS:
-        case GT:
-        case EOF:
+        case CodePoints.SLASH:
+        case CodePoints.GT:
+        case CodePoints.EOF:
           return this.callState('afterAttributeName', code);
-        case EQ:
+        case CodePoints.EQ:
           this.error('unexpected-equals-sign-before-attribute-name');
           this.startNewAttribute();
           this.env.buffer.append(code);
@@ -526,25 +501,25 @@ export class CompositeTokenizer {
     const buffer = this.env.buffer;
     while (true) {
       switch (code) {
-        case EQ:
+        case CodePoints.EQ:
           this.currentAttribute.name = buffer.takeString();
           return 'beforeAttributeValue';
-        case TAB:
-        case LF:
-        case FF:
-        case SPACE:
-        case GT:
-        case SOLIDUS:
-        case EOF:
+        case CodePoints.TAB:
+        case CodePoints.LF:
+        case CodePoints.FF:
+        case CodePoints.SPACE:
+        case CodePoints.GT:
+        case CodePoints.SLASH:
+        case CodePoints.EOF:
           this.currentAttribute.name = buffer.takeString();
           return this.callState('afterAttributeName', code);
-        case NUL:
+        case CodePoints.NUL:
           this.error('unexpected-null-character');
-          buffer.append(REPLACEMENT_CHAR);
+          buffer.append(CodePoints.REPLACEMENT_CHAR);
           break;
-        case SINGLE_QUOTE:
-        case DOUBLE_QUOTE:
-        case LT:
+        case CodePoints.SINGLE_QUOTE:
+        case CodePoints.DOUBLE_QUOTE:
+        case CodePoints.LT:
           this.error('unexpected-character-in-attribute-name');
         default:
           if (isAsciiUpperAlpha(code)) code += 0x20; // toLowerCase
@@ -557,20 +532,20 @@ export class CompositeTokenizer {
   afterAttributeName(code: number): State {
     while (true) {
       switch (code) {
-        case EQ:
+        case CodePoints.EQ:
           return 'beforeAttributeValue';
-        case TAB:
-        case LF:
-        case FF:
-        case SPACE:
+        case CodePoints.TAB:
+        case CodePoints.LF:
+        case CodePoints.FF:
+        case CodePoints.SPACE:
           code = this.nextCode();
           break;
-        case GT:
+        case CodePoints.GT:
           this.emitCurrentTag();
           return 'data';
-        case SOLIDUS:
+        case CodePoints.SLASH:
           return 'selfClosingStartTag';
-        case EOF:
+        case CodePoints.EOF:
           this.error('eof-in-tag');
           return this.eof();
         default:
@@ -583,17 +558,17 @@ export class CompositeTokenizer {
   beforeAttributeValue(code: number): State {
     while (true) {
       switch (code) {
-        case TAB:
-        case LF:
-        case FF:
-        case SPACE:
+        case CodePoints.TAB:
+        case CodePoints.LF:
+        case CodePoints.FF:
+        case CodePoints.SPACE:
           code = this.nextCode();
           break;
-        case DOUBLE_QUOTE:
+        case CodePoints.DOUBLE_QUOTE:
           return 'attributeValueDoubleQuoted';
-        case SINGLE_QUOTE:
+        case CodePoints.SINGLE_QUOTE:
           return 'attributeValueSingleQuoted';
-        case GT:
+        case CodePoints.GT:
           this.error('missing-attribute-value');
           this.emitCurrentTag();
           return 'data';
@@ -605,11 +580,11 @@ export class CompositeTokenizer {
 
 
   attributeValueDoubleQuoted(code: number): State {
-    return this.attributeValueQuoted(code, DOUBLE_QUOTE);
+    return this.attributeValueQuoted(code, CodePoints.DOUBLE_QUOTE);
   }
 
   attributeValueSingleQuoted(code: number): State {
-    return this.attributeValueQuoted(code, SINGLE_QUOTE);
+    return this.attributeValueQuoted(code, CodePoints.SINGLE_QUOTE);
   }
 
   attributeValueQuoted(code: number, terminator: number): State {
@@ -619,16 +594,16 @@ export class CompositeTokenizer {
         case terminator:
           this.currentAttribute.value = buffer.takeString();
           return 'afterAttributeValueQuoted';
-        case AMPERSAND:
+        case CodePoints.AMPERSAND:
           this.returnState = this.state;
           this.inAttribute = true;
           return 'characterReference';
-        case EOF:
+        case CodePoints.EOF:
           this.error('eof-in-tag');
           return this.eof();
-        case NUL:
+        case CodePoints.NUL:
           this.error('unexpected-null-character');
-          code = REPLACEMENT_CHAR;
+          code = CodePoints.REPLACEMENT_CHAR;
         default:
           buffer.append(code);
           code = this.nextCode();
@@ -641,32 +616,32 @@ export class CompositeTokenizer {
     const buffer = this.env.buffer;
     while (true) {
       switch (code) {
-        case TAB:
-        case LF:
-        case FF:
-        case SPACE:
+        case CodePoints.TAB:
+        case CodePoints.LF:
+        case CodePoints.FF:
+        case CodePoints.SPACE:
           this.currentAttribute.value = buffer.takeString();
           return 'beforeAttributeName';
-        case AMPERSAND:
+        case CodePoints.AMPERSAND:
           this.returnState = this.state;
           this.inAttribute = true;
           return 'characterReference';
-        case GT:
+        case CodePoints.GT:
           this.currentAttribute.value = buffer.takeString();
           this.emitCurrentTag();
           return 'data';
-        case NUL:
+        case CodePoints.NUL:
           this.error('unexpected-null-character');
-          buffer.append(REPLACEMENT_CHAR);
+          buffer.append(CodePoints.REPLACEMENT_CHAR);
           code = this.nextCode();
           break;
-        case EOF:
+        case CodePoints.EOF:
           this.error('eof-in-tag');
           return this.eof();
-        case DOUBLE_QUOTE:
-        case SINGLE_QUOTE:
-        case LT:
-        case EQ:
+        case CodePoints.DOUBLE_QUOTE:
+        case CodePoints.SINGLE_QUOTE:
+        case CodePoints.LT:
+        case CodePoints.EQ:
         case 0x60: // grave accent (`)
           this.error('unexpected-character-in-unquoted-attribute-value');
         default:
@@ -678,17 +653,17 @@ export class CompositeTokenizer {
 
   afterAttributeValueQuoted(code: number): State {
     switch (code) {
-      case TAB:
-      case LF:
-      case FF:
-      case SPACE:
+      case CodePoints.TAB:
+      case CodePoints.LF:
+      case CodePoints.FF:
+      case CodePoints.SPACE:
         return 'beforeAttributeName';
-      case SOLIDUS:
+      case CodePoints.SLASH:
         return 'selfClosingStartTag';
-      case GT:
+      case CodePoints.GT:
         this.emitCurrentTag();
         return 'data';
-      case EOF:
+      case CodePoints.EOF:
         this.error('eof-in-tag');
         return this.eof();
       default:
@@ -699,11 +674,11 @@ export class CompositeTokenizer {
 
   selfClosingStartTag(code: number): State {
     switch (code) {
-      case GT:
+      case CodePoints.GT:
         this.currentTag.selfClosing = true;
         this.emitCurrentTag();
         return 'data';
-      case EOF:
+      case CodePoints.EOF:
         this.error('eof-in-tag');
         return this.eof();
       default:
@@ -722,9 +697,9 @@ export class CompositeTokenizer {
     const buffer = this.env.buffer;
     while (true) {
       switch (code) {
-        case CLOSE_SQUARE_BRACKET:
+        case CodePoints.CLOSE_SQUARE_BRACKET:
           return 'cdataSectionBracket';
-        case EOF:
+        case CodePoints.EOF:
           this.emitAccumulatedCharacters();
           this.error('eof-in-cdata');
           return this.eof();
@@ -736,10 +711,10 @@ export class CompositeTokenizer {
   }
 
   cdataSectionBracket(code: number): State {
-    if (code === CLOSE_SQUARE_BRACKET)
+    if (code === CodePoints.CLOSE_SQUARE_BRACKET)
       return 'cdataSectionEnd';
     else {
-      this.env.buffer.append(CLOSE_SQUARE_BRACKET);
+      this.env.buffer.append(CodePoints.CLOSE_SQUARE_BRACKET);
       return this.callState('cdataSection', code);
     }
   }
@@ -748,16 +723,16 @@ export class CompositeTokenizer {
     const buffer = this.env.buffer;
     while (true) {
       switch (code) {
-        case CLOSE_SQUARE_BRACKET:
-          buffer.append(CLOSE_SQUARE_BRACKET);
+        case CodePoints.CLOSE_SQUARE_BRACKET:
+          buffer.append(CodePoints.CLOSE_SQUARE_BRACKET);
           code = this.nextCode();
           break;
-        case GT:
+        case CodePoints.GT:
           this.emitAccumulatedCharacters(); // TODO this should be marked explicitly as CDATA
           return 'data';
         default:
-          buffer.append(CLOSE_SQUARE_BRACKET);
-          buffer.append(CLOSE_SQUARE_BRACKET);
+          buffer.append(CodePoints.CLOSE_SQUARE_BRACKET);
+          buffer.append(CodePoints.CLOSE_SQUARE_BRACKET);
           return this.callState('cdataSection', code);
       }
     }
@@ -767,8 +742,8 @@ export class CompositeTokenizer {
   characterReference(code: number): State {
     const buffer = this.env.buffer;
     this.referenceStartMark = buffer.position;
-    buffer.append(AMPERSAND);
-    if (code === SHARP) {
+    buffer.append(CodePoints.AMPERSAND);
+    if (code === CodePoints.SHARP) {
       buffer.append(code);
       return 'numericCharacterReference';
     } else if (isAsciiAlphaNum(code))
@@ -779,7 +754,7 @@ export class CompositeTokenizer {
 
   numericCharacterReference(code: number): State {
     this.charCode = 0;
-    if (code === X_CAPITAL || code === X_REGULAR) {
+    if (code === CodePoints.X_CAPITAL || code === CodePoints.X_REGULAR) {
       this.env.buffer.append(code);
       return 'hexadecimalCharacterReferenceStart';
     } else
@@ -791,13 +766,13 @@ export class CompositeTokenizer {
     let charCode = this.charCode;
     if (charCode === 0) {
       this.error('null-character-reference');
-      charCode = REPLACEMENT_CHAR;
+      charCode = CodePoints.REPLACEMENT_CHAR;
     } else if (charCode > 0x10FFFF) {
       this.error('character-reference-outside-unicode-range');
-      charCode = REPLACEMENT_CHAR;
+      charCode = CodePoints.REPLACEMENT_CHAR;
     } else if (isSurrogate(charCode)) {
       this.error('surrogate-character-reference');
-      charCode = REPLACEMENT_CHAR;
+      charCode = CodePoints.REPLACEMENT_CHAR;
     } else if (isNonCharacter(charCode)) {
       this.error('noncharacter-character-reference');
     } else if (charCode === 0x0D || (!isSpace(charCode) && isControl(charCode))) {
@@ -818,10 +793,10 @@ export class CompositeTokenizer {
       code = this.nextCode();
     }
     if (node.value) {
-      if (this.inAttribute && lastMatch !== SEMICOLON && (code === EQ || isAsciiAlphaNum(code))) { // for historical reasons
+      if (this.inAttribute && lastMatch !== CodePoints.SEMICOLON && (code === CodePoints.EQ || isAsciiAlphaNum(code))) { // for historical reasons
         return this.callState(this.returnState, code);
       } else {
-        if (lastMatch !== SEMICOLON)
+        if (lastMatch !== CodePoints.SEMICOLON)
           this.error('missing-semicolon-after-character-reference');
         buffer.position = this.referenceStartMark;
         buffer.appendSequence(node.value);
@@ -841,7 +816,7 @@ export class CompositeTokenizer {
 
   hexadecimalCharacterReference(code: number): State {
     while (true) {
-      if (code === SEMICOLON) {
+      if (code === CodePoints.SEMICOLON) {
         this.numericCharacterReferenceEnd();
         return this.returnState;
       } else if (isDigit(code)) {
@@ -869,7 +844,7 @@ export class CompositeTokenizer {
 
   decimalCharacterReference(code: number): State {
     while (true) {
-      if (code === SEMICOLON) {
+      if (code === CodePoints.SEMICOLON) {
         this.numericCharacterReferenceEnd();
         return this.returnState;
       } else if (isDigit(code)) {
@@ -886,7 +861,7 @@ export class CompositeTokenizer {
   ambiguousAmpersand(code: number): State {
     const buffer = this.env.buffer;
     while (true) {
-      if (code === SEMICOLON) {
+      if (code === CodePoints.SEMICOLON) {
         this.error('unknown-named-character-reference');
         return this.callState(this.returnState, code);
       } else if (isAsciiAlphaNum(code)) {
@@ -902,9 +877,9 @@ export class CompositeTokenizer {
     this.env.buffer.position = this.sequenceBufferOffset;
     this.startNewComment();
     switch (code) {
-      case HYPHEN:
+      case CodePoints.HYPHEN:
         return 'commentStartDash';
-      case GT:
+      case CodePoints.GT:
         this.error('abrupt-closing-of-empty-comment');
         this.emitCurrentComment();
         return 'data';
@@ -915,18 +890,18 @@ export class CompositeTokenizer {
 
   commentStartDash(code: number): State {
     switch (code) {
-      case HYPHEN:
+      case CodePoints.HYPHEN:
         return 'commentEnd';
-      case GT:
+      case CodePoints.GT:
         this.error('abrupt-closing-of-empty-comment');
         this.emitCurrentComment();
         return 'data';
-      case EOF:
+      case CodePoints.EOF:
         this.error('eof-in-comment');
         this.emitCurrentComment();
         return this.eof();
       default:
-        this.env.buffer.append(HYPHEN);
+        this.env.buffer.append(CodePoints.HYPHEN);
         return this.callState('comment', code);
     }
   }
@@ -935,18 +910,18 @@ export class CompositeTokenizer {
     const buffer = this.env.buffer;
     while (true) {
       switch (code) {
-        case LT:
+        case CodePoints.LT:
           buffer.append(code);
           return 'commentLessThanSign';
-        case HYPHEN:
+        case CodePoints.HYPHEN:
           return 'commentEndDash';
-        case EOF:
+        case CodePoints.EOF:
           this.error('eof-in-comment');
           this.emitCurrentComment();
           return this.eof();
-        case NUL:
+        case CodePoints.NUL:
           this.error('unexpected-null-character');
-          code = REPLACEMENT_CHAR;
+          code = CodePoints.REPLACEMENT_CHAR;
         default:
           buffer.append(code);
           code = this.nextCode();
@@ -958,10 +933,10 @@ export class CompositeTokenizer {
     const buffer = this.env.buffer;
     while (true) {
       switch (code) {
-        case EXCLAMATION:
+        case CodePoints.EXCLAMATION:
           buffer.append(code);
           return 'commentLessThanSignBang';
-        case LT:
+        case CodePoints.LT:
           buffer.append(code);
           code = this.nextCode();
           break;
@@ -972,37 +947,37 @@ export class CompositeTokenizer {
   }
 
   commentLessThanSignBang(code: number): State {
-    if (code === HYPHEN)
+    if (code === CodePoints.HYPHEN)
       return 'commentLessThanSignBangDash';
     else
       return this.callState('comment', code);
   }
 
   commentLessThanSignBangDash(code: number): State {
-    if (code === HYPHEN)
+    if (code === CodePoints.HYPHEN)
       return 'commentLessThanSignBangDashDash';
     else
       return this.callState('commentEndDash', code);
   }
 
   commentLessThanSignBangDashDash(code: number): State {
-    if (code !== GT && code !== EOF)
+    if (code !== CodePoints.GT && code !== CodePoints.EOF)
       this.error('nested-comment');
     return this.callState('commentEnd', code);
   }
 
   commentEndDash(code: number): State {
     switch (code) {
-      case HYPHEN:
+      case CodePoints.HYPHEN:
         return 'commentEnd';
-      case EOF:
+      case CodePoints.EOF:
         // by the spec extra dash is NOT appended here
         // so unfinished comments ending with single dash do NOT include that dash in data
         this.error('eof-in-comment');
         this.emitCurrentComment();
         return this.eof();
       default:
-        this.env.buffer.append(HYPHEN);
+        this.env.buffer.append(CodePoints.HYPHEN);
         return this.callState('comment', code);
     }
   }
@@ -1011,22 +986,22 @@ export class CompositeTokenizer {
     const buffer = this.env.buffer;
     while (true) {
       switch (code) {
-        case GT:
+        case CodePoints.GT:
           this.emitCurrentComment();
           return 'data';
-        case EXCLAMATION:
+        case CodePoints.EXCLAMATION:
           return 'commentEndBang';
-        case EOF:
+        case CodePoints.EOF:
           this.error('eof-in-comment');
           this.emitCurrentComment();
           return this.eof();
-        case HYPHEN:
+        case CodePoints.HYPHEN:
           buffer.append(code);
           code = this.nextCode();
           break;
         default:
-          buffer.append(HYPHEN);
-          buffer.append(HYPHEN);
+          buffer.append(CodePoints.HYPHEN);
+          buffer.append(CodePoints.HYPHEN);
           return this.callState('comment', code);
       }
     }
@@ -1037,27 +1012,27 @@ export class CompositeTokenizer {
     const data = buffer.buffer;
     let position: number;
     switch (code) {
-      case HYPHEN:
+      case CodePoints.HYPHEN:
         // TODO this might be good variant overload candidate
         position = buffer.position;
-        data[position++] = HYPHEN;
-        data[position++] = HYPHEN;
-        data[position++] = EXCLAMATION;
+        data[position++] = CodePoints.HYPHEN;
+        data[position++] = CodePoints.HYPHEN;
+        data[position++] = CodePoints.EXCLAMATION;
         buffer.position += 3;
         return 'commentEndDash';
-      case GT:
+      case CodePoints.GT:
         this.error('incorrectly-closed-comment');
         this.emitCurrentComment();
         return 'data';
-      case EOF:
+      case CodePoints.EOF:
         this.error('eof-in-comment');
         this.emitCurrentComment();
         return this.eof();
       default:
         position = buffer.position;
-        data[position++] = HYPHEN;
-        data[position++] = HYPHEN;
-        data[position++] = EXCLAMATION;
+        data[position++] = CodePoints.HYPHEN;
+        data[position++] = CodePoints.HYPHEN;
+        data[position++] = CodePoints.EXCLAMATION;
         buffer.position += 3;
         return this.callState('comment', code);
     }
@@ -1067,15 +1042,15 @@ export class CompositeTokenizer {
     const buffer = this.env.buffer;
     while (true) {
       switch (code) {
-        case GT:
+        case CodePoints.GT:
           this.emitCurrentComment();
           return 'data';
-        case EOF:
+        case CodePoints.EOF:
           this.emitCurrentComment();
           return this.eof();
-        case NUL:
+        case CodePoints.NUL:
           this.error('unexpected-null-character');
-          code = REPLACEMENT_CHAR;
+          code = CodePoints.REPLACEMENT_CHAR;
         default:
           buffer.append(code);
           code = this.nextCode();
@@ -1086,12 +1061,12 @@ export class CompositeTokenizer {
   markupDeclarationOpen(code: number): State {
     // TODO deal with reconsuming the buffer when sequence fails
     switch (code) {
-      case HYPHEN:
+      case CodePoints.HYPHEN:
         return this.matchSequence(code, TWO_HYPHENS, false, 'commentStart', 'bogusComment');
       case 0x44: // D
       case 0x64: // d
         return this.matchSequence(code, DOCTYPE, true, 'doctype', 'bogusComment');
-      case OPEN_SQUARE_BRACKET:
+      case CodePoints.OPEN_SQUARE_BRACKET:
         this.emitAccumulatedCharacters();
         return this.matchSequence(code, CDATA, false, 'cdataSectionStart', 'bogusComment');
       default:
@@ -1107,16 +1082,16 @@ export class CompositeTokenizer {
     this.emitAccumulatedCharacters();
     this.startNewDoctype();
     switch (code) {
-      case TAB:
-      case LF:
-      case FF:
-      case SPACE:
+      case CodePoints.TAB:
+      case CodePoints.LF:
+      case CodePoints.FF:
+      case CodePoints.SPACE:
         return 'beforeDoctypeName';
-      case EOF:
+      case CodePoints.EOF:
         return this.eofInDoctype();
       default:
         this.error('missing-whitespace-before-doctype-name');
-      case GT:
+      case CodePoints.GT:
         return this.callState('beforeDoctypeName', code);
     }
   }
@@ -1125,22 +1100,22 @@ export class CompositeTokenizer {
     const buffer = this.env.buffer;
     while (true) {
       switch (code) {
-        case TAB:
-        case LF:
-        case FF:
-        case SPACE:
+        case CodePoints.TAB:
+        case CodePoints.LF:
+        case CodePoints.FF:
+        case CodePoints.SPACE:
           code = this.nextCode();
           break;
-        case GT:
+        case CodePoints.GT:
           this.error('missing-doctype-name');
           this.currentDoctype.forceQuirks = true;
           this.emitCurrentDoctype();
           return 'data';
-        case EOF:
+        case CodePoints.EOF:
           return this.eofInDoctype();
-        case NUL:
+        case CodePoints.NUL:
           this.error('unexpected-null-character');
-          code = REPLACEMENT_CHAR;
+          code = CodePoints.REPLACEMENT_CHAR;
         default:
           if (isAsciiUpperAlpha(code)) code += 0x20;
           buffer.append(code);
@@ -1153,22 +1128,22 @@ export class CompositeTokenizer {
     const buffer = this.env.buffer;
     while (true) {
       switch (code) {
-        case TAB:
-        case LF:
-        case FF:
-        case SPACE:
+        case CodePoints.TAB:
+        case CodePoints.LF:
+        case CodePoints.FF:
+        case CodePoints.SPACE:
           this.currentDoctype.name = buffer.takeString();
           return 'afterDoctypeName';
-        case GT:
+        case CodePoints.GT:
           this.currentDoctype.name = buffer.takeString();
           this.emitCurrentDoctype();
           return 'data';
-        case EOF:
+        case CodePoints.EOF:
           this.currentDoctype.name = buffer.takeString();
           return this.eofInDoctype();
-        case NUL:
+        case CodePoints.NUL:
           this.error('unexpected-null-character');
-          code = REPLACEMENT_CHAR;
+          code = CodePoints.REPLACEMENT_CHAR;
         default:
           if (isAsciiUpperAlpha(code)) code += 0x20;
           buffer.append(code);
@@ -1180,16 +1155,16 @@ export class CompositeTokenizer {
   afterDoctypeName(code: number): State {
     while (true) {
       switch (code) {
-        case TAB:
-        case LF:
-        case FF:
-        case SPACE:
+        case CodePoints.TAB:
+        case CodePoints.LF:
+        case CodePoints.FF:
+        case CodePoints.SPACE:
           code = this.nextCode();
           break;
-        case GT:
+        case CodePoints.GT:
           this.emitCurrentDoctype();
           return 'data';
-        case EOF:
+        case CodePoints.EOF:
           return this.eofInDoctype();
         case 0x50: // P
         case 0x70: // p
@@ -1213,23 +1188,23 @@ export class CompositeTokenizer {
   afterDoctypePublicKeyword(code: number): State {
     this.env.buffer.position = this.sequenceBufferOffset;
     switch (code) {
-      case TAB:
-      case LF:
-      case FF:
-      case SPACE:
+      case CodePoints.TAB:
+      case CodePoints.LF:
+      case CodePoints.FF:
+      case CodePoints.SPACE:
         return 'beforeDoctypePublicIdentifier';
-      case DOUBLE_QUOTE:
+      case CodePoints.DOUBLE_QUOTE:
         this.error('missing-whitespace-after-doctype-public-keyword');
         return 'doctypePublicIdentifierDoubleQuoted';
-      case SINGLE_QUOTE:
+      case CodePoints.SINGLE_QUOTE:
         this.error('missing-whitespace-after-doctype-public-keyword');
         return 'doctypePublicIdentifierSingleQuoted';
-      case GT:
+      case CodePoints.GT:
         this.currentDoctype.forceQuirks = true;
         this.error('missing-doctype-public-identifier');
         this.emitCurrentDoctype();
         return 'data';
-      case EOF:
+      case CodePoints.EOF:
         return this.eofInDoctype();
       default:
         this.currentDoctype.forceQuirks = true;
@@ -1241,22 +1216,22 @@ export class CompositeTokenizer {
   beforeDoctypePublicIdentifier(code: number): State {
     while (true) {
       switch (code) {
-        case TAB:
-        case LF:
-        case FF:
-        case SPACE:
+        case CodePoints.TAB:
+        case CodePoints.LF:
+        case CodePoints.FF:
+        case CodePoints.SPACE:
           code = this.nextCode();
           break;
-        case DOUBLE_QUOTE:
+        case CodePoints.DOUBLE_QUOTE:
           return 'doctypePublicIdentifierDoubleQuoted';
-        case SINGLE_QUOTE:
+        case CodePoints.SINGLE_QUOTE:
           return 'doctypePublicIdentifierSingleQuoted';
-        case GT:
+        case CodePoints.GT:
           this.currentDoctype.forceQuirks = true;
           this.error('missing-doctype-public-identifier');
           this.emitCurrentDoctype();
           return 'data';
-        case EOF:
+        case CodePoints.EOF:
           return this.eofInDoctype();
         default:
           this.currentDoctype.forceQuirks = true;
@@ -1267,11 +1242,11 @@ export class CompositeTokenizer {
   }
 
   doctypePublicIdentifierDoubleQuoted(code: number): State {
-    return this.doctypePublicIdentifierQuoted(code, DOUBLE_QUOTE);
+    return this.doctypePublicIdentifierQuoted(code, CodePoints.DOUBLE_QUOTE);
   }
 
   doctypePublicIdentifierSingleQuoted(code: number): State {
-    return this.doctypePublicIdentifierQuoted(code, SINGLE_QUOTE);
+    return this.doctypePublicIdentifierQuoted(code, CodePoints.SINGLE_QUOTE);
   }
 
   doctypePublicIdentifierQuoted(code: number, terminator: number): State {
@@ -1281,18 +1256,18 @@ export class CompositeTokenizer {
         case terminator:
           this.currentDoctype.publicId = buffer.takeString();
           return 'afterDoctypePublicIdentifier';
-        case GT:
+        case CodePoints.GT:
           this.currentDoctype.publicId = buffer.takeString();
           this.currentDoctype.forceQuirks = true;
           this.error('abrupt-doctype-public-identifier');
           this.emitCurrentDoctype();
           return 'data';
-        case EOF:
+        case CodePoints.EOF:
           this.currentDoctype.publicId = buffer.takeString();
           return this.eofInDoctype();
-        case NUL:
+        case CodePoints.NUL:
           this.error('unexpected-null-character');
-          code = REPLACEMENT_CHAR;
+          code = CodePoints.REPLACEMENT_CHAR;
         default:
           buffer.append(code);
           code = this.nextCode();
@@ -1302,21 +1277,21 @@ export class CompositeTokenizer {
 
   afterDoctypePublicIdentifier(code: number): State {
     switch (code) {
-      case TAB:
-      case LF:
-      case FF:
-      case SPACE:
+      case CodePoints.TAB:
+      case CodePoints.LF:
+      case CodePoints.FF:
+      case CodePoints.SPACE:
         return 'betweenDoctypePublicAndSystemIdentifiers';
-      case GT:
+      case CodePoints.GT:
         this.emitCurrentDoctype();
         return 'data';
-      case DOUBLE_QUOTE:
+      case CodePoints.DOUBLE_QUOTE:
         this.error('missing-whitespace-between-doctype-public-and-system-identifiers');
         return 'doctypeSystemIdentifierDoubleQuoted';
-      case SINGLE_QUOTE:
+      case CodePoints.SINGLE_QUOTE:
         this.error('missing-whitespace-between-doctype-public-and-system-identifiers');
         return 'doctypeSystemIdentifierSingleQuoted';
-      case EOF:
+      case CodePoints.EOF:
         return this.eofInDoctype();
       default:
         this.currentDoctype.forceQuirks = true;
@@ -1328,20 +1303,20 @@ export class CompositeTokenizer {
   betweenDoctypePublicAndSystemIdentifiers(code: number): State {
     while (true) {
       switch (code) {
-        case TAB:
-        case LF:
-        case FF:
-        case SPACE:
+        case CodePoints.TAB:
+        case CodePoints.LF:
+        case CodePoints.FF:
+        case CodePoints.SPACE:
           code = this.nextCode();
           break;
-        case DOUBLE_QUOTE:
+        case CodePoints.DOUBLE_QUOTE:
           return 'doctypeSystemIdentifierDoubleQuoted';
-        case SINGLE_QUOTE:
+        case CodePoints.SINGLE_QUOTE:
           return 'doctypeSystemIdentifierSingleQuoted';
-        case GT:
+        case CodePoints.GT:
           this.emitCurrentDoctype();
           return 'data';
-        case EOF:
+        case CodePoints.EOF:
           return this.eofInDoctype();
         default:
           this.currentDoctype.forceQuirks = true;
@@ -1354,23 +1329,23 @@ export class CompositeTokenizer {
   afterDoctypeSystemKeyword(code: number): State {
     this.env.buffer.position = this.sequenceBufferOffset;
     switch (code) {
-      case TAB:
-      case LF:
-      case FF:
-      case SPACE:
+      case CodePoints.TAB:
+      case CodePoints.LF:
+      case CodePoints.FF:
+      case CodePoints.SPACE:
         return 'beforeDoctypeSystemIdentifier';
-      case DOUBLE_QUOTE:
+      case CodePoints.DOUBLE_QUOTE:
         this.error('missing-whitespace-after-doctype-system-keyword');
         return 'doctypeSystemIdentifierDoubleQuoted';
-      case SINGLE_QUOTE:
+      case CodePoints.SINGLE_QUOTE:
         this.error('missing-whitespace-after-doctype-system-keyword');
         return 'doctypeSystemIdentifierSingleQuoted';
-      case GT:
+      case CodePoints.GT:
         this.currentDoctype.forceQuirks = true;
         this.error('missing-doctype-system-identifier');
         this.emitCurrentDoctype();
         return 'data';
-      case EOF:
+      case CodePoints.EOF:
         return this.eofInDoctype();
       default:
         this.currentDoctype.forceQuirks = true;
@@ -1382,22 +1357,22 @@ export class CompositeTokenizer {
   beforeDoctypeSystemIdentifier(code: number): State {
     while (true) {
       switch (code) {
-        case TAB:
-        case LF:
-        case FF:
-        case SPACE:
+        case CodePoints.TAB:
+        case CodePoints.LF:
+        case CodePoints.FF:
+        case CodePoints.SPACE:
           code = this.nextCode();
           break;
-        case DOUBLE_QUOTE:
+        case CodePoints.DOUBLE_QUOTE:
           return 'doctypeSystemIdentifierDoubleQuoted';
-        case SINGLE_QUOTE:
+        case CodePoints.SINGLE_QUOTE:
           return 'doctypeSystemIdentifierSingleQuoted';
-        case GT:
+        case CodePoints.GT:
           this.currentDoctype.forceQuirks = true;
           this.error('missing-doctype-system-identifier');
           this.emitCurrentDoctype();
           return 'data';
-        case EOF:
+        case CodePoints.EOF:
           return this.eofInDoctype();
         default:
           this.currentDoctype.forceQuirks = true;
@@ -1408,10 +1383,10 @@ export class CompositeTokenizer {
   }
 
   doctypeSystemIdentifierDoubleQuoted(code: number): State {
-    return this.doctypeSystemIdentifierQuoted(code, DOUBLE_QUOTE);
+    return this.doctypeSystemIdentifierQuoted(code, CodePoints.DOUBLE_QUOTE);
   }
   doctypeSystemIdentifierSingleQuoted(code: number): State {
-    return this.doctypeSystemIdentifierQuoted(code, SINGLE_QUOTE);
+    return this.doctypeSystemIdentifierQuoted(code, CodePoints.SINGLE_QUOTE);
   }
 
   doctypeSystemIdentifierQuoted(code: number, terminator: number): State {
@@ -1421,18 +1396,18 @@ export class CompositeTokenizer {
         case terminator:
           this.currentDoctype.systemId = buffer.takeString();
           return 'afterDoctypeSystemIdentifier';
-        case GT:
+        case CodePoints.GT:
           this.currentDoctype.systemId = buffer.takeString();
           this.currentDoctype.forceQuirks = true;
           this.error('abrupt-doctype-system-identifier');
           this.emitCurrentDoctype();
           return 'data';
-        case EOF:
+        case CodePoints.EOF:
           this.currentDoctype.systemId = buffer.takeString();
           return this.eofInDoctype();
-        case NUL:
+        case CodePoints.NUL:
           this.error('unexpected-null-character');
-          code = REPLACEMENT_CHAR;
+          code = CodePoints.REPLACEMENT_CHAR;
         default:
           buffer.append(code);
           code = this.nextCode();
@@ -1443,16 +1418,16 @@ export class CompositeTokenizer {
   afterDoctypeSystemIdentifier(code: number): State {
     while (true) {
       switch (code) {
-        case TAB:
-        case LF:
-        case FF:
-        case SPACE:
+        case CodePoints.TAB:
+        case CodePoints.LF:
+        case CodePoints.FF:
+        case CodePoints.SPACE:
           code = this.nextCode();
           break;
-        case GT:
+        case CodePoints.GT:
           this.emitCurrentDoctype();
           return 'data';
-        case EOF:
+        case CodePoints.EOF:
           return this.eofInDoctype();
         default:
           this.error('unexpected-character-after-doctype-system-identifier');
@@ -1464,13 +1439,13 @@ export class CompositeTokenizer {
   bogusDoctype(code: number): State {
     while (true) {
       switch (code) {
-        case GT:
+        case CodePoints.GT:
           this.emitCurrentDoctype()
           return 'data';
-        case EOF:
+        case CodePoints.EOF:
           this.emitCurrentDoctype();
           return this.eof();
-        case NUL:
+        case CodePoints.NUL:
           this.error('unexpected-null-character');
         default:
           code = this.nextCode();
@@ -1486,14 +1461,14 @@ export class CompositeTokenizer {
   scriptDataLessThanSign(code: number): State {
     const buffer = this.env.buffer;
     switch (code) {
-      case SOLIDUS:
+      case CodePoints.SLASH:
         return 'scriptDataEndTagOpen';
-      case EXCLAMATION:
-        buffer.append(LT);
-        buffer.append(EXCLAMATION);
+      case CodePoints.EXCLAMATION:
+        buffer.append(CodePoints.LT);
+        buffer.append(CodePoints.EXCLAMATION);
         return 'scriptDataEscapeStart';
       default:
-        buffer.append(LT);
+        buffer.append(CodePoints.LT);
         return this.callState('scriptData', code);
     }
   }
@@ -1511,7 +1486,7 @@ export class CompositeTokenizer {
   }
 
   scriptDataEscapeStart(code: number): State {
-    if (code === HYPHEN) {
+    if (code === CodePoints.HYPHEN) {
       this.env.buffer.append(code);
       return 'scriptDataEscapeStartDash';
     } else
@@ -1519,7 +1494,7 @@ export class CompositeTokenizer {
   }
 
   scriptDataEscapeStartDash(code: number): State {
-    if (code === HYPHEN) {
+    if (code === CodePoints.HYPHEN) {
       this.env.buffer.append(code);
       return 'scriptDataEscapedDashDash';
     } else
@@ -1530,18 +1505,18 @@ export class CompositeTokenizer {
     const buffer = this.env.buffer;
     while (true) {
       switch (code) {
-        case HYPHEN:
+        case CodePoints.HYPHEN:
           buffer.append(code);
           return 'scriptDataEscapedDash';
-        case LT:
+        case CodePoints.LT:
           return 'scriptDataEscapedLessThanSign';
-        case EOF:
+        case CodePoints.EOF:
           this.error('eof-in-script-html-comment-like-text');
           this.emitAccumulatedCharacters();
           return this.eof();
-        case NUL:
+        case CodePoints.NUL:
           this.error('unexpected-null-character');
-          code = REPLACEMENT_CHAR;
+          code = CodePoints.REPLACEMENT_CHAR;
         default:
           buffer.append(code);
           code = this.nextCode();
@@ -1552,18 +1527,18 @@ export class CompositeTokenizer {
   scriptDataEscapedDash(code: number): State {
     const buffer = this.env.buffer;
     switch (code) {
-      case HYPHEN:
+      case CodePoints.HYPHEN:
         buffer.append(code);
         return 'scriptDataEscapedDashDash';
-      case LT:
+      case CodePoints.LT:
         return 'scriptDataEscapedLessThanSign';
-      case EOF:
+      case CodePoints.EOF:
         this.error('eof-in-script-html-comment-like-text');
         this.emitAccumulatedCharacters();
         return this.eof();
-      case NUL:
+      case CodePoints.NUL:
         this.error('unexpected-null-character');
-        code = REPLACEMENT_CHAR;
+        code = CodePoints.REPLACEMENT_CHAR;
       default:
         buffer.append(code);
         return 'scriptDataEscaped';
@@ -1574,22 +1549,22 @@ export class CompositeTokenizer {
     const buffer = this.env.buffer;
     while (true) {
       switch (code) {
-        case HYPHEN:
+        case CodePoints.HYPHEN:
           buffer.append(code);
           code = this.nextCode();
           break;
-        case LT:
+        case CodePoints.LT:
           return 'scriptDataEscapedLessThanSign';
-        case GT:
+        case CodePoints.GT:
           buffer.append(code);
           return 'scriptData';
-        case EOF:
+        case CodePoints.EOF:
           this.error('eof-in-script-html-comment-like-text');
           this.emitAccumulatedCharacters();
           return this.eof();
-        case NUL:
+        case CodePoints.NUL:
           this.error('unexpected-null-character');
-          code = REPLACEMENT_CHAR;
+          code = CodePoints.REPLACEMENT_CHAR;
         default:
           buffer.append(code);
           return 'scriptDataEscaped';
@@ -1599,13 +1574,13 @@ export class CompositeTokenizer {
 
   scriptDataEscapedLessThanSign(code: number): State {
     const buffer = this.env.buffer;
-    if (code === SOLIDUS) {
+    if (code === CodePoints.SLASH) {
       return 'scriptDataEscapedEndTagOpen';
     } else if (isAsciiAlpha(code)) {
-      buffer.append(LT);
+      buffer.append(CodePoints.LT);
       return this.scriptDataDoubleEscapeStart(code);
     } else {
-      buffer.append(LT);
+      buffer.append(CodePoints.LT);
       return this.callState('scriptDataEscaped', code);
     }
   }
@@ -1628,12 +1603,12 @@ export class CompositeTokenizer {
 
   scriptDataDoubleEscapeStartMatched(code: number): State {
     switch (code) {
-      case TAB:
-      case LF:
-      case FF:
-      case SPACE:
-      case SOLIDUS:
-      case GT:
+      case CodePoints.TAB:
+      case CodePoints.LF:
+      case CodePoints.FF:
+      case CodePoints.SPACE:
+      case CodePoints.SLASH:
+      case CodePoints.GT:
         this.env.buffer.append(code);
         return 'scriptDataDoubleEscaped';
       default:
@@ -1645,19 +1620,19 @@ export class CompositeTokenizer {
     const buffer = this.env.buffer;
     while (true) {
       switch (code) {
-        case HYPHEN:
+        case CodePoints.HYPHEN:
           buffer.append(code);
           return 'scriptDataDoubleEscapedDash';
-        case LT:
+        case CodePoints.LT:
           buffer.append(code);
           return 'scriptDataDoubleEscapedLessThanSign';
-        case EOF:
+        case CodePoints.EOF:
           this.error('eof-in-script-html-comment-like-text');
           this.emitAccumulatedCharacters();
           return this.eof();
-        case NUL:
+        case CodePoints.NUL:
           this.error('unexpected-null-character');
-          code = REPLACEMENT_CHAR;
+          code = CodePoints.REPLACEMENT_CHAR;
         default:
           buffer.append(code);
           code = this.nextCode();
@@ -1669,17 +1644,17 @@ export class CompositeTokenizer {
   scriptDataDoubleEscapedDash(code: number): State {
     const buffer = this.env.buffer;
     switch (code) {
-      case HYPHEN:
+      case CodePoints.HYPHEN:
         buffer.append(code);
         return 'scriptDataDoubleEscapedDashDash';
-      case LT:
+      case CodePoints.LT:
         buffer.append(code);
         return 'scriptDataDoubleEscapedLessThanSign';
-      case NUL:
+      case CodePoints.NUL:
         this.error('unexpected-null-character');
-        buffer.append(REPLACEMENT_CHAR);
+        buffer.append(CodePoints.REPLACEMENT_CHAR);
         return 'scriptDataDoubleEscaped';
-      case EOF:
+      case CodePoints.EOF:
         this.error('eof-in-script-html-comment-like-text');
         this.emitAccumulatedCharacters();
         return this.eof();
@@ -1693,21 +1668,21 @@ export class CompositeTokenizer {
     const buffer = this.env.buffer;
     while (true) {
       switch (code) {
-        case HYPHEN:
+        case CodePoints.HYPHEN:
           buffer.append(code);
           code = this.nextCode();
           break;
-        case LT:
+        case CodePoints.LT:
           buffer.append(code);
           return 'scriptDataDoubleEscapedLessThanSign';
-        case GT:
+        case CodePoints.GT:
           buffer.append(code);
           return 'scriptData';
-        case NUL:
+        case CodePoints.NUL:
           this.error('unexpected-null-character');
-          buffer.append(REPLACEMENT_CHAR);
+          buffer.append(CodePoints.REPLACEMENT_CHAR);
           return 'scriptDataDoubleEscaped';
-        case EOF:
+        case CodePoints.EOF:
           this.error('eof-in-script-html-comment-like-text');
           this.emitAccumulatedCharacters();
           return this.eof();
@@ -1720,7 +1695,7 @@ export class CompositeTokenizer {
 
   scriptDataDoubleEscapedLessThanSign(code: number): State {
     const buffer = this.env.buffer;
-    if (code === SOLIDUS) {
+    if (code === CodePoints.SLASH) {
       buffer.append(code);
       return 'scriptDataDoubleEscapeEnd';
     } else {
@@ -1734,12 +1709,12 @@ export class CompositeTokenizer {
 
   scriptDataDoubleEscapeEndMatched(code: number): State {
     switch (code) {
-      case TAB:
-      case LF:
-      case FF:
-      case SPACE:
-      case SOLIDUS:
-      case GT:
+      case CodePoints.TAB:
+      case CodePoints.LF:
+      case CodePoints.FF:
+      case CodePoints.SPACE:
+      case CodePoints.SLASH:
+      case CodePoints.GT:
         this.env.buffer.append(code);
         return 'scriptDataEscaped';
       default:

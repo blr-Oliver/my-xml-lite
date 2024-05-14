@@ -1,5 +1,5 @@
 import {isSpace} from '../common/code-checks';
-import {AMPERSAND, DOUBLE_QUOTE, EQ, EXCLAMATION, GT, LT, QUESTION, SEMICOLON, SINGLE_QUOTE, SLASH} from '../common/code-points';
+import {CodePoints} from '../common/code-points';
 import {CD_END, CD_START, CMT_END, CMT_START, PI_END, PI_START, stringToArray} from '../common/code-sequences';
 import {StringSource} from '../common/stream-source';
 import {isNameChar, isNameStartChar} from '../common/xml-code-checks';
@@ -41,7 +41,7 @@ export function document(source: StringSource): Document {
 function elementContents(source: StringSource, parent: NodeContainer): string | void {
   while (source.get() !== -1) {
     text(source, parent);
-    if (source.get() === LT) {
+    if (source.get() === CodePoints.LT) {
       let closingTagName = lt(source, parent);
       if (closingTagName) return closingTagName;
     } else {
@@ -52,10 +52,10 @@ function elementContents(source: StringSource, parent: NodeContainer): string | 
 
 function text(source: StringSource, parent: NodeContainer): void {
   let code: number = source.next();
-  if (code === -1 || code === LT) return;
+  if (code === -1 || code === CodePoints.LT) return;
   source.start();
   let blank = true;
-  while (code !== -1 && code !== LT) {
+  while (code !== -1 && code !== CodePoints.LT) {
     code = source.next();
     blank = blank && isSpace(code);
   }
@@ -75,13 +75,13 @@ function text(source: StringSource, parent: NodeContainer): void {
 
 function lt(source: StringSource, parent: NodeContainer): string | void {
   let code = source.next();
-  if (code === SLASH) {
+  if (code === CodePoints.SLASH) {
     const name = closingTag(source);
     if (ALWAYS_EMPTY[name.toLowerCase()])
       return;
     return name;
-  } else if (code === QUESTION) pi(source, parent);
-  else if (code === EXCLAMATION) exclamation(source, parent);
+  } else if (code === CodePoints.QUESTION) pi(source, parent);
+  else if (code === CodePoints.EXCLAMATION) exclamation(source, parent);
   else if (isNameChar(code) || isSpace(code)) return element(source, parent);
   else unexpected(source, `Expected valid markup or name`);
 }
@@ -97,7 +97,7 @@ function closingTag(source: StringSource): string {
   source.next();
   skipSpace(source);
   const name = readName(source);
-  if (skipSpace(source) !== GT) unexpected(source, `Expected '>'`);
+  if (skipSpace(source) !== CodePoints.GT) unexpected(source, `Expected '>'`);
   return name;
 }
 
@@ -122,12 +122,12 @@ function element(source: StringSource, parent: NodeContainer): string | void {
       attribute(source, element);
     else break;
   }
-  if (source.get() === SLASH) {
-    if (source.next() !== GT) unexpected(source, `Expected '>'`);
+  if (source.get() === CodePoints.SLASH) {
+    if (source.next() !== CodePoints.GT) unexpected(source, `Expected '>'`);
     element.empty = true;
     return;
   } else {
-    if (source.get() !== GT) unexpected(source, `Expected valid markup or name`);
+    if (source.get() !== CodePoints.GT) unexpected(source, `Expected valid markup or name`);
     const lcName = name.toLowerCase();
     if (ALWAYS_EMPTY[lcName]) {
       element.empty = true;
@@ -136,7 +136,7 @@ function element(source: StringSource, parent: NodeContainer): string | void {
     let closingName: string | void;
     if (NO_CHILDREN[lcName]) {
       source.start();
-      skipToSeq(source, [LT, SLASH]);
+      skipToSeq(source, [CodePoints.LT, CodePoints.SLASH]);
       addNode(element, {
         type: 'text',
         blank: false, // TODO
@@ -155,15 +155,15 @@ function attribute(source: StringSource, node: Element) {
   const name = readName(source);
   skipSpace(source);
   let value: string | null = null;
-  if (source.get() === EQ) {
+  if (source.get() === CodePoints.EQ) {
     source.next();
     skipSpace(source);
     const startQuote = source.start();
-    if (startQuote === AMPERSAND) {
+    if (startQuote === CodePoints.AMPERSAND) {
       // let all bears of deepest woods drill creator of this fucking invalid XML shit
       value = attributeWithEntityQuote(source);
     } else {
-      if (startQuote !== SINGLE_QUOTE && startQuote !== DOUBLE_QUOTE) unexpected(source, `Expected single (') or double quote (")`);
+      if (startQuote !== CodePoints.SINGLE_QUOTE && startQuote !== CodePoints.DOUBLE_QUOTE) unexpected(source, `Expected single (') or double quote (")`);
       source.next();
       const endQuote = skipTo(source, startQuote);
       if (startQuote !== endQuote) unexpected(source, `Expected matching quote (${startQuote})`);
@@ -175,12 +175,12 @@ function attribute(source: StringSource, node: Element) {
 }
 
 function attributeWithEntityQuote(source: StringSource): string {
-  skipTo(source, SEMICOLON);
+  skipTo(source, CodePoints.SEMICOLON);
   source.next();
   const entity = source.end();
   source.start();
   const endMarker = skipToSeq(source, stringToArray(entity));
-  if (endMarker !== SEMICOLON) unexpected(source, `Expected same closing entity ${entity}`);
+  if (endMarker !== CodePoints.SEMICOLON) unexpected(source, `Expected same closing entity ${entity}`);
   source.next();
   return source.end(0, entity.length);
 }
@@ -212,8 +212,8 @@ function declaration(source: StringSource, parent: NodeContainer) {
   let level = 1;
   let code: number = source.get();
   while (level > 0 && code !== -1) {
-    if (code === LT) ++level;
-    else if (code === GT) --level;
+    if (code === CodePoints.LT) ++level;
+    else if (code === CodePoints.GT) --level;
     code = source.next();
   }
   addNode(parent, {

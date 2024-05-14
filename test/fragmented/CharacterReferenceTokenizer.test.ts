@@ -1,9 +1,9 @@
-import {AMPERSAND, EOF, X_REGULAR} from '../../src/common/code-points';
+import {CodePoints} from '../../src/common/code-points';
 import {stringToArray} from '../../src/common/code-sequences';
 import {DirectCharacterSource} from '../../src/common/stream-source';
+import {PrefixNode} from '../../src/decl/entity-ref-index';
 import {HTML_SPECIAL} from '../../src/decl/known-named-refs';
 import {ParserEnvironment} from '../../src/decl/ParserEnvironment';
-import {PrefixNode} from '../../src/decl/entity-ref-index';
 import {buildIndex} from '../../src/impl/build-index';
 import {CompositeTokenizer} from '../../src/impl/CompositeTokenizer';
 import {FixedSizeStringBuilder} from '../../src/impl/FixedSizeStringBuilder';
@@ -27,9 +27,9 @@ function suite() {
       }
       attributeValueUnquoted(code: number): State {
         switch (code) {
-          case EOF:
+          case CodePoints.EOF as const:
             return this.eof();
-          case AMPERSAND:
+          case CodePoints.AMPERSAND:
             return super.attributeValueUnquoted(code);
           default:
             this.env.buffer.append(code);
@@ -63,7 +63,7 @@ function suite() {
     parser.referenceStartMark = 0;
     parser.active = true;
     parser.env.buffer.clear();
-    parser.env.buffer.append(X_REGULAR);
+    parser.env.buffer.append(CodePoints.X_REGULAR);
     tokenList.length = 0;
     errorList.length = 0;
   });
@@ -102,7 +102,7 @@ function suite() {
       expect(lastState).toStrictEqual(expectedLastState);
       expect(parser.referenceStartMark).toStrictEqual(1);
       const buffer = parser.env.buffer;
-      expect(buffer.buffer[0]).toStrictEqual(X_REGULAR);
+      expect(buffer.buffer[0]).toStrictEqual(CodePoints.X_REGULAR);
       expect(buffer.takeString(1)).toStrictEqual(expectedData);
       expect(errorList).toStrictEqual(expectedErrors);
     });
