@@ -1,13 +1,13 @@
 import {stringToArray} from '../../src/common/code-sequences';
 import {DirectCharacterSource} from '../../src/common/stream-source';
+import {PrefixNode} from '../../src/decl/entity-ref-index';
 import {HTML_SPECIAL} from '../../src/decl/known-named-refs';
 import {ParserEnvironment} from '../../src/decl/ParserEnvironment';
-import {PrefixNode} from '../../src/decl/entity-ref-index';
 import {buildIndex} from '../../src/impl/build-index';
 import {CompositeTokenizer} from '../../src/impl/CompositeTokenizer';
 import {FixedSizeStringBuilder} from '../../src/impl/FixedSizeStringBuilder';
 import {State} from '../../src/impl/states';
-import {CharactersToken, DoctypeToken, EOF_TOKEN, Token} from '../../src/impl/tokens';
+import {CharactersToken, CommentToken, DoctypeToken, EOF_TOKEN, Token} from '../../src/impl/tokens';
 import {default as rawTests} from './samples/doctype.json';
 
 type TestCase = [string/*name*/, string/*input*/, string | null/*doctype name*/, string | null/*public id*/, string | null/*system id*/, boolean/*force quirks*/, string[]/*errors*/];
@@ -73,6 +73,22 @@ function suite() {
       expect(doctype.systemId).toBeUndefined();
       expect(doctype.forceQuirks).toStrictEqual(false);
       expect(errorList).toHaveLength(0);
+    });
+    it('failed doctype', () => {
+      processInput('abc<!doc html>def');
+      expect(parser.state).toStrictEqual('eof');
+      expect(tokenList).toHaveLength(4);
+      expect(tokenList[0].type).toBe('characters');
+      expect(tokenList[1].type).toBe('comment');
+      expect(tokenList[2].type).toBe('characters');
+      expect(tokenList[3]).toBe(EOF_TOKEN);
+      const textStart: CharactersToken = tokenList[0] as CharactersToken;
+      const comment: CommentToken = tokenList[1] as CommentToken;
+      const textEnd: CharactersToken = tokenList[2] as CharactersToken;
+      expect(textStart.data).toStrictEqual('abc');
+      expect(comment.data).toStrictEqual('doc html');
+      expect(textEnd.data).toStrictEqual('def');
+      expect(errorList).toStrictEqual(['incorrectly-opened-comment']);
     })
   });
 
