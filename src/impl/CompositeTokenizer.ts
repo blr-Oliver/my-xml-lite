@@ -16,7 +16,7 @@ import {stringToArray} from '../common/code-sequences';
 import {PrefixNode} from '../decl/entity-ref-index';
 import {ParserEnvironment} from '../decl/ParserEnvironment';
 import {State} from './states';
-import {Attribute, CommentToken, DoctypeToken, EOF_TOKEN, TagToken, TextToken, Token} from './tokens';
+import {Attribute, CDataToken, CharactersToken, CommentToken, DoctypeToken, EOF_TOKEN, TagToken, Token} from './tokens';
 
 const SCRIPT: number[] = [0x73, 0x63, 0x72, 0x69, 0x70, 0x74];
 const TWO_HYPHENS: number[] = [CodePoints.HYPHEN, CodePoints.HYPHEN];
@@ -120,8 +120,15 @@ export class CompositeTokenizer {
       this.emit({
         type: 'characters',
         data: buffer.takeString()
-      } as TextToken);
+      } as CharactersToken);
     }
+  }
+
+  emitCData() {
+    this.emit({
+      type: 'cdata',
+      data: this.env.buffer.takeString()
+    } as CDataToken);
   }
 
   emitCurrentComment() {
@@ -700,7 +707,7 @@ export class CompositeTokenizer {
         case CodePoints.CLOSE_SQUARE_BRACKET:
           return 'cdataSectionBracket';
         case CodePoints.EOF:
-          this.emitAccumulatedCharacters();
+          this.emitCData();
           this.error('eof-in-cdata');
           return this.eof();
         default:
@@ -728,7 +735,7 @@ export class CompositeTokenizer {
           code = this.nextCode();
           break;
         case CodePoints.GT:
-          this.emitAccumulatedCharacters(); // TODO this should be marked explicitly as CDATA
+          this.emitCData();
           return 'data';
         default:
           buffer.append(CodePoints.CLOSE_SQUARE_BRACKET);
@@ -1059,21 +1066,24 @@ export class CompositeTokenizer {
   }
 
   markupDeclarationOpen(code: number): State {
-    // TODO deal with reconsuming the buffer when sequence fails
+    this.emitAccumulatedCharacters();
     switch (code) {
       case CodePoints.HYPHEN:
-        return this.matchSequence(code, TWO_HYPHENS, false, 'commentStart', 'bogusComment');
+        return this.matchSequence(code, TWO_HYPHENS, false, 'commentStart', 'markupDeclarationFail');
       case 0x44: // D
       case 0x64: // d
-        return this.matchSequence(code, DOCTYPE, true, 'doctype', 'bogusComment');
+        return this.matchSequence(code, DOCTYPE, true, 'doctype', 'markupDeclarationFail');
       case CodePoints.OPEN_SQUARE_BRACKET:
-        this.emitAccumulatedCharacters();
-        return this.matchSequence(code, CDATA, false, 'cdataSectionStart', 'bogusComment');
+        return this.matchSequence(code, CDATA, false, 'cdataSectionStart', 'markupDeclarationFail');
       default:
-        this.emitAccumulatedCharacters();
-        this.error('incorrectly-opened-comment');
-        return this.callState('bogusComment', code);
+        return this.callState('markupDeclarationFail', code);
     }
+  }
+
+  markupDeclarationFail(code: number): State {
+    this.startNewComment();
+    this.error('incorrectly-opened-comment');
+    return this.callState('bogusComment', code);
   }
 
   // -----doctype states-----

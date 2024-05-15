@@ -47,6 +47,7 @@ export type State =
     'selfClosingStartTag' |
     'bogusComment' |
     'markupDeclarationOpen' |
+    'markupDeclarationFail' |
     'commentStart' |
     'commentStartDash' |
     'comment' |

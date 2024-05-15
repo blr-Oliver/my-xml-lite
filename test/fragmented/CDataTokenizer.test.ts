@@ -6,7 +6,7 @@ import {buildIndex} from '../../src/impl/build-index';
 import {CompositeTokenizer} from '../../src/impl/CompositeTokenizer';
 import {FixedSizeStringBuilder} from '../../src/impl/FixedSizeStringBuilder';
 import {State} from '../../src/impl/states';
-import {CharactersToken, EOF_TOKEN, Token} from '../../src/impl/tokens';
+import {CDataToken, CharactersToken, CommentToken, EOF_TOKEN, Token} from '../../src/impl/tokens';
 import {default as rawTests} from './samples/cdata.json';
 
 type TestCase = [string/*name*/, string/*input*/, string/*CDATA*/, string[]/*errors*/, boolean/*completed*/];
@@ -53,6 +53,34 @@ function suite() {
     for (let test of testCases) {
       createTest(test);
     }
+    it('separate text and CDATA', () => {
+      processInput('a<![CDATA[b]]>');
+      expect(parser.state).toStrictEqual('eof');
+      expect(tokenList.length).toStrictEqual(3);
+      expect(tokenList[2]).toBe(EOF_TOKEN);
+      expect(tokenList[0].type).toStrictEqual('characters');
+      expect(tokenList[1].type).toStrictEqual('cdata');
+      const textToken = tokenList[0] as CharactersToken;
+      const cdataToken = tokenList[1] as CDataToken;
+      expect(textToken.data).toStrictEqual('a');
+      expect(cdataToken.data).toStrictEqual('b');
+      expect(errorList).toHaveLength(0);
+      expect(lastState).toStrictEqual('data');
+    });
+    it('incomplete CDATA start', () => {
+      processInput('a<![CDb>');
+      expect(parser.state).toStrictEqual('eof');
+      expect(tokenList.length).toStrictEqual(3);
+      expect(tokenList[2]).toBe(EOF_TOKEN);
+      expect(tokenList[0].type).toStrictEqual('characters');
+      expect(tokenList[1].type).toStrictEqual('comment');
+      const textToken = tokenList[0] as CharactersToken;
+      const commentToken = tokenList[1] as CommentToken;
+      expect(textToken.data).toStrictEqual('a');
+      expect(commentToken.data).toStrictEqual('[CDb');
+      expect(errorList).toStrictEqual(['incorrectly-opened-comment']);
+      expect(lastState).toStrictEqual('data');
+    })
   });
 
   function processInput(input: string) {
@@ -67,28 +95,17 @@ function suite() {
     it(name, () => {
       let token: Token;
       processInput(input);
-      const hasContent = expectedData !== '';
       expect(parser.state).toStrictEqual('eof');
-      if (hasContent) {
-        expect(tokenList.length).toStrictEqual(2);
-        expect(tokenList[1]).toBe(EOF_TOKEN);
-        token = tokenList[0]!;
-        expect(token.type).toStrictEqual('characters');
-        expect((token as CharactersToken).data).toStrictEqual(expectedData);
-        expect(errorList).toStrictEqual(expectedErrors);
-        if (completed) {
-          expect(lastState).toStrictEqual('data');
-        } else {
-          expect(lastState).not.toStrictEqual('data');
-        }
+      expect(tokenList.length).toStrictEqual(2);
+      expect(tokenList[1]).toBe(EOF_TOKEN);
+      token = tokenList[0]!;
+      expect(token.type).toStrictEqual('cdata');
+      expect((token as CharactersToken).data).toStrictEqual(expectedData);
+      expect(errorList).toStrictEqual(expectedErrors);
+      if (completed) {
+        expect(lastState).toStrictEqual('data');
       } else {
-        expect(tokenList.length).toStrictEqual(1);
-        expect(tokenList[0]).toBe(EOF_TOKEN);
-        if (completed) {
-          expect(lastState).toStrictEqual('data');
-        } else {
-          expect(lastState).not.toStrictEqual('data');
-        }
+        expect(lastState).not.toStrictEqual('data');
       }
     });
   }

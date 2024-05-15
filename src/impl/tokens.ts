@@ -1,4 +1,4 @@
-export type TokenType = 'doctype' | 'startTag' | 'endTag' | 'comment' | 'characters' | 'eof';
+export type TokenType = 'doctype' | 'startTag' | 'endTag' | 'comment' | 'characters' | 'cdata' | 'eof';
 
 export interface Token {
   type: TokenType;
@@ -25,7 +25,7 @@ export interface TagToken extends Token {
 }
 
 export interface TextToken extends Token {
-  type: 'comment' | 'characters';
+  type: 'comment' | 'characters' | 'cdata';
   data: string;
 }
 
@@ -34,7 +34,11 @@ export interface CharactersToken extends TextToken {
 }
 
 export interface CommentToken extends TextToken {
-  type: 'comment'
+  type: 'comment';
+}
+
+export interface CDataToken extends TextToken {
+  type: 'cdata';
 }
 
 export const EOF_TOKEN: Token = {
