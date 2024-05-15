@@ -5,7 +5,7 @@ import {ParserEnvironment} from '../../src/decl/ParserEnvironment';
 import {buildIndex} from '../../src/impl/build-index';
 import {CompositeTokenizer} from '../../src/impl/CompositeTokenizer';
 import {FixedSizeStringBuilder} from '../../src/impl/FixedSizeStringBuilder';
-import {CommentToken, EOF_TOKEN, Token} from '../../src/impl/tokens';
+import {CharactersToken, CommentToken, EOF_TOKEN, Token} from '../../src/impl/tokens';
 import {default as rawTests} from './samples/comment.json';
 
 type TestCase = [string/*name*/, string/*input*/, string/*comment data*/, string[]/*errors*/];
@@ -42,6 +42,50 @@ function suite() {
   describe('CommentTokenizer tests', () => {
     for (let test of testCases) {
       createTest(test);
+    }
+    it('separate text and comment', () => {
+      processInput('a<!--b-->');
+      const [textToken, commentToken] = expectTextAndComment();
+      expect(textToken.data).toStrictEqual('a');
+      expect(commentToken.data).toStrictEqual('b');
+      expect(errorList).toHaveLength(0);
+    });
+    it('incomplete comment start hyphen', () => {
+      processInput('a<!-b-->');
+      const [textToken, commentToken] = expectTextAndComment();
+      expect(textToken.data).toStrictEqual('a');
+      expect(commentToken.data).toStrictEqual('-b--');
+      expect(errorList).toStrictEqual(['incorrectly-opened-comment']);
+    });
+    it('incomplete comment start', () => {
+      processInput('a<!b>');
+      const [textToken, commentToken] = expectTextAndComment();
+      expect(textToken.data).toStrictEqual('a');
+      expect(commentToken.data).toStrictEqual('b');
+      expect(errorList).toStrictEqual(['incorrectly-opened-comment']);
+    });
+    it('bogus comment + nested comment', () => {
+      processInput('a<!-b<!--c>');
+      const [textToken, commentToken] = expectTextAndComment();
+      expect(textToken.data).toStrictEqual('a');
+      expect(commentToken.data).toStrictEqual('-b<!--c');
+      expect(errorList).toStrictEqual(['incorrectly-opened-comment']);
+    });
+    it('bogus comment unfinished', () => {
+      processInput('a<!-bc');
+      const [textToken, commentToken] = expectTextAndComment();
+      expect(textToken.data).toStrictEqual('a');
+      expect(commentToken.data).toStrictEqual('-bc');
+      expect(errorList).toStrictEqual(['incorrectly-opened-comment']);
+    });
+
+    function expectTextAndComment(): [CharactersToken, CommentToken] {
+      expect(parser.state).toStrictEqual('eof');
+      expect(tokenList.length).toStrictEqual(3);
+      expect(tokenList[0].type).toStrictEqual('characters');
+      expect(tokenList[1].type).toStrictEqual('comment');
+      expect(tokenList[2]).toBe(EOF_TOKEN);
+      return [tokenList[0] as CharactersToken, tokenList[1] as CommentToken];
     }
   });
 
