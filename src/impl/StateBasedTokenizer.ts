@@ -36,6 +36,7 @@ interface IStateBasedTokenizer {
   readonly env: ParserEnvironment;
   readonly state: State;
   readonly active: boolean;
+  lastOpenTag?: string;
   proceed(): void;
 }
 
@@ -43,6 +44,7 @@ export class StateBasedTokenizer implements IStateBasedTokenizer {
   env!: ParserEnvironment;
   state: State = 'data';
   active: boolean = true;
+  lastOpenTag?: string;
   tokenQueue: Token[] = [];
 
   returnState!: State;
