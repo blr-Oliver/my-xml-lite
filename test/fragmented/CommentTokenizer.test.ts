@@ -3,7 +3,7 @@ import {DirectCharacterSource} from '../../src/common/stream-source';
 import {HTML_SPECIAL} from '../../src/decl/known-named-refs';
 import {ParserEnvironment} from '../../src/decl/ParserEnvironment';
 import {buildIndex} from '../../src/impl/build-index';
-import {CompositeTokenizer} from '../../src/impl/CompositeTokenizer';
+import {StateBasedTokenizer} from '../../src/impl/StateBasedTokenizer';
 import {FixedSizeStringBuilder} from '../../src/impl/FixedSizeStringBuilder';
 import {CharactersToken, CommentToken, EOF_TOKEN, Token} from '../../src/impl/tokens';
 import {default as rawTests} from './samples/comment.json';
@@ -12,15 +12,14 @@ type TestCase = [string/*name*/, string/*input*/, string/*comment data*/, string
 const testCases = rawTests as TestCase[];
 
 function suite() {
-  let parser!: CompositeTokenizer;
+  let parser!: StateBasedTokenizer;
   let tokenList: Token[] = [];
   let errorList: string[] = [];
 
   beforeAll(() => {
-    parser = new CompositeTokenizer(buildIndex(HTML_SPECIAL));
+    parser = new StateBasedTokenizer(buildIndex(HTML_SPECIAL));
     parser.env = {
       buffer: new FixedSizeStringBuilder(1000),
-      state: 'data',
       tokens: {
         accept(token: Token) {
           tokenList.push(token);

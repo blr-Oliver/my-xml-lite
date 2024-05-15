@@ -32,7 +32,14 @@ const CHAR_REF_REPLACEMENT: number[] = [
   0x02DC, 0x2122, 0x0161, 0x203A, 0x0153, 0x0000, 0x017E, 0x0178
 ];
 
-export class CompositeTokenizer {
+interface IStateBasedTokenizer {
+  readonly env: ParserEnvironment;
+  readonly state: State;
+  readonly active: boolean;
+  proceed(): void;
+}
+
+export class StateBasedTokenizer implements IStateBasedTokenizer {
   env!: ParserEnvironment;
   state: State = 'data';
   active: boolean = true;

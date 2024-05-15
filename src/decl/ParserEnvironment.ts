@@ -6,8 +6,6 @@ export interface ParserEnvironment {
   readonly input: StringSource;
   readonly buffer: StringBuilder;
   readonly errors: string[];
-  reconsume: boolean;
-  state?: string;
   tokens?: TokenSink;
 }
 

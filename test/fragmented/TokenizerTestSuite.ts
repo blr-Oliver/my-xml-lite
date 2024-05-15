@@ -3,14 +3,14 @@ import {DirectCharacterSource} from '../../src/common/stream-source';
 import {HTML_SPECIAL} from '../../src/decl/known-named-refs';
 import {ParserEnvironment} from '../../src/decl/ParserEnvironment';
 import {buildIndex} from '../../src/impl/build-index';
-import {CompositeTokenizer} from '../../src/impl/CompositeTokenizer';
+import {StateBasedTokenizer} from '../../src/impl/StateBasedTokenizer';
 import {FixedSizeStringBuilder} from '../../src/impl/FixedSizeStringBuilder';
 import {State} from '../../src/impl/states';
 import {Token} from '../../src/impl/tokens';
 
 export abstract class TokenizerTestSuite<T/*test case*/> {
   name!: string;
-  parser!: CompositeTokenizer;
+  parser!: StateBasedTokenizer;
   tokenList: Token[] = [];
   errorList: string[] = [];
   lastState!: State;
@@ -19,9 +19,9 @@ export abstract class TokenizerTestSuite<T/*test case*/> {
     this.name = name;
   }
 
-  defineTokenizerClass(): typeof CompositeTokenizer {
+  defineTokenizerClass(): typeof StateBasedTokenizer {
     const suite = this;
-    return class extends CompositeTokenizer {
+    return class extends StateBasedTokenizer {
       eof(): State {
         suite.lastState = this.state;
         return super.eof();
@@ -29,7 +29,7 @@ export abstract class TokenizerTestSuite<T/*test case*/> {
     };
   }
 
-  createTokenizer(): CompositeTokenizer {
+  createTokenizer(): StateBasedTokenizer {
     return new (this.defineTokenizerClass())(buildIndex(HTML_SPECIAL));
   }
 
@@ -39,7 +39,6 @@ export abstract class TokenizerTestSuite<T/*test case*/> {
     this.parser.env.buffer.clear();
     this.tokenList.length = 0;
     this.errorList.length = 0;
-    this.lastState = 'data';
   }
 
   protected abstract getRegularTestCases(): T[];
@@ -63,7 +62,6 @@ export abstract class TokenizerTestSuite<T/*test case*/> {
       const parser = this.parser = this.createTokenizer();
       parser.env = {
         buffer: new FixedSizeStringBuilder(1000),
-        state: 'data',
         tokens: {
           accept(token: Token) {
             tokenList.push(token);

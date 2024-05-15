@@ -3,7 +3,7 @@ import {DirectCharacterSource} from '../../src/common/stream-source';
 import {HTML_SPECIAL} from '../../src/decl/known-named-refs';
 import {ParserEnvironment} from '../../src/decl/ParserEnvironment';
 import {buildIndex} from '../../src/impl/build-index';
-import {CompositeTokenizer} from '../../src/impl/CompositeTokenizer';
+import {StateBasedTokenizer} from '../../src/impl/StateBasedTokenizer';
 import {FixedSizeStringBuilder} from '../../src/impl/FixedSizeStringBuilder';
 import {State} from '../../src/impl/states';
 import {CDataToken, CharactersToken, CommentToken, EOF_TOKEN, Token} from '../../src/impl/tokens';
@@ -13,23 +13,22 @@ type TestCase = [string/*name*/, string/*input*/, string/*CDATA*/, string[]/*err
 const testCases = rawTests as TestCase[];
 
 function suite() {
-  let parser!: CompositeTokenizer;
+  let parser!: StateBasedTokenizer;
   let tokenList: Token[] = [];
   let errorList: string[] = [];
   let lastState!: State;
 
   beforeAll(() => {
-    class MockedCompositeTokenizer extends CompositeTokenizer {
+    class MockCompositeTokenizer extends StateBasedTokenizer {
       eof(): State {
         lastState = this.state;
         return super.eof();
       }
     }
 
-    parser = new MockedCompositeTokenizer(buildIndex(HTML_SPECIAL));
+    parser = new MockCompositeTokenizer(buildIndex(HTML_SPECIAL));
     parser.env = {
       buffer: new FixedSizeStringBuilder(1000),
-      state: 'data',
       tokens: {
         accept(token: Token) {
           tokenList.push(token);
@@ -46,7 +45,6 @@ function suite() {
     parser.env.buffer.clear();
     tokenList.length = 0;
     errorList.length = 0;
-    lastState = 'data';
   });
 
   describe('CDataTokenizer tests', () => {
