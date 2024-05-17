@@ -1,9 +1,7 @@
 import {TokenSink} from '../decl/ParserEnvironment';
-import {XMLLite} from '../decl/xml-lite-decl';
+import {Document, Node} from '../decl/xml-lite-decl';
 import {InsertionMode} from './insertion-mode';
 import {Token} from './tokens';
-import Document = XMLLite.Document;
-import Node = XMLLite.Node;
 
 /*
   no script execution
