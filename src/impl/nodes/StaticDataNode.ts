@@ -4,10 +4,10 @@ import {StaticEmptyNode} from './StaticEmptyNode';
 export class StaticDataNode extends StaticEmptyNode implements CharacterData, Text, Comment, CDATASection {
   readonly data: string;
 
-  protected constructor(nodeType: NodeType,
-                        parentNode: ParentNode | null,
-                        parentIndex: number,
-                        data: string) {
+  constructor(nodeType: NodeType,
+              parentNode: ParentNode | null,
+              parentIndex: number,
+              data: string) {
     super(nodeType, parentNode, parentIndex);
     this.data = data;
   }

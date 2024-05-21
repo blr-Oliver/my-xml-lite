@@ -1,16 +1,17 @@
 import {Element, Node, NodeList, NodeType, ParentNode} from '../../decl/xml-lite-decl';
+import {StaticElement} from './StaticElement';
 import {StaticEmptyNode} from './StaticEmptyNode';
 
 export class StaticParentNode extends StaticEmptyNode implements ParentNode {
-  readonly children: NodeList<Element>;
+  readonly children: StaticElement[];
 
   constructor(nodeType: NodeType,
-              parentNode: ParentNode | null,
+              parentNode: StaticParentNode | null,
               parentIndex: number,
               childNodes: Node[],
-              children?: Element[]) {
+              children?: StaticElement[]) {
     super(nodeType, parentNode, parentIndex, childNodes);
-    this.children = children || childNodes.filter(node => node.nodeType === NodeType.ELEMENT_NODE) as Element[];
+    this.children = children || childNodes.filter(node => node.nodeType === NodeType.ELEMENT_NODE) as StaticElement[];
   }
 
   get nodeValue(): string | null {

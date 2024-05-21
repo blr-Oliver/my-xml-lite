@@ -4,6 +4,21 @@ export type InsertionMode =
     'beforeHead' |
     'inHead' |
     'inHeadNoscript' |
-    'beforeBody' |
+    'afterHead' |
     'inBody' |
-    'text';
+    'text' |
+    'inTable' |
+    'inTableText' |
+    'inCaption' |
+    'inColumnGroup' |
+    'inTableBody' |
+    'inRow' |
+    'inCell' |
+    'inSelect' |
+    'inSelectInTable' |
+    'inTemplate' |
+    'afterBody' |
+    'inFrameset' |
+    'afterFrameset' |
+    'afterAfterBody' |
+    'afterAfterFrameset';
