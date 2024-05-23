@@ -16,11 +16,11 @@ export class StaticElement extends StaticParentNode implements Element {
 
   readonly parentElementIndex: number;
   constructor(tag: TagToken,
-              parentNode: ParentNode | null,
+              parentNode: StaticParentNode | null,
               childNodes: Node[],
               parentIndex: number,
               parentElementIndex: number,
-              children?: Element[]) {
+              children?: StaticElement[]) {
     super(NodeType.ELEMENT_NODE, parentNode, parentIndex, childNodes, children);
     this.attributes = new StaticAttributes(tag.attributes);
     this.id = this.attributes.getAttribute('id') || '';
