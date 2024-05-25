@@ -1,4 +1,5 @@
-import {Element, Node, NodeType, ParentNode} from '../../decl/xml-lite-decl';
+import {Tokenizer} from '../../decl/lexer-decl';
+import {Element, Node, NodeType} from '../../decl/xml-lite-decl';
 import {TagToken} from '../tokens';
 import {StaticAttributes} from './StaticAttributes';
 import {StaticParentNode} from './StaticParentNode';

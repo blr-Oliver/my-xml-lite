@@ -75,6 +75,8 @@ export class TreeComposer implements TokenSink {
   originalInsertionMode!: InsertionMode;
 
   document!: StaticDocument;
+  headElement!: StaticElement;
+
   openElements: StaticElement[] = [];
   openCounts: { [tagName: string]: number } = {};
   scopeCounter: number = 0;
@@ -186,7 +188,7 @@ export class TreeComposer implements TokenSink {
           this.createAndPushElement(tagToken);
           return 'beforeHead';
         }
-        return this.forceHtmlElement(token);
+        return this.forceElementAndState('html', 'beforeHead', token);
       case 'endTag':
         tagToken = token as TagToken;
         switch (tagToken.name) {
@@ -194,13 +196,13 @@ export class TreeComposer implements TokenSink {
           case 'body':
           case 'html':
           case 'br':
-            return this.forceHtmlElement(token);
+            return this.forceElementAndState('html', 'beforeHead', token);
           default:
             this.error();
             return 'beforeHtml';
         }
       default:
-        return this.forceHtmlElement(token);
+        return this.forceElementAndState('html', 'beforeHead', token);
     }
   }
 
@@ -218,10 +220,10 @@ export class TreeComposer implements TokenSink {
           case 'html':
             return this.inBody(token);
           case 'head':
-            this.createAndPushElement(tagToken);
+            this.headElement = this.createAndPushElement(tagToken);
             return 'inHead';
           default:
-            return this.forceHeadElement(token);
+            return this.forceHead(token);
         }
       case 'endTag':
         switch (tagToken.name) {
@@ -229,12 +231,22 @@ export class TreeComposer implements TokenSink {
           case 'body':
           case 'html':
           case 'br':
-            return this.forceHeadElement(token);
+            return this.forceHead(token);
           default:
             this.error();
         }
     }
-    return 'beforeHead';
+    return this.insertionMode;
+  }
+
+  forceHead(token: Token): InsertionMode {
+    this.headElement = this.createAndPushElement({
+      type: 'startTag',
+      name: 'head',
+      selfClosing: false,
+      attributes: []
+    } as TagToken);
+    return this.reprocessIn('inHead', token);
   }
 
   inHead(token: Token): InsertionMode {
@@ -258,7 +270,7 @@ export class TreeComposer implements TokenSink {
         this.popCurrentElement();
         return this.reprocessIn('afterHead', token);
     }
-    return 'inHead';
+    return this.insertionMode;
   }
 
   startTagInHead(token: TagToken): InsertionMode {
@@ -289,7 +301,7 @@ export class TreeComposer implements TokenSink {
         this.popCurrentElement();
         return this.reprocessIn('afterHead', token);
     }
-    return 'inHead';
+    return this.insertionMode;
   }
 
   endTagInHead(token: TagToken): InsertionMode {
@@ -310,7 +322,7 @@ export class TreeComposer implements TokenSink {
       default:
         this.error();
     }
-    return 'inHead';
+    return this.insertionMode;
   }
 
   inHeadNoscript(token: Token): InsertionMode {
@@ -324,6 +336,7 @@ export class TreeComposer implements TokenSink {
         break;
       case 'characters':
         // TODO whitespace only
+        this.insertDataNode(token as TextToken);
         break;
       case 'startTag':
         tagToken = token as TagToken;
@@ -361,7 +374,7 @@ export class TreeComposer implements TokenSink {
       default:
         return this.escapeNoscript(token);
     }
-    return 'inHeadNoscript';
+    return this.insertionMode;
   }
 
   escapeNoscript(token: Token): InsertionMode {
@@ -371,21 +384,95 @@ export class TreeComposer implements TokenSink {
   }
 
   afterHead(token: Token): InsertionMode {
-    return 'afterHead';
+    switch (token.type) {
+      case 'comment':
+        this.insertDataNode(token as TextToken);
+        break;
+      case 'doctype':
+        this.error();
+        break;
+      case 'characters':
+        // TODO whitespace only
+        this.insertDataNode(token as TextToken);
+        break;
+      case 'startTag':
+        return this.startTagAfterHead(token as TagToken);
+      case 'endTag':
+        return this.endTagAfterHead(token as TagToken);
+      default:
+        return this.forceElementAndState('body', 'inBody', token);
+    }
+    return this.insertionMode;
+  }
+
+  startTagAfterHead(token: TagToken): InsertionMode {
+    switch (token.name) {
+      case 'head':
+        this.error();
+        break;
+      case 'html':
+        return this.inBody(token);
+      case 'body':
+        this.createAndPushElement(token);
+        // TODO frameset-ok flag
+        return 'inBody';
+      case 'frameset':
+        this.createAndPushElement(token);
+        return 'inFrameset';
+      case 'base':
+      case 'basefont':
+      case 'bgsound':
+      case 'link':
+      case 'meta':
+      case 'noframes':
+      case 'script':
+      case 'style':
+      case 'template':
+      case 'title':
+        this.error();
+        this.openElements.push(this.current = this.headElement);
+        this.openCounts['head'] = (this.openCounts['head'] || 0) + 1;
+        let result = this.inHead(token);
+        let index = this.openElements.indexOf(this.headElement);
+        if (index === this.openElements.length - 1)
+          this.popCurrentElement();
+        else {
+          this.openElements.splice(index, 1);
+          this.openCounts['head']--;
+        }
+        return result;
+      default:
+        return this.forceElementAndState('body', 'inBody', token);
+    }
+    return this.insertionMode;
+  }
+
+  endTagAfterHead(token: TagToken): InsertionMode {
+    switch (token.name) {
+      case 'template':
+        return this.endTagInHead(token);
+      case 'body':
+      case 'html':
+      case 'br':
+        return this.forceElementAndState('body', 'inBody', token);
+      default:
+        this.error();
+        return this.insertionMode;
+    }
   }
 
   inBody(token: Token): InsertionMode {
-    return 'inBody';
+    return this.insertionMode;
   }
 
-  forceHtmlElement(token: Token): InsertionMode {
-    this.createAndPushElement(EMPTY_HTML);
-    return this.beforeHead(token);
-  }
-
-  forceHeadElement(token: Token): InsertionMode {
-    this.createAndPushElement(EMPTY_HEAD);
-    return this.inHead(token);
+  forceElementAndState(element: string, state: InsertionMode, token: Token): InsertionMode {
+    this.createAndPushElement({
+      type: 'startTag',
+      name: element,
+      selfClosing: false,
+      attributes: []
+    } as TagToken);
+    return this.reprocessIn(state, token);
   }
 
   createAndAddEmptyElement(token: TagToken): StaticElement {
