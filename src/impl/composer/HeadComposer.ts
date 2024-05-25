@@ -1,98 +1,8 @@
-import {DoctypeToken, TagToken, TextToken, Token} from '../tokens';
+import {TagToken, TextToken, Token} from '../tokens';
 import {BaseComposer} from './BaseComposer';
 import {InsertionMode} from './insertion-mode';
 
-export class TreeComposer extends BaseComposer {
-  initial(token: Token): InsertionMode {
-    switch (token.type) {
-      case 'comment':
-        this.insertDataNode(token as TextToken);
-        return 'initial';
-      case 'doctype':
-        this.insertDoctype(token as DoctypeToken);
-        return 'beforeHtml';
-      default:
-        //TODO in this state whitespace should be ignored at tokenizer level
-        return this.beforeHtml(token);
-    }
-  }
-
-  beforeHtml(token: Token): InsertionMode {
-    let tagToken: TagToken;
-    switch (token.type) {
-      case 'comment':
-        this.insertDataNode(token as TextToken);
-        return 'beforeHtml';
-      case 'doctype':
-        this.error();
-        return 'beforeHtml';
-      case 'startTag':
-        tagToken = token as TagToken;
-        if (tagToken.name === 'html') {
-          this.createAndPushElement(tagToken);
-          return 'beforeHead';
-        }
-        return this.forceElementAndState('html', 'beforeHead', token);
-      case 'endTag':
-        tagToken = token as TagToken;
-        switch (tagToken.name) {
-          case 'head':
-          case 'body':
-          case 'html':
-          case 'br':
-            return this.forceElementAndState('html', 'beforeHead', token);
-          default:
-            this.error();
-            return 'beforeHtml';
-        }
-      default:
-        return this.forceElementAndState('html', 'beforeHead', token);
-    }
-  }
-
-  beforeHead(token: Token): InsertionMode {
-    let tagToken = token as TagToken;
-    switch (token.type) {
-      case 'comment':
-        this.insertDataNode(token as TextToken);
-        break;
-      case 'doctype':
-        this.error();
-        break;
-      case 'startTag':
-        switch (tagToken.name) {
-          case 'html':
-            return this.inBody(token);
-          case 'head':
-            this.headElement = this.createAndPushElement(tagToken);
-            return 'inHead';
-          default:
-            return this.forceHead(token);
-        }
-      case 'endTag':
-        switch (tagToken.name) {
-          case 'head':
-          case 'body':
-          case 'html':
-          case 'br':
-            return this.forceHead(token);
-          default:
-            this.error();
-        }
-    }
-    return this.insertionMode;
-  }
-
-  forceHead(token: Token): InsertionMode {
-    this.headElement = this.createAndPushElement({
-      type: 'startTag',
-      name: 'head',
-      selfClosing: false,
-      attributes: []
-    } as TagToken);
-    return this.reprocessIn('inHead', token);
-  }
-
+export class HeadComposer extends BaseComposer {
   inHead(token: Token): InsertionMode {
     let tagToken = token as TagToken;
     switch (token.type) {
@@ -107,9 +17,9 @@ export class TreeComposer extends BaseComposer {
         this.error();
         break;
       case 'startTag':
-        return this.startTagInHead(token as TagToken);
+        return this.inHeadStartTag(token as TagToken);
       case 'endTag':
-        return this.endTagInHead(token as TagToken);
+        return this.inHeadEndTag(token as TagToken);
       default:
         this.popCurrentElement();
         return this.reprocessIn('afterHead', token);
@@ -117,7 +27,7 @@ export class TreeComposer extends BaseComposer {
     return this.insertionMode;
   }
 
-  startTagInHead(token: TagToken): InsertionMode {
+  inHeadStartTag(token: TagToken): InsertionMode {
     switch (token.name) {
       case 'html':
         return this.inBody(token);
@@ -148,7 +58,7 @@ export class TreeComposer extends BaseComposer {
     return this.insertionMode;
   }
 
-  endTagInHead(token: TagToken): InsertionMode {
+  inHeadEndTag(token: TagToken): InsertionMode {
     switch (token.name) {
       case 'head':
         this.popCurrentElement();
@@ -193,13 +103,13 @@ export class TreeComposer extends BaseComposer {
           case 'meta':
           case 'noframes':
           case 'style':
-            return this.startTagInHead(tagToken);
+            return this.inHeadStartTag(tagToken);
           case 'head':
           case 'noscript':
             this.error();
             break;
           default:
-            return this.escapeNoscript(token);
+            return this.escapeInHeadNoscript(token);
         }
         break;
       case 'endTag':
@@ -209,19 +119,19 @@ export class TreeComposer extends BaseComposer {
             this.popCurrentElement();
             return 'inHead';
           case 'br':
-            return this.escapeNoscript(token);
+            return this.escapeInHeadNoscript(token);
           default:
             this.error();
             break;
         }
         break;
       default:
-        return this.escapeNoscript(token);
+        return this.escapeInHeadNoscript(token);
     }
     return this.insertionMode;
   }
 
-  escapeNoscript(token: Token): InsertionMode {
+  escapeInHeadNoscript(token: Token): InsertionMode {
     this.error();
     this.popCurrentElement();
     return this.reprocessIn('inHead', token);
@@ -240,16 +150,16 @@ export class TreeComposer extends BaseComposer {
         this.insertDataNode(token as TextToken);
         break;
       case 'startTag':
-        return this.startTagAfterHead(token as TagToken);
+        return this.afterHeadStartTag(token as TagToken);
       case 'endTag':
-        return this.endTagAfterHead(token as TagToken);
+        return this.afterHeadEndTag(token as TagToken);
       default:
         return this.forceElementAndState('body', 'inBody', token);
     }
     return this.insertionMode;
   }
 
-  startTagAfterHead(token: TagToken): InsertionMode {
+  afterHeadStartTag(token: TagToken): InsertionMode {
     switch (token.name) {
       case 'head':
         this.error();
@@ -291,10 +201,10 @@ export class TreeComposer extends BaseComposer {
     return this.insertionMode;
   }
 
-  endTagAfterHead(token: TagToken): InsertionMode {
+  afterHeadEndTag(token: TagToken): InsertionMode {
     switch (token.name) {
       case 'template':
-        return this.endTagInHead(token);
+        return this.inHeadEndTag(token);
       case 'body':
       case 'html':
       case 'br':
@@ -303,9 +213,5 @@ export class TreeComposer extends BaseComposer {
         this.error();
         return this.insertionMode;
     }
-  }
-
-  inBody(token: Token): InsertionMode {
-    return this.insertionMode;
   }
 }

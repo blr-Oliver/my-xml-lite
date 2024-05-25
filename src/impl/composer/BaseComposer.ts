@@ -65,6 +65,7 @@ export class BaseComposer implements TokenSink {
 
   current!: StaticParentNode;
   headElement!: StaticElement;
+
   get currentChildNodes(): Node[] {
     return this.current.childNodes;
   }
@@ -73,6 +74,10 @@ export class BaseComposer implements TokenSink {
   }
 
   accept(token: Token) {
+  }
+
+  inBody(token: Token): InsertionMode {
+    throw new Error('Malformed inheritance');
   }
 
   protected insertDoctype(doctypeToken: DoctypeToken) {
