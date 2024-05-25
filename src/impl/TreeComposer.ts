@@ -314,7 +314,60 @@ export class TreeComposer implements TokenSink {
   }
 
   inHeadNoscript(token: Token): InsertionMode {
+    let tagToken: TagToken;
+    switch (token.type) {
+      case 'comment':
+        this.insertDataNode(token as TextToken);
+        break;
+      case 'doctype':
+        this.error();
+        break;
+      case 'characters':
+        // TODO whitespace only
+        break;
+      case 'startTag':
+        tagToken = token as TagToken;
+        switch (tagToken.name) {
+          case 'html':
+            return this.inBody(token);
+          case 'basefont':
+          case 'bgsound':
+          case 'link':
+          case 'meta':
+          case 'noframes':
+          case 'style':
+            return this.startTagInHead(tagToken);
+          case 'head':
+          case 'noscript':
+            this.error();
+            break;
+          default:
+            return this.escapeNoscript(token);
+        }
+        break;
+      case 'endTag':
+        tagToken = token as TagToken;
+        switch (tagToken.name) {
+          case 'noscript':
+            this.popCurrentElement();
+            return 'inHead';
+          case 'br':
+            return this.escapeNoscript(token);
+          default:
+            this.error();
+            break;
+        }
+        break;
+      default:
+        return this.escapeNoscript(token);
+    }
     return 'inHeadNoscript';
+  }
+
+  escapeNoscript(token: Token): InsertionMode {
+    this.error();
+    this.popCurrentElement();
+    return this.reprocessIn('inHead', token);
   }
 
   afterHead(token: Token): InsertionMode {
@@ -354,7 +407,7 @@ export class TreeComposer implements TokenSink {
   }
 
   startTextMode(tokenizerState: State, token: TagToken): InsertionMode {
-    this.createAndAddEmptyElement(token);
+    this.createAndPushElement(token);
     this.originalInsertionMode = this.insertionMode;
     this.tokenizer.state = tokenizerState;
     this.tokenizer.lastOpenTag = token.name;
