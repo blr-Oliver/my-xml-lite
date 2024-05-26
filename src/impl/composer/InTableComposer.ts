@@ -34,7 +34,7 @@ export class InTableComposer extends BaseComposer {
     switch (token.name) {
       case 'caption':
         this.clearStackToTableContext();
-        // TODO insert formatting marker
+        this.insertFormattingMarker();
         this.createAndInsertElement(token);
         return 'inCaption';
       case 'colgroup':

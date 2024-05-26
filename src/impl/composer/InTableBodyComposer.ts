@@ -96,6 +96,4 @@ export class InTableBodyComposer extends InTableComposer {
         return true;
     }
   }
-
-
 }

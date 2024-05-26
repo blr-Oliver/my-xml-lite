@@ -79,9 +79,9 @@ export class BaseComposer implements TokenSink {
   accept(token: Token) {
   }
 
-  resetInsertionMode() {
-    // TODO
+  resetInsertionMode() { // TODO
   }
+
   inBody(token: Token): InsertionMode {
     throw new Error('Malformed inheritance');
   }
@@ -183,13 +183,11 @@ export class BaseComposer implements TokenSink {
     return 'text';
   }
 
-  startTemplate(start: TagToken): InsertionMode {
-    // TODO
+  startTemplate(start: TagToken): InsertionMode { // TODO
     return this.insertionMode;
   }
 
-  endTemplate(end: TagToken): InsertionMode {
-    // TODO
+  endTemplate(end: TagToken): InsertionMode { // TODO
     return this.insertionMode;
   }
 
@@ -198,8 +196,7 @@ export class BaseComposer implements TokenSink {
     // @ts-ignore
     return this[mode](token);
   }
-  error() {
-    // TODO
+  error() { // TODO
   }
 
   closeParagraph() {
@@ -217,7 +214,9 @@ export class BaseComposer implements TokenSink {
     }
   }
 
-  clearFormattingUpToMarker() {
-    // TODO
+  clearFormattingUpToMarker() { // TODO
+  }
+
+  insertFormattingMarker() { // TODO
   }
 }
