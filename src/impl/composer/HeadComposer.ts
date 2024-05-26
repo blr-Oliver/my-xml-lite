@@ -36,7 +36,7 @@ export class HeadComposer extends BaseComposer {
       case 'bgsound':
       case 'link':
       case 'meta':
-        this.createAndAddEmptyElement(token);
+        this.createAndInsertEmptyElement(token);
         break;
       case 'title':
         return this.startTextMode('rcdata', token);
@@ -167,11 +167,11 @@ export class HeadComposer extends BaseComposer {
       case 'html':
         return this.inBody(token);
       case 'body':
-        this.createAndPushElement(token);
+        this.createAndInsertElement(token);
         // TODO frameset-ok flag
         return 'inBody';
       case 'frameset':
-        this.createAndPushElement(token);
+        this.createAndInsertElement(token);
         return 'inFrameset';
       case 'base':
       case 'basefont':

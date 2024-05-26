@@ -35,11 +35,11 @@ export class InTableComposer extends BaseComposer {
       case 'caption':
         this.clearStackToTableContext();
         // TODO insert formatting marker
-        this.createAndPushElement(token);
+        this.createAndInsertElement(token);
         return 'inCaption';
       case 'colgroup':
         this.clearStackToTableContext();
-        this.createAndPushElement(token);
+        this.createAndInsertElement(token);
         return 'inColumnGroup';
       case 'col':
         this.clearStackToTableContext();
@@ -48,7 +48,7 @@ export class InTableComposer extends BaseComposer {
       case 'tfoot':
       case 'thead':
         this.clearStackToTableContext();
-        this.createAndPushElement(token);
+        this.createAndInsertElement(token);
         return 'inTableBody';
       case 'td':
       case 'th':
@@ -75,14 +75,14 @@ export class InTableComposer extends BaseComposer {
           return this.escapeInTable(token);
         } else {
           this.error();
-          this.addEmptyElement(inputElement);
+          this.insertEmptyElement(inputElement);
           // TODO acknowledge self-closing flag
         }
         break;
       case 'form':
         this.error();
         if (!this.openCounts['template'] && !this.formElement) {
-          this.formElement = this.createAndPushElement(token);
+          this.formElement = this.createAndInsertElement(token);
           this.popCurrentElement();
         }
     }

@@ -30,7 +30,7 @@ export class BeforeHeadComposer extends BaseComposer {
       case 'startTag':
         tagToken = token as TagToken;
         if (tagToken.name === 'html') {
-          this.createAndPushElement(tagToken);
+          this.createAndInsertElement(tagToken);
           return 'beforeHead';
         }
         return this.forceElementAndState('html', 'beforeHead', token);
@@ -65,7 +65,7 @@ export class BeforeHeadComposer extends BaseComposer {
           case 'html':
             return this.inBody(token);
           case 'head':
-            this.headElement = this.createAndPushElement(tagToken);
+            this.headElement = this.createAndInsertElement(tagToken);
             return 'inHead';
           default:
             return this.forceHead(token);
@@ -85,7 +85,7 @@ export class BeforeHeadComposer extends BaseComposer {
   }
 
   forceHead(token: Token): InsertionMode {
-    this.headElement = this.createAndPushElement({
+    this.headElement = this.createAndInsertElement({
       type: 'startTag',
       name: 'head',
       selfClosing: false,

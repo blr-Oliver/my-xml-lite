@@ -141,7 +141,7 @@ export class BaseComposer implements TokenSink {
   }
 
   forceElementAndState(element: string, state: InsertionMode, token: Token): InsertionMode {
-    this.createAndPushElement({
+    this.createAndInsertElement({
       type: 'startTag',
       name: element,
       selfClosing: false,
@@ -154,17 +154,17 @@ export class BaseComposer implements TokenSink {
     return new StaticElement(token, this.current, [], this.currentChildNodes.length, this.currentChildElements.length, []);
   }
 
-  addEmptyElement(element: StaticElement): StaticElement {
+  insertEmptyElement(element: StaticElement): StaticElement {
     this.currentChildNodes.push(element);
     this.currentChildElements.push(element);
     return element;
   }
 
-  createAndAddEmptyElement(token: TagToken): StaticElement {
-    return this.addEmptyElement(this.createElement(token));
+  createAndInsertEmptyElement(token: TagToken): StaticElement {
+    return this.insertEmptyElement(this.createElement(token));
   }
 
-  createAndPushElement(token: TagToken): StaticElement {
+  createAndInsertElement(token: TagToken): StaticElement {
     const childNodes: Node[] = [];
     const childElements: StaticElement[] = [];
     const element = new StaticElement(token, this.current, childNodes, this.currentChildNodes.length, this.currentChildElements.length, childElements);
@@ -176,7 +176,7 @@ export class BaseComposer implements TokenSink {
   }
 
   startTextMode(tokenizerState: State, token: TagToken): InsertionMode {
-    this.createAndPushElement(token);
+    this.createAndInsertElement(token);
     this.originalInsertionMode = this.insertionMode;
     this.tokenizer.state = tokenizerState;
     this.tokenizer.lastOpenTag = token.name;
@@ -215,5 +215,9 @@ export class BaseComposer implements TokenSink {
       this.openElements.length = 0;
       this.current = this.document;
     }
+  }
+
+  clearFormattingUpToMarker() {
+    // TODO
   }
 }
