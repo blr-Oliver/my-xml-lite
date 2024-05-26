@@ -61,10 +61,13 @@ export class BaseComposer implements TokenSink {
   openCounts: { [tagName: string]: number } = {};
   scopeCounter: number = 0;
   listScopeCounter: number = 0;
-  tableScopeCounter: number = 0;
+  tableScopeCounts: { [tagName: string]: number } = {}; // TODO
 
   current!: StaticParentNode;
   headElement!: StaticElement;
+  formElement: StaticElement | null = null;
+
+  fosterParentingEnabled: boolean = false; // TODO
 
   get currentChildNodes(): Node[] {
     return this.current.childNodes;
@@ -76,7 +79,14 @@ export class BaseComposer implements TokenSink {
   accept(token: Token) {
   }
 
+  resetInsertionMode() {
+    // TODO
+  }
   inBody(token: Token): InsertionMode {
+    throw new Error('Malformed inheritance');
+  }
+
+  inHead(token: Token): InsertionMode {
     throw new Error('Malformed inheritance');
   }
 
@@ -140,11 +150,18 @@ export class BaseComposer implements TokenSink {
     return this.reprocessIn(state, token);
   }
 
-  createAndAddEmptyElement(token: TagToken): StaticElement {
-    const element = new StaticElement(token, this.current, [], this.currentChildNodes.length, this.currentChildElements.length, []);
+  createElement(token: TagToken): StaticElement {
+    return new StaticElement(token, this.current, [], this.currentChildNodes.length, this.currentChildElements.length, []);
+  }
+
+  addEmptyElement(element: StaticElement): StaticElement {
     this.currentChildNodes.push(element);
     this.currentChildElements.push(element);
     return element;
+  }
+
+  createAndAddEmptyElement(token: TagToken): StaticElement {
+    return this.addEmptyElement(this.createElement(token));
   }
 
   createAndPushElement(token: TagToken): StaticElement {
