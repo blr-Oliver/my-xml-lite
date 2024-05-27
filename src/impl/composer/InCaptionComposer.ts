@@ -65,7 +65,7 @@ export class InCaptionComposer extends BaseComposer {
       this.generateImpliedEndTags();
       if ((this.current as StaticElement).tagName !== 'caption') {
         this.error();
-        this.popUntilMatches((element, name) => name !== 'caption');
+        this.popUntilMatches(name => name !== 'caption');
       }
       this.popCurrentElement();
       this.clearFormattingUpToMarker();

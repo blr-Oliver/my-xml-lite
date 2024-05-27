@@ -1,4 +1,3 @@
-import {StaticElement} from '../nodes/StaticElement';
 import {TagToken, Token} from '../tokens';
 import {InsertionMode} from './insertion-mode';
 import {InTableComposer} from './InTableComposer';
@@ -84,7 +83,7 @@ export class InTableBodyComposer extends InTableComposer {
     this.popUntilMatches(this.notATBodyContext);
   }
 
-  protected notATBodyContext(element: StaticElement, name: string): boolean {
+  protected notATBodyContext(name: string): boolean {
     switch (name) {
       case 'tbody':
       case 'tfoot':

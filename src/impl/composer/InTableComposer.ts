@@ -1,4 +1,3 @@
-import {StaticElement} from '../nodes/StaticElement';
 import {TagToken, TextToken, Token} from '../tokens';
 import {BaseComposer} from './BaseComposer';
 import {InsertionMode} from './insertion-mode';
@@ -58,7 +57,7 @@ export class InTableComposer extends BaseComposer {
       case 'table':
         this.error();
         if (this.tableScopeCounts['table']) {
-          this.popUntilMatches((element, name) => name !== 'table');
+          this.popUntilMatches(name => name !== 'table');
           this.popCurrentElement();
           this.resetInsertionMode();
           return this.reprocessIn(this.insertionMode, token);
@@ -93,7 +92,7 @@ export class InTableComposer extends BaseComposer {
     switch (token.name) {
       case 'table':
         if (this.tableScopeCounts['table']) {
-          this.popUntilMatches((element, name) => name !== 'table');
+          this.popUntilMatches(name => name !== 'table');
           this.popCurrentElement();
           this.resetInsertionMode();
         } else {
@@ -123,7 +122,7 @@ export class InTableComposer extends BaseComposer {
     this.popUntilMatches(this.notATableContext);
   }
 
-  protected notATableContext(element: StaticElement, name: string): boolean {
+  protected notATableContext(name: string): boolean {
     switch (name) {
       case 'table':
       case 'template':

@@ -1,4 +1,3 @@
-import {StaticElement} from '../nodes/StaticElement';
 import {DoctypeToken, TagToken, TextToken, Token} from '../tokens';
 import {BaseComposer} from './BaseComposer';
 import {InsertionMode} from './insertion-mode';

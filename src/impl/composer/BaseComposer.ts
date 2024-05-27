@@ -106,7 +106,7 @@ export class BaseComposer implements TokenSink {
     this.currentChildNodes.push(dataNode);
   }
 
-  popUntilMatches(test: (element: StaticElement, name: string) => boolean) {
+  popUntilMatches(test: (name: string, element: StaticElement) => boolean) {
     let i = this.openElements.length;
     if (i) {
       let changed = false;
@@ -114,7 +114,7 @@ export class BaseComposer implements TokenSink {
       for (--i; i >= 0; --i) {
         element = this.openElements[i];
         const name = element.tagName;
-        if (test(element, name)) {
+        if (test(name, element)) {
           this.openElements.pop();
           this.openCounts[name]--;
           changed = true;
@@ -126,7 +126,7 @@ export class BaseComposer implements TokenSink {
     }
   }
   generateImpliedEndTagsFromSet(closable: { [tagName: string]: any }, exclude?: string) {
-    this.popUntilMatches((element, name) => name !== exclude && (name in closable));
+    this.popUntilMatches(name => name !== exclude && (name in closable));
   }
   generateImpliedEndTags(exclude?: string) {
     return this.generateImpliedEndTagsFromSet(IMPLICITLY_CLOSABLE, exclude);
@@ -201,7 +201,7 @@ export class BaseComposer implements TokenSink {
 
   closeParagraph() {
     if (this.openCounts['p']) {
-      this.popUntilMatches((element, name) => name !== 'p');
+      this.popUntilMatches(name => name !== 'p');
       if (this.openElements.length) {
         this.openElements.pop();
         this.openCounts['p']--;

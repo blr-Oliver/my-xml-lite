@@ -1,4 +1,3 @@
-import {StaticElement} from '../nodes/StaticElement';
 import {TagToken, Token} from '../tokens';
 import {InsertionMode} from './insertion-mode';
 import {InTableComposer} from './InTableComposer';
@@ -83,7 +82,7 @@ export class InRowComposer extends InTableComposer {
     this.popUntilMatches(this.notARowContext);
   }
 
-  protected notARowContext(element: StaticElement, name: string): boolean {
+  protected notARowContext(name: string): boolean {
     switch (name) {
       case 'tr':
       case 'template':

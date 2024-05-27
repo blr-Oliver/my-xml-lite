@@ -41,7 +41,7 @@ export class InCellComposer extends BaseComposer {
           this.generateImpliedEndTags();
           if ((this.current as StaticElement).tagName !== tagName) {
             this.error();
-            this.popUntilMatches((element, name) => name !== tagName);
+            this.popUntilMatches(name => name !== tagName);
           }
           this.popCurrentElement();
           this.clearFormattingUpToMarker();
@@ -76,7 +76,7 @@ export class InCellComposer extends BaseComposer {
     const currentTagName = (this.current as StaticElement).tagName;
     if (currentTagName !== 'td' && currentTagName !== 'th') {
       this.error();
-      this.popUntilMatches((element, name) => name !== 'td' && name !== 'th');
+      this.popUntilMatches(name => name !== 'td' && name !== 'th');
     }
     this.popCurrentElement();
     this.clearFormattingUpToMarker();
