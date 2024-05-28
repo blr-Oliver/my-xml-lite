@@ -219,4 +219,8 @@ export class BaseComposer implements TokenSink {
 
   insertFormattingMarker() { // TODO
   }
+
+  hasElementInSelectScope(name: string): boolean { // TODO
+    return false;
+  }
 }
