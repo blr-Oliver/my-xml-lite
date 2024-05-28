@@ -50,6 +50,7 @@ const IMPLICITLY_THOROUGHLY_CLOSABLE = {
 
 
 export class BaseComposer implements TokenSink {
+  isFragmentParser: boolean = false;
 
   tokenizer!: StateBasedTokenizer;
   insertionMode: InsertionMode = 'initial';
