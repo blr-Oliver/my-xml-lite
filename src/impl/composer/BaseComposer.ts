@@ -54,6 +54,7 @@ export class BaseComposer implements TokenSink {
   tokenizer!: StateBasedTokenizer;
   insertionMode: InsertionMode = 'initial';
   originalInsertionMode!: InsertionMode;
+  templateInsertionModes: InsertionMode[] = [];
 
   document!: StaticDocument;
 
@@ -222,5 +223,9 @@ export class BaseComposer implements TokenSink {
 
   hasElementInSelectScope(name: string): boolean { // TODO
     return false;
+  }
+
+  stopParsing(): InsertionMode { // TODO
+    return this.insertionMode;
   }
 }
