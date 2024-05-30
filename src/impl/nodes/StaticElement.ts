@@ -1,12 +1,12 @@
-import {Attr, Document, Element, Node, NodeType, ParentNode, StringList} from '../../decl/xml-lite-decl';
+import {Attr, Document, Element, NamedNodeMap, Node, NodeType, ParentNode, StringList} from '../../decl/xml-lite-decl';
 import {TagToken} from '../tokens';
-import {NamespaceNamedNodeMap, StaticAttributes} from './StaticAttributes';
+import {StaticAttributes} from './StaticAttributes';
 import {StaticParentNode} from './StaticParentNode';
 import {StaticStringList} from './StaticStringList';
 
 export class StaticElement extends StaticParentNode implements Element {
   readonly ownerDocument!: Document;
-  readonly attributes: NamespaceNamedNodeMap;
+  readonly attributes: NamedNodeMap;
   readonly classList: StringList;
   readonly id: string;
   readonly className: string;
@@ -17,6 +17,7 @@ export class StaticElement extends StaticParentNode implements Element {
   readonly selfClosed: boolean;
 
   readonly parentElementIndex: number;
+  readonly attributeNames: string[];
   constructor(tag: TagToken,
               namespaceURI: string | null,
               parentNode: ParentNode | null,
@@ -26,9 +27,10 @@ export class StaticElement extends StaticParentNode implements Element {
               children: Element[]) {
     super(NodeType.ELEMENT_NODE, parentNode, parentIndex, childNodes, children);
     this.namespaceURI = namespaceURI;
-    this.attributes = new StaticAttributes(tag.attributes, this) as unknown as NamespaceNamedNodeMap;
-    this.id = this.attributes.getAttribute('id') || '';
-    const classList = new StaticStringList(this.attributes.getAttribute('class') || '');
+    this.attributeNames = tag.attributes.map(attr => attr.name);
+    this.attributes = new StaticAttributes(tag.attributes, this) as unknown as NamedNodeMap;
+    this.id = this.attributes.getNamedItem('id')?.value || '';
+    const classList = new StaticStringList(this.attributes.getNamedItem('class')?.value || '');
     this.classList = classList;
     this.className = classList.join(' ');
     this.prefix = null; // TODO prefix must be meaningful
@@ -45,13 +47,15 @@ export class StaticElement extends StaticParentNode implements Element {
   }
 
   getAttribute(qName: string): string | null {
-    return this.attributes.getAttribute(qName);
+    const attr = this.attributes.getNamedItem(qName);
+    return attr ? attr.value : null;
   }
-  getAttributeNS(prefix: string | null, localName: string): string | null {
-    return this.attributes.getAttributeNS(prefix, localName);
+  getAttributeNS(namespace: string | null, localName: string): string | null {
+    const attr = this.attributes.getNamedItemNS(namespace, localName);
+    return attr ? attr.value : null;
   }
   getAttributeNames(): string[] {
-    return this.attributes.getAttributeNames();
+    return this.attributeNames;
   }
   getAttributeNode(qName: string): Attr | null {
     return this.attributes.getNamedItem(qName);
@@ -60,12 +64,12 @@ export class StaticElement extends StaticParentNode implements Element {
     return this.attributes.getNamedItemNS(namespace, localName);
   }
   hasAttribute(qName: string): boolean {
-    return this.attributes.hasAttribute(qName);
+    return this.attributes.getNamedItem(qName) !== null;
   }
-  hasAttributeNS(prefix: string | null, localName: string): boolean {
-    return this.attributes.hasAttributeNS(prefix, localName);
+  hasAttributeNS(namespace: string | null, localName: string): boolean {
+    return this.attributes.getNamedItemNS(namespace, localName) !== null;
   }
   hasAttributes(): boolean {
-    return this.attributes.hasAttributes();
+    return this.attributes.length !== 0;
   }
 }
