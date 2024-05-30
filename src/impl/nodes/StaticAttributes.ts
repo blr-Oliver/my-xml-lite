@@ -2,10 +2,10 @@ import {Attr, Element, NamedNodeMap} from '../../decl/xml-lite-decl';
 import {NamespacedAttribute} from '../tokens';
 import {StaticAttr} from './StaticAttr';
 
-//@ts-ignore
 export class StaticAttributes implements NamedNodeMap {
   readonly #attrs: Attr[];
   readonly #map: { [name: string]: Attr };
+  readonly [index: number]: Attr;
 
   constructor(attributes: NamespacedAttribute[], ownerElement: Element) {
     const length = attributes.length;
