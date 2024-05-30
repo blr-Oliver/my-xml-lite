@@ -1,9 +1,10 @@
 import {Element} from '../../decl/xml-lite-decl';
 import {TagToken, TextToken, Token} from '../tokens';
-import {BaseComposer} from './BaseComposer';
+import {NS_HTML, NS_MATHML, NS_SVG} from './BaseComposer';
 import {InsertionMode} from './insertion-mode';
+import {TokenAdjustingComposer} from './TokenAdjustingComposer';
 
-export class InForeignContentComposer extends BaseComposer {
+export class InForeignContentComposer extends TokenAdjustingComposer {
   inForeignContent(token: Token): InsertionMode {
     switch (token.type) {
       case 'comment':
@@ -82,6 +83,14 @@ export class InForeignContentComposer extends BaseComposer {
   }
 
   inForeignContentStartTagDefault(token: TagToken): InsertionMode {
+    const currentElement = this.current as Element;
+    if (currentElement.namespaceURI === NS_MATHML)
+      this.adjustMathMLAttributes(token);
+    else if (currentElement.namespaceURI === NS_SVG) {
+      this.adjustSvgTagName(token);
+      this.adjustSvgAttributes(token);
+    }
+    this.adjustForeignAttributes(token);
     return this.insertionMode;
   }
 
@@ -90,11 +99,11 @@ export class InForeignContentComposer extends BaseComposer {
   }
 
   isForeignNonIntegrationPoint(name: string, element: Element): boolean {
-    const namespace = (element as any)['namespace']; // TODO introduce namespaces
+    const namespace = element.namespaceURI || NS_HTML;
     switch (namespace) {
-      case 'html':
+      case NS_HTML:
         return false;
-      case 'math':
+      case NS_MATHML:
         switch (name) {
           case 'annotation-xml':
             const encoding = (element.getAttribute('encoding') || '').toLowerCase();
@@ -108,10 +117,9 @@ export class InForeignContentComposer extends BaseComposer {
           default:
             return true;
         }
-      case 'svg':
+      case NS_SVG:
         switch (name) {
           case 'foreignObject':
-          case 'foreignobject': // TODO this should probably not repeat
           case 'desc':
           case 'title':
             return false;
