@@ -97,12 +97,7 @@ export class BaseComposer implements TokenSink {
   }
 
   protected insertDoctype(doctypeToken: DoctypeToken) {
-    const documentType = new StaticDocumentType(
-        this.current,
-        this.currentChildNodes.length,
-        doctypeToken.name ?? 'html',
-        doctypeToken.publicId ?? '',
-        doctypeToken.systemId ?? '');
+    const documentType = new StaticDocumentType(this.current, doctypeToken.name ?? 'html', doctypeToken.publicId ?? '', doctypeToken.systemId ?? '');
     this.currentChildNodes.push(documentType);
   }
 
@@ -156,8 +151,12 @@ export class BaseComposer implements TokenSink {
     return this.reprocessIn(state, token);
   }
 
+  createElementNS(token: TagToken, namespace: string, parent: ParentNode): Element {
+    return new StaticElement(token, namespace, parent, [], []);
+  }
+
   createElement(token: TagToken): Element {
-    return new StaticElement(token, NS_HTML, this.current, [], this.currentChildNodes.length, this.currentChildElements.length, []);
+    return new StaticElement(token, NS_HTML, this.current, [], []);
   }
 
   insertEmptyElement(element: Element): Element {

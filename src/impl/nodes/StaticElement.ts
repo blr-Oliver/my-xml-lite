@@ -16,16 +16,15 @@ export class StaticElement extends StaticParentNode implements Element {
   readonly tagName: string;
   readonly selfClosed: boolean;
 
-  readonly parentElementIndex: number;
   readonly attributeNames: string[];
+  parentElementIndex: number;
+
   constructor(tag: TagToken,
               namespaceURI: string | null,
-              parentNode: ParentNode | null,
+              parentNode: ParentNode,
               childNodes: Node[],
-              parentIndex: number,
-              parentElementIndex: number,
               children: Element[]) {
-    super(NodeType.ELEMENT_NODE, parentNode, parentIndex, childNodes, children);
+    super(NodeType.ELEMENT_NODE, parentNode, childNodes, children);
     this.namespaceURI = namespaceURI;
     this.attributeNames = tag.attributes.map(attr => attr.name);
     this.attributes = new StaticAttributes(tag.attributes, this) as unknown as NamedNodeMap;
@@ -36,7 +35,7 @@ export class StaticElement extends StaticParentNode implements Element {
     this.prefix = null; // TODO prefix must be meaningful
     this.tagName = this.localName = tag.name;
     this.selfClosed = tag.selfClosing;
-    this.parentElementIndex = parentElementIndex;
+    this.parentElementIndex = parentNode.childElementCount;
   }
 
   get nextElementSibling(): Element | null {

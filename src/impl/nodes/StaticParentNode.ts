@@ -6,10 +6,9 @@ export class StaticParentNode extends StaticEmptyNode implements ParentNode {
 
   constructor(nodeType: NodeType,
               parentNode: ParentNode | null,
-              parentIndex: number,
               childNodes: Node[],
               children?: Element[]) {
-    super(nodeType, parentNode, parentIndex, childNodes);
+    super(nodeType, parentNode, childNodes);
     this.children = children || childNodes.filter(node => node.nodeType === NodeType.ELEMENT_NODE) as Element[];
   }
 

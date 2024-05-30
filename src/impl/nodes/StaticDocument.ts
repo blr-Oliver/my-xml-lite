@@ -5,7 +5,7 @@ export class StaticDocument extends StaticParentNode implements Document {
   readonly ownerDocument!: null;
 
   constructor(childNodes: Node[], children?: Element[]) {
-    super(NodeType.DOCUMENT_NODE, null, -1, childNodes, children);
+    super(NodeType.DOCUMENT_NODE, null, childNodes, children);
   }
 
   get documentElement(): Element {

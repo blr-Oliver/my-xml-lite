@@ -7,8 +7,8 @@ export class StaticDocumentType extends StaticEmptyNode implements DocumentType 
   readonly publicId: string;
   readonly systemId: string;
 
-  constructor(parentNode: ParentNode | null, parentIndex: number, name: string, publicId: string, systemId: string) {
-    super(NodeType.DOCUMENT_TYPE_NODE, parentNode, parentIndex);
+  constructor(parentNode: ParentNode | null, name: string, publicId: string, systemId: string) {
+    super(NodeType.DOCUMENT_TYPE_NODE, parentNode);
     this.name = name;
     this.publicId = publicId;
     this.systemId = systemId;

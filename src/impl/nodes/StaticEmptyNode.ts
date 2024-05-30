@@ -6,20 +6,20 @@ export abstract class StaticEmptyNode {
   readonly ownerDocument: Document | null;
   readonly nodeType: NodeType;
   readonly parentNode: ParentNode | null;
-  readonly parentIndex: number;
   readonly parentElement: Element | null;
   readonly childNodes: Node[];
 
+  parentIndex: number;
+
   protected constructor(nodeType: NodeType,
                         parentNode: ParentNode | null,
-                        parentIndex: number,
                         childNodes: Node[] = EMPTY_LIST) {
     this.ownerDocument = parentNode ? parentNode.ownerDocument || (parentNode as Document) : null;
     this.nodeType = nodeType;
     this.parentNode = parentNode;
-    this.parentIndex = parentIndex;
     this.parentElement = parentNode && parentNode.nodeType === NodeType.ELEMENT_NODE ? parentNode as Element : null;
     this.childNodes = childNodes;
+    this.parentIndex = parentNode ? parentNode.childNodes.length : -1;
   }
   get nodeValue(): string | null {
     return null;

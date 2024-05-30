@@ -9,7 +9,7 @@ export class StaticDataNode extends StaticEmptyNode implements CharacterData, Te
               parentNode: ParentNode | null,
               parentIndex: number,
               data: string) {
-    super(nodeType, parentNode, parentIndex);
+    super(nodeType, parentNode);
     this.data = data;
   }
 
