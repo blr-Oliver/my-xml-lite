@@ -1,7 +1,8 @@
-import {CDATASection, CharacterData, Comment, NodeType, ParentNode, Text} from '../../decl/xml-lite-decl';
+import {CDATASection, CharacterData, Comment, Document, NodeType, ParentNode, Text} from '../../decl/xml-lite-decl';
 import {StaticEmptyNode} from './StaticEmptyNode';
 
 export class StaticDataNode extends StaticEmptyNode implements CharacterData, Text, Comment, CDATASection {
+  readonly ownerDocument!: Document;
   readonly data: string;
 
   constructor(nodeType: NodeType,

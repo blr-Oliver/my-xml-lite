@@ -1,34 +1,37 @@
-import {Tokenizer} from '../../decl/lexer-decl';
-import {Element, Node, NodeType} from '../../decl/xml-lite-decl';
+import {Attr, Document, Element, Node, NodeType, ParentNode, StringList} from '../../decl/xml-lite-decl';
 import {TagToken} from '../tokens';
-import {StaticAttributes} from './StaticAttributes';
+import {NamespaceNamedNodeMap, StaticAttributes} from './StaticAttributes';
 import {StaticParentNode} from './StaticParentNode';
 import {StaticStringList} from './StaticStringList';
 
 export class StaticElement extends StaticParentNode implements Element {
-  readonly attributes: StaticAttributes;
-  readonly classList: StaticStringList;
+  readonly ownerDocument!: Document;
+  readonly attributes: NamespaceNamedNodeMap;
+  readonly classList: StringList;
   readonly id: string;
   readonly className: string;
-  readonly localName: string;
+  readonly namespaceURI: string | null;
   readonly prefix: string | null;
-  readonly selfClosed: boolean;
+  readonly localName: string;
   readonly tagName: string;
+  readonly selfClosed: boolean;
 
   readonly parentElementIndex: number;
   constructor(tag: TagToken,
-              parentNode: StaticParentNode | null,
+              namespaceURI: string | null,
+              parentNode: ParentNode | null,
               childNodes: Node[],
               parentIndex: number,
               parentElementIndex: number,
-              children?: StaticElement[]) {
+              children: Element[]) {
     super(NodeType.ELEMENT_NODE, parentNode, parentIndex, childNodes, children);
-    this.attributes = new StaticAttributes(tag.attributes);
+    this.namespaceURI = namespaceURI;
+    this.attributes = new StaticAttributes(tag.attributes, this) as unknown as NamespaceNamedNodeMap;
     this.id = this.attributes.getAttribute('id') || '';
-    this.classList = new StaticStringList(this.attributes.getAttribute('class') || '');
-    this.className = this.classList.join(' ');
-    // TODO prefix must be meaningful
-    this.prefix = null;
+    const classList = new StaticStringList(this.attributes.getAttribute('class') || '');
+    this.classList = classList;
+    this.className = classList.join(' ');
+    this.prefix = null; // TODO prefix must be meaningful
     this.tagName = this.localName = tag.name;
     this.selfClosed = tag.selfClosing;
     this.parentElementIndex = parentElementIndex;
@@ -44,11 +47,23 @@ export class StaticElement extends StaticParentNode implements Element {
   getAttribute(qName: string): string | null {
     return this.attributes.getAttribute(qName);
   }
+  getAttributeNS(prefix: string | null, localName: string): string | null {
+    return this.attributes.getAttributeNS(prefix, localName);
+  }
   getAttributeNames(): string[] {
     return this.attributes.getAttributeNames();
   }
+  getAttributeNode(qName: string): Attr | null {
+    return this.attributes.getNamedItem(qName);
+  }
+  getAttributeNodeNS(namespace: string | null, localName: string): Attr | null {
+    return this.attributes.getNamedItemNS(namespace, localName);
+  }
   hasAttribute(qName: string): boolean {
     return this.attributes.hasAttribute(qName);
+  }
+  hasAttributeNS(prefix: string | null, localName: string): boolean {
+    return this.attributes.hasAttributeNS(prefix, localName);
   }
   hasAttributes(): boolean {
     return this.attributes.hasAttributes();

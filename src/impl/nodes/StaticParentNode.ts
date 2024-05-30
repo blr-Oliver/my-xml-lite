@@ -1,17 +1,16 @@
 import {Element, Node, NodeList, NodeType, ParentNode} from '../../decl/xml-lite-decl';
-import {StaticElement} from './StaticElement';
 import {StaticEmptyNode} from './StaticEmptyNode';
 
 export class StaticParentNode extends StaticEmptyNode implements ParentNode {
-  readonly children: StaticElement[];
+  readonly children: Element[];
 
   constructor(nodeType: NodeType,
-              parentNode: StaticParentNode | null,
+              parentNode: ParentNode | null,
               parentIndex: number,
               childNodes: Node[],
-              children?: StaticElement[]) {
+              children?: Element[]) {
     super(nodeType, parentNode, parentIndex, childNodes);
-    this.children = children || childNodes.filter(node => node.nodeType === NodeType.ELEMENT_NODE) as StaticElement[];
+    this.children = children || childNodes.filter(node => node.nodeType === NodeType.ELEMENT_NODE) as Element[];
   }
 
   get nodeValue(): string | null {
@@ -42,20 +41,21 @@ export class StaticParentNode extends StaticEmptyNode implements ParentNode {
     if (!classes) return [];
     const classList = classes.split(/\s+/);
     if (!classList.length) return [];
-    const result: Element[] = [];
-    this.traverseElementsFrom(this, element => {
-      if (classList.every(cls => element.classList.contains(cls)))
-        result.push(element);
-    });
-    return result;
+    return this.collectMatchingElements(el => classList.every(cls => el.classList.contains(cls)));
   }
+
   getElementsByTagName(name: string): NodeList<Element> {
-    const result: Element[] = [];
-    this.traverseElementsFrom(this, element => {
-      if (element.tagName === name)
-        result.push(element);
-    });
-    return result;
+    return this.collectMatchingElements(element => element.tagName === name);
+  }
+
+  getElementsByTagNameNS(namespaceURI: string | null, localName: string): NodeList<Element> {
+    if (namespaceURI === '*') {
+      if (localName === '*') return this.collectMatchingElements(() => true);
+      else return this.collectMatchingElements(el => el.localName === localName);
+    } else {
+      if (localName === '*') return this.collectMatchingElements(el => el.namespaceURI === namespaceURI);
+      else return this.collectMatchingElements(el => el.namespaceURI === namespaceURI && el.localName === localName);
+    }
   }
 
   protected traverseNodesFrom(root: Node, callback: (node: Node) => void) {
@@ -75,5 +75,13 @@ export class StaticParentNode extends StaticEmptyNode implements ParentNode {
       callback(child);
       this.traverseElementsFrom(child, callback);
     }
+  }
+  protected collectMatchingElements(callback: (element: Element) => boolean) {
+    const result: Element[] = [];
+    this.traverseElementsFrom(this, element => {
+      if (callback(element))
+        result.push(element);
+    });
+    return result;
   }
 }

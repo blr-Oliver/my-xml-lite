@@ -1,8 +1,9 @@
-import {Element, Node, NodeType, ParentNode} from '../../decl/xml-lite-decl';
+import {Document, Element, Node, NodeType, ParentNode} from '../../decl/xml-lite-decl';
 
 const EMPTY_LIST: Node[] = [] as const;
 
 export abstract class StaticEmptyNode {
+  readonly ownerDocument: Document | null;
   readonly nodeType: NodeType;
   readonly parentNode: ParentNode | null;
   readonly parentIndex: number;
@@ -13,6 +14,7 @@ export abstract class StaticEmptyNode {
                         parentNode: ParentNode | null,
                         parentIndex: number,
                         childNodes: Node[] = EMPTY_LIST) {
+    this.ownerDocument = parentNode ? parentNode.ownerDocument || (parentNode as Document) : null;
     this.nodeType = nodeType;
     this.parentNode = parentNode;
     this.parentIndex = parentIndex;

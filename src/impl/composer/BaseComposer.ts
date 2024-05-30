@@ -1,5 +1,5 @@
 import {TokenSink} from '../../decl/ParserEnvironment';
-import {Node, NodeType} from '../../decl/xml-lite-decl';
+import {Element, Node, NodeType} from '../../decl/xml-lite-decl';
 import {StaticDataNode} from '../nodes/StaticDataNode';
 import {StaticDocument} from '../nodes/StaticDocument';
 import {StaticDocumentType} from '../nodes/StaticDocumentType';
@@ -48,6 +48,12 @@ const IMPLICITLY_THOROUGHLY_CLOSABLE = {
   'tr': true
 };
 
+const NS_HTML = 'http://www.w3.org/1999/xhtml';
+const NS_MATHML = 'http://www.w3.org/1998/Math/MathML';
+const NS_SVG = 'http://www.w3.org/2000/svg';
+const NS_XLINK = 'http://www.w3.org/1999/xlink';
+const NS_XML = 'http://www.w3.org/XML/1998/namespace';
+const NS_XMLNS = 'http://www.w3.org/2000/xmlns/';
 
 export class BaseComposer implements TokenSink {
   isFragmentParser: boolean = false;
@@ -74,7 +80,7 @@ export class BaseComposer implements TokenSink {
   get currentChildNodes(): Node[] {
     return this.current.childNodes;
   }
-  get currentChildElements(): StaticElement[] {
+  get currentChildElements(): Element[] {
     return this.current.children;
   }
 
@@ -153,7 +159,7 @@ export class BaseComposer implements TokenSink {
   }
 
   createElement(token: TagToken): StaticElement {
-    return new StaticElement(token, this.current, [], this.currentChildNodes.length, this.currentChildElements.length, []);
+    return new StaticElement(token, NS_HTML, this.current, [], this.currentChildNodes.length, this.currentChildElements.length, []);
   }
 
   insertEmptyElement(element: StaticElement): StaticElement {
@@ -169,7 +175,7 @@ export class BaseComposer implements TokenSink {
   createAndInsertElement(token: TagToken): StaticElement {
     const childNodes: Node[] = [];
     const childElements: StaticElement[] = [];
-    const element = new StaticElement(token, this.current, childNodes, this.currentChildNodes.length, this.currentChildElements.length, childElements);
+    const element = new StaticElement(token, NS_HTML, this.current, childNodes, this.currentChildNodes.length, this.currentChildElements.length, childElements);
     this.currentChildNodes.push(element);
     this.currentChildElements.push(element);
     this.current = element;

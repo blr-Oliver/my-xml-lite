@@ -12,6 +12,7 @@ export enum NodeType {
 export type NodeList<T extends Node> = ArrayLike<T>;
 
 export interface Node {
+  readonly ownerDocument: Document | null;
   readonly childNodes: NodeList<Node>;
   readonly firstChild: Node | null;
   readonly lastChild: Node | null;
@@ -31,25 +32,34 @@ export interface ParentNode extends Node {
   readonly lastElementChild: Element | null;
   getElementsByTagName(name: string): NodeList<Element>;
   getElementsByClassName(classes: string): NodeList<Element>;
+  getElementsByTagNameNS(namespaceURI: string | null, localName: string): NodeList<Element>;
 }
 
 export interface Element extends ParentNode {
+  readonly ownerDocument: Document;
+  readonly attributes: NamedNodeMap;
   readonly id: string;
   readonly className: string;
   readonly classList: StringList;
   readonly nextElementSibling: Element | null;
   readonly previousElementSibling: Element | null;
+  readonly namespaceURI: string | null;
+  readonly prefix: string | null;
   readonly localName: string;
   readonly tagName: string;
-  readonly prefix: string | null;
   getAttribute(qName: string): string | null;
+  getAttributeNS(prefix: string | null, localName: string): string | null;
   getAttributeNames(): string[];
+  getAttributeNode(qualifiedName: string): Attr | null;
+  getAttributeNodeNS(namespace: string | null, localName: string): Attr | null;
   hasAttribute(qName: string): boolean;
+  hasAttributeNS(prefix: string | null, localName: string): boolean;
   hasAttributes(): boolean;
   readonly selfClosed?: boolean;
 }
 
 export interface CharacterData extends Node {
+  readonly ownerDocument: Document;
   readonly data: string;
 }
 
@@ -67,19 +77,40 @@ export interface ProcessingInstruction extends CharacterData {
 }
 
 export interface DocumentType extends Node {
+  readonly ownerDocument: Document;
   readonly name: string;
   readonly publicId: string;
   readonly systemId: string;
 }
 
 export interface Document extends ParentNode {
+  readonly ownerDocument: null;
   readonly documentElement: Element;
+  getElementById(elementId: string): Element | null;
 }
 
 export interface StringList {
   readonly length: number;
   contains(string: string): boolean;
   readonly [index: number]: string;
+}
+
+export interface Attr {
+  readonly localName: string;
+  readonly name: string;
+  readonly namespaceURI: string | null;
+  readonly ownerDocument: Document;
+  readonly ownerElement: Element;
+  readonly prefix: string | null;
+  readonly value: string | null;
+}
+
+export interface NamedNodeMap {
+  readonly length: number;
+  getNamedItem(qualifiedName: string): Attr | null;
+  getNamedItemNS(namespace: string | null, localName: string): Attr | null;
+  item(index: number): Attr | null;
+  readonly [index: number]: Attr;
 }
 
 export function isElement(node: Node): node is Element {

@@ -17,6 +17,12 @@ export interface Attribute {
   value: string | null;
 }
 
+export interface NamespacedAttribute extends Attribute {
+  prefix?: string;
+  localName?: string;
+  namespaceURI?: string;
+}
+
 export interface TagToken extends Token {
   type: 'startTag' | 'endTag';
   name: string;
