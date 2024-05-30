@@ -1,4 +1,4 @@
-import {StaticElement} from '../nodes/StaticElement';
+import {Element} from '../../decl/xml-lite-decl';
 import {TagToken, TextToken, Token} from '../tokens';
 import {BaseComposer} from './BaseComposer';
 import {InsertionMode} from './insertion-mode';
@@ -29,7 +29,7 @@ export class InSelectComposer extends BaseComposer {
   }
 
   inSelectStartTag(token: TagToken): InsertionMode {
-    const currentName = (this.current as StaticElement).tagName;
+    const currentName = (this.current as Element).tagName;
     switch (token.name) {
       case 'html':
         return this.inBody(token);
@@ -65,11 +65,11 @@ export class InSelectComposer extends BaseComposer {
   }
 
   inSelectEndTag(token: TagToken): InsertionMode {
-    const currentName = (this.current as StaticElement).tagName;
+    const currentName = (this.current as Element).tagName;
     switch (token.name) {
       case 'optgroup':
         if (currentName === 'option') {
-          const previous = this.openElements.at(-2) as StaticElement;
+          const previous = this.openElements.at(-2) as Element;
           if (previous && previous.tagName === 'optgroup') {
             this.popCurrentElement();
             this.popCurrentElement();

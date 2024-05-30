@@ -1,4 +1,4 @@
-import {StaticElement} from '../nodes/StaticElement';
+import {Element} from '../../decl/xml-lite-decl';
 import {TagToken, TextToken, Token} from '../tokens';
 import {BaseComposer} from './BaseComposer';
 import {InsertionMode} from './insertion-mode';
@@ -59,7 +59,7 @@ export class InColumnGroupComposer extends BaseComposer {
   }
 
   inColumnGroupDefault(token: Token, reprocess = true): InsertionMode {
-    if ((this.current as StaticElement).tagName !== 'colgroup') {
+    if ((this.current as Element).tagName !== 'colgroup') {
       this.error();
       return this.insertionMode;
     } else {

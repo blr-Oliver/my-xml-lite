@@ -1,10 +1,8 @@
 import {TokenSink} from '../../decl/ParserEnvironment';
-import {Element, Node, NodeType} from '../../decl/xml-lite-decl';
+import {Document, Element, Node, NodeType, ParentNode} from '../../decl/xml-lite-decl';
 import {StaticDataNode} from '../nodes/StaticDataNode';
-import {StaticDocument} from '../nodes/StaticDocument';
 import {StaticDocumentType} from '../nodes/StaticDocumentType';
 import {StaticElement} from '../nodes/StaticElement';
-import {StaticParentNode} from '../nodes/StaticParentNode';
 import {StateBasedTokenizer} from '../StateBasedTokenizer';
 import {State} from '../states';
 import {DoctypeToken, TagToken, TextToken, Token} from '../tokens';
@@ -63,25 +61,25 @@ export class BaseComposer implements TokenSink {
   originalInsertionMode!: InsertionMode;
   templateInsertionModes: InsertionMode[] = [];
 
-  document!: StaticDocument;
+  document!: Document;
 
-  openElements: StaticElement[] = [];
+  openElements: Element[] = [];
   openCounts: { [tagName: string]: number } = {};
   scopeCounter: number = 0;
   listScopeCounter: number = 0;
   tableScopeCounts: { [tagName: string]: number } = {}; // TODO
 
-  current!: StaticParentNode;
-  headElement!: StaticElement;
-  formElement: StaticElement | null = null;
+  current!: ParentNode;
+  headElement!: Element;
+  formElement: Element | null = null;
 
   fosterParentingEnabled: boolean = false; // TODO
 
   get currentChildNodes(): Node[] {
-    return this.current.childNodes;
+    return this.current.childNodes as Node[];
   }
   get currentChildElements(): Element[] {
-    return this.current.children;
+    return this.current.children as Element[];
   }
 
   accept(token: Token) {
@@ -114,11 +112,11 @@ export class BaseComposer implements TokenSink {
     this.currentChildNodes.push(dataNode);
   }
 
-  popUntilMatches(test: (name: string, element: StaticElement) => boolean) {
+  popUntilMatches(test: (name: string, element: Element) => boolean) {
     let i = this.openElements.length;
     if (i) {
       let changed = false;
-      let element!: StaticElement;
+      let element!: Element;
       for (--i; i >= 0; --i) {
         element = this.openElements[i];
         const name = element.tagName;
@@ -158,26 +156,25 @@ export class BaseComposer implements TokenSink {
     return this.reprocessIn(state, token);
   }
 
-  createElement(token: TagToken): StaticElement {
+  createElement(token: TagToken): Element {
     return new StaticElement(token, NS_HTML, this.current, [], this.currentChildNodes.length, this.currentChildElements.length, []);
   }
 
-  insertEmptyElement(element: StaticElement): StaticElement {
+  insertEmptyElement(element: Element): Element {
     this.currentChildNodes.push(element);
     this.currentChildElements.push(element);
     return element;
   }
 
-  createAndInsertEmptyElement(token: TagToken): StaticElement {
+  createAndInsertEmptyElement(token: TagToken): Element {
     return this.insertEmptyElement(this.createElement(token));
   }
 
-  createAndInsertElement(token: TagToken): StaticElement {
-    const childNodes: Node[] = [];
-    const childElements: StaticElement[] = [];
-    const element = new StaticElement(token, NS_HTML, this.current, childNodes, this.currentChildNodes.length, this.currentChildElements.length, childElements);
+  createAndInsertElement(token: TagToken): Element {
+    const element = this.createElement(token);
     this.currentChildNodes.push(element);
     this.currentChildElements.push(element);
+    this.openElements.push(element);
     this.current = element;
     this.openCounts[token.name] = (this.openCounts[token.name] || 0) + 1;
     return element;

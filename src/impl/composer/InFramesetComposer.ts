@@ -1,4 +1,4 @@
-import {StaticElement} from '../nodes/StaticElement';
+import {Element} from '../../decl/xml-lite-decl';
 import {TagToken, TextToken, Token} from '../tokens';
 import {BaseComposer} from './BaseComposer';
 import {InsertionMode} from './insertion-mode';
@@ -54,7 +54,7 @@ export class InFramesetComposer extends BaseComposer {
         this.error();
       } else {
         this.popCurrentElement();
-        if (!this.isFragmentParser && (this.current as StaticElement).tagName !== 'frameset')
+        if (!this.isFragmentParser && (this.current as Element).tagName !== 'frameset')
           return 'afterFrameset';
       }
     } else

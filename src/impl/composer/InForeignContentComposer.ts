@@ -1,4 +1,4 @@
-import {StaticElement} from '../nodes/StaticElement';
+import {Element} from '../../decl/xml-lite-decl';
 import {TagToken, TextToken, Token} from '../tokens';
 import {BaseComposer} from './BaseComposer';
 import {InsertionMode} from './insertion-mode';
@@ -89,7 +89,7 @@ export class InForeignContentComposer extends BaseComposer {
     return this.insertionMode;
   }
 
-  isForeignNonIntegrationPoint(name: string, element: StaticElement): boolean {
+  isForeignNonIntegrationPoint(name: string, element: Element): boolean {
     const namespace = (element as any)['namespace']; // TODO introduce namespaces
     switch (namespace) {
       case 'html':

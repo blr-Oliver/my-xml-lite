@@ -1,4 +1,4 @@
-import {StaticElement} from '../nodes/StaticElement';
+import {Element} from '../../decl/xml-lite-decl';
 import {TagToken, Token} from '../tokens';
 import {BaseComposer} from './BaseComposer';
 import {InsertionMode} from './insertion-mode';
@@ -39,7 +39,7 @@ export class InCellComposer extends BaseComposer {
       case 'th':
         if (this.tableScopeCounts[tagName]) {
           this.generateImpliedEndTags();
-          if ((this.current as StaticElement).tagName !== tagName) {
+          if ((this.current as Element).tagName !== tagName) {
             this.error();
             this.popUntilMatches(name => name !== tagName);
           }
@@ -73,7 +73,7 @@ export class InCellComposer extends BaseComposer {
 
   closeTheCell(token: Token): InsertionMode {
     this.generateImpliedEndTags();
-    const currentTagName = (this.current as StaticElement).tagName;
+    const currentTagName = (this.current as Element).tagName;
     if (currentTagName !== 'td' && currentTagName !== 'th') {
       this.error();
       this.popUntilMatches(name => name !== 'td' && name !== 'th');

@@ -1,4 +1,4 @@
-import {StaticElement} from '../nodes/StaticElement';
+import {Element} from '../../decl/xml-lite-decl';
 import {TagToken, Token} from '../tokens';
 import {BaseComposer} from './BaseComposer';
 import {InsertionMode} from './insertion-mode';
@@ -63,7 +63,7 @@ export class InCaptionComposer extends BaseComposer {
   inCaptionEnd(token: TagToken, reprocess: boolean): InsertionMode {
     if (this.tableScopeCounts['caption']) {
       this.generateImpliedEndTags();
-      if ((this.current as StaticElement).tagName !== 'caption') {
+      if ((this.current as Element).tagName !== 'caption') {
         this.error();
         this.popUntilMatches(name => name !== 'caption');
       }
