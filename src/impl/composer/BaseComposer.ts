@@ -1,5 +1,5 @@
 import {TokenSink} from '../../decl/ParserEnvironment';
-import {Document, Element, Node, NodeType, ParentNode} from '../../decl/xml-lite-decl';
+import {Document, Element, isElement, Node, NodeType, ParentNode} from '../../decl/xml-lite-decl';
 import {StaticDataNode} from '../nodes/StaticDataNode';
 import {StaticDocumentType} from '../nodes/StaticDocumentType';
 import {StaticElement} from '../nodes/StaticElement';
@@ -52,6 +52,11 @@ export const NS_SVG = 'http://www.w3.org/2000/svg';
 export const NS_XLINK = 'http://www.w3.org/1999/xlink';
 export const NS_XML = 'http://www.w3.org/XML/1998/namespace';
 export const NS_XMLNS = 'http://www.w3.org/2000/xmlns/';
+
+type InsertionLocation = {
+  parent: ParentNode,
+  position?: number
+}
 
 export class BaseComposer implements TokenSink {
   isFragmentParser: boolean = false;
@@ -149,6 +154,72 @@ export class BaseComposer implements TokenSink {
       attributes: []
     } as TagToken);
     return this.reprocessIn(state, token);
+  }
+
+  getInsertionLocation(override?: ParentNode): InsertionLocation {
+    const target: ParentNode = override || this.current;
+    const result: InsertionLocation = {
+      parent: target
+    };
+    if (this.fosterParentingEnabled) {
+      if (isElement(target)) {
+        switch (target.tagName) {
+          case 'table':
+          case 'tbody':
+          case 'tfoot':
+          case 'thead':
+          case 'tr':
+            let lastTemplateIndex = this.openElements.findLastIndex(el => el.tagName === 'template');
+            let lastTableIndex = this.openElements.findLastIndex(el => el.tagName === 'table');
+            if (lastTemplateIndex >= 0 && (lastTableIndex < 0 || lastTemplateIndex > lastTableIndex)) {
+              result.parent = this.openElements[lastTemplateIndex];
+            } else if (lastTableIndex < 0) {
+              result.parent = this.openElements[0];
+            } else {
+              const table = this.openElements[lastTableIndex];
+              const tableParent = table.parentNode;
+              if (tableParent) {
+                result.parent = tableParent;
+                result.position = this.findPosition(tableParent.childNodes, table);
+              } else {
+                result.parent = this.openElements[lastTableIndex - 1];
+              }
+            }
+        }
+      }
+    }
+    if (isElement(result.parent) && result.parent.tagName === 'template') {
+      // TODO use template contents
+    }
+    return result;
+  }
+
+  insertNodeAt(node: Node, location: InsertionLocation) {
+    const {parent, position} = location;
+    if (position === undefined) {
+      this.push(parent.childNodes, node);
+      if (isElement(node))
+        this.push(parent.children, node);
+    } else {
+      // TODO this breaks internal indexes
+      this.insertAt(parent.childNodes, node, position);
+      if (isElement(node))
+        this.insertAt(parent.children, node, position);
+    }
+  }
+  // TODO how to use array methods directly while staying decoupled of implementation?
+  findPosition<T>(list: ArrayLike<T>, el: T): number {
+    return Array.isArray(list) ? list.lastIndexOf(el) : Array.prototype.lastIndexOf.call(list, el);
+  }
+
+  push<T>(list: ArrayLike<T>, el: T) {
+    if (Array.isArray(list)) list.push(el);
+    else Array.prototype.push.call(list, el);
+  }
+
+  insertAt<T>(list: ArrayLike<T>, el: T, position: number) {
+    if (Array.isArray(list)) list.splice(position, 0, el);
+    else Array.prototype.splice.call(list, position, 0, el);
   }
 
   createElementNS(token: TagToken, namespace: string, parent: ParentNode): Element {

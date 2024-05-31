@@ -18,7 +18,7 @@ export interface Node {
   readonly lastChild: Node | null;
   readonly nextSibling: Node | null;
   readonly previousSibling: Node | null;
-  readonly parentNode: Node | null;
+  readonly parentNode: ParentNode | null;
   readonly parentElement: Element | null;
   readonly nodeType: NodeType;
   readonly nodeValue: string | null;
