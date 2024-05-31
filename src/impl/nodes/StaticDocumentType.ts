@@ -2,7 +2,7 @@ import {Document, DocumentType, NodeType, ParentNode} from '../../decl/xml-lite-
 import {StaticEmptyNode} from './StaticEmptyNode';
 
 export class StaticDocumentType extends StaticEmptyNode implements DocumentType {
-  readonly ownerDocument!: Document;
+  declare readonly ownerDocument: Document;
   readonly name: string;
   readonly publicId: string;
   readonly systemId: string;

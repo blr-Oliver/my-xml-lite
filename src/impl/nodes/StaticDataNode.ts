@@ -2,7 +2,7 @@ import {CDATASection, CharacterData, Comment, Document, NodeType, ParentNode, Te
 import {StaticEmptyNode} from './StaticEmptyNode';
 
 export class StaticDataNode extends StaticEmptyNode implements CharacterData, Text, Comment, CDATASection {
-  readonly ownerDocument!: Document;
+  declare readonly ownerDocument: Document;
   readonly data: string;
 
   constructor(nodeType: NodeType,

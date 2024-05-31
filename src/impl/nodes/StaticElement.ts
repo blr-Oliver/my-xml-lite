@@ -5,7 +5,7 @@ import {StaticParentNode} from './StaticParentNode';
 import {StaticStringList} from './StaticStringList';
 
 export class StaticElement extends StaticParentNode implements Element {
-  readonly ownerDocument!: Document;
+  declare readonly ownerDocument: Document;
   readonly attributes: NamedNodeMap;
   readonly classList: StringList;
   readonly id: string;
