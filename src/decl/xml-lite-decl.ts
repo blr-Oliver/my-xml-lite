@@ -9,11 +9,15 @@ export enum NodeType {
   DOCUMENT_FRAGMENT_NODE = 11
 }
 
-export type NodeList<T extends Node> = ArrayLike<T>;
+export type NodeListOf<T extends Node> = ArrayLike<T> & {
+  entries(): IterableIterator<[number, T]>;
+  keys(): IterableIterator<number>;
+  values(): IterableIterator<T>;
+};
 
 export interface Node {
   readonly ownerDocument: Document | null;
-  readonly childNodes: NodeList<Node>;
+  readonly childNodes: NodeListOf<Node>;
   readonly firstChild: Node | null;
   readonly lastChild: Node | null;
   readonly nextSibling: Node | null;
@@ -27,12 +31,12 @@ export interface Node {
 
 export interface ParentNode extends Node {
   readonly childElementCount: number;
-  readonly children: NodeList<Element>;
+  readonly children: NodeListOf<Element>;
   readonly firstElementChild: Element | null;
   readonly lastElementChild: Element | null;
-  getElementsByTagName(name: string): NodeList<Element>;
-  getElementsByClassName(classes: string): NodeList<Element>;
-  getElementsByTagNameNS(namespaceURI: string | null, localName: string): NodeList<Element>;
+  getElementsByTagName(name: string): NodeListOf<Element>;
+  getElementsByClassName(classes: string): NodeListOf<Element>;
+  getElementsByTagNameNS(namespaceURI: string | null, localName: string): NodeListOf<Element>;
 }
 
 export interface Element extends ParentNode {
@@ -93,6 +97,7 @@ export interface StringList {
   readonly length: number;
   contains(string: string): boolean;
   readonly [index: number]: string;
+  [Symbol.iterator](): IterableIterator<string>;
 }
 
 export interface Attr {
@@ -111,6 +116,7 @@ export interface NamedNodeMap {
   getNamedItemNS(namespace: string | null, localName: string): Attr | null;
   item(index: number): Attr | null;
   readonly [index: number]: Attr;
+  [Symbol.iterator](): IterableIterator<Attr>;
 }
 
 export function isElement(node: Node): node is Element {

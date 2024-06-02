@@ -1,4 +1,4 @@
-import {Element, Node, NodeList, NodeType, ParentNode} from '../../decl/xml-lite-decl';
+import {Element, Node, NodeListOf, NodeType, ParentNode} from '../../decl/xml-lite-decl';
 import {StaticEmptyNode} from './StaticEmptyNode';
 
 export class StaticParentNode extends StaticEmptyNode implements ParentNode {
@@ -36,18 +36,18 @@ export class StaticParentNode extends StaticEmptyNode implements ParentNode {
     return len ? this.children[len - 1] : null;
   }
 
-  getElementsByClassName(classes: string): NodeList<Element> {
+  getElementsByClassName(classes: string): NodeListOf<Element> {
     if (!classes) return [];
     const classList = classes.split(/\s+/);
     if (!classList.length) return [];
     return this.collectMatchingElements(el => classList.every(cls => el.classList.contains(cls)));
   }
 
-  getElementsByTagName(name: string): NodeList<Element> {
+  getElementsByTagName(name: string): NodeListOf<Element> {
     return this.collectMatchingElements(element => element.tagName === name);
   }
 
-  getElementsByTagNameNS(namespaceURI: string | null, localName: string): NodeList<Element> {
+  getElementsByTagNameNS(namespaceURI: string | null, localName: string): NodeListOf<Element> {
     if (namespaceURI === '*') {
       if (localName === '*') return this.collectMatchingElements(() => true);
       else return this.collectMatchingElements(el => el.localName === localName);

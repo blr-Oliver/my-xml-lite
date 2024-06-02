@@ -32,4 +32,7 @@ export class StaticAttributes implements NamedNodeMap {
   item(index: number): StaticAttr {
     return this.#attrs[index];
   }
+  [Symbol.iterator](): IterableIterator<Attr> {
+    return this.#attrs.values();
+  }
 }
