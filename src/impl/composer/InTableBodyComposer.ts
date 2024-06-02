@@ -18,7 +18,7 @@ export class InTableBodyComposer extends InTableComposer {
     switch (token.name) {
       case 'tr':
         this.clearStackToTBodyContext();
-        this.createAndInsertElement(token);
+        this.createAndInsertHTMLElement(token);
         return 'inRow';
       case 'th':
       case 'td':

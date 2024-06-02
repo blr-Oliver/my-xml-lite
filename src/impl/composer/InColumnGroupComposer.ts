@@ -33,7 +33,7 @@ export class InColumnGroupComposer extends BaseComposer {
       case 'html':
         return this.inBody(token);
       case 'col':
-        this.createAndInsertEmptyElement(token);
+        this.createAndInsertEmptyHTMLElement(token);
         break;
       case 'template':
         return this.inHead(token);

@@ -34,11 +34,11 @@ export class InTableComposer extends BaseComposer {
       case 'caption':
         this.clearStackToTableContext();
         this.insertFormattingMarker();
-        this.createAndInsertElement(token);
+        this.createAndInsertHTMLElement(token);
         return 'inCaption';
       case 'colgroup':
         this.clearStackToTableContext();
-        this.createAndInsertElement(token);
+        this.createAndInsertHTMLElement(token);
         return 'inColumnGroup';
       case 'col':
         this.clearStackToTableContext();
@@ -47,7 +47,7 @@ export class InTableComposer extends BaseComposer {
       case 'tfoot':
       case 'thead':
         this.clearStackToTableContext();
-        this.createAndInsertElement(token);
+        this.createAndInsertHTMLElement(token);
         return 'inTableBody';
       case 'td':
       case 'th':
@@ -68,20 +68,18 @@ export class InTableComposer extends BaseComposer {
       case 'template':
         return this.inHead(token); // TODO this actually should be inHeadStartTag
       case 'input':
-        const inputElement = this.createElement(token);
-        const type = inputElement.getAttribute('type');
-        if (type === null || type.toLowerCase() !== 'hidden') {
+        const typeAttr = token.attributes.find(attr => attr.name === 'type');
+        if (!typeAttr || (typeAttr.value || '').toLowerCase() !== 'hidden') {
           return this.escapeInTable(token);
         } else {
           this.error();
-          this.insertEmptyElement(inputElement);
-          // TODO acknowledge self-closing flag
+          this.createAndInsertEmptyHTMLElement(token);
         }
         break;
       case 'form':
         this.error();
         if (!this.openCounts['template'] && !this.formElement) {
-          this.formElement = this.createAndInsertElement(token);
+          this.formElement = this.createAndInsertHTMLElement(token);
           this.popCurrentElement();
         }
     }

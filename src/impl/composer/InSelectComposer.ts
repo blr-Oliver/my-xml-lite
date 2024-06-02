@@ -35,17 +35,17 @@ export class InSelectComposer extends BaseComposer {
         return this.inBody(token);
       case 'option':
         if (currentName === 'option') this.popCurrentElement();
-        this.createAndInsertElement(token);
+        this.createAndInsertHTMLElement(token);
         break;
       case 'optgroup':
         if (currentName === 'option') this.popCurrentElement();
         if (currentName === 'optgroup') this.popCurrentElement();
-        this.createAndInsertElement(token);
+        this.createAndInsertHTMLElement(token);
         break;
       case 'hr':
         if (currentName === 'option') this.popCurrentElement();
         if (currentName === 'optgroup') this.popCurrentElement();
-        this.createAndInsertEmptyElement(token);
+        this.createAndInsertEmptyHTMLElement(token);
         break;
       case 'select':
         this.error();

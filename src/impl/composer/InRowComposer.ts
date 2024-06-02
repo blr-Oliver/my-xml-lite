@@ -19,7 +19,7 @@ export class InRowComposer extends InTableComposer {
       case 'th':
       case 'td':
         this.clearStackToRowContext();
-        this.createAndInsertElement(token);
+        this.createAndInsertHTMLElement(token);
         this.insertFormattingMarker();
         return 'inCell';
       case 'caption':

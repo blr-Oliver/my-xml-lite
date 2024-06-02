@@ -55,10 +55,10 @@ export interface Element extends ParentNode {
   getAttribute(qName: string): string | null;
   getAttributeNS(prefix: string | null, localName: string): string | null;
   getAttributeNames(): string[];
-  getAttributeNode(qualifiedName: string): Attr | null;
+  getAttributeNode(qName: string): Attr | null;
   getAttributeNodeNS(namespace: string | null, localName: string): Attr | null;
   hasAttribute(qName: string): boolean;
-  hasAttributeNS(prefix: string | null, localName: string): boolean;
+  hasAttributeNS(namespace: string | null, localName: string): boolean;
   hasAttributes(): boolean;
   readonly selfClosed?: boolean;
 }

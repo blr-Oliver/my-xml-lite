@@ -193,14 +193,9 @@ export class BaseComposer implements TokenSink {
   generateImpliedEndTagsThoroughly() {
     return this.generateImpliedEndTagsFromSet(IMPLICITLY_THOROUGHLY_CLOSABLE);
   }
-  popCurrentElement() {
-    const element = this.openElements.pop()!;
-    this.openCounts[element.tagName]--;
-    this.current = this.openElements.at(-1) || this.document;
-  }
 
   forceElementAndState(element: string, state: InsertionMode, token: Token): InsertionMode {
-    this.createAndInsertElement({
+    this.createAndInsertHTMLElement({
       type: 'startTag',
       name: element,
       selfClosing: false,
@@ -209,6 +204,26 @@ export class BaseComposer implements TokenSink {
     return this.reprocessIn(state, token);
   }
 
+  createElementNS(token: TagToken, namespace: string | null, parent: ParentNode): Element {
+    const element = new StaticElement(token, namespace, parent, [], []);
+    this.validateNsAttributes(element);
+    return element;
+  }
+
+  protected validateNsAttributes(element: Element) {
+    if (element.hasAttribute('xmlns')) {
+      const attr = element.getAttributeNode('xmlns')!;
+      if (attr.namespaceURI === NS_XMLNS && attr.localName === 'xmlns' && attr.value !== element.namespaceURI)
+        this.error();
+    }
+    if (element.hasAttribute('xmlns:xlink')) {
+      const attr = element.getAttributeNode('xmlns:xlink')!;
+      if (attr.namespaceURI === NS_XMLNS && attr.localName === 'xlink' && attr.value !== NS_XLINK)
+        this.error();
+    }
+  }
+
+  /** a-ka "appropriate place for inserting a node" */
   getInsertionLocation(override?: ParentNode): InsertionLocation {
     const target: ParentNode = override || this.current;
     const result: InsertionLocation = {
@@ -240,8 +255,9 @@ export class BaseComposer implements TokenSink {
     return result;
   }
 
-  insertNodeAt(node: Node, location: InsertionLocation) {
+  insertElementAtLocation(node: Node, location: InsertionLocation) {
     const {parent, before} = location;
+    // TODO is it whenever a case when insertion is not possible?
     if (!before) {
       this.push(parent.childNodes, node);
       if (isElement(node))
@@ -252,51 +268,40 @@ export class BaseComposer implements TokenSink {
       this.fosterTables.get(before)!.push(node);
     }
   }
-  // TODO how to use array methods directly while staying decoupled of implementation?
-  findPosition<T>(list: ArrayLike<T>, el: T): number {
-    return Array.isArray(list) ? list.lastIndexOf(el) : Array.prototype.lastIndexOf.call(list, el);
-  }
 
-  push<T>(list: ArrayLike<T>, el: T) {
-    if (Array.isArray(list)) list.push(el);
-    else Array.prototype.push.call(list, el);
-  }
-
-  insertAt<T>(list: ArrayLike<T>, el: T, position: number) {
-    if (Array.isArray(list)) list.splice(position, 0, el);
-    else Array.prototype.splice.call(list, position, 0, el);
-  }
-
-  createElementNS(token: TagToken, namespace: string, parent: ParentNode): Element {
-    return new StaticElement(token, namespace, parent, [], []);
-  }
-
-  createElement(token: TagToken): Element {
-    return new StaticElement(token, NS_HTML, this.current, [], []);
-  }
-
-  insertEmptyElement(element: Element): Element {
-    this.currentChildNodes.push(element);
-    this.currentChildElements.push(element);
+  /** a-ka "insert a foreign element" */
+  createAndInsertElementNS(token: TagToken, namespace: string | null, popImmediately: boolean, onlyAddToStack: boolean = false): Element {
+    let location = this.getInsertionLocation();
+    let element = this.createElementNS(token, namespace, location.parent);
+    if (!onlyAddToStack)
+      this.insertElementAtLocation(element, location);
+    if (!popImmediately)
+      this.pushOpenElement(element);
     return element;
   }
 
-  createAndInsertEmptyElement(token: TagToken): Element {
-    return this.insertEmptyElement(this.createElement(token));
+  createAndInsertEmptyHTMLElement(token: TagToken): Element {
+    return this.createAndInsertElementNS(token, NS_HTML, true);
   }
 
-  createAndInsertElement(token: TagToken): Element {
-    const element = this.createElement(token);
-    this.currentChildNodes.push(element);
-    this.currentChildElements.push(element);
+  createAndInsertHTMLElement(token: TagToken): Element {
+    return this.createAndInsertElementNS(token, NS_HTML, false);
+  }
+
+  pushOpenElement(element: Element) {
     this.openElements.push(element);
     this.current = element;
-    this.openCounts[token.name] = (this.openCounts[token.name] || 0) + 1;
-    return element;
+    this.openCounts[element.tagName] = (this.openCounts[element.tagName] || 0) + 1;
+  }
+
+  popCurrentElement() {
+    const element = this.openElements.pop()!;
+    this.openCounts[element.tagName]--;
+    this.current = this.openElements.at(-1) || this.document;
   }
 
   startTextMode(tokenizerState: State, token: TagToken): InsertionMode {
-    this.createAndInsertElement(token);
+    this.createAndInsertHTMLElement(token);
     this.originalInsertionMode = this.insertionMode;
     this.tokenizer.state = tokenizerState;
     this.tokenizer.lastOpenTag = token.name;
@@ -392,5 +397,10 @@ export class BaseComposer implements TokenSink {
   stopParsing(): InsertionMode { // TODO
     this.settleFosterChildren();
     return this.insertionMode;
+  }
+
+  push<T>(list: ArrayLike<T>, el: T) {
+    if (Array.isArray(list)) list.push(el);
+    else Array.prototype.push.call(list, el);
   }
 }

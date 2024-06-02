@@ -35,10 +35,10 @@ export class InFramesetComposer extends BaseComposer {
       case 'html':
         return this.inBody(token);
       case 'frameset':
-        this.createAndInsertElement(token);
+        this.createAndInsertHTMLElement(token);
         break;
       case 'frame':
-        this.createAndInsertEmptyElement(token);
+        this.createAndInsertEmptyHTMLElement(token);
         break;
       case 'noframes':
         return this.inHead(token);
