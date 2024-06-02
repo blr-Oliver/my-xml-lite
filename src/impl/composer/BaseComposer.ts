@@ -3,6 +3,8 @@ import {Document, Element, isElement, Node, NodeType, ParentNode} from '../../de
 import {StaticDataNode} from '../nodes/StaticDataNode';
 import {StaticDocumentType} from '../nodes/StaticDocumentType';
 import {StaticElement} from '../nodes/StaticElement';
+import {StaticEmptyNode} from '../nodes/StaticEmptyNode';
+import {StaticParentNode} from '../nodes/StaticParentNode';
 import {StateBasedTokenizer} from '../StateBasedTokenizer';
 import {State} from '../states';
 import {DoctypeToken, TagToken, TextToken, Token} from '../tokens';
@@ -55,7 +57,7 @@ export const NS_XMLNS = 'http://www.w3.org/2000/xmlns/';
 
 type InsertionLocation = {
   parent: ParentNode,
-  position?: number
+  before?: Element // this can only be a table
 }
 
 export class BaseComposer implements TokenSink {
@@ -79,6 +81,7 @@ export class BaseComposer implements TokenSink {
   formElement: Element | null = null;
 
   fosterParentingEnabled: boolean = false; // TODO
+  fosterTables: Map<Element, Node[]> = new Map<Element, Node[]>(); // keys are table elements, values are collection of elements inserted just before them
 
   get currentChildNodes(): Node[] {
     return this.current.childNodes as Node[];
@@ -176,14 +179,7 @@ export class BaseComposer implements TokenSink {
             } else if (lastTableIndex < 0) {
               result.parent = this.openElements[0];
             } else {
-              const table = this.openElements[lastTableIndex];
-              const tableParent = table.parentNode;
-              if (tableParent) {
-                result.parent = tableParent;
-                result.position = this.findPosition(tableParent.childNodes, table);
-              } else {
-                result.parent = this.openElements[lastTableIndex - 1];
-              }
+              result.parent = (result.before = this.openElements[lastTableIndex]).parentNode!;
             }
         }
       }
@@ -195,16 +191,15 @@ export class BaseComposer implements TokenSink {
   }
 
   insertNodeAt(node: Node, location: InsertionLocation) {
-    const {parent, position} = location;
-    if (position === undefined) {
+    const {parent, before} = location;
+    if (!before) {
       this.push(parent.childNodes, node);
       if (isElement(node))
         this.push(parent.children, node);
     } else {
-      // TODO this breaks internal indexes
-      this.insertAt(parent.childNodes, node, position);
-      if (isElement(node))
-        this.insertAt(parent.children, node, position);
+      if (!this.fosterTables.has(before))
+        this.fosterTables.set(before, []);
+      this.fosterTables.get(before)!.push(node);
     }
   }
   // TODO how to use array methods directly while staying decoupled of implementation?
@@ -299,7 +294,53 @@ export class BaseComposer implements TokenSink {
     return false;
   }
 
+  settleFosterChildren() {
+    const parents: Map<ParentNode, [Node[], Element[]]> = new Map<ParentNode, [Node[], Element[]]>();
+    for (let table of this.fosterTables.keys()) {
+      const parent = table.parentNode!;
+      const newChildNodes: Node[] = [];
+      const newChildren: Element[] = [];
+      parents.set(parent, [newChildNodes, newChildren]);
+      for (let node of parent.childNodes) {
+        this.collectFosterNode(node, newChildNodes, newChildren);
+      }
+    }
+    for (let [parent, [childNodes, children]] of parents) {
+      childNodes.forEach(this.setNodeIndex, this);
+      children.forEach(this.setElementIndex, this);
+      this.setNestedNodes(parent, childNodes, children);
+    }
+    this.fosterTables.clear();
+  }
+
+  collectFosterNode(node: Node, childNodes: Node[], children: Element[]) {
+    if (isElement(node)) {
+      if (this.fosterTables.has(node)) {
+        const predecessors = this.fosterTables.get(node)!;
+        for (let extraNode of predecessors)
+          this.collectFosterNode(extraNode, childNodes, children);
+        predecessors.length = 0;
+      }
+      children.push(node);
+    }
+    childNodes.push(node);
+  }
+  // TODO these methods are tied to StaticXXX implementation - not good
+  setNodeIndex(node: Node, nodeIndex: number) {
+    (node as StaticEmptyNode).parentIndex = nodeIndex;
+  }
+  setElementIndex(el: Element, elementIndex: number) {
+    (el as StaticElement).parentElementIndex = elementIndex;
+  }
+  setNestedNodes(parent: ParentNode, childNodes: Node[], children: Element[]) {
+    //@ts-ignore
+    (parent as StaticParentNode).childNodes = childNodes;
+    //@ts-ignore
+    (parent as StaticParentNode).children = children;
+  }
+
   stopParsing(): InsertionMode { // TODO
+    this.settleFosterChildren();
     return this.insertionMode;
   }
 }

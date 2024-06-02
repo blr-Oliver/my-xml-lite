@@ -13,6 +13,7 @@ export type NodeListOf<T extends Node> = ArrayLike<T> & {
   entries(): IterableIterator<[number, T]>;
   keys(): IterableIterator<number>;
   values(): IterableIterator<T>;
+  [Symbol.iterator](): IterableIterator<T>;
 };
 
 export interface Node {
