@@ -91,11 +91,31 @@ export class InForeignContentComposer extends TokenAdjustingComposer {
       this.adjustSvgAttributes(token);
     }
     this.adjustForeignAttributes(token);
-    // TODO
+    this.createAndInsertElementNS(token, adjustedNode.namespaceURI, token.selfClosing);
     return this.insertionMode;
   }
 
   inForeignContentEndTag(token: TagToken): InsertionMode {
+    switch (token.name) {
+      case 'br':
+      case 'p':
+        this.error();
+        this.popUntilMatches(this.isForeignNonIntegrationPoint);
+        return this.reprocessIn(this.insertionMode, token);
+      default:
+        if (token.name !== (this.current as Element).tagName.toLowerCase())
+          this.error();
+        for (let i = this.openElements.length - 1; i > 0; --i) {
+          let node = this.openElements[i];
+          if (node.namespaceURI === NS_HTML) return this.reprocessIn(this.insertionMode, token);
+          if (node.tagName.toLowerCase() === token.name) {
+            while (this.openElements.length >= i) {
+              this.popCurrentElement();
+            }
+            break;
+          }
+        }
+    }
     return this.insertionMode;
   }
 
