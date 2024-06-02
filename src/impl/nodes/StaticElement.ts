@@ -27,12 +27,12 @@ export class StaticElement extends StaticParentNode implements Element {
     super(NodeType.ELEMENT_NODE, parentNode, childNodes, children);
     this.namespaceURI = namespaceURI;
     this.attributeNames = tag.attributes.map(attr => attr.name);
-    this.attributes = new StaticAttributes(tag.attributes, this) as unknown as NamedNodeMap;
+    this.attributes = new StaticAttributes(tag.attributes, this); // TODO check for repeating attributes
     this.id = this.attributes.getNamedItem('id')?.value || '';
     const classList = new StaticStringList(this.attributes.getNamedItem('class')?.value || '');
     this.classList = classList;
     this.className = classList.join(' ');
-    this.prefix = null; // TODO prefix must be meaningful
+    this.prefix = null;
     this.tagName = this.localName = tag.name;
     this.selfClosed = tag.selfClosing;
     this.parentElementIndex = parentNode.childElementCount;

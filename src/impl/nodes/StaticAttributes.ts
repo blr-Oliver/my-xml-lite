@@ -12,12 +12,15 @@ export class StaticAttributes implements NamedNodeMap {
     this.#attrs = new Array(length);
     this.#map = {};
     for (let i = 0; i < length; ++i) {
-      const attr = new StaticAttr(attributes[i], ownerElement);
-      (this as any)[i] = this.#attrs[i] = attr;
-      this.#map[attr.name] = attr;
-      if (!(attr.name in this))
-        (this as any)[attr.name] = attr;
+      this.addAttributeNode(new StaticAttr(attributes[i], ownerElement), i);
     }
+  }
+
+  addAttributeNode(attr: Attr, i: number = this.length) {
+    (this as any)[i] = this.#attrs[i] = attr;
+    this.#map[attr.name] = attr;
+    if (!(attr.name in this))
+      (this as any)[attr.name] = attr;
   }
   get length() {
     return this.#attrs.length;

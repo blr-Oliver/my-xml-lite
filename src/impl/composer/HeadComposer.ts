@@ -184,8 +184,7 @@ export class HeadComposer extends BaseComposer {
       case 'template':
       case 'title':
         this.error();
-        this.openElements.push(this.current = this.headElement);
-        this.openCounts['head'] = (this.openCounts['head'] || 0) + 1;
+        this.pushOpenElement(this.headElement);
         let result = this.inHead(token);
         let index = this.openElements.indexOf(this.headElement);
         if (index === this.openElements.length - 1)

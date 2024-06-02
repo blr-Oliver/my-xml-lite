@@ -77,13 +77,17 @@ export class BaseComposer implements TokenSink {
   listScopeCounter: number = 0;
   tableScopeCounts: { [tagName: string]: number } = {}; // TODO
 
-  current!: ParentNode;
   headElement!: Element;
   formElement: Element | null = null;
 
   fosterParentingEnabled: boolean = false; // TODO
   fosterTables: Map<Element, Node[]> = new Map<Element, Node[]>(); // keys are table elements, values are collection of elements inserted just before them
 
+  framesetOk: boolean = true;
+
+  get current(): Element {
+    return this.openElements[this.openElements.length - 1];
+  }
   get currentChildNodes(): Node[] {
     return this.current.childNodes as Node[];
   }
@@ -154,6 +158,10 @@ export class BaseComposer implements TokenSink {
     throw new Error('Malformed inheritance');
   }
 
+  inTemplate(token: Token): InsertionMode {
+    throw new Error('Malformed inheritance');
+  }
+
   protected insertDoctype(doctypeToken: DoctypeToken) {
     const documentType = new StaticDocumentType(this.current, doctypeToken.name ?? 'html', doctypeToken.publicId ?? '', doctypeToken.systemId ?? '');
     this.currentChildNodes.push(documentType);
@@ -168,7 +176,6 @@ export class BaseComposer implements TokenSink {
   popUntilMatches(test: (name: string, element: Element) => boolean) {
     let i = this.openElements.length;
     if (i) {
-      let changed = false;
       let element!: Element;
       for (--i; i >= 0; --i) {
         element = this.openElements[i];
@@ -176,12 +183,10 @@ export class BaseComposer implements TokenSink {
         if (test(name, element)) {
           this.openElements.pop();
           this.openCounts[name]--;
-          changed = true;
+          // TODO
         } else
           break;
       }
-      if (changed)
-        this.current = i < 0 ? this.document : element;
     }
   }
   generateImpliedEndTagsFromSet(closable: { [tagName: string]: any }, exclude?: string) {
@@ -290,14 +295,12 @@ export class BaseComposer implements TokenSink {
 
   pushOpenElement(element: Element) {
     this.openElements.push(element);
-    this.current = element;
     this.openCounts[element.tagName] = (this.openCounts[element.tagName] || 0) + 1;
   }
 
   popCurrentElement() {
     const element = this.openElements.pop()!;
     this.openCounts[element.tagName]--;
-    this.current = this.openElements.at(-1) || this.document;
   }
 
   startTextMode(tokenizerState: State, token: TagToken): InsertionMode {
@@ -330,12 +333,10 @@ export class BaseComposer implements TokenSink {
       if (this.openElements.length) {
         this.openElements.pop();
         this.openCounts['p']--;
-        this.current = this.openElements[this.openElements.length - 1] || this.document;
       }
     } else {
       this.openCounts = {};
       this.openElements.length = 0;
-      this.current = this.document;
     }
   }
 
@@ -343,6 +344,9 @@ export class BaseComposer implements TokenSink {
   }
 
   insertFormattingMarker() { // TODO
+  }
+
+  reconstructFormattingElements() { // TODO
   }
 
   hasElementInSelectScope(name: string): boolean { // TODO
