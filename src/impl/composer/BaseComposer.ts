@@ -69,6 +69,7 @@ export class BaseComposer implements TokenSink {
   templateInsertionModes: InsertionMode[] = [];
 
   document!: Document;
+  contextElement?: Element;
 
   openElements: Element[] = [];
   openCounts: { [tagName: string]: number } = {};
@@ -93,7 +94,53 @@ export class BaseComposer implements TokenSink {
   accept(token: Token) {
   }
 
-  resetInsertionMode() { // TODO
+  resetInsertionMode() {
+    this.insertionMode = this.computeInsertionMode();
+  }
+
+  computeInsertionMode(): InsertionMode {
+    for (let i = this.openElements.length - 1; ; --i) {
+      let node = i === 0 && this.contextElement ? this.contextElement : this.openElements[i];
+      switch (node.tagName) {
+        case 'select':
+          for (let j = i - 1; j >= 0; --j) { // are we in table?
+            switch (this.openElements[j].tagName) {
+              case 'table':
+                return 'inSelectInTable';
+              case 'template':
+                return 'inSelect';
+            }
+          }
+          return 'inSelect';
+        case 'td':
+        case 'th':
+          return i === 0 ? 'inBody' : 'inCell';
+        case 'tr':
+          return 'inRow';
+        case 'tbody':
+        case 'thead':
+        case 'tfoot':
+          return 'inTableBody';
+        case 'caption':
+          return 'inCaption';
+        case 'colgroup':
+          return 'inColumnGroup';
+        case 'table':
+          return 'inTable';
+        case 'template':
+          return this.templateInsertionModes.at(-1)!;
+        case 'head':
+          return 'inHead';
+        case 'body':
+          return 'inBody';
+        case 'frameset':
+          return 'inFrameset';
+        case 'html':
+          return this.headElement ? 'afterHead' : 'beforeHead';
+        default:
+          if (i === 0) return 'inBody';
+      }
+    }
   }
 
   inBody(token: Token): InsertionMode {
