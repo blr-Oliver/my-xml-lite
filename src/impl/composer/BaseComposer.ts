@@ -90,6 +90,9 @@ export class BaseComposer implements TokenSink {
   get currentChildElements(): Element[] {
     return this.current.children as Element[];
   }
+  get adjustedCurrentNode(): Element {
+    return this.openElements.length <= 1 ? (this.contextElement || this.openElements[0]) : this.openElements[this.openElements.length - 1];
+  }
 
   accept(token: Token) {
   }

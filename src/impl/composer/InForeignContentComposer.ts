@@ -83,14 +83,15 @@ export class InForeignContentComposer extends TokenAdjustingComposer {
   }
 
   inForeignContentStartTagDefault(token: TagToken): InsertionMode {
-    const currentElement = this.current as Element;
-    if (currentElement.namespaceURI === NS_MATHML)
+    const adjustedNode = this.adjustedCurrentNode;
+    if (adjustedNode.namespaceURI === NS_MATHML)
       this.adjustMathMLAttributes(token);
-    else if (currentElement.namespaceURI === NS_SVG) {
+    else if (adjustedNode.namespaceURI === NS_SVG) {
       this.adjustSvgTagName(token);
       this.adjustSvgAttributes(token);
     }
     this.adjustForeignAttributes(token);
+    // TODO
     return this.insertionMode;
   }
 
