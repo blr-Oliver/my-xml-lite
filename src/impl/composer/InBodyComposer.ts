@@ -3,10 +3,11 @@ import {StaticAttr} from '../nodes/StaticAttr';
 import {StaticAttributes} from '../nodes/StaticAttributes';
 import {StaticElement} from '../nodes/StaticElement';
 import {TagToken, TextToken, Token} from '../tokens';
-import {BaseComposer, NS_HTML} from './BaseComposer';
+import {NS_HTML, NS_MATHML, NS_SVG} from './BaseComposer';
 import {InsertionMode} from './insertion-mode';
+import {TokenAdjustingComposer} from './TokenAdjustingComposer';
 
-export class InBodyComposer extends BaseComposer {
+export class InBodyComposer extends TokenAdjustingComposer {
   inBody(token: Token): InsertionMode {
     switch (token.type) {
       case 'comment':
@@ -36,7 +37,7 @@ export class InBodyComposer extends BaseComposer {
   }
 
   inBodyStartTag(token: TagToken): InsertionMode {
-    const current = this.current;
+    let element: Element;
     switch (token.name) {
       case 'html':
         this.error();
@@ -110,8 +111,8 @@ export class InBodyComposer extends BaseComposer {
       case 'h6':
         if (this.hasParagraphInButtonScope())
           this.closeParagraph();
-        if (current.namespaceURI === NS_HTML) {
-          switch (current.tagName) {
+        if (this.current.namespaceURI === NS_HTML) {
+          switch (this.current.tagName) {
             case 'h1':
             case 'h2':
             case 'h3':
@@ -143,15 +144,184 @@ export class InBodyComposer extends BaseComposer {
         }
         break;
       case 'li':
-        return this.inBodyStartLiTag(token);
+        return this.inBodyStartTagLi(token);
       case 'dt':
       case 'dd':
-        // TODO
+        return this.inBodyStartTagDt(token);
+      case 'plaintext':
+        if (this.hasParagraphInButtonScope())
+          this.closeParagraph();
+        this.createAndInsertHTMLElement(token);
+        this.tokenizer.state = 'plaintext';
+        break;
+      case 'button':
+        if (this.openCounts['button']) {
+          this.error();
+          this.generateImpliedEndTags();
+          this.popUntilName('button');
+        }
+        this.reconstructFormattingElements();
+        this.createAndInsertHTMLElement(token);
+        this.framesetOk = false;
+        break;
+      case 'a':
+        return this.inBodyStartTagAnchor(token);
+      case 'b':
+      case 'big':
+      case 'code':
+      case 'em':
+      case 'font':
+      case 'i':
+      case 's':
+      case 'small':
+      case 'strike':
+      case 'strong':
+      case 'tt':
+      case 'u':
+        this.reconstructFormattingElements();
+        this.formattingElements.push(this.createAndInsertHTMLElement(token));
+        break;
+      case 'nobr':
+        this.reconstructFormattingElements();
+        if (this.hasElementInScope('nobr')) {
+          this.error();
+          this.adoptionAgency(token);
+          this.reconstructFormattingElements();
+        }
+        this.formattingElements.push(this.createAndInsertHTMLElement(token));
+        break;
+      case 'applet':
+      case 'marquee':
+      case 'object':
+        this.reconstructFormattingElements();
+        this.createAndInsertHTMLElement(token);
+        this.insertFormattingMarker();
+        this.framesetOk = false;
+        break;
+      case 'table':
+        if (this.hasParagraphInButtonScope())
+          this.closeParagraph();
+        this.createAndInsertHTMLElement(token);
+        this.framesetOk = false;
+        return 'inTable';
+      case 'area':
+      case 'br':
+      case 'embed':
+      case 'img':
+      case 'keygen':
+      case 'wbr':
+        this.reconstructFormattingElements();
+        this.createAndInsertEmptyHTMLElement(token);
+        this.framesetOk = false;
+        break;
+      case 'input':
+        this.reconstructFormattingElements();
+        element = this.createAndInsertEmptyHTMLElement(token);
+        if (!element.hasAttribute('type') || (element.getAttribute('type') || '').toLowerCase() !== 'hidden')
+          this.framesetOk = false;
+        break;
+      case 'param':
+      case 'source':
+      case 'track':
+        this.createAndInsertEmptyHTMLElement(token);
+        break;
+      case 'hr':
+        if (this.hasParagraphInButtonScope())
+          this.closeParagraph();
+        this.createAndInsertEmptyHTMLElement(token);
+        this.framesetOk = false;
+        break;
+      case 'image':
+        this.error();
+        token.name = 'img';
+        return this.inBodyStartTag(token);
+      case 'textarea':
+        this.framesetOk = false;
+        return this.startTextMode('rcdata', token);
+      case 'xmp':
+        if (this.hasParagraphInButtonScope())
+          this.closeParagraph();
+        this.reconstructFormattingElements();
+      case 'iframe': // ok no break
+        this.framesetOk = false;
+      case 'noembed': // ok no break
+        return this.startTextMode('rawtext', token);
+      case 'select':
+        this.reconstructFormattingElements();
+        this.createAndInsertHTMLElement(token);
+        this.framesetOk = false;
+        switch (this.insertionMode) {
+          case 'inTable':
+          case 'inCaption':
+          case 'inTableBody':
+          case 'inRow':
+          case 'inCell':
+            return 'inSelectInTable';
+          default:
+            return 'inSelect';
+        }
+      case 'optgroup':
+      case 'option':
+        if (this.current.tagName === 'option')
+          this.popCurrentElement();
+        this.reconstructFormattingElements();
+        this.createAndInsertHTMLElement(token);
+        break;
+      case 'rb':
+      case 'rtc':
+        if (this.hasElementInScope('ruby')) {
+          this.generateImpliedEndTags();
+          if (this.current.tagName !== 'ruby')
+            this.error();
+        }
+        this.createAndInsertHTMLElement(token);
+        break;
+      case 'rp':
+      case 'rt':
+        if (this.hasElementInScope('ruby')) {
+          this.generateImpliedEndTags('rtc');
+          if (this.current.tagName !== 'rtc' && this.current.tagName !== 'ruby')
+            this.error();
+        }
+        this.createAndInsertHTMLElement(token);
+        break;
+      case 'math':
+        this.reconstructFormattingElements();
+        this.adjustMathMLAttributes(token);
+        this.adjustForeignAttributes(token);
+        this.createAndInsertElementNS(token, NS_MATHML, token.selfClosing, false);
+        break;
+      case 'svg':
+        this.reconstructFormattingElements();
+        this.adjustSvgAttributes(token);
+        this.adjustForeignAttributes(token);
+        this.createAndInsertElementNS(token, NS_SVG, token.selfClosing, false);
+        break;
+      case 'caption':
+      case 'col':
+      case 'colgroup':
+      case 'frame':
+      case 'head':
+      case 'tbody':
+      case 'td':
+      case 'tfoot':
+      case 'th':
+      case 'thead':
+      case 'tr':
+        this.error();
+        break;
+      default:
+        this.reconstructFormattingElements();
+        this.createAndInsertHTMLElement(token);
     }
     return this.insertionMode;
   }
 
   inBodyEndTag(token: TagToken): InsertionMode {
+    return this.insertionMode;
+  }
+
+  inBodyEndTagDefault(token: TagToken): InsertionMode {
     return this.insertionMode;
   }
 
@@ -175,8 +345,67 @@ export class InBodyComposer extends BaseComposer {
     return this.openCounts['p'] > 0;
   }
 
-  inBodyStartLiTag(token: TagToken): InsertionMode { // TODO
+  inBodyStartTagLi(token: TagToken): InsertionMode {
     this.framesetOk = false;
+    for (let i = this.openElements.length - 1; ; --i) {
+      const node = this.openElements[i];
+      const tagName = node.tagName;
+      if (tagName === 'li') {
+        this.generateImpliedEndTags('li');
+        if (this.current.tagName !== 'li')
+          this.error();
+        this.popUntilName('li');
+        break;
+      } else if (this.isSpecial(node) && tagName !== 'address' && tagName !== 'div' && tagName !== 'p')
+        break;
+    }
+    if (this.hasParagraphInButtonScope())
+      this.closeParagraph();
+    this.createAndInsertHTMLElement(token);
     return this.insertionMode;
+  }
+
+  inBodyStartTagDt(token: TagToken): InsertionMode {
+    this.framesetOk = false;
+    for (let i = this.openElements.length - 1; ; --i) {
+      const node = this.openElements[i];
+      const tagName = node.tagName;
+      if (tagName === 'dd') {
+        this.generateImpliedEndTags('dd');
+        if (this.current.tagName !== 'dd')
+          this.error();
+        this.popUntilName('dd');
+        break;
+      } else if (tagName === 'dt') {
+        this.generateImpliedEndTags('dt');
+        if (this.current.tagName !== 'dt')
+          this.error();
+        this.popUntilName('dt');
+        break;
+      } else if (this.isSpecial(node) && tagName !== 'address' && tagName !== 'div' && tagName !== 'p') {
+        break;
+      }
+    }
+    if (this.hasParagraphInButtonScope())
+      this.closeParagraph();
+    this.createAndInsertHTMLElement(token);
+    return this.insertionMode;
+  }
+
+  inBodyStartTagAnchor(token: TagToken): InsertionMode {
+    let activeAnchor = this.getActiveFormattingElement('a');
+    if (activeAnchor) {
+      this.error();
+      this.adoptionAgency(token);
+      this.removeFormattingElement(activeAnchor);
+      this.removeFromStack(activeAnchor);
+    }
+    this.reconstructFormattingElements();
+    const element = this.createAndInsertHTMLElement(token);
+    this.formattingElements.push(element);
+    return this.insertionMode;
+  }
+
+  adoptionAgency(token: TagToken) { // TODO this requires active tree modification which is not possible with current implementation
   }
 }

@@ -84,6 +84,7 @@ export class BaseComposer implements TokenSink {
   fosterTables: Map<Element, Node[]> = new Map<Element, Node[]>(); // keys are table elements, values are collection of elements inserted just before them
 
   framesetOk: boolean = true;
+  formattingElements: Element[] = [];
 
   get current(): Element {
     return this.openElements[this.openElements.length - 1];
@@ -173,22 +174,6 @@ export class BaseComposer implements TokenSink {
     this.currentChildNodes.push(dataNode);
   }
 
-  popUntilMatches(test: (name: string, element: Element) => boolean) {
-    let i = this.openElements.length;
-    if (i) {
-      let element!: Element;
-      for (--i; i >= 0; --i) {
-        element = this.openElements[i];
-        const name = element.tagName;
-        if (test(name, element)) {
-          this.openElements.pop();
-          this.openCounts[name]--;
-          // TODO
-        } else
-          break;
-      }
-    }
-  }
   generateImpliedEndTagsFromSet(closable: { [tagName: string]: any }, exclude?: string) {
     this.popUntilMatches(name => name !== exclude && (name in closable));
   }
@@ -303,6 +288,41 @@ export class BaseComposer implements TokenSink {
     this.openCounts[element.tagName]--;
   }
 
+  popUntilMatches(test: (name: string, element: Element) => boolean) {
+    let i = this.openElements.length;
+    if (i) {
+      let element!: Element;
+      for (--i; i >= 0; --i) {
+        element = this.openElements[i];
+        const name = element.tagName;
+        if (test(name, element)) {
+          this.openElements.pop();
+          this.openCounts[name]--;
+          // TODO
+        } else
+          break;
+      }
+    }
+  }
+
+  popUntilName(name: string) {
+    this.popUntilMatches(n => n !== name);
+    this.popCurrentElement();
+  }
+
+  popToLength(len: number) {
+    while (this.openElements.length > len)
+      this.popCurrentElement();
+  }
+
+  removeFromStack(element: Element) {
+    let index = this.openElements.indexOf(element);
+    if (index >= 0) {
+      this.openElements.splice(index, 1);
+      this.openCounts[element.tagName]--;
+    }
+  }
+
   startTextMode(tokenizerState: State, token: TagToken): InsertionMode {
     this.createAndInsertHTMLElement(token);
     this.originalInsertionMode = this.insertionMode;
@@ -349,8 +369,189 @@ export class BaseComposer implements TokenSink {
   reconstructFormattingElements() { // TODO
   }
 
+  getActiveFormattingElement(name: string): Element | null { // TODO
+    return null;
+  }
+
+  removeFormattingElement(element: Element) { // TODO
+
+  }
+
   hasElementInSelectScope(name: string): boolean { // TODO
     return false;
+  }
+
+  isElementInScope(element: Element) {
+    for (let i = this.openElements.length - 1; i >= 0; --i) {
+      const node = this.openElements[i];
+      if (node === element) return true;
+      if (this.isScopeFence(node)) break;
+    }
+    return false;
+  }
+
+  hasElementInScope(name: string): boolean {
+    for (let i = this.openElements.length - 1; i >= 0; --i) {
+      const node = this.openElements[i];
+      if (node.tagName === name) return true;
+      if (this.isScopeFence(node)) break;
+    }
+    return false;
+  }
+
+  isScopeFence(element: Element): boolean {
+    switch (element.namespaceURI) {
+      case NS_HTML:
+        switch (element.tagName) {
+          case 'applet':
+          case 'caption':
+          case 'html':
+          case 'table':
+          case 'td':
+          case 'th':
+          case 'marquee':
+          case 'object':
+          case 'template':
+            return true;
+        }
+        break;
+      case NS_MATHML:
+        switch (element.tagName) {
+          case 'mi':
+          case 'mo':
+          case 'mn':
+          case 'ms':
+          case 'mtext':
+          case 'annotation-xml':
+            return true;
+        }
+        break;
+      case NS_SVG:
+        switch (element.tagName) {
+          case 'foreignObject':
+          case 'desc':
+          case 'title':
+            return true;
+        }
+    }
+    return false;
+  }
+
+  isSpecial(element: Element): boolean {
+    switch (element.namespaceURI) {
+      case NS_HTML:
+        switch (element.tagName) {
+          case 'address':
+          case 'applet':
+          case 'area':
+          case 'article':
+          case 'aside':
+          case 'base':
+          case 'basefont':
+          case 'bgsound':
+          case 'blockquote':
+          case 'body':
+          case 'br':
+          case 'button':
+          case 'caption':
+          case 'center':
+          case 'col':
+          case 'colgroup':
+          case 'dd':
+          case 'details':
+          case 'dir':
+          case 'div':
+          case 'dl':
+          case 'dt':
+          case 'embed':
+          case 'fieldset':
+          case 'figcaption':
+          case 'figure':
+          case 'footer':
+          case 'form':
+          case 'frame':
+          case 'frameset':
+          case 'h1':
+          case 'h2':
+          case 'h3':
+          case 'h4':
+          case 'h5':
+          case 'h6':
+          case 'head':
+          case 'header':
+          case 'hgroup':
+          case 'hr':
+          case 'html':
+          case 'iframe':
+          case 'img':
+          case 'input':
+          case 'keygen':
+          case 'li':
+          case 'link':
+          case 'listing':
+          case 'main':
+          case 'marquee':
+          case 'menu':
+          case 'meta':
+          case 'nav':
+          case 'noembed':
+          case 'noframes':
+          case 'noscript':
+          case 'object':
+          case 'ol':
+          case 'p':
+          case 'param':
+          case 'plaintext':
+          case 'pre':
+          case 'script':
+          case 'search':
+          case 'section':
+          case 'select':
+          case 'source':
+          case 'style':
+          case 'summary':
+          case 'table':
+          case 'tbody':
+          case 'td':
+          case 'template':
+          case 'textarea':
+          case 'tfoot':
+          case 'th':
+          case 'thead':
+          case 'title':
+          case 'tr':
+          case 'track':
+          case 'ul':
+          case 'wbr':
+          case 'xmp':
+            return true;
+          default:
+            return false;
+        }
+      case NS_MATHML:
+        switch (element.tagName) {
+          case 'mi':
+          case 'mo':
+          case 'mn':
+          case 'ms':
+          case 'mtext':
+          case 'annotation-xml':
+            return true;
+          default:
+            return false;
+        }
+      case NS_SVG:
+        switch (element.tagName) {
+          case 'foreignObject':
+          case 'desc':
+          case 'title':
+            return true;
+          default:
+            return false;
+        }
+      default:
+        return false;
+    }
   }
 
   settleFosterChildren() {
