@@ -64,6 +64,7 @@
   ["duplicate attribute", "<tag first='foo' first='bar' second='bar'>", "tag", true, false, [["first", "foo"], ["second", "bar"]], ["duplicate-attribute"], true],
   ["duplicate empty attribute", "<tag first='foo' first second='bar'>", "tag", true, false, [["first", "foo"], ["second", "bar"]], ["duplicate-attribute"], true],
   ["duplicate attribute after empty", "<tag first first='foo' second='bar'>", "tag", true, false, [["first", null], ["second", "bar"]], ["duplicate-attribute"], true],
+  ["triple duplicate attribute", "<tag first='foo' first='bar' first='baz' second='bar'>", "tag", true, false, [["first", "foo"], ["second", "bar"]], ["duplicate-attribute", "duplicate-attribute"], true],
   ["orphan /", "<tag first='foo'/second='bar'>", "tag", true, false, [["first", "foo"], ["second", "bar"]], ["unexpected-solidus-in-tag"], true],
   ["eof in tag name", "<ta", "", true, false, [], ["eof-in-tag"], false],
   ["eof after tag name", "<tag ", "", true, false, [], ["eof-in-tag"], false],
