@@ -160,6 +160,7 @@ export class BaseComposer implements TokenSink {
   }
 
   protected insertDataNode(token: TextToken) {
+    // TODO characters into document should be dropped on the floor
     const nodeType = TokenTypeMapping[token.type];
     const parent = this.adjustedCurrentNode || this.document;
     const dataNode = new StaticDataNode(nodeType, parent, token.data);

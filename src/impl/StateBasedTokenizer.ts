@@ -15,6 +15,7 @@ import {CodePoints} from '../common/code-points';
 import {stringToArray} from '../common/code-sequences';
 import {PrefixNode} from '../decl/entity-ref-index';
 import {ParserEnvironment} from '../decl/ParserEnvironment';
+import {BaseComposer, NS_HTML} from './composer/BaseComposer';
 import {State} from './states';
 import {Attribute, CDataToken, CharactersToken, CommentToken, DoctypeToken, EOF_TOKEN, TagToken, Token} from './tokens';
 
@@ -37,8 +38,12 @@ interface IStateBasedTokenizer {
   readonly state: State;
   readonly active: boolean;
   lastOpenTag?: string;
+  composer?: BaseComposer;
   proceed(): void;
 }
+
+type NulCharMode = 'block' | 'replace';
+type WhitespaceMode = 'ignoreLeading' | 'emitLeading' | 'accept';
 
 export class StateBasedTokenizer implements IStateBasedTokenizer {
   env!: ParserEnvironment;
@@ -68,6 +73,12 @@ export class StateBasedTokenizer implements IStateBasedTokenizer {
   referenceStartMark!: number;
   charCode!: number;
   refsIndex!: PrefixNode<number[]>;
+
+  blockNulChars: boolean = true;
+  whitespaceMode: WhitespaceMode = 'ignoreLeading';
+  onlyWhitespace: boolean = true;
+
+  composer!: BaseComposer;
 
   constructor(refsIndex: PrefixNode<number[]>) {
     this.refsIndex = refsIndex;
@@ -379,6 +390,8 @@ export class StateBasedTokenizer implements IStateBasedTokenizer {
           return this.eof();
         case CodePoints.NUL:
           this.error('unexpected-null-character');
+          if (this.blockNulChars) break;
+          else code = CodePoints.REPLACEMENT_CHAR;
         default:
           buffer.append(code);
           code = this.nextCode();
@@ -731,6 +744,9 @@ export class StateBasedTokenizer implements IStateBasedTokenizer {
           this.emitCData();
           this.error('eof-in-cdata');
           return this.eof();
+        case CodePoints.NUL:
+          this.error('unexpected-null-character');
+          code = CodePoints.REPLACEMENT_CHAR;
         default:
           buffer.append(code);
           code = this.nextCode();
@@ -1095,7 +1111,8 @@ export class StateBasedTokenizer implements IStateBasedTokenizer {
       case 0x64: // d
         return this.matchSequence(code, DOCTYPE, true, 'doctype', 'markupDeclarationFail');
       case CodePoints.OPEN_SQUARE_BRACKET:
-        return this.matchSequence(code, CDATA, false, 'cdataSectionStart', 'markupDeclarationFail');
+        if (this.composer && this.composer.adjustedCurrentNode && this.composer.adjustedCurrentNode.namespaceURI !== NS_HTML)
+          return this.matchSequence(code, CDATA, false, 'cdataSectionStart', 'markupDeclarationFail');
       default:
         return this.callState('markupDeclarationFail', code);
     }

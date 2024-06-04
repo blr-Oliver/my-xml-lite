@@ -5,8 +5,8 @@ import {PrefixNode} from '../../src/decl/entity-ref-index';
 import {HTML_SPECIAL} from '../../src/decl/known-named-refs';
 import {ParserEnvironment} from '../../src/decl/ParserEnvironment';
 import {buildIndex} from '../../src/impl/build-index';
-import {StateBasedTokenizer} from '../../src/impl/StateBasedTokenizer';
 import {FixedSizeStringBuilder} from '../../src/impl/FixedSizeStringBuilder';
+import {StateBasedTokenizer} from '../../src/impl/StateBasedTokenizer';
 import {State} from '../../src/impl/states';
 import {EOF_TOKEN, Token} from '../../src/impl/tokens';
 import {default as rawTests} from './samples/char-ref.json';
@@ -94,6 +94,7 @@ function suite() {
     const [name, input, expectedData, expectedErrors, inAttribute] = test;
     it(name, () => {
       const expectedLastState = parser.state = inAttribute ? 'attributeValueUnquoted' : 'data';
+      parser.inAttribute = !!inAttribute;
       processInput(input);
       expect(parser.state).toStrictEqual('eof');
       expect(tokenList).toHaveLength(1);

@@ -3,8 +3,9 @@ import {DirectCharacterSource} from '../../src/common/stream-source';
 import {HTML_SPECIAL} from '../../src/decl/known-named-refs';
 import {ParserEnvironment} from '../../src/decl/ParserEnvironment';
 import {buildIndex} from '../../src/impl/build-index';
-import {StateBasedTokenizer} from '../../src/impl/StateBasedTokenizer';
+import {BaseComposer} from '../../src/impl/composer/BaseComposer';
 import {FixedSizeStringBuilder} from '../../src/impl/FixedSizeStringBuilder';
+import {StateBasedTokenizer} from '../../src/impl/StateBasedTokenizer';
 import {State} from '../../src/impl/states';
 import {CDataToken, CharactersToken, CommentToken, EOF_TOKEN, Token} from '../../src/impl/tokens';
 import {default as rawTests} from './samples/cdata.json';
@@ -37,6 +38,7 @@ function suite() {
       errors: errorList
     } as any as ParserEnvironment;
     parser.tokenQueue = [];
+    parser.composer = {adjustedCurrentNode: {namespaceURI: null}} as unknown as BaseComposer;
   });
 
   beforeEach(() => {

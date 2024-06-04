@@ -14,6 +14,7 @@
   ["CDATA with ]] in middle", "<![CDATA[x]]y]]>", "x]]y", [], true],
   ["CDATA with ]> in middle", "<![CDATA[x]>y]]>", "x]>y", [], true],
   ["CDATA with char ref", "<![CDATA[x&lt;y]]>", "x&lt;y", [], true],
+  ["CDATA with NUL", "<![CDATA[x\u0000y]]>", "x\uFFFDy", ["unexpected-null-character"], true],
   ["CDATA eof immediately", "<![CDATA[", "", ["eof-in-cdata"], false],
   ["CDATA eof in content", "<![CDATA[x", "x", ["eof-in-cdata"], false],
   ["CDATA eof after [", "<![CDATA[x[", "x[", ["eof-in-cdata"], false],
