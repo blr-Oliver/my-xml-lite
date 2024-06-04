@@ -97,8 +97,7 @@ export class InSelectComposer extends BaseComposer {
 
   protected closeSelect(token: TagToken, reprocess: boolean, errorIfMissing: boolean) {
     if (this.hasElementInSelectScope('select')) {
-      this.popUntilMatches(name => name !== 'select');
-      this.popCurrentElement();
+      this.popUntilName('select');
       this.resetInsertionMode();
       if (reprocess)
         return this.reprocessIn(this.insertionMode, token);

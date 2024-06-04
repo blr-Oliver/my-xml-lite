@@ -12,8 +12,7 @@ export class InTemplateComposer extends BaseComposer {
       case 'eof':
         if (this.openCounts['template']) {
           this.error();
-          this.popUntilMatches(name => name !== 'template');
-          this.popCurrentElement();
+          this.popUntilName('template');
           this.clearFormattingUpToMarker();
           this.templateInsertionModes.pop();
           this.resetInsertionMode();

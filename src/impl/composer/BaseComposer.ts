@@ -73,14 +73,11 @@ export class BaseComposer implements TokenSink {
 
   openElements: Element[] = [];
   openCounts: { [tagName: string]: number } = {};
-  scopeCounter: number = 0;
-  listScopeCounter: number = 0;
-  tableScopeCounts: { [tagName: string]: number } = {}; // TODO
 
   headElement!: Element;
   formElement: Element | null = null;
 
-  fosterParentingEnabled: boolean = false; // TODO
+  fosterParentingEnabled: boolean = false;
   fosterTables: Map<Element, Node[]> = new Map<Element, Node[]>(); // keys are table elements, values are collection of elements inserted just before them
 
   framesetOk: boolean = true;
@@ -88,12 +85,6 @@ export class BaseComposer implements TokenSink {
 
   get current(): Element {
     return this.openElements[this.openElements.length - 1];
-  }
-  get currentChildNodes(): Node[] {
-    return this.current.childNodes as Node[];
-  }
-  get currentChildElements(): Element[] {
-    return this.current.children as Element[];
   }
   get adjustedCurrentNode(): Element {
     return this.openElements.length <= 1 ? (this.contextElement || this.openElements[0]) : this.openElements[this.openElements.length - 1];
@@ -164,14 +155,15 @@ export class BaseComposer implements TokenSink {
   }
 
   protected insertDoctype(doctypeToken: DoctypeToken) {
-    const documentType = new StaticDocumentType(this.current, doctypeToken.name ?? 'html', doctypeToken.publicId ?? '', doctypeToken.systemId ?? '');
-    this.currentChildNodes.push(documentType);
+    const documentType = new StaticDocumentType(this.document, doctypeToken.name ?? 'html', doctypeToken.publicId ?? '', doctypeToken.systemId ?? '');
+    this.push(this.document.childNodes, documentType);
   }
 
   protected insertDataNode(token: TextToken) {
     const nodeType = TokenTypeMapping[token.type];
-    const dataNode = new StaticDataNode(nodeType, this.current, this.currentChildNodes.length, token.data);
-    this.currentChildNodes.push(dataNode);
+    const parent = this.adjustedCurrentNode || this.document;
+    const dataNode = new StaticDataNode(nodeType, parent, token.data);
+    this.push(parent.childNodes, dataNode);
   }
 
   generateImpliedEndTagsFromSet(closable: { [tagName: string]: any }, exclude?: string) {
@@ -298,7 +290,7 @@ export class BaseComposer implements TokenSink {
         if (test(name, element)) {
           this.openElements.pop();
           this.openCounts[name]--;
-          // TODO
+          // TODO sync all add/remove with stack
         } else
           break;
       }
@@ -348,16 +340,10 @@ export class BaseComposer implements TokenSink {
   }
 
   closeParagraph() {
-    if (this.openCounts['p']) {
-      this.popUntilMatches(name => name !== 'p');
-      if (this.openElements.length) {
-        this.openElements.pop();
-        this.openCounts['p']--;
-      }
-    } else {
-      this.openCounts = {};
-      this.openElements.length = 0;
-    }
+    this.generateImpliedEndTags('p');
+    if (this.current.tagName !== 'p')
+      this.error();
+    this.popUntilName('p');
   }
 
   clearFormattingUpToMarker() { // TODO
@@ -374,11 +360,6 @@ export class BaseComposer implements TokenSink {
   }
 
   removeFormattingElement(element: Element) { // TODO
-
-  }
-
-  hasElementInSelectScope(name: string): boolean { // TODO
-    return false;
   }
 
   hasMatchInScope(test: (el: Element) => boolean, fenceTest: (el: Element) => boolean) {
@@ -400,6 +381,18 @@ export class BaseComposer implements TokenSink {
 
   hasElementInListScope(name: string, namespace: string = NS_HTML): boolean {
     return this.hasMatchInScope(el => el.tagName === name && el.namespaceURI === namespace, el => this.isListScopeFence(el));
+  }
+
+  hasElementInButtonScope(name: string, namespace: string = NS_HTML): boolean {
+    return this.hasMatchInScope(el => el.tagName === name && el.namespaceURI === namespace, el => this.isButtonScopeFence(el));
+  }
+
+  hasElementInTableScope(name: string, namespace: string = NS_HTML): boolean {
+    return this.hasMatchInScope(el => el.tagName === name && el.namespaceURI === namespace, el => this.isTableScopeFence(el));
+  }
+
+  hasElementInSelectScope(name: string, namespace: string = NS_HTML): boolean {
+    return this.hasMatchInScope(el => el.tagName === name && el.namespaceURI === namespace, el => this.isSelectScopeFence(el));
   }
 
   isScopeFence(element: Element): boolean {
@@ -444,6 +437,29 @@ export class BaseComposer implements TokenSink {
     if (this.isScopeFence(element)) return true;
     if (element.namespaceURI !== NS_HTML) return false;
     return element.tagName === 'ol' || element.tagName === 'ul';
+  }
+
+  isButtonScopeFence(element: Element): boolean {
+    if (this.isScopeFence(element)) return true;
+    if (element.namespaceURI !== NS_HTML) return false;
+    return element.tagName === 'button';
+  }
+
+  isTableScopeFence(element: Element): boolean {
+    if (element.namespaceURI !== NS_HTML) return false;
+    switch (element.tagName) {
+      case 'html':
+      case 'table':
+      case 'template':
+        return true;
+      default:
+        return false;
+    }
+  }
+
+  isSelectScopeFence(element: Element): boolean {
+    if (element.namespaceURI !== NS_HTML) return true;
+    return element.tagName !== 'optgroup' && element.tagName !== 'option';
   }
 
   isSpecial(element: Element): boolean {

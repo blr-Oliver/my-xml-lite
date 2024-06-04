@@ -100,7 +100,7 @@ export class InBodyComposer extends TokenAdjustingComposer {
       case 'section':
       case 'summary':
       case 'ul':
-        if (this.hasParagraphInButtonScope())
+        if (this.hasElementInButtonScope('p'))
           this.closeParagraph();
         this.createAndInsertHTMLElement(token);
         break;
@@ -110,7 +110,7 @@ export class InBodyComposer extends TokenAdjustingComposer {
       case 'h4':
       case 'h5':
       case 'h6':
-        if (this.hasParagraphInButtonScope())
+        if (this.hasElementInButtonScope('p'))
           this.closeParagraph();
         if (this.current.namespaceURI === NS_HTML) {
           switch (this.current.tagName) {
@@ -128,7 +128,7 @@ export class InBodyComposer extends TokenAdjustingComposer {
         break;
       case 'pre':
       case 'listing':
-        if (this.hasParagraphInButtonScope())
+        if (this.hasElementInButtonScope('p'))
           this.closeParagraph();
         this.createAndInsertHTMLElement(token);
         this.framesetOk = false;
@@ -137,7 +137,7 @@ export class InBodyComposer extends TokenAdjustingComposer {
         if (this.formElement && !this.openCounts['template']) {
           this.error();
         } else {
-          if (this.hasParagraphInButtonScope())
+          if (this.hasElementInButtonScope('p'))
             this.closeParagraph();
           const element = this.createAndInsertHTMLElement(token);
           if (!this.openCounts['template'])
@@ -150,7 +150,7 @@ export class InBodyComposer extends TokenAdjustingComposer {
       case 'dd':
         return this.inBodyStartTagDt(token);
       case 'plaintext':
-        if (this.hasParagraphInButtonScope())
+        if (this.hasElementInButtonScope('p'))
           this.closeParagraph();
         this.createAndInsertHTMLElement(token);
         this.tokenizer.state = 'plaintext';
@@ -200,7 +200,7 @@ export class InBodyComposer extends TokenAdjustingComposer {
         this.framesetOk = false;
         break;
       case 'table':
-        if (this.hasParagraphInButtonScope())
+        if (this.hasElementInButtonScope('p'))
           this.closeParagraph();
         this.createAndInsertHTMLElement(token);
         this.framesetOk = false;
@@ -227,7 +227,7 @@ export class InBodyComposer extends TokenAdjustingComposer {
         this.createAndInsertEmptyHTMLElement(token);
         break;
       case 'hr':
-        if (this.hasParagraphInButtonScope())
+        if (this.hasElementInButtonScope('p'))
           this.closeParagraph();
         this.createAndInsertEmptyHTMLElement(token);
         this.framesetOk = false;
@@ -240,7 +240,7 @@ export class InBodyComposer extends TokenAdjustingComposer {
         this.framesetOk = false;
         return this.startTextMode('rcdata', token);
       case 'xmp':
-        if (this.hasParagraphInButtonScope())
+        if (this.hasElementInButtonScope('p'))
           this.closeParagraph();
         this.reconstructFormattingElements();
       case 'iframe': // ok no break
@@ -370,7 +370,7 @@ export class InBodyComposer extends TokenAdjustingComposer {
         this.inBodyEndTagForm();
         break;
       case 'p':
-        if (!this.hasParagraphInButtonScope()) {
+        if (!this.hasElementInButtonScope('p')) {
           this.error();
           this.createAndInsertHTMLElement({type: 'startTag', name: 'p', selfClosing: false, attributes: []});
         }
@@ -529,10 +529,6 @@ export class InBodyComposer extends TokenAdjustingComposer {
     staticParent.children.forEach(this.setElementIndex, this);
   }
 
-  hasParagraphInButtonScope(): boolean { // TODO
-    return this.openCounts['p'] > 0;
-  }
-
   inBodyStartTagLi(token: TagToken): InsertionMode {
     this.framesetOk = false;
     for (let i = this.openElements.length - 1; ; --i) {
@@ -547,7 +543,7 @@ export class InBodyComposer extends TokenAdjustingComposer {
       } else if (this.isSpecial(node) && tagName !== 'address' && tagName !== 'div' && tagName !== 'p')
         break;
     }
-    if (this.hasParagraphInButtonScope())
+    if (this.hasElementInButtonScope('p'))
       this.closeParagraph();
     this.createAndInsertHTMLElement(token);
     return this.insertionMode;
@@ -574,7 +570,7 @@ export class InBodyComposer extends TokenAdjustingComposer {
         break;
       }
     }
-    if (this.hasParagraphInButtonScope())
+    if (this.hasElementInButtonScope('p'))
       this.closeParagraph();
     this.createAndInsertHTMLElement(token);
     return this.insertionMode;

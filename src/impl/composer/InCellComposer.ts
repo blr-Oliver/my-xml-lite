@@ -1,6 +1,6 @@
 import {Element} from '../../decl/xml-lite-decl';
 import {TagToken, Token} from '../tokens';
-import {BaseComposer} from './BaseComposer';
+import {BaseComposer, NS_HTML} from './BaseComposer';
 import {InsertionMode} from './insertion-mode';
 
 export class InCellComposer extends BaseComposer {
@@ -37,13 +37,13 @@ export class InCellComposer extends BaseComposer {
     switch (tagName) {
       case 'td':
       case 'th':
-        if (this.tableScopeCounts[tagName]) {
+        if (this.hasElementInTableScope(tagName)) {
           this.generateImpliedEndTags();
-          if ((this.current as Element).tagName !== tagName) {
+          if (this.current.tagName !== tagName) {
             this.error();
-            this.popUntilMatches(name => name !== tagName);
-          }
-          this.popCurrentElement();
+            this.popUntilName(tagName);
+          } else
+            this.popCurrentElement();
           this.clearFormattingUpToMarker();
           return 'inRow';
         } else
@@ -61,7 +61,7 @@ export class InCellComposer extends BaseComposer {
       case 'tfoot':
       case 'thead':
       case 'tr':
-        if (this.tableScopeCounts[tagName])
+        if (this.hasElementInTableScope(tagName))
           return this.closeTheCell(token);
         this.error();
         break;
@@ -76,7 +76,7 @@ export class InCellComposer extends BaseComposer {
     const currentTagName = (this.current as Element).tagName;
     if (currentTagName !== 'td' && currentTagName !== 'th') {
       this.error();
-      this.popUntilMatches(name => name !== 'td' && name !== 'th');
+      this.popUntilMatches((name, el) => name !== 'td' && name !== 'th' || el.namespaceURI !== NS_HTML);
     }
     this.popCurrentElement();
     this.clearFormattingUpToMarker();

@@ -168,7 +168,7 @@ export class HeadComposer extends BaseComposer {
         return this.inBody(token);
       case 'body':
         this.createAndInsertHTMLElement(token);
-        // TODO frameset-ok flag
+        this.framesetOk = false;
         return 'inBody';
       case 'frameset':
         this.createAndInsertHTMLElement(token);

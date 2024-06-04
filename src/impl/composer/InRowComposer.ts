@@ -1,4 +1,6 @@
+import {Element} from '../../decl/xml-lite-decl';
 import {TagToken, Token} from '../tokens';
+import {NS_HTML} from './BaseComposer';
 import {InsertionMode} from './insertion-mode';
 import {InTableComposer} from './InTableComposer';
 
@@ -44,12 +46,14 @@ export class InRowComposer extends InTableComposer {
       case 'tbody':
       case 'tfoot':
       case 'thead':
-        if (!this.tableScopeCounts[token.name]) {
+        if (this.hasElementInTableScope(token.name)) {
+          if (this.hasElementInTableScope('tr')) {
+            this.clearStackToRowContext();
+            this.popCurrentElement();
+            return this.reprocessIn('inTableBody', token);
+          }
+        } else {
           this.error();
-        } else if (this.tableScopeCounts['tr']) {
-          this.clearStackToRowContext();
-          this.popCurrentElement();
-          return this.reprocessIn('inTableBody', token);
         }
         break;
       case 'body':
@@ -68,7 +72,7 @@ export class InRowComposer extends InTableComposer {
   }
 
   protected inRowEndRow(token: TagToken, reprocess: boolean) {
-    if (this.tableScopeCounts['tr']) {
+    if (this.hasElementInTableScope('tr')) {
       this.clearStackToRowContext();
       this.popCurrentElement();
       return reprocess ? this.reprocessIn('inTableBody', token) : 'inTableBody';
@@ -82,7 +86,8 @@ export class InRowComposer extends InTableComposer {
     this.popUntilMatches(this.notARowContext);
   }
 
-  protected notARowContext(name: string): boolean {
+  protected notARowContext(name: string, element: Element): boolean {
+    if (element.namespaceURI !== NS_HTML) return true;
     switch (name) {
       case 'tr':
       case 'template':

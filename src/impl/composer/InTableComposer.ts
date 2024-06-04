@@ -1,5 +1,6 @@
+import {Element} from '../../decl/xml-lite-decl';
 import {TagToken, TextToken, Token} from '../tokens';
-import {BaseComposer} from './BaseComposer';
+import {BaseComposer, NS_HTML} from './BaseComposer';
 import {InsertionMode} from './insertion-mode';
 
 export class InTableComposer extends BaseComposer {
@@ -56,9 +57,8 @@ export class InTableComposer extends BaseComposer {
         return this.forceElementAndState('tbody', 'inTableBody', token);
       case 'table':
         this.error();
-        if (this.tableScopeCounts['table']) {
-          this.popUntilMatches(name => name !== 'table');
-          this.popCurrentElement();
+        if (this.hasElementInTableScope('table')) {
+          this.popUntilName('table');
           this.resetInsertionMode();
           return this.reprocessIn(this.insertionMode, token);
         }
@@ -89,9 +89,8 @@ export class InTableComposer extends BaseComposer {
   inTableEndTag(token: TagToken): InsertionMode {
     switch (token.name) {
       case 'table':
-        if (this.tableScopeCounts['table']) {
-          this.popUntilMatches(name => name !== 'table');
-          this.popCurrentElement();
+        if (this.hasElementInTableScope('table')) {
+          this.popUntilName('table');
           this.resetInsertionMode();
         } else {
           this.error();
@@ -120,7 +119,8 @@ export class InTableComposer extends BaseComposer {
     this.popUntilMatches(this.notATableContext);
   }
 
-  protected notATableContext(name: string): boolean {
+  protected notATableContext(name: string, element: Element): boolean {
+    if (element.namespaceURI !== NS_HTML) return true;
     switch (name) {
       case 'table':
       case 'template':

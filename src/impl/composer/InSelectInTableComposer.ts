@@ -25,8 +25,7 @@ export class InSelectInTableComposer extends InSelectComposer {
       case 'td':
       case 'th':
         this.error();
-        this.popUntilMatches(name => name !== 'select');
-        this.popCurrentElement();
+        this.popUntilName('select');
         this.resetInsertionMode();
         return this.reprocessIn(this.insertionMode, token);
       default:
@@ -45,9 +44,8 @@ export class InSelectInTableComposer extends InSelectComposer {
       case 'td':
       case 'th':
         this.error();
-        if (this.tableScopeCounts[token.name]) {
-          this.popUntilMatches(name => name !== 'select');
-          this.popCurrentElement();
+        if (this.hasElementInTableScope(token.name)) {
+          this.popUntilName('select');
           this.resetInsertionMode();
           return this.reprocessIn(this.insertionMode, token);
         } else

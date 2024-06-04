@@ -7,7 +7,6 @@ export class StaticDataNode extends StaticEmptyNode implements CharacterData, Te
 
   constructor(nodeType: NodeType,
               parentNode: ParentNode | null,
-              parentIndex: number,
               data: string) {
     super(nodeType, parentNode);
     this.data = data;

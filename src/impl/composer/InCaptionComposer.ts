@@ -1,4 +1,3 @@
-import {Element} from '../../decl/xml-lite-decl';
 import {TagToken, Token} from '../tokens';
 import {BaseComposer} from './BaseComposer';
 import {InsertionMode} from './insertion-mode';
@@ -61,13 +60,13 @@ export class InCaptionComposer extends BaseComposer {
   }
 
   inCaptionEnd(token: TagToken, reprocess: boolean): InsertionMode {
-    if (this.tableScopeCounts['caption']) {
+    if (this.hasElementInTableScope('caption')) {
       this.generateImpliedEndTags();
-      if ((this.current as Element).tagName !== 'caption') {
+      if (this.current.tagName !== 'caption') {
         this.error();
-        this.popUntilMatches(name => name !== 'caption');
-      }
-      this.popCurrentElement();
+        this.popUntilName('caption');
+      } else
+        this.popCurrentElement();
       this.clearFormattingUpToMarker();
       return reprocess ? this.reprocessIn('inTable', token) : 'inTable';
     } else

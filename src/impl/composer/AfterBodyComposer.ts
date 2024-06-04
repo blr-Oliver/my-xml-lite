@@ -34,7 +34,7 @@ export class AfterBodyComposer extends BaseComposer {
 
   afterBodyEndTag(token: TagToken): InsertionMode {
     if (token.name === 'html') {
-      if (this.isFragmentParser) { // TODO check fragment parsing case
+      if (this.contextElement) {
         this.error();
         return this.insertionMode;
       }

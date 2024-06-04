@@ -1,4 +1,6 @@
+import {Element} from '../../decl/xml-lite-decl';
 import {TagToken, Token} from '../tokens';
+import {NS_HTML} from './BaseComposer';
 import {InsertionMode} from './insertion-mode';
 import {InTableComposer} from './InTableComposer';
 
@@ -42,7 +44,7 @@ export class InTableBodyComposer extends InTableComposer {
       case 'tbody':
       case 'tfoot':
       case 'thead':
-        if (this.tableScopeCounts[token.name]) {
+        if (this.hasElementInTableScope(token.name)) {
           this.clearStackToTBodyContext();
           this.popCurrentElement();
           return 'inTable';
@@ -69,7 +71,7 @@ export class InTableBodyComposer extends InTableComposer {
   }
 
   protected inTableBodyEndTable(token: TagToken) {
-    if (this.tableScopeCounts['tbody'] || this.tableScopeCounts['thead'] || this.tableScopeCounts['tfoot']) {
+    if (this.hasMatchInScope(el => this.isTableBodyElement(el), el => this.isTableScopeFence(el))) {
       this.clearStackToTBodyContext();
       this.popCurrentElement();
       return this.reprocessIn('inTable', token);
@@ -83,7 +85,8 @@ export class InTableBodyComposer extends InTableComposer {
     this.popUntilMatches(this.notATBodyContext);
   }
 
-  protected notATBodyContext(name: string): boolean {
+  protected notATBodyContext(name: string, element: Element): boolean {
+    if (element.namespaceURI !== NS_HTML) return true;
     switch (name) {
       case 'tbody':
       case 'tfoot':
@@ -93,6 +96,18 @@ export class InTableBodyComposer extends InTableComposer {
         return false;
       default:
         return true;
+    }
+  }
+
+  protected isTableBodyElement(element: Element): boolean {
+    if (element.namespaceURI !== NS_HTML) return false;
+    switch (element.tagName) {
+      case 'tbody':
+      case 'thead':
+      case 'tfoot':
+        return true;
+      default:
+        return false;
     }
   }
 }
