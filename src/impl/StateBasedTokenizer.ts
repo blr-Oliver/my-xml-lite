@@ -335,20 +335,19 @@ export class StateBasedTokenizer implements IStateBasedTokenizer {
     }
   }
 
-  textDataEndTagMatched(code: number, tag: string, textState: State): State {
-    // TODO use last open tag instead of explicit parameter
+  textDataEndTagMatched(code: number, textState: State): State {
     switch (code) {
       case CodePoints.TAB:
       case CodePoints.LF:
       case CodePoints.FF:
       case CodePoints.SPACE:
-        this.createTextDataEndTag(tag);
+        this.createTextDataEndTag(this.lastOpenTag!);
         return 'beforeAttributeName';
       case CodePoints.SLASH:
-        this.createTextDataEndTag(tag);
+        this.createTextDataEndTag(this.lastOpenTag!);
         return 'selfClosingStartTag';
       case CodePoints.GT:
-        this.createTextDataEndTag(tag);
+        this.createTextDataEndTag(this.lastOpenTag!);
         this.emitCurrentTag();
         return 'data';
       default:
@@ -362,6 +361,7 @@ export class StateBasedTokenizer implements IStateBasedTokenizer {
     this.emitAccumulatedCharacters();
     this.startNewTag(tag);
     this.currentTag.type = 'endTag';
+    this.lastOpenTag = undefined;
   }
 
   data(code: number): State {
@@ -1513,7 +1513,7 @@ export class StateBasedTokenizer implements IStateBasedTokenizer {
   }
 
   scriptDataEndTagNameMatched(code: number): State {
-    return this.textDataEndTagMatched(code, 'script', 'scriptData');
+    return this.textDataEndTagMatched(code, 'scriptData');
   }
 
   scriptDataEscapeStart(code: number): State {
@@ -1625,7 +1625,7 @@ export class StateBasedTokenizer implements IStateBasedTokenizer {
   }
 
   scriptDataEscapedEndTagNameMatched(code: number): State {
-    return this.textDataEndTagMatched(code, 'script', 'scriptDataEscaped');
+    return this.textDataEndTagMatched(code, 'scriptDataEscaped');
   }
 
   scriptDataDoubleEscapeStart(code: number): State {
@@ -1770,7 +1770,7 @@ export class StateBasedTokenizer implements IStateBasedTokenizer {
   }
 
   rawtextEndTagNameMatched(code: number): State {
-    return this.textDataEndTagMatched(code, 'noscript', 'rawtext')
+    return this.textDataEndTagMatched(code, 'rawtext');
   }
 
   rcdata(code: number): State {
@@ -1790,6 +1790,6 @@ export class StateBasedTokenizer implements IStateBasedTokenizer {
   }
 
   rcdataEndTagNameMatched(code: number): State {
-    return this.textDataEndTagMatched(code, 'textarea', 'rcdata');
+    return this.textDataEndTagMatched(code, 'rcdata');
   }
 }

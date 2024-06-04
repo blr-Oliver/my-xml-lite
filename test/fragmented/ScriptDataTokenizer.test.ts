@@ -3,8 +3,8 @@ import {DirectCharacterSource} from '../../src/common/stream-source';
 import {HTML_SPECIAL} from '../../src/decl/known-named-refs';
 import {ParserEnvironment} from '../../src/decl/ParserEnvironment';
 import {buildIndex} from '../../src/impl/build-index';
-import {StateBasedTokenizer} from '../../src/impl/StateBasedTokenizer';
 import {FixedSizeStringBuilder} from '../../src/impl/FixedSizeStringBuilder';
+import {StateBasedTokenizer} from '../../src/impl/StateBasedTokenizer';
 import {State} from '../../src/impl/states';
 import {CharactersToken, EOF_TOKEN, TagToken, Token} from '../../src/impl/tokens';
 import {default as rawTests} from './samples/script-data.json';
@@ -21,8 +21,10 @@ function suite() {
   beforeAll(() => {
     class MockCompositeTokenizer extends StateBasedTokenizer {
       data(code: number): State {
-        if (tokenList.length === 1 && tokenList[0].type === 'startTag' && (tokenList[0] as TagToken).name === 'script')
+        if (tokenList.length === 1 && tokenList[0].type === 'startTag' && (tokenList[0] as TagToken).name === 'script') {
+          parser.lastOpenTag = 'script';
           return this.callState('scriptData', code);
+        }
         return super.data(code);
       }
       eof(): State {
@@ -86,8 +88,10 @@ function suite() {
       if (completed) {
         expect(token.type).toStrictEqual('endTag');
         expect((token as TagToken).name).toStrictEqual('script');
+        expect(parser.lastOpenTag).toBeUndefined();
         token = tokenList.shift()!;
-      }
+      } else
+        expect(parser.lastOpenTag).toStrictEqual('script');
       expect(token).toBe(EOF_TOKEN);
       expect(errorList).toStrictEqual(expectedErrors);
     });
