@@ -175,7 +175,7 @@ export class BaseComposer implements TokenSink {
   }
 
   generateImpliedEndTagsFromSet(closable: { [tagName: string]: any }, exclude?: string) {
-    this.popUntilMatches(name => name !== exclude && (name in closable));
+    this.popUntilMatches((name, el) => name !== exclude && (name in closable) && el.namespaceURI === NS_HTML);
   }
   generateImpliedEndTags(exclude?: string) {
     return this.generateImpliedEndTagsFromSet(IMPLICITLY_CLOSABLE, exclude);
@@ -305,8 +305,8 @@ export class BaseComposer implements TokenSink {
     }
   }
 
-  popUntilName(name: string) {
-    this.popUntilMatches(n => n !== name);
+  popUntilName(name: string, namespace: string = NS_HTML) {
+    this.popUntilMatches((n, el) => n !== name || el.namespaceURI !== namespace);
     this.popCurrentElement();
   }
 
@@ -381,22 +381,25 @@ export class BaseComposer implements TokenSink {
     return false;
   }
 
-  isElementInScope(element: Element) {
+  hasMatchInScope(test: (el: Element) => boolean, fenceTest: (el: Element) => boolean) {
     for (let i = this.openElements.length - 1; i >= 0; --i) {
       const node = this.openElements[i];
-      if (node === element) return true;
-      if (this.isScopeFence(node)) break;
+      if (test(node)) return true;
+      if (fenceTest(node)) break;
     }
     return false;
   }
 
-  hasElementInScope(name: string): boolean {
-    for (let i = this.openElements.length - 1; i >= 0; --i) {
-      const node = this.openElements[i];
-      if (node.tagName === name) return true;
-      if (this.isScopeFence(node)) break;
-    }
-    return false;
+  isElementInScope(element: Element) {
+    return this.hasMatchInScope(el => el === element, el => this.isScopeFence(el));
+  }
+
+  hasElementInScope(name: string, namespace: string = NS_HTML): boolean {
+    return this.hasMatchInScope(el => el.tagName === name && el.namespaceURI === namespace, el => this.isScopeFence(el));
+  }
+
+  hasElementInListScope(name: string, namespace: string = NS_HTML): boolean {
+    return this.hasMatchInScope(el => el.tagName === name && el.namespaceURI === namespace, el => this.isListScopeFence(el));
   }
 
   isScopeFence(element: Element): boolean {
@@ -435,6 +438,12 @@ export class BaseComposer implements TokenSink {
         }
     }
     return false;
+  }
+
+  isListScopeFence(element: Element): boolean {
+    if (this.isScopeFence(element)) return true;
+    if (element.namespaceURI !== NS_HTML) return false;
+    return element.tagName === 'ol' || element.tagName === 'ul';
   }
 
   isSpecial(element: Element): boolean {
