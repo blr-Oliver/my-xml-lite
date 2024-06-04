@@ -53,6 +53,7 @@ export class StateBasedTokenizer implements IStateBasedTokenizer {
   currentComment!: CommentToken;
   currentTag!: TagToken;
   currentAttribute!: Attribute;
+  currentAttributeNames!: { [name: string]: true };
   currentDoctype!: DoctypeToken;
 
   sequenceBufferOffset!: number;
@@ -121,6 +122,8 @@ export class StateBasedTokenizer implements IStateBasedTokenizer {
     this.currentTag = undefined;
     // @ts-ignore
     this.currentAttribute = undefined;
+    // @ts-ignore
+    this.currentAttributeNames = undefined;
   }
 
   emitAccumulatedCharacters() {
@@ -172,7 +175,8 @@ export class StateBasedTokenizer implements IStateBasedTokenizer {
       type: 'startTag',
       selfClosing: false,
       attributes: []
-    }
+    };
+    this.currentAttributeNames = {};
   }
 
   startNewAttribute() {
@@ -518,7 +522,7 @@ export class StateBasedTokenizer implements IStateBasedTokenizer {
     while (true) {
       switch (code) {
         case CodePoints.EQ:
-          this.currentAttribute.name = buffer.takeString();
+          this.checkDuplicateAttribute(this.currentAttribute.name = buffer.takeString());
           return 'beforeAttributeValue';
         case CodePoints.TAB:
         case CodePoints.LF:
@@ -527,7 +531,7 @@ export class StateBasedTokenizer implements IStateBasedTokenizer {
         case CodePoints.GT:
         case CodePoints.SLASH:
         case CodePoints.EOF:
-          this.currentAttribute.name = buffer.takeString();
+          this.checkDuplicateAttribute(this.currentAttribute.name = buffer.takeString());
           return this.callState('afterAttributeName', code);
         case CodePoints.NUL:
           this.error('unexpected-null-character');
@@ -543,6 +547,14 @@ export class StateBasedTokenizer implements IStateBasedTokenizer {
       }
       code = this.nextCode();
     }
+  }
+
+  checkDuplicateAttribute(name: string) {
+    if (name in this.currentAttributeNames) {
+      this.error('duplicate-attribute');
+      this.currentTag.attributes.pop();
+    } else
+      this.currentAttributeNames[name] = true;
   }
 
   afterAttributeName(code: number): State {

@@ -27,7 +27,7 @@ export class StaticElement extends StaticParentNode implements Element {
     super(NodeType.ELEMENT_NODE, parentNode, childNodes, children);
     this.namespaceURI = namespaceURI;
     this.attributeNames = tag.attributes.map(attr => attr.name);
-    this.attributes = new StaticAttributes(tag.attributes, this); // TODO check for repeating attributes
+    this.attributes = new StaticAttributes(tag.attributes, this);
     this.id = this.attributes.getNamedItem('id')?.value || '';
     const classList = new StaticStringList(this.attributes.getNamedItem('class')?.value || '');
     this.classList = classList;
