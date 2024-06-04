@@ -1,13 +1,13 @@
-import {Attr, Document, Element, NamedNodeMap, Node, NodeType, ParentNode, StringList} from '../../decl/xml-lite-decl';
+import {Attr, Document, DOMTokenList, Element, NamedNodeMap, Node, NodeType, ParentNode} from '../../decl/xml-lite-decl';
 import {TagToken} from '../tokens';
 import {StaticAttributes} from './StaticAttributes';
 import {StaticParentNode} from './StaticParentNode';
-import {StaticStringList} from './StaticStringList';
+import {StaticTokenList} from './StaticTokenList';
 
 export class StaticElement extends StaticParentNode implements Element {
   declare readonly ownerDocument: Document;
   readonly attributes: NamedNodeMap;
-  readonly classList: StringList;
+  readonly classList: DOMTokenList;
   readonly id: string;
   readonly className: string;
   readonly namespaceURI: string | null;
@@ -29,9 +29,8 @@ export class StaticElement extends StaticParentNode implements Element {
     this.attributeNames = tag.attributes.map(attr => attr.name);
     this.attributes = new StaticAttributes(tag.attributes, this);
     this.id = this.attributes.getNamedItem('id')?.value || '';
-    const classList = new StaticStringList(this.attributes.getNamedItem('class')?.value || '');
-    this.classList = classList;
-    this.className = classList.join(' ');
+    this.className = this.attributes.getNamedItem('class')?.value || '';
+    this.classList = new StaticTokenList(this.className);
     this.prefix = null;
     this.tagName = this.localName = tag.name;
     this.selfClosed = tag.selfClosing;

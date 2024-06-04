@@ -45,7 +45,7 @@ export interface Element extends ParentNode {
   readonly attributes: NamedNodeMap;
   readonly id: string;
   readonly className: string;
-  readonly classList: StringList;
+  readonly classList: DOMTokenList;
   readonly nextElementSibling: Element | null;
   readonly previousElementSibling: Element | null;
   readonly namespaceURI: string | null;
@@ -94,9 +94,12 @@ export interface Document extends ParentNode {
   getElementById(elementId: string): Element | null;
 }
 
-export interface StringList {
+export interface DOMTokenList {
   readonly length: number;
-  contains(string: string): boolean;
+  readonly value: string;
+  toString(): string;
+  contains(token: string): boolean;
+  item(index: number): string | null;
   readonly [index: number]: string;
   [Symbol.iterator](): IterableIterator<string>;
 }
