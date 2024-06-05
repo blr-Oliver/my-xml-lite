@@ -91,10 +91,44 @@ export class BaseComposer implements TokenSink {
   }
 
   accept(token: Token) {
+    // TODO detect foreign content
+    // TODO allow NUL chars to be replaced in foreign content
+  }
+
+  setInsertionMode(value: InsertionMode) {
+    switch (this.insertionMode = value) {
+      case 'initial':
+      case 'beforeHtml':
+      case 'beforeHead':
+        return this.tokenizer.whitespaceMode = 'ignoreLeading';
+      case 'inHead':
+      case 'inHeadNoscript':
+      case 'afterHead':
+      case 'inColumnGroup':
+      case 'afterBody':
+      case 'afterAfterBody':
+        return this.tokenizer.whitespaceMode = 'emitLeading';
+      case 'inBody':
+      case 'text':
+      case 'inTable':
+      case 'inTableText':
+      case 'inCaption':
+      case 'inTableBody':
+      case 'inRow':
+      case 'inCell':
+      case 'inSelect':
+      case 'inSelectInTable':
+      case 'inTemplate':
+        return this.tokenizer.whitespaceMode = 'mixed';
+      case 'inFrameset':
+      case 'afterFrameset':
+      case 'afterAfterFrameset':
+        return this.tokenizer.whitespaceMode = 'whitespaceOnly';
+    }
   }
 
   resetInsertionMode() {
-    this.insertionMode = this.computeInsertionMode();
+    this.setInsertionMode(this.computeInsertionMode());
   }
 
   computeInsertionMode(): InsertionMode {
@@ -333,10 +367,11 @@ export class BaseComposer implements TokenSink {
   }
 
   reprocessIn(mode: InsertionMode, token: Token): InsertionMode {
-    this.insertionMode = mode;
+    this.setInsertionMode(mode);
     // @ts-ignore
     return this[mode](token);
   }
+
   error() { // TODO
   }
 

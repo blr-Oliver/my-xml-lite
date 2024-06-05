@@ -37,6 +37,7 @@ export interface TextToken extends Token {
 
 export interface CharactersToken extends TextToken {
   type: 'characters';
+  whitespaceOnly: boolean;
 }
 
 export interface CommentToken extends TextToken {

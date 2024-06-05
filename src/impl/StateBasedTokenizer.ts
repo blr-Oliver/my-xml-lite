@@ -42,8 +42,7 @@ interface IStateBasedTokenizer {
   proceed(): void;
 }
 
-type NulCharMode = 'block' | 'replace';
-type WhitespaceMode = 'ignoreLeading' | 'emitLeading' | 'accept';
+export type WhitespaceMode = 'ignoreLeading' | 'emitLeading' | 'mixed' | 'whitespaceOnly';
 
 export class StateBasedTokenizer implements IStateBasedTokenizer {
   env!: ParserEnvironment;
@@ -76,7 +75,7 @@ export class StateBasedTokenizer implements IStateBasedTokenizer {
 
   blockNulChars: boolean = true;
   whitespaceMode: WhitespaceMode = 'ignoreLeading';
-  onlyWhitespace: boolean = true;
+  hasWhitespaceOnly: boolean = true;
 
   composer!: BaseComposer;
 
@@ -142,8 +141,10 @@ export class StateBasedTokenizer implements IStateBasedTokenizer {
     if (buffer.position) {
       this.emit({
         type: 'characters',
-        data: buffer.takeString()
+        data: buffer.takeString(),
+        whitespaceOnly: this.hasWhitespaceOnly
       } as CharactersToken);
+      this.hasWhitespaceOnly = true;
     }
   }
 
