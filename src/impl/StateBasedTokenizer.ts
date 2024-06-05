@@ -74,7 +74,7 @@ export class StateBasedTokenizer implements IStateBasedTokenizer {
   refsIndex!: PrefixNode<number[]>;
 
   blockNulChars: boolean = true;
-  whitespaceMode: WhitespaceMode = 'ignoreLeading';
+  whitespaceMode: WhitespaceMode = 'mixed';
   hasWhitespaceOnly: boolean = true;
 
   composer!: BaseComposer;
@@ -215,6 +215,34 @@ export class StateBasedTokenizer implements IStateBasedTokenizer {
     };
   }
 
+  appendCharacter(code: number) {
+    if (isSpace(code)) this.appendWhitespace(code);
+    else this.appendNonWhitespace(code);
+  }
+  appendWhitespace(code: number) {
+    if (this.whitespaceMode !== 'ignoreLeading' || !this.hasWhitespaceOnly)
+      this.env.buffer.append(code);
+  }
+  appendNonWhitespace(code: number) {
+    switch (this.whitespaceMode) {
+      case 'ignoreLeading':
+        this.hasWhitespaceOnly = false;
+        break;
+      case 'emitLeading':
+        if (this.hasWhitespaceOnly) {
+          this.emitAccumulatedCharacters();
+          this.hasWhitespaceOnly = false;
+        }
+        break;
+      case 'mixed':
+        this.hasWhitespaceOnly = false;
+        break;
+      case 'whitespaceOnly':
+        return;
+    }
+    this.env.buffer.append(code);
+  }
+
   /**
    Initiates "sequence matching" mode. In this mode input is checked against provided sequence, verbatim or case-insensitive.
    Sequence mode either completes "positively" when input completely matches the expected sequence or exits "negatively" when first difference occurs.
@@ -249,7 +277,7 @@ export class StateBasedTokenizer implements IStateBasedTokenizer {
       if (code === CodePoints.EOC) return 'sequence';
       if (code !== seqData[this.sequenceIndex++])
         return this.callState(this.sequenceNegativeState, code);
-      buffer.append(code);
+      buffer.append(code); // TODO check if this should belong to characters
       code = this.nextCode();
     }
     return this.callState(this.sequencePositiveState, code);
@@ -265,7 +293,7 @@ export class StateBasedTokenizer implements IStateBasedTokenizer {
       if (isAsciiUpperAlpha(ciCode)) ciCode += 0x20;
       if (ciCode !== seqData[this.sequenceIndex++])
         return this.callState(this.sequenceNegativeState, code);
-      buffer.append(code);
+      buffer.append(code); // TODO check if this should belong to characters
       code = this.nextCode();
     }
     return this.callState(this.sequencePositiveState, code);
@@ -273,7 +301,6 @@ export class StateBasedTokenizer implements IStateBasedTokenizer {
 
   // -----text helpers-----
   textDataNoRefs(code: number, ltState: State): State {
-    const buffer = this.env.buffer;
     while (true) {
       switch (code) {
         case CodePoints.LT:
@@ -285,7 +312,7 @@ export class StateBasedTokenizer implements IStateBasedTokenizer {
           this.error('unexpected-null-character');
           code = CodePoints.REPLACEMENT_CHAR;
         default:
-          buffer.append(code);
+          this.appendCharacter(code);
           code = this.nextCode();
           break;
       }
@@ -293,7 +320,6 @@ export class StateBasedTokenizer implements IStateBasedTokenizer {
   }
 
   textDataWithRefs(code: number, ltState: State): State {
-    const buffer = this.env.buffer;
     while (true) {
       switch (code) {
         case CodePoints.AMPERSAND:
@@ -309,7 +335,7 @@ export class StateBasedTokenizer implements IStateBasedTokenizer {
           this.error('unexpected-null-character');
           code = CodePoints.REPLACEMENT_CHAR;
         default:
-          buffer.append(code);
+          this.appendCharacter(code);
           code = this.nextCode();
           break;
       }
@@ -317,17 +343,16 @@ export class StateBasedTokenizer implements IStateBasedTokenizer {
   }
 
   textDataLessThanSign(code: number, endTagOpenState: State, textState: State): State {
-    const buffer = this.env.buffer;
     while (true) {
       switch (code) {
         case CodePoints.SLASH:
           return endTagOpenState;
         case CodePoints.LT:
-          buffer.append(code);
+          this.appendNonWhitespace(code);
           code = this.nextCode();
           break;
         default:
-          buffer.append(CodePoints.LT);
+          this.appendNonWhitespace(CodePoints.LT);
           return this.callState(textState, code);
       }
     }
@@ -337,11 +362,11 @@ export class StateBasedTokenizer implements IStateBasedTokenizer {
     const buffer = this.env.buffer;
     if (isAsciiAlpha(code)) {
       this.textEndMark = buffer.position;
-      buffer.append(CodePoints.LT);
+      buffer.append(CodePoints.LT); // TODO check if this should belong to characters
       buffer.append(CodePoints.SLASH);
       return this.callState(tagNameState, code);
     } else {
-      buffer.append(CodePoints.LT);
+      buffer.append(CodePoints.LT); // TODO check if this should belong to characters
       buffer.append(CodePoints.SLASH);
       return this.callState(textState, code);
     }
@@ -377,7 +402,6 @@ export class StateBasedTokenizer implements IStateBasedTokenizer {
   }
 
   data(code: number): State {
-    const buffer = this.env.buffer;
     while (true) {
       switch (code) {
         case CodePoints.AMPERSAND:
@@ -394,7 +418,7 @@ export class StateBasedTokenizer implements IStateBasedTokenizer {
           if (this.blockNulChars) break;
           else code = CodePoints.REPLACEMENT_CHAR;
         default:
-          buffer.append(code);
+          this.appendCharacter(code);
           code = this.nextCode();
           break;
       }
@@ -402,7 +426,6 @@ export class StateBasedTokenizer implements IStateBasedTokenizer {
   }
 
   plaintext(code: number): State {
-    const buffer = this.env.buffer;
     while (true) {
       switch (code) {
         case CodePoints.EOF:
@@ -412,7 +435,7 @@ export class StateBasedTokenizer implements IStateBasedTokenizer {
           this.error('unexpected-null-character');
           code = CodePoints.REPLACEMENT_CHAR;
         default:
-          buffer.append(code);
+          this.appendCharacter(code);
           code = this.nextCode();
           break;
       }
@@ -456,9 +479,8 @@ export class StateBasedTokenizer implements IStateBasedTokenizer {
         this.error('missing-end-tag-name');
         return 'data';
       case CodePoints.EOF:
-        const buffer = this.env.buffer;
-        buffer.append(CodePoints.LT);
-        buffer.append(CodePoints.SLASH);
+        this.appendNonWhitespace(CodePoints.LT);
+        this.appendNonWhitespace(CodePoints.SLASH);
         this.emitAccumulatedCharacters();
         this.error('eof-before-tag-name');
         return this.eof();
@@ -736,7 +758,6 @@ export class StateBasedTokenizer implements IStateBasedTokenizer {
   }
 
   cdataSection(code: number): State {
-    const buffer = this.env.buffer;
     while (true) {
       switch (code) {
         case CodePoints.CLOSE_SQUARE_BRACKET:
@@ -749,7 +770,7 @@ export class StateBasedTokenizer implements IStateBasedTokenizer {
           this.error('unexpected-null-character');
           code = CodePoints.REPLACEMENT_CHAR;
         default:
-          buffer.append(code);
+          this.appendCharacter(code);
           code = this.nextCode();
       }
     }
@@ -759,25 +780,24 @@ export class StateBasedTokenizer implements IStateBasedTokenizer {
     if (code === CodePoints.CLOSE_SQUARE_BRACKET)
       return 'cdataSectionEnd';
     else {
-      this.env.buffer.append(CodePoints.CLOSE_SQUARE_BRACKET);
+      this.appendNonWhitespace(CodePoints.CLOSE_SQUARE_BRACKET);
       return this.callState('cdataSection', code);
     }
   }
 
   cdataSectionEnd(code: number): State {
-    const buffer = this.env.buffer;
     while (true) {
       switch (code) {
         case CodePoints.CLOSE_SQUARE_BRACKET:
-          buffer.append(CodePoints.CLOSE_SQUARE_BRACKET);
+          this.appendNonWhitespace(CodePoints.CLOSE_SQUARE_BRACKET);
           code = this.nextCode();
           break;
         case CodePoints.GT:
           this.emitCData();
           return 'data';
         default:
-          buffer.append(CodePoints.CLOSE_SQUARE_BRACKET);
-          buffer.append(CodePoints.CLOSE_SQUARE_BRACKET);
+          this.appendNonWhitespace(CodePoints.CLOSE_SQUARE_BRACKET);
+          this.appendNonWhitespace(CodePoints.CLOSE_SQUARE_BRACKET);
           return this.callState('cdataSection', code);
       }
     }
@@ -787,9 +807,11 @@ export class StateBasedTokenizer implements IStateBasedTokenizer {
   characterReference(code: number): State {
     const buffer = this.env.buffer;
     this.referenceStartMark = buffer.position;
-    buffer.append(CodePoints.AMPERSAND);
+    if (this.inAttribute) buffer.append(CodePoints.AMPERSAND);
+    else this.appendNonWhitespace(CodePoints.AMPERSAND);
     if (code === CodePoints.SHARP) {
-      buffer.append(code);
+      if (this.inAttribute) buffer.append(CodePoints.SHARP);
+      else this.appendNonWhitespace(CodePoints.SHARP);
       return 'numericCharacterReference';
     } else if (isAsciiAlphaNum(code))
       return this.callState('namedCharacterReference', code);
@@ -800,7 +822,8 @@ export class StateBasedTokenizer implements IStateBasedTokenizer {
   numericCharacterReference(code: number): State {
     this.charCode = 0;
     if (code === CodePoints.X_CAPITAL || code === CodePoints.X_REGULAR) {
-      this.env.buffer.append(code);
+      if (this.inAttribute) this.env.buffer.append(code);
+      else this.appendNonWhitespace(code);
       return 'hexadecimalCharacterReferenceStart';
     } else
       return this.callState('decimalCharacterReferenceStart', code);
@@ -825,7 +848,8 @@ export class StateBasedTokenizer implements IStateBasedTokenizer {
       charCode = CHAR_REF_REPLACEMENT[charCode - 0x80] || charCode;
     }
     buffer.position = this.referenceStartMark;
-    buffer.append(charCode);
+    if (this.inAttribute) buffer.append(charCode);
+    else this.appendCharacter(charCode);
   }
 
   namedCharacterReference(code: number): State {
@@ -834,7 +858,8 @@ export class StateBasedTokenizer implements IStateBasedTokenizer {
     let lastMatch = 0x00;
     while (node.children && (next = node.children[code])) {
       node = next;
-      buffer.append(lastMatch = code);
+      if (this.inAttribute) buffer.append(lastMatch = code);
+      else this.appendNonWhitespace(lastMatch = code);
       code = this.nextCode();
     }
     if (node.value) {
@@ -910,7 +935,10 @@ export class StateBasedTokenizer implements IStateBasedTokenizer {
         this.error('unknown-named-character-reference');
         return this.callState(this.returnState, code);
       } else if (isAsciiAlphaNum(code)) {
-        buffer.append(code);
+        if (this.inAttribute)
+          buffer.append(code);
+        else
+          this.appendNonWhitespace(code);
         code = this.nextCode();
       } else
         return this.callState(this.returnState, code);
@@ -1508,16 +1536,15 @@ export class StateBasedTokenizer implements IStateBasedTokenizer {
   }
 
   scriptDataLessThanSign(code: number): State {
-    const buffer = this.env.buffer;
     switch (code) {
       case CodePoints.SLASH:
         return 'scriptDataEndTagOpen';
       case CodePoints.EXCLAMATION:
-        buffer.append(CodePoints.LT);
-        buffer.append(CodePoints.EXCLAMATION);
+        this.appendNonWhitespace(CodePoints.LT);
+        this.appendNonWhitespace(CodePoints.EXCLAMATION);
         return 'scriptDataEscapeStart';
       default:
-        buffer.append(CodePoints.LT);
+        this.appendNonWhitespace(CodePoints.LT);
         return this.callState('scriptData', code);
     }
   }
@@ -1536,7 +1563,7 @@ export class StateBasedTokenizer implements IStateBasedTokenizer {
 
   scriptDataEscapeStart(code: number): State {
     if (code === CodePoints.HYPHEN) {
-      this.env.buffer.append(code);
+      this.appendNonWhitespace(code);
       return 'scriptDataEscapeStartDash';
     } else
       return this.callState('scriptData', code);
@@ -1544,18 +1571,17 @@ export class StateBasedTokenizer implements IStateBasedTokenizer {
 
   scriptDataEscapeStartDash(code: number): State {
     if (code === CodePoints.HYPHEN) {
-      this.env.buffer.append(code);
+      this.appendNonWhitespace(code);
       return 'scriptDataEscapedDashDash';
     } else
       return this.callState('scriptData', code);
   }
 
   scriptDataEscaped(code: number): State {
-    const buffer = this.env.buffer;
     while (true) {
       switch (code) {
         case CodePoints.HYPHEN:
-          buffer.append(code);
+          this.appendNonWhitespace(code);
           return 'scriptDataEscapedDash';
         case CodePoints.LT:
           return 'scriptDataEscapedLessThanSign';
@@ -1567,17 +1593,16 @@ export class StateBasedTokenizer implements IStateBasedTokenizer {
           this.error('unexpected-null-character');
           code = CodePoints.REPLACEMENT_CHAR;
         default:
-          buffer.append(code);
+          this.appendCharacter(code);
           code = this.nextCode();
       }
     }
   }
 
   scriptDataEscapedDash(code: number): State {
-    const buffer = this.env.buffer;
     switch (code) {
       case CodePoints.HYPHEN:
-        buffer.append(code);
+        this.appendNonWhitespace(code);
         return 'scriptDataEscapedDashDash';
       case CodePoints.LT:
         return 'scriptDataEscapedLessThanSign';
@@ -1589,23 +1614,22 @@ export class StateBasedTokenizer implements IStateBasedTokenizer {
         this.error('unexpected-null-character');
         code = CodePoints.REPLACEMENT_CHAR;
       default:
-        buffer.append(code);
+        this.appendCharacter(code);
         return 'scriptDataEscaped';
     }
   }
 
   scriptDataEscapedDashDash(code: number): State {
-    const buffer = this.env.buffer;
     while (true) {
       switch (code) {
         case CodePoints.HYPHEN:
-          buffer.append(code);
+          this.appendNonWhitespace(code);
           code = this.nextCode();
           break;
         case CodePoints.LT:
           return 'scriptDataEscapedLessThanSign';
         case CodePoints.GT:
-          buffer.append(code);
+          this.appendNonWhitespace(code);
           return 'scriptData';
         case CodePoints.EOF:
           this.error('eof-in-script-html-comment-like-text');
@@ -1615,21 +1639,20 @@ export class StateBasedTokenizer implements IStateBasedTokenizer {
           this.error('unexpected-null-character');
           code = CodePoints.REPLACEMENT_CHAR;
         default:
-          buffer.append(code);
+          this.appendCharacter(code);
           return 'scriptDataEscaped';
       }
     }
   }
 
   scriptDataEscapedLessThanSign(code: number): State {
-    const buffer = this.env.buffer;
     if (code === CodePoints.SLASH) {
       return 'scriptDataEscapedEndTagOpen';
     } else if (isAsciiAlpha(code)) {
-      buffer.append(CodePoints.LT);
+      this.appendNonWhitespace(CodePoints.LT);
       return this.scriptDataDoubleEscapeStart(code);
     } else {
-      buffer.append(CodePoints.LT);
+      this.appendNonWhitespace(CodePoints.LT);
       return this.callState('scriptDataEscaped', code);
     }
   }
@@ -1656,9 +1679,11 @@ export class StateBasedTokenizer implements IStateBasedTokenizer {
       case CodePoints.LF:
       case CodePoints.FF:
       case CodePoints.SPACE:
+        this.appendWhitespace(code);
+        return 'scriptDataDoubleEscaped';
       case CodePoints.SLASH:
       case CodePoints.GT:
-        this.env.buffer.append(code);
+        this.appendNonWhitespace(code);
         return 'scriptDataDoubleEscaped';
       default:
         return this.callState('scriptDataEscaped', code);
@@ -1666,14 +1691,13 @@ export class StateBasedTokenizer implements IStateBasedTokenizer {
   }
 
   scriptDataDoubleEscaped(code: number): State {
-    const buffer = this.env.buffer;
     while (true) {
       switch (code) {
         case CodePoints.HYPHEN:
-          buffer.append(code);
+          this.appendNonWhitespace(code);
           return 'scriptDataDoubleEscapedDash';
         case CodePoints.LT:
-          buffer.append(code);
+          this.appendNonWhitespace(code);
           return 'scriptDataDoubleEscapedLessThanSign';
         case CodePoints.EOF:
           this.error('eof-in-script-html-comment-like-text');
@@ -1683,7 +1707,7 @@ export class StateBasedTokenizer implements IStateBasedTokenizer {
           this.error('unexpected-null-character');
           code = CodePoints.REPLACEMENT_CHAR;
         default:
-          buffer.append(code);
+          this.appendCharacter(code);
           code = this.nextCode();
           break;
       }
@@ -1691,61 +1715,58 @@ export class StateBasedTokenizer implements IStateBasedTokenizer {
   }
 
   scriptDataDoubleEscapedDash(code: number): State {
-    const buffer = this.env.buffer;
     switch (code) {
       case CodePoints.HYPHEN:
-        buffer.append(code);
+        this.appendNonWhitespace(code);
         return 'scriptDataDoubleEscapedDashDash';
       case CodePoints.LT:
-        buffer.append(code);
+        this.appendNonWhitespace(code);
         return 'scriptDataDoubleEscapedLessThanSign';
       case CodePoints.NUL:
         this.error('unexpected-null-character');
-        buffer.append(CodePoints.REPLACEMENT_CHAR);
+        this.appendNonWhitespace(CodePoints.REPLACEMENT_CHAR);
         return 'scriptDataDoubleEscaped';
       case CodePoints.EOF:
         this.error('eof-in-script-html-comment-like-text');
         this.emitAccumulatedCharacters();
         return this.eof();
       default:
-        buffer.append(code);
+        this.appendCharacter(code);
         return 'scriptDataDoubleEscaped';
     }
   }
 
   scriptDataDoubleEscapedDashDash(code: number): State {
-    const buffer = this.env.buffer;
     while (true) {
       switch (code) {
         case CodePoints.HYPHEN:
-          buffer.append(code);
+          this.appendNonWhitespace(code);
           code = this.nextCode();
           break;
         case CodePoints.LT:
-          buffer.append(code);
+          this.appendNonWhitespace(code);
           return 'scriptDataDoubleEscapedLessThanSign';
         case CodePoints.GT:
-          buffer.append(code);
+          this.appendNonWhitespace(code);
           return 'scriptData';
         case CodePoints.NUL:
           this.error('unexpected-null-character');
-          buffer.append(CodePoints.REPLACEMENT_CHAR);
+          this.appendNonWhitespace(CodePoints.REPLACEMENT_CHAR);
           return 'scriptDataDoubleEscaped';
         case CodePoints.EOF:
           this.error('eof-in-script-html-comment-like-text');
           this.emitAccumulatedCharacters();
           return this.eof();
         default:
-          buffer.append(code);
+          this.appendCharacter(code);
           return 'scriptDataDoubleEscaped';
       }
     }
   }
 
   scriptDataDoubleEscapedLessThanSign(code: number): State {
-    const buffer = this.env.buffer;
     if (code === CodePoints.SLASH) {
-      buffer.append(code);
+      this.appendNonWhitespace(code);
       return 'scriptDataDoubleEscapeEnd';
     } else {
       return this.callState('scriptDataDoubleEscaped', code);
@@ -1762,9 +1783,11 @@ export class StateBasedTokenizer implements IStateBasedTokenizer {
       case CodePoints.LF:
       case CodePoints.FF:
       case CodePoints.SPACE:
+        this.appendWhitespace(code);
+        return 'scriptDataEscaped';
       case CodePoints.SLASH:
       case CodePoints.GT:
-        this.env.buffer.append(code);
+        this.appendNonWhitespace(code);
         return 'scriptDataEscaped';
       default:
         return this.callState('scriptDataDoubleEscaped', code);
@@ -1784,7 +1807,7 @@ export class StateBasedTokenizer implements IStateBasedTokenizer {
   }
 
   rawtextEndTagName(code: number): State {
-    return this.matchSequence(code, stringToArray('noscript'), true, 'rawtextEndTagNameMatched', 'rawtext');
+    return this.matchSequence(code, stringToArray(this.lastOpenTag!), true, 'rawtextEndTagNameMatched', 'rawtext');
   }
 
   rawtextEndTagNameMatched(code: number): State {
@@ -1804,7 +1827,7 @@ export class StateBasedTokenizer implements IStateBasedTokenizer {
   }
 
   rcdataEndTagName(code: number): State {
-    return this.matchSequence(code, stringToArray('textarea'), true, 'rcdataEndTagNameMatched', 'rcdata');
+    return this.matchSequence(code, stringToArray(this.lastOpenTag!), true, 'rcdataEndTagNameMatched', 'rcdata');
   }
 
   rcdataEndTagNameMatched(code: number): State {
