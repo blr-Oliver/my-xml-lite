@@ -21,6 +21,7 @@ export const HTML_SPECIAL: EntityMapping<number[]> = {
   'quot;': [CodePoints.QUOTE],
   'quot': [CodePoints.QUOTE],
   'QUOT;': [CodePoints.QUOTE],
-  'QUOT': [CodePoints.QUOTE]
+  'QUOT': [CodePoints.QUOTE],
+  'nbsp;': [0x00A0]
 }
 

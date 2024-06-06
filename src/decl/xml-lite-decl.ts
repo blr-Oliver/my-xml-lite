@@ -66,6 +66,7 @@ export interface Element extends ParentNode {
 export interface CharacterData extends Node {
   readonly ownerDocument: Document;
   readonly data: string;
+  readonly length: number;
 }
 
 export interface Text extends CharacterData {

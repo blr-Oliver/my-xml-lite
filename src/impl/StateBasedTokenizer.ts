@@ -150,8 +150,10 @@ export class StateBasedTokenizer implements IStateBasedTokenizer {
   emitCData() {
     this.emit({
       type: 'cdata',
-      data: this.env.buffer.takeString()
+      data: this.env.buffer.takeString(),
+      whitespaceOnly: this.hasWhitespaceOnly
     } as CDataToken);
+    this.hasWhitespaceOnly = true;
   }
 
   emitCurrentComment() {

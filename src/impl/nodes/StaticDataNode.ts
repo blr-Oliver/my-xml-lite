@@ -15,4 +15,8 @@ export class StaticDataNode extends StaticEmptyNode implements CharacterData, Te
   get nodeValue(): string {
     return this.data;
   }
+
+  get length(): number {
+    return this.data.length;
+  }
 }

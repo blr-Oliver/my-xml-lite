@@ -36,7 +36,7 @@ export interface TextToken extends Token {
 }
 
 export interface CharactersToken extends TextToken {
-  type: 'characters';
+  type: 'characters' | 'cdata';
   whitespaceOnly: boolean;
 }
 
@@ -44,7 +44,7 @@ export interface CommentToken extends TextToken {
   type: 'comment';
 }
 
-export interface CDataToken extends TextToken {
+export interface CDataToken extends CharactersToken {
   type: 'cdata';
 }
 
