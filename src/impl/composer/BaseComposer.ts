@@ -92,8 +92,39 @@ export class BaseComposer implements TokenSink {
   }
 
   accept(token: Token) {
-    // TODO detect foreign content
-    // TODO allow NUL chars to be replaced in foreign content
+    if (token.type !== 'eof' && this.shouldUseForeignRules(token))
+      this.setInsertionMode(this.inForeignContent(token));
+    else this.setInsertionMode(this.process(token));
+  }
+
+  shouldUseForeignRules(token?: Token): boolean {
+    if (!this.openElements.length) return false;
+    const adjustedNode = this.adjustedCurrentNode;
+    if (adjustedNode.namespaceURI === NS_HTML) return false;
+    if (!token)
+      return !this.isMathMLIntegrationPoint(adjustedNode) && !this.isHTMLIntegrationPoint(adjustedNode);
+    if (this.isMathMLIntegrationPoint(adjustedNode)) {
+      if (token.type === 'characters') return false;
+      if (token.type === 'startTag' && (token as TagToken).name !== 'mglyph' && (token as TagToken).name !== 'malignmark') return false;
+    }
+    if (adjustedNode.namespaceURI === NS_MATHML && adjustedNode.tagName === 'annotation-xml') {
+      if (token.type === 'startTag' && (token as TagToken).name === 'svg') return false;
+    }
+    if (this.isHTMLIntegrationPoint(adjustedNode)) {
+      if (token.type === 'characters' || token.type === 'startTag') return false;
+    }
+    return true;
+  }
+
+  process(token: Token): InsertionMode {
+    // @ts-ignore
+    return this[this.insertionMode](token);
+  }
+
+  reprocessIn(mode: InsertionMode, token: Token): InsertionMode {
+    this.setInsertionMode(mode);
+    // @ts-ignore
+    return this[mode](token);
   }
 
   setInsertionMode(value: InsertionMode) {
@@ -187,6 +218,44 @@ export class BaseComposer implements TokenSink {
 
   inTemplate(token: Token): InsertionMode {
     throw new Error('Malformed inheritance');
+  }
+
+  inForeignContent(token: Token): InsertionMode {
+    throw new Error('Malformed inheritance');
+  }
+
+  isMathMLIntegrationPoint(element: Element): boolean {
+    if (element.namespaceURI !== NS_MATHML) return false;
+    switch (element.tagName) {
+      case 'mi':
+      case 'mo':
+      case 'mn':
+      case 'ms':
+      case 'mtext':
+        return true;
+      default:
+        return false;
+    }
+  }
+
+  isHTMLIntegrationPoint(element: Element): boolean {
+    switch (element.namespaceURI) {
+      case NS_MATHML:
+        if (element.tagName !== 'annotation-xml') return false;
+        const encoding = (element.getAttribute('encoding') || '').toLowerCase();
+        return encoding === 'text/html' || encoding === 'application/xhtml+xml';
+      case NS_SVG:
+        switch (element.tagName) {
+          case 'foreignObject':
+          case 'desc':
+          case 'title':
+            return true;
+          default:
+            return false;
+        }
+      default:
+        return false;
+    }
   }
 
   protected insertDoctype(doctypeToken: DoctypeToken) {
@@ -365,12 +434,6 @@ export class BaseComposer implements TokenSink {
 
   endTemplate(end: TagToken): InsertionMode { // TODO
     return this.insertionMode;
-  }
-
-  reprocessIn(mode: InsertionMode, token: Token): InsertionMode {
-    this.setInsertionMode(mode);
-    // @ts-ignore
-    return this[mode](token);
   }
 
   error() { // TODO

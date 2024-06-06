@@ -73,7 +73,6 @@ export class StateBasedTokenizer implements IStateBasedTokenizer {
   charCode!: number;
   refsIndex!: PrefixNode<number[]>;
 
-  blockNulChars: boolean = true;
   whitespaceMode: WhitespaceMode = 'mixed';
   hasWhitespaceOnly: boolean = true;
 
@@ -416,7 +415,7 @@ export class StateBasedTokenizer implements IStateBasedTokenizer {
           return this.eof();
         case CodePoints.NUL:
           this.error('unexpected-null-character');
-          if (this.blockNulChars) break;
+          if (!this.composer.shouldUseForeignRules()) break;
           else code = CodePoints.REPLACEMENT_CHAR;
         default:
           this.appendCharacter(code);

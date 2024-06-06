@@ -16,7 +16,7 @@ export class InTemplateComposer extends BaseComposer {
           this.clearFormattingUpToMarker();
           this.templateInsertionModes.pop();
           this.resetInsertionMode();
-          return this.reprocessIn(this.insertionMode, token);
+          return this.process(token);
         } else
           return this.stopParsing();
       case 'startTag':

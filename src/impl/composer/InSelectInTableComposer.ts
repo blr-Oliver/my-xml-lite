@@ -27,7 +27,7 @@ export class InSelectInTableComposer extends InSelectComposer {
         this.error();
         this.popUntilName('select');
         this.resetInsertionMode();
-        return this.reprocessIn(this.insertionMode, token);
+        return this.process(token);
       default:
         return this.inSelect(token);
     }
@@ -47,7 +47,7 @@ export class InSelectInTableComposer extends InSelectComposer {
         if (this.hasElementInTableScope(token.name)) {
           this.popUntilName('select');
           this.resetInsertionMode();
-          return this.reprocessIn(this.insertionMode, token);
+          return this.process(token);
         } else
           return this.insertionMode;
       default:

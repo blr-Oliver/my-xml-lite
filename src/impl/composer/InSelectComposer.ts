@@ -99,7 +99,7 @@ export class InSelectComposer extends BaseComposer {
       this.popUntilName('select');
       this.resetInsertionMode();
       if (reprocess)
-        return this.reprocessIn(this.insertionMode, token);
+        return this.process(token);
     } else if (errorIfMissing)
       this.error();
     return this.insertionMode;

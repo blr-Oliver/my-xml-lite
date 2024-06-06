@@ -60,7 +60,7 @@ export class InTableComposer extends BaseComposer {
         if (this.hasElementInTableScope('table')) {
           this.popUntilName('table');
           this.resetInsertionMode();
-          return this.reprocessIn(this.insertionMode, token);
+          return this.process(token);
         }
         break;
       case 'style':

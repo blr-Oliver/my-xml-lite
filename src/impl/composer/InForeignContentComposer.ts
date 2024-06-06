@@ -14,7 +14,6 @@ export class InForeignContentComposer extends TokenAdjustingComposer {
         this.error();
         break;
       case 'characters':
-        // TODO replace NUL at tokenizer level
         this.insertDataNode(token as TextToken);
         break;
       case 'startTag':
@@ -75,8 +74,8 @@ export class InForeignContentComposer extends TokenAdjustingComposer {
       case 'ul':
       case 'var':
         this.error();
-        this.popUntilMatches(this.isForeignNonIntegrationPoint);
-        return this.reprocessIn(this.insertionMode, token);
+        this.popUntilMatches(this.isHTMLContentRestricted);
+        return this.process(token);
       default:
         return this.inForeignContentStartTagDefault(token);
     }
@@ -100,14 +99,14 @@ export class InForeignContentComposer extends TokenAdjustingComposer {
       case 'br':
       case 'p':
         this.error();
-        this.popUntilMatches(this.isForeignNonIntegrationPoint);
-        return this.reprocessIn(this.insertionMode, token);
+        this.popUntilMatches(this.isHTMLContentRestricted);
+        return this.process(token);
       default:
         if (token.name !== (this.current as Element).tagName.toLowerCase())
           this.error();
         for (let i = this.openElements.length - 1; i > 0; --i) {
           let node = this.openElements[i];
-          if (node.namespaceURI === NS_HTML) return this.reprocessIn(this.insertionMode, token);
+          if (node.namespaceURI === NS_HTML) return this.process(token);
           if (node.tagName.toLowerCase() === token.name) {
             while (this.openElements.length >= i) {
               this.popCurrentElement();
@@ -119,36 +118,7 @@ export class InForeignContentComposer extends TokenAdjustingComposer {
     return this.insertionMode;
   }
 
-  isForeignNonIntegrationPoint(name: string, element: Element): boolean {
-    const namespace = element.namespaceURI || NS_HTML;
-    switch (namespace) {
-      case NS_HTML:
-        return false;
-      case NS_MATHML:
-        switch (name) {
-          case 'annotation-xml':
-            const encoding = (element.getAttribute('encoding') || '').toLowerCase();
-            return encoding !== 'text/html' && encoding !== 'application/xhtml+xml';
-          case 'mi':
-          case 'mo':
-          case 'mn':
-          case 'ms':
-          case 'mtext':
-            return false;
-          default:
-            return true;
-        }
-      case NS_SVG:
-        switch (name) {
-          case 'foreignObject':
-          case 'desc':
-          case 'title':
-            return false;
-          default:
-            return true;
-        }
-      default:
-        return true;
-    }
+  isHTMLContentRestricted(name: string, element: Element): boolean {
+    return !(element.namespaceURI === NS_HTML || this.isMathMLIntegrationPoint(element) || this.isHTMLIntegrationPoint(element));
   }
 }
