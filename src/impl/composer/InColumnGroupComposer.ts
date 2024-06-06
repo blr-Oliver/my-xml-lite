@@ -1,5 +1,4 @@
-import {Element} from '../../decl/xml-lite-decl';
-import {TagToken, TextToken, Token} from '../tokens';
+import {CharactersToken, TagToken, TextToken, Token} from '../tokens';
 import {BaseComposer} from './BaseComposer';
 import {InsertionMode} from './insertion-mode';
 
@@ -13,9 +12,7 @@ export class InColumnGroupComposer extends BaseComposer {
         this.error();
         break;
       case 'characters':
-        // TODO whitespace only
-        this.insertDataNode(token as TextToken);
-        break;
+        return this.inColumnGroupCharacters(token as CharactersToken);
       case 'eof':
         return this.inBody(token);
       case 'startTag':
@@ -26,6 +23,14 @@ export class InColumnGroupComposer extends BaseComposer {
         return this.inColumnGroupDefault(token);
     }
     return this.insertionMode;
+  }
+
+  inColumnGroupCharacters(token: CharactersToken): InsertionMode {
+    if (token.whitespaceOnly) {
+      this.insertDataNode(token);
+      return this.insertionMode;
+    }
+    return this.inColumnGroupDefault(token);
   }
 
   inColumnGroupStartTag(token: TagToken): InsertionMode {
@@ -59,7 +64,7 @@ export class InColumnGroupComposer extends BaseComposer {
   }
 
   inColumnGroupDefault(token: Token, reprocess = true): InsertionMode {
-    if ((this.current as Element).tagName !== 'colgroup') {
+    if (this.current.tagName !== 'colgroup') {
       this.error();
       return this.insertionMode;
     } else {

@@ -13,7 +13,6 @@ export class InSelectComposer extends BaseComposer {
         this.error();
         break;
       case 'characters':
-        // TODO exclude NUL characters on tokenizer level
         this.insertDataNode(token as TextToken);
         break;
       case 'startTag':

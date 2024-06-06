@@ -12,7 +12,6 @@ export class AfterAfterComposer extends BaseComposer {
         this.error();
         break;
       case 'characters':
-        // TODO whitespace only
         return this.inBody(token);
       case 'eof':
         return this.stopParsing();
@@ -47,7 +46,6 @@ export class AfterAfterComposer extends BaseComposer {
         this.error();
         break;
       case 'characters':
-        // TODO whitespace only
         return this.inBody(token);
       case 'eof':
         return this.stopParsing();

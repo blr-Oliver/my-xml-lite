@@ -2,7 +2,7 @@ import {Element} from '../../decl/xml-lite-decl';
 import {StaticAttr} from '../nodes/StaticAttr';
 import {StaticAttributes} from '../nodes/StaticAttributes';
 import {StaticElement} from '../nodes/StaticElement';
-import {TagToken, TextToken, Token} from '../tokens';
+import {CharactersToken, TagToken, TextToken, Token} from '../tokens';
 import {NS_HTML, NS_MATHML, NS_SVG} from './BaseComposer';
 import {InsertionMode} from './insertion-mode';
 import {TokenAdjustingComposer} from './TokenAdjustingComposer';
@@ -17,10 +17,9 @@ export class InBodyComposer extends TokenAdjustingComposer {
         this.error();
         break;
       case 'characters':
-        // TODO whitespace and NUL characters
         this.reconstructFormattingElements();
-        this.insertDataNode(token as TextToken);
-        this.framesetOk = false;
+        this.insertDataNode(token as CharactersToken);
+        this.framesetOk &&= (token as CharactersToken).whitespaceOnly;
         break;
       case 'eof':
         if (this.templateInsertionModes.length) return this.inTemplate(token);

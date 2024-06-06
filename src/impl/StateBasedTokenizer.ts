@@ -238,6 +238,7 @@ export class StateBasedTokenizer implements IStateBasedTokenizer {
         this.hasWhitespaceOnly = false;
         break;
       case 'whitespaceOnly':
+        this.error('unexpected-non-whitespace-character');
         return;
     }
     this.env.buffer.append(code);

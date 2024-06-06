@@ -60,6 +60,7 @@ type InsertionLocation = {
   before?: Element // this can only be a table
 }
 
+// TODO when partial composers are merged refine cross-calls where needed
 export class BaseComposer implements TokenSink {
   isFragmentParser: boolean = false;
 

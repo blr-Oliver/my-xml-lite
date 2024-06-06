@@ -12,7 +12,6 @@ export class AfterBodyComposer extends BaseComposer {
         this.error();
         break;
       case 'characters':
-        // TODO whitespace only
         return this.inBody(token);
       case 'startTag':
         return this.afterBodyStartTag(token as TagToken);

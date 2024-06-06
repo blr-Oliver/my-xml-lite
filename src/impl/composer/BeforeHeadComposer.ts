@@ -12,7 +12,6 @@ export class BeforeHeadComposer extends BaseComposer {
         this.insertDoctype(token as DoctypeToken);
         return 'beforeHtml';
       default:
-        //TODO in this state whitespace should be ignored at tokenizer level
         return this.reprocessIn('beforeHtml', token);
     }
   }

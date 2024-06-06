@@ -1,15 +1,12 @@
-import {TagToken, TextToken, Token} from '../tokens';
+import {CharactersToken, TagToken, TextToken, Token} from '../tokens';
 import {BaseComposer} from './BaseComposer';
 import {InsertionMode} from './insertion-mode';
 
 export class HeadComposer extends BaseComposer {
   inHead(token: Token): InsertionMode {
-    let tagToken = token as TagToken;
     switch (token.type) {
       case 'characters':
-        // TODO separate whitespace and text
-        this.insertDataNode(token as TextToken);
-        break;
+        return this.inHeadCharacters(token as CharactersToken);
       case 'comment':
         this.insertDataNode(token as TextToken);
         break;
@@ -21,10 +18,17 @@ export class HeadComposer extends BaseComposer {
       case 'endTag':
         return this.inHeadEndTag(token as TagToken);
       default:
-        this.popCurrentElement();
-        return this.reprocessIn('afterHead', token);
+        return this.inHeadDefault(token);
     }
     return this.insertionMode;
+  }
+
+  inHeadCharacters(token: CharactersToken): InsertionMode {
+    if (token.whitespaceOnly) {
+      this.insertDataNode(token);
+      return this.insertionMode;
+    }
+    return this.inHeadDefault(token);
   }
 
   inHeadStartTag(token: TagToken): InsertionMode {
@@ -79,6 +83,11 @@ export class HeadComposer extends BaseComposer {
     return this.insertionMode;
   }
 
+  inHeadDefault(token: Token): InsertionMode {
+    this.popCurrentElement();
+    return this.reprocessIn('afterHead', token);
+  }
+
   inHeadNoscript(token: Token): InsertionMode {
     let tagToken: TagToken;
     switch (token.type) {
@@ -89,9 +98,7 @@ export class HeadComposer extends BaseComposer {
         this.error();
         break;
       case 'characters':
-        // TODO whitespace only
-        this.insertDataNode(token as TextToken);
-        break;
+        return this.inHeadNoscriptCharacters(token as CharactersToken);
       case 'startTag':
         tagToken = token as TagToken;
         switch (tagToken.name) {
@@ -131,6 +138,14 @@ export class HeadComposer extends BaseComposer {
     return this.insertionMode;
   }
 
+  inHeadNoscriptCharacters(token: CharactersToken): InsertionMode {
+    if (token.whitespaceOnly) {
+      this.insertDataNode(token);
+      return this.insertionMode;
+    }
+    return this.escapeInHeadNoscript(token);
+  }
+
   escapeInHeadNoscript(token: Token): InsertionMode {
     this.error();
     this.popCurrentElement();
@@ -146,9 +161,7 @@ export class HeadComposer extends BaseComposer {
         this.error();
         break;
       case 'characters':
-        // TODO whitespace only
-        this.insertDataNode(token as TextToken);
-        break;
+        return this.afterHeadCharacters(token as CharactersToken);
       case 'startTag':
         return this.afterHeadStartTag(token as TagToken);
       case 'endTag':
@@ -157,6 +170,14 @@ export class HeadComposer extends BaseComposer {
         return this.forceElementAndState('body', 'inBody', token);
     }
     return this.insertionMode;
+  }
+
+  afterHeadCharacters(token: CharactersToken): InsertionMode {
+    if (token.whitespaceOnly) {
+      this.insertDataNode(token);
+      return this.insertionMode;
+    }
+    return this.forceElementAndState('body', 'inBody', token);
   }
 
   afterHeadStartTag(token: TagToken): InsertionMode {

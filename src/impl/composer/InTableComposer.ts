@@ -66,7 +66,7 @@ export class InTableComposer extends BaseComposer {
       case 'style':
       case 'script':
       case 'template':
-        return this.inHead(token); // TODO this actually should be inHeadStartTag
+        return this.inHead(token);
       case 'input':
         const typeAttr = token.attributes.find(attr => attr.name === 'type');
         if (!typeAttr || (typeAttr.value || '').toLowerCase() !== 'hidden') {
@@ -110,7 +110,7 @@ export class InTableComposer extends BaseComposer {
         this.error();
         break;
       case 'template':
-        return this.inHead(token); // TODO this actually should be inHeadEndTag
+        return this.inHead(token);
     }
     return this.insertionMode;
   }

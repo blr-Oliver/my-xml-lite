@@ -13,7 +13,6 @@ export class InFramesetComposer extends BaseComposer {
         this.error();
         break;
       case 'characters':
-        // TODO whitespace only
         this.insertDataNode(token as TextToken);
         break;
       case 'eof':
