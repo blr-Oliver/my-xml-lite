@@ -1,6 +1,7 @@
 import {TokenSink} from '../../decl/ParserEnvironment';
 import {Document, Element, isElement, Node, NodeType, ParentNode} from '../../decl/xml-lite-decl';
 import {StaticDataNode} from '../nodes/StaticDataNode';
+import {StaticDocument} from '../nodes/StaticDocument';
 import {StaticDocumentType} from '../nodes/StaticDocumentType';
 import {StaticElement} from '../nodes/StaticElement';
 import {StaticEmptyNode} from '../nodes/StaticEmptyNode';
@@ -87,6 +88,58 @@ export class BaseComposer implements TokenSink {
   }
   get adjustedCurrentNode(): Element {
     return this.openElements.length <= 1 ? (this.contextElement || this.openElements[0]) : this.openElements[this.openElements.length - 1];
+  }
+
+  reset(contextElement?: Element) {
+    this.templateInsertionModes.length = 0;
+    this.openElements.length = 0;
+    this.openCounts = {};
+    this.headElement = null;
+    this.formElement = null;
+    this.fosterParentingEnabled = false;
+    this.fosterTables.clear();
+    this.framesetOk = true;
+    this.formattingElements.length = 0;
+    this.document = new StaticDocument([], []);
+    if (!(this.contextElement = contextElement)) {
+      this.tokenizer.state = 'data';
+      this.insertionMode = 'initial';
+    } else
+      this.resetForFragmentCase(contextElement!);
+  }
+
+  resetForFragmentCase(contextElement: Element) {
+    switch (contextElement.tagName) {
+      case 'title':
+      case 'textarea':
+        this.tokenizer.state = 'rcdata';
+        break;
+      case 'style':
+      case 'xmp':
+      case 'iframe':
+      case 'noembed':
+      case 'noframes':
+        this.tokenizer.state = 'rawtext';
+        break;
+      case 'script':
+        this.tokenizer.state = 'scriptData';
+        break;
+      case 'plaintext':
+        this.tokenizer.state = 'plaintext'
+        break;
+      default:
+        this.tokenizer.state = 'data';
+    }
+    const root = this.createElementNS({type: 'startTag', name: 'html', selfClosing: false, attributes: []}, NS_HTML, this.document);
+    this.pushOpenElement(root);
+    if (contextElement.tagName === 'template')
+      this.templateInsertionModes.push('inTemplate');
+    this.resetInsertionMode();
+    for (let el: Element | null = contextElement; el; el = el.parentElement)
+      if (el.tagName === 'form') {
+        this.formElement = el;
+        break;
+      }
   }
 
   accept(token: Token) {
