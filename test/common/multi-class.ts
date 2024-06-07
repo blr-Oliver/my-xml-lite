@@ -20,9 +20,14 @@ export function combine(name: string, ...classes: Class<unknown>[]): Class<unkno
       let keys = Object.getOwnPropertyNames(classProto);
       for (let key of keys) {
         if (key === 'constructor') continue;
-        const member = classProto[key];
-        if (typeof member === 'function')
-          proto[key] = member;
+        const descriptor = Object.getOwnPropertyDescriptor(classProto, key)!;
+        if (descriptor.get || descriptor.set) {
+          Object.defineProperty(proto, key, descriptor);
+        } else {
+          const member = classProto[key];
+          if (typeof member === 'function')
+            proto[key] = member;
+        }
       }
     }
   }

@@ -363,7 +363,7 @@ export class BaseComposer implements TokenSink {
 
   /** a-ka "appropriate place for inserting a node" */
   getInsertionLocation(override?: ParentNode): InsertionLocation {
-    const target: ParentNode = override || this.current;
+    const target: ParentNode = override || this.current || this.document;
     const result: InsertionLocation = {
       parent: target
     };
