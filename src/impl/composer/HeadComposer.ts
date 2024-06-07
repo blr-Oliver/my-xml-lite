@@ -205,9 +205,9 @@ export class HeadComposer extends BaseComposer {
       case 'template':
       case 'title':
         this.error();
-        this.pushOpenElement(this.headElement);
+        this.pushOpenElement(this.headElement!);
         let result = this.inHead(token);
-        let index = this.openElements.indexOf(this.headElement);
+        let index = this.openElements.indexOf(this.headElement!);
         if (index === this.openElements.length - 1)
           this.popCurrentElement();
         else {

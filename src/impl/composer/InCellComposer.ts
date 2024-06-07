@@ -1,4 +1,3 @@
-import {Element} from '../../decl/xml-lite-decl';
 import {TagToken, Token} from '../tokens';
 import {BaseComposer, NS_HTML} from './BaseComposer';
 import {InsertionMode} from './insertion-mode';
@@ -73,7 +72,7 @@ export class InCellComposer extends BaseComposer {
 
   closeTheCell(token: Token): InsertionMode {
     this.generateImpliedEndTags();
-    const currentTagName = (this.current as Element).tagName;
+    const currentTagName = this.current.tagName;
     if (currentTagName !== 'td' && currentTagName !== 'th') {
       this.error();
       this.popUntilMatches((name, el) => name !== 'td' && name !== 'th' || el.namespaceURI !== NS_HTML);

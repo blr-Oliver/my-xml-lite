@@ -28,22 +28,21 @@ export class InSelectComposer extends BaseComposer {
   }
 
   inSelectStartTag(token: TagToken): InsertionMode {
-    const currentName = (this.current as Element).tagName;
     switch (token.name) {
       case 'html':
         return this.inBody(token);
       case 'option':
-        if (currentName === 'option') this.popCurrentElement();
+        if (this.current.tagName === 'option') this.popCurrentElement();
         this.createAndInsertHTMLElement(token);
         break;
       case 'optgroup':
-        if (currentName === 'option') this.popCurrentElement();
-        if (currentName === 'optgroup') this.popCurrentElement();
+        if (this.current.tagName === 'option') this.popCurrentElement();
+        if (this.current.tagName === 'optgroup') this.popCurrentElement();
         this.createAndInsertHTMLElement(token);
         break;
       case 'hr':
-        if (currentName === 'option') this.popCurrentElement();
-        if (currentName === 'optgroup') this.popCurrentElement();
+        if (this.current.tagName === 'option') this.popCurrentElement();
+        if (this.current.tagName === 'optgroup') this.popCurrentElement();
         this.createAndInsertEmptyHTMLElement(token);
         break;
       case 'select':
@@ -64,22 +63,21 @@ export class InSelectComposer extends BaseComposer {
   }
 
   inSelectEndTag(token: TagToken): InsertionMode {
-    const currentName = (this.current as Element).tagName;
     switch (token.name) {
       case 'optgroup':
-        if (currentName === 'option') {
+        if (this.current.tagName === 'option') {
           const previous = this.openElements.at(-2) as Element;
           if (previous && previous.tagName === 'optgroup') {
             this.popCurrentElement();
             this.popCurrentElement();
           }
-        } else if (currentName === 'optgroup')
+        } else if (this.current.tagName === 'optgroup')
           this.popCurrentElement();
         else
           this.error();
         break;
       case 'option':
-        if (currentName === 'option')
+        if (this.current.tagName === 'option')
           this.popCurrentElement();
         else
           this.error();

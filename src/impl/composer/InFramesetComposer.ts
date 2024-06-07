@@ -1,4 +1,3 @@
-import {Element} from '../../decl/xml-lite-decl';
 import {TagToken, TextToken, Token} from '../tokens';
 import {BaseComposer} from './BaseComposer';
 import {InsertionMode} from './insertion-mode';
@@ -53,7 +52,7 @@ export class InFramesetComposer extends BaseComposer {
         this.error();
       } else {
         this.popCurrentElement();
-        if (!this.isFragmentParser && (this.current as Element).tagName !== 'frameset')
+        if (!this.contextElement && this.current.tagName !== 'frameset')
           return 'afterFrameset';
       }
     } else

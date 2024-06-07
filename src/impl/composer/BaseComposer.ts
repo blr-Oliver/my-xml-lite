@@ -62,8 +62,6 @@ type InsertionLocation = {
 
 // TODO when partial composers are merged refine cross-calls where needed
 export class BaseComposer implements TokenSink {
-  isFragmentParser: boolean = false;
-
   tokenizer!: StateBasedTokenizer;
   insertionMode: InsertionMode = 'initial';
   originalInsertionMode!: InsertionMode;
@@ -75,7 +73,7 @@ export class BaseComposer implements TokenSink {
   openElements: Element[] = [];
   openCounts: { [tagName: string]: number } = {};
 
-  headElement!: Element;
+  headElement: Element | null = null;
   formElement: Element | null = null;
 
   fosterParentingEnabled: boolean = false;

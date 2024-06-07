@@ -103,7 +103,7 @@ export class InForeignContentComposer extends TokenAdjustingComposer {
         this.popUntilMatches(this.isHTMLContentRestricted);
         return this.process(token);
       default:
-        if (token.name !== (this.current as Element).tagName.toLowerCase())
+        if (token.name !== this.current.tagName.toLowerCase())
           this.error();
         for (let i = this.openElements.length - 1; i > 0; --i) {
           let node = this.openElements[i];
