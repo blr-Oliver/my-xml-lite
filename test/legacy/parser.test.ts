@@ -1,7 +1,7 @@
 import {readFileSync} from 'fs';
-import {BufferedStringSource, StringSource, UTF16NonValidatingCharacterSource, UTF8NonValidatingCharacterSource} from '../src';
-import {document, skipToSeq} from '../src/legacy/parser';
-import {stringify} from '../src/legacy/stringifier';
+import {BufferedStringSource, StringSource, UTF16NonValidatingCharacterSource, UTF8NonValidatingCharacterSource} from '../../src';
+import {document, skipToSeq} from '../../src/legacy/parser';
+import {stringify} from '../../src/legacy/stringifier';
 
 function fileStringSource(name: string): StringSource {
   const buffer = readFileSync(name);
@@ -30,7 +30,7 @@ function fileBasedTest(inFile: string, outFile: string) {
 }
 
 describe('parse-stringify cycle', function () {
-  const samplesRoot = './test/samples/';
+  const samplesRoot = './test/legacy/samples/';
   function standardCase(name: string) {
     test(name, () => {
       fileBasedTest(`${samplesRoot}${name}.in.xml`, `${samplesRoot}${name}.out.xml`);
