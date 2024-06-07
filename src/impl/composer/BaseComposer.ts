@@ -130,7 +130,7 @@ export class BaseComposer implements TokenSink {
       default:
         this.tokenizer.state = 'data';
     }
-    const root = this.createElementNS({type: 'startTag', name: 'html', selfClosing: false, attributes: []}, NS_HTML, this.document);
+    const root = this.createElementNS({type: 'startTag', name: 'html', selfClosed: false, attributes: []}, NS_HTML, this.document);
     this.pushOpenElement(root);
     if (contextElement.tagName === 'template')
       this.templateInsertionModes.push('inTemplate');
@@ -336,7 +336,7 @@ export class BaseComposer implements TokenSink {
     this.createAndInsertHTMLElement({
       type: 'startTag',
       name: element,
-      selfClosing: false,
+      selfClosed: false,
       attributes: []
     } as TagToken);
     return this.reprocessIn(state, token);
@@ -410,6 +410,9 @@ export class BaseComposer implements TokenSink {
   /** a-ka "insert a foreign element" */
   createAndInsertElementNS(token: TagToken, namespace: string | null, popImmediately: boolean, onlyAddToStack: boolean = false): Element {
     let location = this.getInsertionLocation();
+    if (!popImmediately && token.selfClosed)
+      this.error();
+    token.selfClosed = popImmediately;
     let element = this.createElementNS(token, namespace, location.parent);
     if (!onlyAddToStack)
       this.insertElementAtLocation(element, location);

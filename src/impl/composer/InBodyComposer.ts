@@ -289,13 +289,13 @@ export class InBodyComposer extends TokenAdjustingComposer {
         this.reconstructFormattingElements();
         this.adjustMathMLAttributes(token);
         this.adjustForeignAttributes(token);
-        this.createAndInsertElementNS(token, NS_MATHML, token.selfClosing, false);
+        this.createAndInsertElementNS(token, NS_MATHML, token.selfClosed, false);
         break;
       case 'svg':
         this.reconstructFormattingElements();
         this.adjustSvgAttributes(token);
         this.adjustForeignAttributes(token);
-        this.createAndInsertElementNS(token, NS_SVG, token.selfClosing, false);
+        this.createAndInsertElementNS(token, NS_SVG, token.selfClosed, false);
         break;
       case 'caption':
       case 'col':
@@ -371,7 +371,7 @@ export class InBodyComposer extends TokenAdjustingComposer {
       case 'p':
         if (!this.hasElementInButtonScope('p')) {
           this.error();
-          this.createAndInsertHTMLElement({type: 'startTag', name: 'p', selfClosing: false, attributes: []});
+          this.createAndInsertHTMLElement({type: 'startTag', name: 'p', selfClosed: false, attributes: []});
         }
         this.closeParagraph();
         break;
@@ -446,7 +446,7 @@ export class InBodyComposer extends TokenAdjustingComposer {
         this.clearFormattingUpToMarker();
         break;
       case 'br':
-        return this.inBodyStartTag({type: 'startTag', name: 'br', selfClosing: false, attributes: []});
+        return this.inBodyStartTag({type: 'startTag', name: 'br', selfClosed: false, attributes: []});
       default:
         return this.inBodyEndTagDefault(token);
     }

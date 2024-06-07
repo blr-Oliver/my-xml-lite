@@ -86,7 +86,7 @@ export class BeforeHeadComposer extends BaseComposer {
     this.headElement = this.createAndInsertHTMLElement({
       type: 'startTag',
       name: 'head',
-      selfClosing: false,
+      selfClosed: false,
       attributes: []
     } as TagToken);
     return this.reprocessIn('inHead', token);

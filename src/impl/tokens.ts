@@ -26,7 +26,7 @@ export interface NamespacedAttribute extends Attribute {
 export interface TagToken extends Token {
   type: 'startTag' | 'endTag';
   name: string;
-  selfClosing: boolean;
+  selfClosed: boolean;
   attributes: Attribute[];
 }
 

@@ -142,7 +142,7 @@ function suite() {
         const token = tokenList[0] as TagToken;
         expect(token.name).toStrictEqual(expectedTagName);
         expect(token.type).toStrictEqual(expectedIsStart ? 'startTag' : 'endTag');
-        expect(token.selfClosing).toStrictEqual(expectedSelfClosing);
+        expect(token.selfClosed).toStrictEqual(expectedSelfClosing);
         expect(token.attributes).toHaveLength(expectedAttributes.length);
         for (let i = 0; i < expectedAttributes.length; ++i) {
           const expectedAttribute = expectedAttributes[i];

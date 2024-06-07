@@ -91,7 +91,7 @@ export class InForeignContentComposer extends TokenAdjustingComposer {
       this.adjustSvgAttributes(token);
     }
     this.adjustForeignAttributes(token);
-    this.createAndInsertElementNS(token, adjustedNode.namespaceURI, token.selfClosing);
+    this.createAndInsertElementNS(token, adjustedNode.namespaceURI, token.selfClosed);
     return this.insertionMode;
   }
 

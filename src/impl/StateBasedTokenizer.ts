@@ -186,7 +186,7 @@ export class StateBasedTokenizer implements IStateBasedTokenizer {
     this.currentTag = {
       name,
       type: 'startTag',
-      selfClosing: false,
+      selfClosed: false,
       attributes: []
     };
     this.currentAttributeNames = {};
@@ -741,7 +741,7 @@ export class StateBasedTokenizer implements IStateBasedTokenizer {
   selfClosingStartTag(code: number): State {
     switch (code) {
       case CodePoints.GT:
-        this.currentTag.selfClosing = true;
+        this.currentTag.selfClosed = true;
         this.emitCurrentTag();
         return 'data';
       case CodePoints.EOF:

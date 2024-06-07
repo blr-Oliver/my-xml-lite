@@ -33,7 +33,7 @@ export class StaticElement extends StaticParentNode implements Element {
     this.classList = new StaticTokenList(this.className);
     this.prefix = null;
     this.tagName = this.localName = tag.name;
-    this.selfClosed = tag.selfClosing;
+    this.selfClosed = tag.selfClosed;
     this.parentElementIndex = parentNode.childElementCount;
   }
 
