@@ -5,10 +5,6 @@ import {InsertionMode} from './insertion-mode';
 export class BeforeHeadComposer extends BaseComposer {
   initial(token: Token): InsertionMode {
     switch (token.type) {
-      case 'characters':
-        if (!(token as CharactersToken).whitespaceOnly)
-          return this.reprocessIn('beforeHtml', token);
-        return this.insertionMode;
       case 'comment':
         this.insertDataNode(token as TextToken);
         return 'initial';
@@ -16,6 +12,8 @@ export class BeforeHeadComposer extends BaseComposer {
         this.insertDoctype(token as DoctypeToken);
         return 'beforeHtml';
       default:
+        //whitespace is ignored on tokenizer level
+        this.error('missing-doctype');
         return this.reprocessIn('beforeHtml', token);
     }
   }

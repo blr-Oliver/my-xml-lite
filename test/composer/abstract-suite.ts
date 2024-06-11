@@ -4,19 +4,15 @@ import {HTML_SPECIAL} from '../../src/decl/known-named-refs';
 import {ParserEnvironment} from '../../src/decl/ParserEnvironment';
 import {buildIndex} from '../../src/impl/build-index';
 import {BaseComposer} from '../../src/impl/composer/BaseComposer';
-import {TokenAdjustingComposer} from '../../src/impl/composer/TokenAdjustingComposer';
 import {FixedSizeStringBuilder} from '../../src/impl/FixedSizeStringBuilder';
 import {serialize} from '../../src/impl/Serializer';
 import {StateBasedTokenizer} from '../../src/impl/StateBasedTokenizer';
-import {Class, combine} from '../common/multi-class';
-
-export type AbstractComposer = BaseComposer & TokenAdjustingComposer;
 
 export interface TestCase {
   name: string;
 }
 
-export abstract class AbstractSuite<C extends AbstractComposer, R, T extends TestCase> {
+export abstract class AbstractSuite<C extends BaseComposer, R, T extends TestCase> {
   testCases: R[];
   errorList: string[];
   tokenizer!: StateBasedTokenizer;
@@ -28,17 +24,12 @@ export abstract class AbstractSuite<C extends AbstractComposer, R, T extends Tes
   }
 
   beforeAll() {
-    const AbstractComposer = combine('AbstractComposer',
-        BaseComposer as Class<BaseComposer>,
-        TokenAdjustingComposer as Class<TokenAdjustingComposer>
-    );
-
-    this.composer = this.createComposer(AbstractComposer);
+    this.composer = this.createComposer();
     this.tokenizer = this.createTokenizer();
     this.configure();
   }
 
-  abstract createComposer(baseClass: Class<AbstractComposer>): C;
+  abstract createComposer(): C;
 
   createTokenizer(): StateBasedTokenizer {
     return new StateBasedTokenizer(buildIndex(HTML_SPECIAL));
@@ -88,7 +79,7 @@ export interface DefaultTestCase extends TestCase {
   errors: string[];
 }
 
-export abstract class DefaultSuite<C extends AbstractComposer, R, T extends DefaultTestCase = DefaultTestCase> extends AbstractSuite<C, R, T> {
+export abstract class DefaultSuite<C extends BaseComposer, R, T extends DefaultTestCase = DefaultTestCase> extends AbstractSuite<C, R, T> {
   protected constructor(testCases: R[]) {
     super(testCases);
   }

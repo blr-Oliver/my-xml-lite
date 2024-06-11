@@ -64,7 +64,7 @@ type InsertionLocation = {
 // TODO when partial composers are merged refine cross-calls where needed
 export class BaseComposer implements TokenSink {
   tokenizer!: StateBasedTokenizer;
-  insertionMode: InsertionMode = 'initial';
+  insertionMode!: InsertionMode;
   originalInsertionMode!: InsertionMode;
   templateInsertionModes: InsertionMode[] = [];
 
@@ -103,7 +103,7 @@ export class BaseComposer implements TokenSink {
     this.document = new StaticDocument([], []);
     if (!(this.contextElement = contextElement)) {
       this.tokenizer.state = 'data';
-      this.insertionMode = 'initial';
+      this.setInsertionMode('initial');
     } else
       this.resetForFragmentCase(contextElement!);
   }
@@ -174,8 +174,7 @@ export class BaseComposer implements TokenSink {
 
   reprocessIn(mode: InsertionMode, token: Token): InsertionMode {
     this.setInsertionMode(mode);
-    // @ts-ignore
-    return this[mode](token);
+    return this.process(token);
   }
 
   setInsertionMode(value: InsertionMode) {
@@ -491,7 +490,8 @@ export class BaseComposer implements TokenSink {
     return this.insertionMode;
   }
 
-  error() { // TODO
+  error(error?: string) { // TODO
+    this.tokenizer.env.errors.push(error || 'error');
   }
 
   closeParagraph() {
