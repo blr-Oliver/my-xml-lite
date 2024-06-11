@@ -58,6 +58,10 @@ export class BeforeHeadComposer extends BaseComposer {
   beforeHead(token: Token): InsertionMode {
     let tagToken = token as TagToken;
     switch (token.type) {
+      case 'characters':
+        if (!(token as CharactersToken).whitespaceOnly)
+          return this.forceHead(token);
+        break;
       case 'comment':
         this.insertDataNode(token as TextToken);
         break;
@@ -84,6 +88,9 @@ export class BeforeHeadComposer extends BaseComposer {
           default:
             this.error();
         }
+        break;
+      default:
+        return this.forceHead(token)
     }
     return this.insertionMode;
   }

@@ -1,3 +1,21 @@
 [
-  ["space only", " \n\f\r\t", "", "initial", []]
+  ["space", " \n\f\r\t", "", "initial", []],
+  ["comment", "<!--A-->", "<!--A-->", "initial", []],
+  ["comment + comment", "<!--A--><!--B-->", "<!--A--><!--B-->", "initial", []],
+  ["comment + space + comment", "<!--A--> \n\f\n\t<!--B-->", "<!--A--><!--B-->", "initial", []],
+  ["doctype", "<!DOCTYPE html>", "<!DOCTYPE html>", "beforeHtml", []],
+  ["space + doctype", " \n\f\n\t<!DOCTYPE html>", "<!DOCTYPE html>", "beforeHtml", []],
+  ["comment + doctype", "<!--A--><!DOCTYPE html>", "<!--A--><!DOCTYPE html>", "beforeHtml", []],
+  ["non-whitespace", "A", "<html><head></head><body>A</body></html>", "inBody", []],
+  ["mixed characters", " A  B   ", "<html><head></head><body> A  B   </body></html>", "inBody", []],
+  ["html start tag", "<html>", "<html></html>", "beforeHead", []],
+  ["head start tag", "<head>", "<html><head></head></html>", "inHead", []],
+  ["body start tag", "<body>", "<html><head></head><body></body></html>", "inBody", []],
+  ["br start tag", "<br>", "<html><head></head><body><br/></body></html>", "inBody", []],
+  ["any start tag", "<tag>", "<html><head></head><body><tag></tag></body></html>", "inBody", []],
+  ["html end tag", "</html>", "<html><head></head><body></body></html>", "afterAfterBody", []],
+  ["head end tag", "</head>", "<html><head></head></html>", "afterHead", []],
+  ["body end tag", "</body>", "<html><head></head><body></body></html>", "afterBody", []],
+  ["br end tag", "</br>", "<html><head></head><body><br/></body></html>", "inBody", []],
+  ["any end tag", "</tag>", "", "beforeHtml", []]
 ]

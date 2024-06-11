@@ -4,26 +4,23 @@ import {HTML_SPECIAL} from '../../src/decl/known-named-refs';
 import {ParserEnvironment} from '../../src/decl/ParserEnvironment';
 import {buildIndex} from '../../src/impl/build-index';
 import {BaseComposer} from '../../src/impl/composer/BaseComposer';
-import {BeforeHeadComposer} from '../../src/impl/composer/BeforeHeadComposer';
-import {HeadComposer} from '../../src/impl/composer/HeadComposer';
-import {InBodyComposer} from '../../src/impl/composer/InBodyComposer';
 import {TokenAdjustingComposer} from '../../src/impl/composer/TokenAdjustingComposer';
 import {FixedSizeStringBuilder} from '../../src/impl/FixedSizeStringBuilder';
 import {serialize} from '../../src/impl/Serializer';
 import {StateBasedTokenizer} from '../../src/impl/StateBasedTokenizer';
 import {Class, combine} from '../common/multi-class';
 
-export type Composer = BaseComposer & TokenAdjustingComposer & HeadComposer & BeforeHeadComposer & InBodyComposer;
+export type AbstractComposer = BaseComposer & TokenAdjustingComposer;
 
 export interface TestCase {
   name: string;
 }
 
-export abstract class AbstractSuite<R, T extends TestCase> {
+export abstract class AbstractSuite<C extends AbstractComposer, R, T extends TestCase> {
   testCases: R[];
   errorList: string[];
   tokenizer!: StateBasedTokenizer;
-  composer!: Composer;
+  composer!: C;
 
   protected constructor(testCases: R[]) {
     this.testCases = testCases;
@@ -31,22 +28,17 @@ export abstract class AbstractSuite<R, T extends TestCase> {
   }
 
   beforeAll() {
-    const TestComposer = combine('TestComposer',
+    const AbstractComposer = combine('AbstractComposer',
         BaseComposer as Class<BaseComposer>,
-        TokenAdjustingComposer as Class<TokenAdjustingComposer>,
-        BeforeHeadComposer as Class<BeforeHeadComposer>,
-        HeadComposer as Class<HeadComposer>,
-        InBodyComposer as Class<InBodyComposer>
+        TokenAdjustingComposer as Class<TokenAdjustingComposer>
     );
 
-    this.composer = this.createComposer(TestComposer);
+    this.composer = this.createComposer(AbstractComposer);
     this.tokenizer = this.createTokenizer();
     this.configure();
   }
 
-  createComposer(baseClass: Class<Composer>): Composer {
-    return new baseClass();
-  }
+  abstract createComposer(baseClass: Class<AbstractComposer>): C;
 
   createTokenizer(): StateBasedTokenizer {
     return new StateBasedTokenizer(buildIndex(HTML_SPECIAL));
@@ -96,7 +88,7 @@ export interface DefaultTestCase extends TestCase {
   errors: string[];
 }
 
-export abstract class DefaultSuite<R, T extends DefaultTestCase = DefaultTestCase> extends AbstractSuite<R, T> {
+export abstract class DefaultSuite<C extends AbstractComposer, R, T extends DefaultTestCase = DefaultTestCase> extends AbstractSuite<C, R, T> {
   protected constructor(testCases: R[]) {
     super(testCases);
   }
