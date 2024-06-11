@@ -115,14 +115,16 @@ export abstract class ArrayCharacterSource<T extends ArrayLike<number>> implemen
   }
 }
 
-export class DirectCharacterSource extends ArrayCharacterSource<Uint16Array> implements StringSource {
+export type DirectSourceBase = Uint16Array | Uint32Array | Int16Array | Int32Array;
+
+export class DirectCharacterSource<D extends DirectSourceBase = Uint16Array> extends ArrayCharacterSource<D> implements StringSource {
   protected mark: number = 0;
 
-  constructor(data?: Uint16Array, limit?: number, offset?: number) {
+  constructor(data?: D, limit?: number, offset?: number) {
     super(data, limit, offset);
   }
 
-  getData(): Uint16Array {
+  getData(): D {
     return this.data;
   }
   getLimit(): number {

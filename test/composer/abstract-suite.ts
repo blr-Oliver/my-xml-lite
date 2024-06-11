@@ -12,25 +12,26 @@ import {FixedSizeStringBuilder} from '../../src/impl/FixedSizeStringBuilder';
 import {serialize} from '../../src/impl/Serializer';
 import {StateBasedTokenizer} from '../../src/impl/StateBasedTokenizer';
 import {Class, combine} from '../common/multi-class';
-import {default as rawTests} from './samples/basic.json';
 
-type Composer = BaseComposer & TokenAdjustingComposer & InBodyComposer & HeadComposer & InBodyComposer;
-type TestCase = [string/*name*/, string/*input*/, string/*output*/, string[]/*errors*/];
-const testCases = rawTests as TestCase[];
+export type Composer = BaseComposer & TokenAdjustingComposer & HeadComposer & BeforeHeadComposer & InBodyComposer;
 
-class Suite {
-  testCases: TestCase[];
+export interface TestCase {
+  name: string;
+}
+
+export abstract class AbstractSuite<R, T extends TestCase> {
+  testCases: R[];
   errorList: string[];
   tokenizer!: StateBasedTokenizer;
   composer!: Composer;
 
-  constructor(testCases: TestCase[]) {
+  protected constructor(testCases: R[]) {
     this.testCases = testCases;
     this.errorList = [];
   }
 
   beforeAll() {
-    const SyntheticComposer = combine('SyntheticComposer',
+    const TestComposer = combine('TestComposer',
         BaseComposer as Class<BaseComposer>,
         TokenAdjustingComposer as Class<TokenAdjustingComposer>,
         BeforeHeadComposer as Class<BeforeHeadComposer>,
@@ -38,14 +39,20 @@ class Suite {
         InBodyComposer as Class<InBodyComposer>
     );
 
-    class TestComposer extends SyntheticComposer {
-      constructor() {
-        super();
-      }
-    }
+    this.composer = this.createComposer(TestComposer);
+    this.tokenizer = this.createTokenizer();
+    this.configure();
+  }
 
-    this.composer = new TestComposer();
-    this.tokenizer = new StateBasedTokenizer(buildIndex(HTML_SPECIAL));
+  createComposer(baseClass: Class<Composer>): Composer {
+    return new baseClass();
+  }
+
+  createTokenizer(): StateBasedTokenizer {
+    return new StateBasedTokenizer(buildIndex(HTML_SPECIAL));
+  }
+
+  configure() {
     this.composer.tokenizer = this.tokenizer;
     this.tokenizer.composer = this.composer;
 
@@ -69,32 +76,54 @@ class Suite {
     this.composer.reset();
   }
 
-  processInput(input: string) {
-    const newInput = new DirectCharacterSource(new Uint16Array(stringToArray(input)));
-    // @ts-ignore
-    this.tokenizer.env.input = newInput;
-    this.tokenizer.proceed();
+  abstract prepareTest(rawTest: R): T;
+  abstract runTest(test: T): void;
+
+  createSuite() {
+    for (let test of this.testCases) {
+      this.createTest(this.prepareTest(test));
+    }
   }
 
-  createTest(test: TestCase) {
-    const [name, input, expectedOutput, expectedErrors] = test;
-    it(name, () => {
-      this.processInput(input);
-      expect(this.tokenizer.state).toStrictEqual('eof');
-      const document = this.composer.document;
-      expect(document).toBeDefined();
-      const output = serialize(document);
-      expect(output).toStrictEqual(expectedOutput);
-      expect(this.errorList).toStrictEqual(expectedErrors);
-    });
+  createTest(test: T) {
+    it(test.name, () => this.runTest(test));
   }
 }
 
-const suite = new Suite(testCases);
+export interface DefaultTestCase extends TestCase {
+  input: string;
+  output: string;
+  errors: string[];
+}
 
-beforeAll(() => suite.beforeAll());
-beforeEach(() => suite.beforeEach());
-describe('Basic tests', () => {
-  for (let test of suite.testCases)
-    suite.createTest(test);
-})
+export abstract class DefaultSuite<R, T extends DefaultTestCase = DefaultTestCase> extends AbstractSuite<R, T> {
+  protected constructor(testCases: R[]) {
+    super(testCases);
+  }
+
+  createSource(input: string) {
+    return new DirectCharacterSource(new Int32Array(stringToArray(input)));
+  }
+
+  processInput(test: T) {
+    const source = this.createSource(test.input);
+    // @ts-ignore
+    this.tokenizer.env.input = source;
+    this.tokenizer.proceed();
+  }
+
+  runTest(test: T) {
+    this.processInput(test);
+    this.runChecks(test);
+  }
+
+  runChecks(test: T) {
+    const {output: expectedOutput, errors: expectedErrors} = test;
+    expect(this.tokenizer.state).toStrictEqual('eof');
+    const document = this.composer.document;
+    expect(document).toBeDefined();
+    const output = serialize(document);
+    expect(output).toStrictEqual(expectedOutput);
+    expect(this.errorList).toStrictEqual(expectedErrors);
+  }
+}

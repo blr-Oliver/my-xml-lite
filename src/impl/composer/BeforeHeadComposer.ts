@@ -1,10 +1,14 @@
-import {DoctypeToken, TagToken, TextToken, Token} from '../tokens';
+import {CharactersToken, DoctypeToken, TagToken, TextToken, Token} from '../tokens';
 import {BaseComposer} from './BaseComposer';
 import {InsertionMode} from './insertion-mode';
 
 export class BeforeHeadComposer extends BaseComposer {
   initial(token: Token): InsertionMode {
     switch (token.type) {
+      case 'characters':
+        if (!(token as CharactersToken).whitespaceOnly)
+          return this.reprocessIn('beforeHtml', token);
+        return this.insertionMode;
       case 'comment':
         this.insertDataNode(token as TextToken);
         return 'initial';
@@ -17,7 +21,6 @@ export class BeforeHeadComposer extends BaseComposer {
   }
 
   beforeHtml(token: Token): InsertionMode {
-    let tagToken: TagToken;
     switch (token.type) {
       case 'comment':
         this.insertDataNode(token as TextToken);
@@ -26,26 +29,29 @@ export class BeforeHeadComposer extends BaseComposer {
         this.error();
         return 'beforeHtml';
       case 'startTag':
-        tagToken = token as TagToken;
+        const tagToken = token as TagToken;
         if (tagToken.name === 'html') {
           this.createAndInsertHTMLElement(tagToken);
           return 'beforeHead';
         }
         return this.forceElementAndState('html', 'beforeHead', token);
       case 'endTag':
-        tagToken = token as TagToken;
-        switch (tagToken.name) {
-          case 'head':
-          case 'body':
-          case 'html':
-          case 'br':
-            return this.forceElementAndState('html', 'beforeHead', token);
-          default:
-            this.error();
-            return 'beforeHtml';
-        }
+        return this.beforeHtmlEndTag(token as TagToken);
       default:
         return this.forceElementAndState('html', 'beforeHead', token);
+    }
+  }
+
+  beforeHtmlEndTag(token: TagToken): InsertionMode {
+    switch (token.name) {
+      case 'head':
+      case 'body':
+      case 'html':
+      case 'br':
+        return this.forceElementAndState('html', 'beforeHead', token);
+      default:
+        this.error();
+        return 'beforeHtml';
     }
   }
 

@@ -179,6 +179,7 @@ export class BaseComposer implements TokenSink {
   }
 
   setInsertionMode(value: InsertionMode) {
+    if (this.insertionMode === value) return;
     switch (this.insertionMode = value) {
       case 'initial':
       case 'beforeHtml':
