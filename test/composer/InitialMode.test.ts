@@ -1,12 +1,6 @@
-import {AfterBodyComposer} from '../../src/impl/composer/AfterBodyComposer';
-import {BaseComposer} from '../../src/impl/composer/BaseComposer';
-import {BeforeHeadComposer} from '../../src/impl/composer/BeforeHeadComposer';
-import {HeadComposer} from '../../src/impl/composer/HeadComposer';
-import {InBodyComposer} from '../../src/impl/composer/InBodyComposer';
 import {InsertionMode} from '../../src/impl/composer/insertion-mode';
-import {TokenAdjustingComposer} from '../../src/impl/composer/TokenAdjustingComposer';
+import {CompositeComposer} from '../../src/impl/composite-composer';
 import {Token} from '../../src/impl/tokens';
-import {Class, combine} from '../common/multi-class';
 import {DefaultSuite, DefaultTestCase} from './abstract-suite';
 import {default as rawTests} from './samples/initial.json';
 
@@ -17,16 +11,7 @@ interface FinalModeTest extends DefaultTestCase {
   extra: number;
 }
 
-const TestComposer = combine('TestComposer',
-    BaseComposer as Class<BaseComposer>,
-    TokenAdjustingComposer as Class<TokenAdjustingComposer>,
-    BeforeHeadComposer as Class<BeforeHeadComposer>,
-    HeadComposer as Class<HeadComposer>,
-    InBodyComposer as Class<InBodyComposer>,
-    AfterBodyComposer as Class<AfterBodyComposer>
-);
-
-class SingleModeComposer extends TestComposer {
+class SingleModeComposer extends CompositeComposer {
   readonly focusMode: InsertionMode;
   readonly extraTokens: Token[];
 
@@ -38,7 +23,7 @@ class SingleModeComposer extends TestComposer {
 
   process(token: Token): InsertionMode {
     if (token.type === 'eof') return this.insertionMode;
-    if (this.insertionMode !== 'initial') {
+    if (this.insertionMode !== this.focusMode) {
       this.extraTokens.push(token);
       return this.insertionMode;
     }

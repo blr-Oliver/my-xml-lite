@@ -3,7 +3,7 @@ import {DirectCharacterSource} from '../../src/common/stream-source';
 import {HTML_SPECIAL} from '../../src/decl/known-named-refs';
 import {ParserEnvironment} from '../../src/decl/ParserEnvironment';
 import {buildIndex} from '../../src/impl/build-index';
-import {BaseComposer} from '../../src/impl/composer/BaseComposer';
+import {CompositeComposer} from '../../src/impl/composite-composer';
 import {FixedSizeStringBuilder} from '../../src/impl/FixedSizeStringBuilder';
 import {serialize} from '../../src/impl/Serializer';
 import {StateBasedTokenizer} from '../../src/impl/StateBasedTokenizer';
@@ -12,7 +12,7 @@ export interface TestCase {
   name: string;
 }
 
-export abstract class AbstractSuite<C extends BaseComposer, R, T extends TestCase> {
+export abstract class AbstractSuite<C extends CompositeComposer, R, T extends TestCase> {
   testCases: R[];
   errorList: string[];
   tokenizer!: StateBasedTokenizer;
@@ -79,7 +79,7 @@ export interface DefaultTestCase extends TestCase {
   errors: string[];
 }
 
-export abstract class DefaultSuite<C extends BaseComposer, R, T extends DefaultTestCase = DefaultTestCase> extends AbstractSuite<C, R, T> {
+export abstract class DefaultSuite<C extends CompositeComposer, R, T extends DefaultTestCase = DefaultTestCase> extends AbstractSuite<C, R, T> {
   protected constructor(testCases: R[]) {
     super(testCases);
   }
