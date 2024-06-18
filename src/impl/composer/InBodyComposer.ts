@@ -2,7 +2,7 @@ import {Element} from '../../decl/xml-lite-decl';
 import {StaticAttr} from '../nodes/StaticAttr';
 import {StaticAttributes} from '../nodes/StaticAttributes';
 import {StaticElement} from '../nodes/StaticElement';
-import {CharactersToken, TagToken, TextToken, Token} from '../tokens';
+import {CharactersToken, CommentToken, TagToken, Token} from '../tokens';
 import {NS_HTML, NS_MATHML, NS_SVG} from './BaseComposer';
 import {InsertionMode} from './insertion-mode';
 import {TokenAdjustingComposer} from './TokenAdjustingComposer';
@@ -11,21 +11,21 @@ export class InBodyComposer extends TokenAdjustingComposer {
   inBody(token: Token): InsertionMode {
     switch (token.type) {
       case 'comment':
-        this.insertDataNode(token as TextToken);
+        this.insertComment(token as CommentToken);
         break;
       case 'doctype':
         this.error();
         break;
       case 'characters':
         this.reconstructFormattingElements();
-        this.insertDataNode(token as CharactersToken);
+        this.insertCharacters(token as CharactersToken);
         this.framesetOk &&= (token as CharactersToken).whitespaceOnly;
         break;
       case 'eof':
         if (this.templateInsertionModes.length) return this.inTemplate(token);
         else {
           if (this.hasExplicitlyClosableOnStack())
-            this.error();
+            this.error('abrupt-end-of-document');
           return this.stopParsing();
         }
       case 'startTag':
@@ -360,10 +360,10 @@ export class InBodyComposer extends TokenAdjustingComposer {
         if (this.hasElementInScope(token.name)) {
           this.generateImpliedEndTags();
           if (this.current.tagName !== token.name)
-            this.error();
+            this.error('misnested-end-tag');
           this.popUntilName(token.name);
         } else
-          this.error();
+          this.error('orphan-end-tag');
         break;
       case 'form':
         this.inBodyEndTagForm();
@@ -500,12 +500,12 @@ export class InBodyComposer extends TokenAdjustingComposer {
       if (token.name === node.tagName && node.namespaceURI === NS_HTML) {
         this.generateImpliedEndTags(token.name);
         if (this.current !== node)
-          this.error();
+          this.error('misnested-end-tag');
         while (this.openElements.length > i)
           this.popCurrentElement();
         break;
       } else if (this.isSpecial(node)) {
-        this.error();
+        this.error('orphan-end-tag-inside-special-element');
         break;
       }
     }

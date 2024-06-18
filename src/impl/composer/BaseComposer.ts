@@ -1,5 +1,5 @@
 import {TokenSink} from '../../decl/ParserEnvironment';
-import {Document, Element, isElement, Node, NodeType, ParentNode} from '../../decl/xml-lite-decl';
+import {Document, Element, isDocument, isElement, Node, NodeType, ParentNode} from '../../decl/xml-lite-decl';
 import {StaticDataNode} from '../nodes/StaticDataNode';
 import {StaticDocument} from '../nodes/StaticDocument';
 import {StaticDocumentType} from '../nodes/StaticDocumentType';
@@ -8,7 +8,7 @@ import {StaticEmptyNode} from '../nodes/StaticEmptyNode';
 import {StaticParentNode} from '../nodes/StaticParentNode';
 import {StateBasedTokenizer} from '../StateBasedTokenizer';
 import {State} from '../states';
-import {DoctypeToken, TagToken, TextToken, Token} from '../tokens';
+import {CharactersToken, CommentToken, DoctypeToken, TagToken, TextToken, Token} from '../tokens';
 import {InsertionMode} from './insertion-mode';
 
 /*
@@ -271,6 +271,23 @@ export class BaseComposer implements TokenSink {
     throw new Error('Malformed inheritance');
   }
 
+  text(token: Token): InsertionMode {
+    switch (token.type) {
+      case 'characters':
+      case 'cdata':
+        this.insertCharacters(token as CharactersToken);
+        break;
+      case 'eof':
+        this.error('abrupt-end-of-document-in-text');
+        this.popCurrentElement();
+        return this.reprocessIn(this.originalInsertionMode, token);
+      case 'endTag':
+        this.popCurrentElement();
+        return this.originalInsertionMode;
+    }
+    return this.insertionMode;
+  }
+
   inForeignContent(token: Token): InsertionMode {
     throw new Error('Malformed inheritance');
   }
@@ -312,6 +329,20 @@ export class BaseComposer implements TokenSink {
   protected insertDoctype(doctypeToken: DoctypeToken) {
     const documentType = new StaticDocumentType(this.document, doctypeToken.name ?? 'html', doctypeToken.publicId ?? '', doctypeToken.systemId ?? '');
     this.push(this.document.childNodes, documentType);
+  }
+
+  protected insertComment(token: CommentToken, override?: ParentNode) {
+    const location = this.getInsertionLocation(override);
+    const node = new StaticDataNode(TokenTypeMapping[token.type], location.parent, token.data);
+    this.insertNodeAtLocation(node, location);
+  }
+
+  protected insertCharacters(token: CharactersToken) {
+    const location = this.getInsertionLocation();
+    if (!isDocument(location.parent)) {
+      const node = new StaticDataNode(TokenTypeMapping[token.type], location.parent, token.data);
+      this.insertNodeAtLocation(node, location);
+    }
   }
 
   protected insertDataNode(token: TextToken) {
@@ -393,7 +424,7 @@ export class BaseComposer implements TokenSink {
     return result;
   }
 
-  insertElementAtLocation(node: Node, location: InsertionLocation) {
+  insertNodeAtLocation(node: Node, location: InsertionLocation) {
     const {parent, before} = location;
     // TODO is it whenever a case when insertion is not possible?
     if (!before) {
@@ -411,11 +442,11 @@ export class BaseComposer implements TokenSink {
   createAndInsertElementNS(token: TagToken, namespace: string | null, popImmediately: boolean, onlyAddToStack: boolean = false): Element {
     let location = this.getInsertionLocation();
     if (!popImmediately && token.selfClosed)
-      this.error();
+      this.error('non-void-html-element-start-tag-with-trailing-solidus');
     token.selfClosed = popImmediately;
     let element = this.createElementNS(token, namespace, location.parent);
     if (!onlyAddToStack)
-      this.insertElementAtLocation(element, location);
+      this.insertNodeAtLocation(element, location);
     if (!popImmediately)
       this.pushOpenElement(element);
     return element;

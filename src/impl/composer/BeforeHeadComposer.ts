@@ -1,4 +1,4 @@
-import {CharactersToken, DoctypeToken, TagToken, TextToken, Token} from '../tokens';
+import {CharactersToken, CommentToken, DoctypeToken, TagToken, Token} from '../tokens';
 import {BaseComposer} from './BaseComposer';
 import {InsertionMode} from './insertion-mode';
 
@@ -6,10 +6,11 @@ export class BeforeHeadComposer extends BaseComposer {
   initial(token: Token): InsertionMode {
     switch (token.type) {
       case 'comment':
-        this.insertDataNode(token as TextToken);
+        this.insertComment(token as CommentToken);
         return 'initial';
       case 'doctype':
         this.insertDoctype(token as DoctypeToken);
+        // TODO set doctype of current document
         return 'beforeHtml';
       default:
         //whitespace is ignored on tokenizer level
@@ -21,7 +22,7 @@ export class BeforeHeadComposer extends BaseComposer {
   beforeHtml(token: Token): InsertionMode {
     switch (token.type) {
       case 'comment':
-        this.insertDataNode(token as TextToken);
+        this.insertComment(token as CommentToken);
         return 'beforeHtml';
       case 'doctype':
         this.error();
@@ -61,7 +62,7 @@ export class BeforeHeadComposer extends BaseComposer {
           return this.forceHead(token);
         break;
       case 'comment':
-        this.insertDataNode(token as TextToken);
+        this.insertComment(token as CommentToken);
         break;
       case 'doctype':
         this.error();

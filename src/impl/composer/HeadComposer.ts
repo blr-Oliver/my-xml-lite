@@ -1,4 +1,4 @@
-import {CharactersToken, TagToken, TextToken, Token} from '../tokens';
+import {CharactersToken, CommentToken, TagToken, Token} from '../tokens';
 import {BaseComposer} from './BaseComposer';
 import {InsertionMode} from './insertion-mode';
 
@@ -8,7 +8,7 @@ export class HeadComposer extends BaseComposer {
       case 'characters':
         return this.inHeadCharacters(token as CharactersToken);
       case 'comment':
-        this.insertDataNode(token as TextToken);
+        this.insertComment(token as CommentToken);
         break;
       case 'doctype':
         this.error();
@@ -25,7 +25,7 @@ export class HeadComposer extends BaseComposer {
 
   inHeadCharacters(token: CharactersToken): InsertionMode {
     if (token.whitespaceOnly) {
-      this.insertDataNode(token);
+      this.insertCharacters(token);
       return this.insertionMode;
     }
     return this.inHeadDefault(token);
@@ -92,7 +92,7 @@ export class HeadComposer extends BaseComposer {
     let tagToken: TagToken;
     switch (token.type) {
       case 'comment':
-        this.insertDataNode(token as TextToken);
+        this.insertComment(token as CommentToken);
         break;
       case 'doctype':
         this.error();
@@ -140,7 +140,7 @@ export class HeadComposer extends BaseComposer {
 
   inHeadNoscriptCharacters(token: CharactersToken): InsertionMode {
     if (token.whitespaceOnly) {
-      this.insertDataNode(token);
+      this.insertCharacters(token);
       return this.insertionMode;
     }
     return this.escapeInHeadNoscript(token);
@@ -155,7 +155,7 @@ export class HeadComposer extends BaseComposer {
   afterHead(token: Token): InsertionMode {
     switch (token.type) {
       case 'comment':
-        this.insertDataNode(token as TextToken);
+        this.insertComment(token as CommentToken);
         break;
       case 'doctype':
         this.error();
@@ -174,7 +174,7 @@ export class HeadComposer extends BaseComposer {
 
   afterHeadCharacters(token: CharactersToken): InsertionMode {
     if (token.whitespaceOnly) {
-      this.insertDataNode(token);
+      this.insertCharacters(token);
       return this.insertionMode;
     }
     return this.forceElementAndState('body', 'inBody', token);

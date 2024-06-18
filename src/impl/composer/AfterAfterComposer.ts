@@ -1,4 +1,4 @@
-import {TagToken, TextToken, Token} from '../tokens';
+import {CommentToken, TagToken, Token} from '../tokens';
 import {BaseComposer} from './BaseComposer';
 import {InsertionMode} from './insertion-mode';
 
@@ -6,7 +6,7 @@ export class AfterAfterComposer extends BaseComposer {
   afterAfterBody(token: Token): InsertionMode {
     switch (token.type) {
       case 'comment':
-        this.insertDataNode(token as TextToken);
+        this.insertComment(token as CommentToken);
         break;
       case 'doctype':
         this.error();
@@ -40,7 +40,7 @@ export class AfterAfterComposer extends BaseComposer {
   afterAfterFrameset(token: Token): InsertionMode {
     switch (token.type) {
       case 'comment':
-        this.insertDataNode(token as TextToken);
+        this.insertComment(token as CommentToken);
         break;
       case 'doctype':
         this.error();

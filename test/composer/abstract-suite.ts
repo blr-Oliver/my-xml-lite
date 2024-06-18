@@ -44,6 +44,7 @@ export abstract class AbstractSuite<C extends CompositeComposer, R, T extends Te
     this.composer.openCounts = {};
     this.composer.fosterTables = new Map<any, any>();
     this.composer.formattingElements = [];
+    this.composer.pendingTableCharacters = [];
 
     this.tokenizer.env = {
       buffer: new FixedSizeStringBuilder(1000),
@@ -79,9 +80,20 @@ export interface DefaultTestCase extends TestCase {
   errors: string[];
 }
 
-export abstract class DefaultSuite<C extends CompositeComposer, R, T extends DefaultTestCase = DefaultTestCase> extends AbstractSuite<C, R, T> {
-  protected constructor(testCases: R[]) {
+export type DefaultRawTest = [string/*name*/, string/*input*/, string/*output*/, string[]/*errors*/];
+
+export class DefaultSuite<C extends CompositeComposer = CompositeComposer, R = DefaultRawTest, T extends DefaultTestCase = DefaultTestCase> extends AbstractSuite<C, R, T> {
+  constructor(testCases: R[]) {
     super(testCases);
+  }
+
+  createComposer(): C {
+    return new CompositeComposer() as C;
+  }
+
+  prepareTest(rawTest: R): T {
+    const [name, input, output, errors] = rawTest as DefaultRawTest;
+    return {name, input, output, errors} as T;
   }
 
   createSource(input: string) {

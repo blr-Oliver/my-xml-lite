@@ -1,0 +1,23 @@
+[
+  ["unclosed table", "<table>", "<table></table>", ["abrupt-end-of-document"]],
+  ["empty table", "<table></table>", "<table></table>", []],
+  ["comment", "<table><!--A--></table>", "<table><!--A--></table>", []],
+  ["doctype", "<table><!DOCTYPE html></table>", "<table></table>", ["unexpected-doctype"]],
+  ["space", "<table> \n\t\f</table>", "<table> \n\t\f</table>", []],
+  ["text", "<table>A</table>", "A<table></table>", ["text-in-table", "unexpected-content-in-table"]],
+  ["space + text", "<table> \n\t\fA</table>", " \n\t\fA<table></table>", ["text-in-table", "unexpected-content-in-table"]],
+  ["space + text + space", "<table> \n\t\fA \n\t\f</table>", " \n\t\fA \n\t\f<table></table>", ["text-in-table", "unexpected-content-in-table"]],
+  ["table", "<table> <table>  </table>", "<table> </table><table>  </table>", ["table-in-table"]],
+  ["style", "<table><style>A</style></table>", "<table><style>A</style></table>", []],
+  ["script", "<table><script>A</script></table>", "<table><script>A</script></table>", []],
+  ["input", "<table><input></table>", "<input/><table></table>", ["unexpected-content-in-table"]],
+  ["input type='text'", "<table><input type='text'></table>", "<input type=\"text\"/><table></table>", ["unexpected-content-in-table"]],
+  ["input type='hidden'", "<table><input type='hidden'></table>", "<table><input type=\"hidden\"/></table>", ["hidden-input-in-table"]],
+  ["form (start)", "<table><form></table>", "<table><form></form></table>", ["form-in-table"]],
+  ["form (inside)", "<form><table><form></table></form>", "<form><table></table></form>", ["form-in-table"]],
+  ["any start tag", "<table><div></table>", "<div></div><table></table>", ["unexpected-content-in-table"]],
+  ["any end tag", "<table></div></table>", "<table></table>", ["unexpected-content-in-table", "orphan-end-tag"]],
+  ["misnested known end tag", "<div><table></div></table>", "<div><table></table></div>", ["unexpected-content-in-table", "orphan-end-tag", "abrupt-end-of-document"]],
+  ["misnested unknown end tag", "<tag><table></tag></table>", "<tag><table></table></tag>", ["unexpected-content-in-table", "orphan-end-tag-inside-special-element", "abrupt-end-of-document"]],
+  ["separated whitespace", "<table> <div>  </div>   </table>", "<div>  </div><table>    </table>", ["unexpected-content-in-table", "unexpected-content-in-table"]]
+]

@@ -1,4 +1,4 @@
-import {CharactersToken, TagToken, TextToken, Token} from '../tokens';
+import {CharactersToken, CommentToken, TagToken, Token} from '../tokens';
 import {BaseComposer} from './BaseComposer';
 import {InsertionMode} from './insertion-mode';
 
@@ -6,7 +6,7 @@ export class InColumnGroupComposer extends BaseComposer {
   inColumnGroup(token: Token): InsertionMode {
     switch (token.type) {
       case 'comment':
-        this.insertDataNode(token as TextToken);
+        this.insertComment(token as CommentToken);
         break;
       case 'doctype':
         this.error();
@@ -27,7 +27,7 @@ export class InColumnGroupComposer extends BaseComposer {
 
   inColumnGroupCharacters(token: CharactersToken): InsertionMode {
     if (token.whitespaceOnly) {
-      this.insertDataNode(token);
+      this.insertCharacters(token);
       return this.insertionMode;
     }
     return this.inColumnGroupDefault(token);

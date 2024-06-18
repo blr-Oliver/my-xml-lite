@@ -1,18 +1,18 @@
 import {Element} from '../../decl/xml-lite-decl';
-import {TagToken, TextToken, Token} from '../tokens';
+import {CharactersToken, CommentToken, TagToken, Token} from '../tokens';
 import {BaseComposer, NS_HTML} from './BaseComposer';
 import {InsertionMode} from './insertion-mode';
 
 export class InTableComposer extends BaseComposer {
-  pendingTableCharacters: TextToken[] = [];
+  pendingTableCharacters: CharactersToken[] = [];
 
   inTable(token: Token): InsertionMode {
     switch (token.type) {
       case 'comment':
-        this.insertDataNode(token as TextToken);
+        this.insertComment(token as CommentToken);
         break;
       case 'doctype':
-        this.error();
+        this.error('unexpected-doctype');
         break;
       case 'characters':
         this.pendingTableCharacters.length = 0;
@@ -25,7 +25,7 @@ export class InTableComposer extends BaseComposer {
       case 'eof':
         return this.inBody(token);
       default:
-        return this.escapeInTable(token);
+        return this.inTableDefault(token);
     }
     return this.insertionMode;
   }
@@ -56,7 +56,7 @@ export class InTableComposer extends BaseComposer {
         this.clearStackToTableContext();
         return this.forceElementAndState('tbody', 'inTableBody', token);
       case 'table':
-        this.error();
+        this.error('table-in-table');
         if (this.hasElementInTableScope('table')) {
           this.popUntilName('table');
           this.resetInsertionMode();
@@ -70,18 +70,21 @@ export class InTableComposer extends BaseComposer {
       case 'input':
         const typeAttr = token.attributes.find(attr => attr.name === 'type');
         if (!typeAttr || (typeAttr.value || '').toLowerCase() !== 'hidden') {
-          return this.escapeInTable(token);
+          return this.inTableDefault(token);
         } else {
-          this.error();
+          this.error('hidden-input-in-table');
           this.createAndInsertEmptyHTMLElement(token);
         }
         break;
       case 'form':
-        this.error();
+        this.error('form-in-table');
         if (!this.openCounts['template'] && !this.formElement) {
           this.formElement = this.createAndInsertHTMLElement(token);
           this.popCurrentElement();
         }
+        break;
+      default:
+        this.inTableDefault(token);
     }
     return this.insertionMode;
   }
@@ -111,6 +114,8 @@ export class InTableComposer extends BaseComposer {
         break;
       case 'template':
         return this.inHead(token);
+      default:
+        return this.inTableDefault(token);
     }
     return this.insertionMode;
   }
@@ -131,11 +136,31 @@ export class InTableComposer extends BaseComposer {
     }
   }
 
-  escapeInTable(token: Token): InsertionMode {
-    this.error();
+  inTableDefault(...tokens: Token[]): InsertionMode {
+    this.error('unexpected-content-in-table');
     this.fosterParentingEnabled = true;
-    let result = this.inBody(token);
+    let result!: InsertionMode;
+    for (let token of tokens) {
+      result = this.inBody(token);
+    }
     this.fosterParentingEnabled = false;
     return result;
+  }
+
+  inTableText(token: Token) {
+    if (token.type === 'characters') {
+      this.pendingTableCharacters.push(token as CharactersToken);
+      return this.insertionMode;
+    } else {
+      // TODO merge all characters to a single token
+      if (this.pendingTableCharacters.every(token => token.whitespaceOnly)) {
+        for (let textToken of this.pendingTableCharacters)
+          this.insertCharacters(textToken);
+      } else {
+        this.error('text-in-table');
+        this.inTableDefault(...this.pendingTableCharacters);
+      }
+      return this.reprocessIn(this.originalInsertionMode, token);
+    }
   }
 }

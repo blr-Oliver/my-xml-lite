@@ -52,6 +52,7 @@ export interface Element extends ParentNode {
   readonly prefix: string | null;
   readonly localName: string;
   readonly tagName: string;
+  readonly selfClosed: boolean;
   getAttribute(qName: string): string | null;
   getAttributeNS(prefix: string | null, localName: string): string | null;
   getAttributeNames(): string[];
@@ -60,7 +61,6 @@ export interface Element extends ParentNode {
   hasAttribute(qName: string): boolean;
   hasAttributeNS(namespace: string | null, localName: string): boolean;
   hasAttributes(): boolean;
-  readonly selfClosed?: boolean;
 }
 
 export interface CharacterData extends Node {

@@ -1,5 +1,5 @@
 import {Element} from '../../decl/xml-lite-decl';
-import {CharactersToken, TagToken, TextToken, Token} from '../tokens';
+import {CharactersToken, CommentToken, TagToken, Token} from '../tokens';
 import {NS_HTML, NS_MATHML, NS_SVG} from './BaseComposer';
 import {InsertionMode} from './insertion-mode';
 import {TokenAdjustingComposer} from './TokenAdjustingComposer';
@@ -8,14 +8,14 @@ export class InForeignContentComposer extends TokenAdjustingComposer {
   inForeignContent(token: Token): InsertionMode {
     switch (token.type) {
       case 'comment':
-        this.insertDataNode(token as TextToken);
+        this.insertComment(token as CommentToken);
         break;
       case 'doctype':
         this.error();
         break;
       case 'characters':
       case 'cdata':
-        this.insertDataNode(token as CharactersToken);
+        this.insertCharacters(token as CharactersToken);
         break;
       case 'startTag':
         return this.inForeignContentStartTag(token as TagToken);
