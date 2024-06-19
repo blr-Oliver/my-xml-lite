@@ -1,0 +1,15 @@
+[
+  ["empty", "<table><tbody></tbody></table>", "<table><tbody></tbody></table>", []],
+  ["comment", "<table><tbody><!--A--></tbody></table>", "<table><tbody><!--A--></tbody></table>", []],
+  ["doctype", "<table><tbody><!DOCTYPE html></tbody></table>", "<table><tbody></tbody></table>", ["unexpected-doctype"]],
+  ["unclosed", "<table><tbody></table>", "<table><tbody></tbody></table>", []],
+  ["tr", "<table><tbody><tr></tbody></table>", "<table><tbody><tr></tr></tbody></table>", []],
+  ["td", "<table><thead><td><tr></tr></thead></table>", "<table><thead><tr><td></td></tr><tr></tr></thead></table>", ["table-cell-in-table-body"]],
+  ["th", "<table><thead><th><tr></tr></thead></table>", "<table><thead><tr><th></th></tr><tr></tr></thead></table>", ["table-cell-in-table-body"]],
+  ["caption", "<table><thead><caption><tr></tr></thead></table>", "<table><thead></thead><caption></caption><tbody><tr></tr></tbody></table>", ["unexpected-end-tag-in-table-body"]],
+  ["col", "<table><thead><col><tr></tr></thead></table>", "<table><thead></thead><colgroup><col/></colgroup><tbody><tr></tr></tbody></table>", ["unexpected-end-tag-in-table-body"]],
+  ["colgroup", "<table><thead><colgroup><tr></tr></thead></table>", "<table><thead></thead><colgroup></colgroup><tbody><tr></tr></tbody></table>", ["unexpected-end-tag-in-table-body"]],
+  ["nested same", "<table><thead><tr a=\"1\"></tr><thead><tr a=\"2\"></tr></thead></table>", "<table><thead><tr a=\"1\"></tr></thead><thead><tr a=\"2\"></tr></thead></table>", []],
+  ["nested other", "<table><thead><tr a=\"1\"></tr><tfoot><tr a=\"2\"></tr></thead></table>", "<table><thead><tr a=\"1\"></tr></thead><tfoot><tr a=\"2\"></tr></tfoot></table>", ["unexpected-end-tag-in-table-body"]],
+  ["mismatched end tag", "<table><tbody></thead><tr></tr></table>", "<table><tbody><tr></tr></tbody></table>", ["unexpected-end-tag-in-table-body"]]
+]

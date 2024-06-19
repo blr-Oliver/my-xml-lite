@@ -33,7 +33,7 @@ export class InTableBodyComposer extends InTableComposer {
       case 'tbody':
       case 'tfoot':
       case 'thead':
-        return this.inTableBodyEndTable(token);
+        return this.inTableBodyEndTableBody(token);
       default:
         return this.inTable(token);
     }
@@ -49,11 +49,11 @@ export class InTableBodyComposer extends InTableComposer {
           this.popCurrentElement();
           return 'inTable';
         } else {
-          this.error();
+          this.error('unexpected-end-tag-in-table-body');
           break;
         }
       case 'table':
-        return this.inTableBodyEndTable(token);
+        return this.inTableBodyEndTableBody(token);
       case 'body':
       case 'caption':
       case 'col':
@@ -62,7 +62,7 @@ export class InTableBodyComposer extends InTableComposer {
       case 'td':
       case 'th':
       case 'tr':
-        this.error();
+        this.error('unexpected-end-tag-in-table-body');
         break;
       default:
         return this.inTable(token);
@@ -70,7 +70,7 @@ export class InTableBodyComposer extends InTableComposer {
     return this.insertionMode;
   }
 
-  protected inTableBodyEndTable(token: TagToken) {
+  protected inTableBodyEndTableBody(token: TagToken) {
     if (this.hasMatchInScope(el => this.isTableBodyElement(el), el => this.isTableScopeFence(el))) {
       this.clearStackToTBodyContext();
       this.popCurrentElement();
