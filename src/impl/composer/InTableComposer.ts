@@ -137,7 +137,8 @@ export class InTableComposer extends BaseComposer {
   }
 
   inTableDefault(token: Token): InsertionMode {
-    this.error('unexpected-content-in-table');
+    if (token.type !== 'characters' && token.type !== 'cdata')
+      this.error('unexpected-content-in-table');
     this.fosterParentingEnabled = true;
     const result = this.inBody(token);
     this.fosterParentingEnabled = false;
