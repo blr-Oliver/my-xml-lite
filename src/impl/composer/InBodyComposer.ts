@@ -14,7 +14,7 @@ export class InBodyComposer extends TokenAdjustingComposer {
         this.insertComment(token as CommentToken);
         break;
       case 'doctype':
-        this.error();
+        this.error('unexpected-doctype');
         break;
       case 'characters':
         this.reconstructFormattingElements();
@@ -40,7 +40,7 @@ export class InBodyComposer extends TokenAdjustingComposer {
     let element: Element;
     switch (token.name) {
       case 'html':
-        this.error();
+        this.error('unexpected-html-start-tag');
         if (!this.openCounts['template'])
           this.addMissingAttributes(this.openElements[0], token);
         break;

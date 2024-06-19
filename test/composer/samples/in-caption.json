@@ -1,5 +1,7 @@
 [
   ["empty", "<table><caption></caption></table>", "<table><caption></caption></table>", []],
+  ["comment", "<table><caption><!--A--></caption></table>", "<table><caption><!--A--></caption></table>", []],
+  ["doctype", "<table><caption><!DOCTYPE html></caption></table>", "<table><caption></caption></table>", ["unexpected-doctype"]],
   ["text", "<table><caption>A</caption></table>", "<table><caption>A</caption></table>", []],
   ["markup", "<table><caption><div>A</div></caption></table>", "<table><caption><div>A</div></caption></table>", []],
   ["unclosed empty", "<table><caption></table>", "<table><caption></caption></table>", []],

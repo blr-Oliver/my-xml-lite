@@ -9,7 +9,7 @@ export class InColumnGroupComposer extends BaseComposer {
         this.insertComment(token as CommentToken);
         break;
       case 'doctype':
-        this.error();
+        this.error('unexpected-doctype');
         break;
       case 'characters':
         return this.inColumnGroupCharacters(token as CharactersToken);
@@ -53,7 +53,7 @@ export class InColumnGroupComposer extends BaseComposer {
       case 'colgroup':
         return this.inColumnGroupDefault(token, false);
       case 'col':
-        this.error();
+        this.error('void-html-element-end-tag');
         break;
       case 'template':
         return this.inHead(token);
@@ -65,7 +65,7 @@ export class InColumnGroupComposer extends BaseComposer {
 
   inColumnGroupDefault(token: Token, reprocess = true): InsertionMode {
     if (this.current.tagName !== 'colgroup') {
-      this.error();
+      this.error('unexpected-content-in-column-group');
       return this.insertionMode;
     } else {
       this.popCurrentElement();

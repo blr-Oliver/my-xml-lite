@@ -1,0 +1,15 @@
+[
+  ["empty", "<table><colgroup></colgroup></table>", "<table><colgroup></colgroup></table>", []],
+  ["comment", "<table><colgroup><!--A--></colgroup></table>", "<table><colgroup><!--A--></colgroup></table>", []],
+  ["doctype", "<table><colgroup><!DOCTYPE html></colgroup></table>", "<table><colgroup></colgroup></table>", ["unexpected-doctype"]],
+  ["space", "<table><colgroup> \n\t\f</colgroup></table>", "<table><colgroup> \n\t\f</colgroup></table>", []],
+  ["text", "<table><colgroup>A</colgroup></table>", "A<table><colgroup></colgroup></table>", ["text-in-table", "unexpected-content-in-table", "unexpected-end-tag-in-table"]],
+  ["space + text", "<table><colgroup> \n\t\fA</colgroup></table>", "A<table><colgroup> \n\t\f</colgroup></table>", ["text-in-table", "unexpected-content-in-table", "unexpected-end-tag-in-table"]],
+  ["space + text + space", "<table><colgroup> \n\t\fA \n\t\f</colgroup></table>", "A \n\t\f<table><colgroup> \n\t\f</colgroup></table>", ["text-in-table", "unexpected-content-in-table", "unexpected-end-tag-in-table"]],
+  ["unclosed", "<table><colgroup></table>", "<table><colgroup></colgroup></table>", []],
+  ["html", "<table><colgroup><html></colgroup></table>", "<table><colgroup></colgroup></table>", ["unexpected-html-start-tag"]],
+  ["col start tag", "<table><colgroup><col></colgroup></table>", "<table><colgroup><col/></colgroup></table>", []],
+  ["col self-closed", "<table><colgroup><col/></colgroup></table>", "<table><colgroup><col/></colgroup></table>", []],
+  ["col empty", "<table><colgroup><col></col></colgroup></table>", "<table><colgroup><col/></colgroup></table>", ["void-html-element-end-tag"]],
+  ["col end tag", "<table><colgroup></col></colgroup></table>", "<table><colgroup></colgroup></table>", ["void-html-element-end-tag"]]
+]

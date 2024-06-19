@@ -110,7 +110,7 @@ export class InTableComposer extends BaseComposer {
       case 'th':
       case 'thead':
       case 'tr':
-        this.error();
+        this.error('unexpected-end-tag-in-table');
         break;
       case 'template':
         return this.inHead(token);
