@@ -1,0 +1,18 @@
+[
+  ["empty", "<table><tbody><tr></tr></tbody></table>", "<table><tbody><tr></tr></tbody></table>", []],
+  ["comment", "<table><tbody><tr><!--A--></tr></tbody></table>", "<table><tbody><tr><!--A--></tr></tbody></table>", []],
+  ["doctype", "<table><tbody><tr><!DOCTYPE html></tr></tbody></table>", "<table><tbody><tr></tr></tbody></table>", ["unexpected-doctype"]],
+  ["space", "<table><tbody><tr> \n\t\f</tr></tbody></table>", "<table><tbody><tr> \n\t\f</tr></tbody></table>", []],
+  ["text", "<table><tbody><tr>A</tr></tbody></table>", "A<table><tbody><tr></tr></tbody></table>", ["text-in-table"]],
+  ["space + text", "<table><tbody><tr> \n\t\fA</tr></tbody></table>", " \n\t\fA<table><tbody><tr></tr></tbody></table>", ["text-in-table"]],
+  ["td", "<table><tbody><tr><td></td></tr></tbody></table>", "<table><tbody><tr><td></td></tr></tbody></table>", []],
+  ["th", "<table><tbody><tr><th></th></tr></tbody></table>", "<table><tbody><tr><th></th></tr></tbody></table>", []],
+  ["cell + caption", "<table><tbody><tr><td>A</td><caption>B</caption></tr></tbody></table>", "<table><tbody><tr><td>A</td></tr></tbody><caption>B</caption></table>", ["unexpected-end-tag-in-table", "unexpected-end-tag-in-table"]],
+  ["cell + caption + cell", "<table><tbody><tr><td>A</td><caption>B</caption><td>C</td></tr></tbody></table>", "<table><tbody><tr><td>A</td></tr></tbody><caption>B</caption><tbody><tr><td>C</td></tr></tbody></table>", ["table-cell-in-table-body"]],
+  ["cell + caption + cell in thead", "<table><thead><tr><td>A</td><caption>B</caption><td>C</td></tr></thead></table>", "<table><thead><tr><td>A</td></tr></thead><caption>B</caption><tbody><tr><td>C</td></tr></tbody></table>", ["table-cell-in-table-body", "wrong-table-body-end-tag"]],
+  ["tr start tag", "<table><tbody><tr><td>A</td><tr><td>B</td></tr></tbody></table>", "<table><tbody><tr><td>A</td></tr><tr><td>B</td></tr></tbody></table>", []],
+  ["tr fully nested", "<table><tbody><tr><td>A</td><tr><td>B</td></tr><td>C</td></tr></tbody></table>", "<table><tbody><tr><td>A</td></tr><tr><td>B</td></tr><tr><td>C</td></tr></tbody></table>", ["table-cell-in-table-body"]],
+  ["end table early", "<table><tbody><tr><td>A</td></table>", "<table><tbody><tr><td>A</td></tr></tbody></table>", []],
+  ["end tbody early", "<table><tbody><tr><td>A</td></tbody></table>", "<table><tbody><tr><td>A</td></tr></tbody></table>", []],
+  ["end thead", "<table><tbody><tr><td>A</td></thead></table>", "<table><tbody><tr><td>A</td></tr></tbody></table>", ["wrong-table-body-end-tag"]]
+]

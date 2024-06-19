@@ -49,7 +49,7 @@ export class InTableBodyComposer extends InTableComposer {
           this.popCurrentElement();
           return 'inTable';
         } else {
-          this.error('unexpected-end-tag-in-table-body');
+          this.error('wrong-table-body-end-tag');
           break;
         }
       case 'table':

@@ -53,7 +53,7 @@ export class InRowComposer extends InTableComposer {
             return this.reprocessIn('inTableBody', token);
           }
         } else {
-          this.error();
+          this.error('wrong-table-body-end-tag');
         }
         break;
       case 'body':
@@ -63,7 +63,7 @@ export class InRowComposer extends InTableComposer {
       case 'html':
       case 'td':
       case 'th':
-        this.error();
+        this.error('unexpected-end-tag-in-row');
         break;
       default:
         return this.inTable(token);
