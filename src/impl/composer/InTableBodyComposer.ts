@@ -24,7 +24,7 @@ export class InTableBodyComposer extends InTableComposer {
         return 'inRow';
       case 'th':
       case 'td':
-        this.error();
+        this.error('table-cell-in-table-body');
         this.clearStackToTBodyContext();
         return this.forceElementAndState('tr', 'inRow', token);
       case 'caption':

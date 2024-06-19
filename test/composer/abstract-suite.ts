@@ -122,3 +122,16 @@ export class DefaultSuite<C extends CompositeComposer = CompositeComposer, R = D
     expect(this.errorList).toStrictEqual(expectedErrors);
   }
 }
+
+export class BodyContentSuite extends DefaultSuite {
+  constructor(testCases: DefaultRawTest[]) {
+    super(testCases);
+  }
+
+  prepareTest(rawTest: DefaultRawTest): DefaultTestCase {
+    let result = super.prepareTest(rawTest) as DefaultTestCase;
+    result.output = '<html><head></head><body>' + result.output + '</body></html>';
+    result.errors.unshift('missing-doctype');
+    return result;
+  }
+}

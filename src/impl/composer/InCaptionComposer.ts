@@ -38,16 +38,16 @@ export class InCaptionComposer extends BaseComposer {
       case 'table':
         return this.inCaptionEnd(token, true);
       case 'body':
-      case 'html':
       case 'col':
       case 'colgroup':
+      case 'html':
       case 'tbody':
       case 'td':
       case 'tfoot':
       case 'th':
       case 'thead':
       case 'tr':
-        this.error();
+        this.error('unexpected-end-tag-in-caption');
         break;
       default:
         return this.inCaptionDefault(token);

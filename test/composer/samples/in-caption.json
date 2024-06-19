@@ -1,0 +1,21 @@
+[
+  ["empty", "<table><caption></caption></table>", "<table><caption></caption></table>", []],
+  ["text", "<table><caption>A</caption></table>", "<table><caption>A</caption></table>", []],
+  ["markup", "<table><caption><div>A</div></caption></table>", "<table><caption><div>A</div></caption></table>", []],
+  ["unclosed empty", "<table><caption></table>", "<table><caption></caption></table>", []],
+  ["unclosed text", "<table><caption>A </table>", "<table><caption>A </caption></table>", []],
+  ["unclosed markup", "<table><caption><div>A</div></table>", "<table><caption><div>A</div></caption></table>", []],
+  ["caption", "<table><caption>A<caption>B</table>", "<table><caption>A</caption><caption>B</caption></table>", []],
+  ["colgroup", "<table><caption>A<colgroup></table>", "<table><caption>A</caption><colgroup></colgroup></table>", []],
+  ["col", "<table><caption>A<col></table>", "<table><caption>A</caption><colgroup><col/></colgroup></table>", []],
+  ["tbody", "<table><caption>A<tbody></table>", "<table><caption>A</caption><tbody></tbody></table>", []],
+  ["thead", "<table><caption>A<thead></table>", "<table><caption>A</caption><thead></thead></table>", []],
+  ["tfoot", "<table><caption>A<tfoot></table>", "<table><caption>A</caption><tfoot></tfoot></table>", []],
+  ["tr", "<table><caption>A<tr></table>", "<table><caption>A</caption><tbody><tr></tr></tbody></table>", []],
+  ["td", "<table><caption>A<td></table>", "<table><caption>A</caption><tbody><tr><td></td></tr></tbody></table>", ["table-cell-in-table-body"]],
+  ["th", "<table><caption>A<th></table>", "<table><caption>A</caption><tbody><tr><th></th></tr></tbody></table>", ["table-cell-in-table-body"]],
+  ["end html", "<table><caption>A</html></table>", "<table><caption>A</caption></table>", ["unexpected-end-tag-in-caption"]],
+  ["end tbody", "<table><caption>A</tbody></table>", "<table><caption>A</caption></table>", ["unexpected-end-tag-in-caption"]],
+  ["known end tag", "<table><caption>A</div></table>", "<table><caption>A</caption></table>", ["orphan-end-tag"]],
+  ["any end tag", "<table><caption>A</tag></table>", "<table><caption>A</caption></table>", ["orphan-end-tag-inside-special-element"]]
+]

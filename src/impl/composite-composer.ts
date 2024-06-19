@@ -6,10 +6,13 @@ import {BaseComposer} from './composer/BaseComposer';
 import {BeforeHeadComposer} from './composer/BeforeHeadComposer';
 import {HeadComposer} from './composer/HeadComposer';
 import {InBodyComposer} from './composer/InBodyComposer';
+import {InCaptionComposer} from './composer/InCaptionComposer';
 import {InCellComposer} from './composer/InCellComposer';
+import {InColumnGroupComposer} from './composer/InColumnGroupComposer';
 import {InRowComposer} from './composer/InRowComposer';
 import {InSelectComposer} from './composer/InSelectComposer';
 import {InSelectInTableComposer} from './composer/InSelectInTableComposer';
+import {InTableBodyComposer} from './composer/InTableBodyComposer';
 import {InTableComposer} from './composer/InTableComposer';
 import {InTemplateComposer} from './composer/InTemplateComposer';
 import {TokenAdjustingComposer} from './composer/TokenAdjustingComposer';
@@ -21,6 +24,9 @@ const SyntheticComposerClass = combine('SyntheticComposerClass',
     HeadComposer,
     InBodyComposer,
     InTableComposer,
+    InCaptionComposer,
+    InColumnGroupComposer,
+    InTableBodyComposer,
     InRowComposer,
     InCellComposer,
     InSelectComposer,
@@ -35,6 +41,9 @@ const SyntheticComposerClass = combine('SyntheticComposerClass',
     HeadComposer &
     InBodyComposer &
     InTableComposer &
+    InCaptionComposer &
+    InColumnGroupComposer &
+    InTableBodyComposer &
     InRowComposer &
     InCellComposer &
     InSelectComposer &
