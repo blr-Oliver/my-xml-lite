@@ -136,13 +136,10 @@ export class InTableComposer extends BaseComposer {
     }
   }
 
-  inTableDefault(...tokens: Token[]): InsertionMode {
+  inTableDefault(token: Token): InsertionMode {
     this.error('unexpected-content-in-table');
     this.fosterParentingEnabled = true;
-    let result!: InsertionMode;
-    for (let token of tokens) {
-      result = this.inBody(token);
-    }
+    const result = this.inBody(token);
     this.fosterParentingEnabled = false;
     return result;
   }
@@ -152,15 +149,34 @@ export class InTableComposer extends BaseComposer {
       this.pendingTableCharacters.push(token as CharactersToken);
       return this.insertionMode;
     } else {
-      // TODO merge all characters to a single token
-      if (this.pendingTableCharacters.every(token => token.whitespaceOnly)) {
-        for (let textToken of this.pendingTableCharacters)
-          this.insertCharacters(textToken);
-      } else {
+      const text = this.mergePendingCharacters();
+      if (text.whitespaceOnly)
+        this.insertCharacters(text);
+      else {
         this.error('text-in-table');
-        this.inTableDefault(...this.pendingTableCharacters);
+        this.inTableDefault(text);
       }
       return this.reprocessIn(this.originalInsertionMode, token);
+    }
+  }
+
+  protected mergePendingCharacters(): CharactersToken {
+    const len = this.pendingTableCharacters.length;
+    if (len === 1)
+      return this.pendingTableCharacters[0];
+    else {
+      let chunks = Array(len);
+      let whitespaceOnly = true;
+      for (let i = 0; i < len; ++i) {
+        const textToken = this.pendingTableCharacters[i];
+        chunks[i] = textToken.data;
+        whitespaceOnly &&= textToken.whitespaceOnly;
+      }
+      return {
+        type: 'characters',
+        data: chunks.join(''),
+        whitespaceOnly
+      };
     }
   }
 }
