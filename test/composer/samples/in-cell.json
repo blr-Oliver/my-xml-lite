@@ -1,0 +1,21 @@
+[
+  ["empty", "<table><tbody><tr><td></td></tr></tbody></table>", "<table><tbody><tr><td></td></tr></tbody></table>", []],
+  ["comment", "<table><tbody><tr><td><!--A--></td></tr></tbody></table>", "<table><tbody><tr><td><!--A--></td></tr></tbody></table>", []],
+  ["doctype", "<table><tbody><tr><td><!DOCTYPE html></td></tr></tbody></table>", "<table><tbody><tr><td></td></tr></tbody></table>", ["unexpected-doctype"]],
+  ["space", "<table><tbody><tr><td> \n\t\f</td></tr></tbody></table>", "<table><tbody><tr><td> \n\t\f</td></tr></tbody></table>", []],
+  ["text", "<table><tbody><tr><td>A</td></tr></tbody></table>", "<table><tbody><tr><td>A</td></tr></tbody></table>", []],
+  ["markup", "<table><tbody><tr><td><div>A</div></td></tr></tbody></table>", "<table><tbody><tr><td><div>A</div></td></tr></tbody></table>", []],
+  ["unclosed markup", "<table><tbody><tr><td><div>A</td></tr></tbody></table>", "<table><tbody><tr><td><div>A</div></td></tr></tbody></table>", ["abrupt-end-of-cell"]],
+  ["wrong end tag (td)", "<table><tbody><tr><td>A</th></tr></tbody></table>", "<table><tbody><tr><td>A</td></tr></tbody></table>", ["wrong-cell-end-tag"]],
+  ["wrong end tag (th)", "<table><tbody><tr><th>A</td></tr></tbody></table>", "<table><tbody><tr><th>A</th></tr></tbody></table>", ["wrong-cell-end-tag"]],
+  ["tr end early", "<table><tbody><tr><td>A</tr></tbody></table>", "<table><tbody><tr><td>A</td></tr></tbody></table>", []],
+  ["tbody end early", "<table><tbody><tr><td>A</tbody></table>", "<table><tbody><tr><td>A</td></tr></tbody></table>", []],
+  ["table end early", "<table><tbody><tr><td>A</table>", "<table><tbody><tr><td>A</td></tr></tbody></table>", []],
+  ["caption start", "<table><tbody><tr><td>A<caption>B</td></tr></tbody></table>", "<table><tbody><tr><td>A</td></tr></tbody><caption>B</caption></table>", ["unexpected-end-tag-in-caption", "unexpected-end-tag-in-caption", "unexpected-end-tag-in-caption"]],
+  ["caption nested", "<table><tbody><tr><td>A<caption>B</caption></td></tr></tbody></table>", "<table><tbody><tr><td>A</td></tr></tbody><caption>B</caption></table>", ["unexpected-end-tag-in-table", "unexpected-end-tag-in-table", "unexpected-end-tag-in-table"]],
+  ["col", "<table><tbody><tr><td>A<col/>B</td></tr></tbody></table>", "B<table><tbody><tr><td>A</td></tr></tbody><colgroup><col/></colgroup></table>", ["text-in-table", "unexpected-end-tag-in-table", "unexpected-end-tag-in-table", "unexpected-end-tag-in-table"]],
+  ["td start", "<table><tbody><tr><td>A<td>B</td></tr></tbody></table>", "<table><tbody><tr><td>A</td><td>B</td></tr></tbody></table>", []],
+  ["td start", "<table><tbody><tr><td>A<td>B</td></tr></tbody></table>", "<table><tbody><tr><td>A</td><td>B</td></tr></tbody></table>", []],
+  ["td nested", "<table><tbody><tr><td>A<td>B</td>C</td></tr></tbody></table>", "C<table><tbody><tr><td>A</td><td>B</td></tr></tbody></table>", ["text-in-table", "unexpected-end-tag-in-row"]],
+  ["wrong table body end tag", "<table><tbody><tr><td>A</td><td>B</thead></td><td>C</td></table>", "<table><tbody><tr><td>A</td><td>B</td><td>C</td></tr></tbody></table>", ["unexpected-end-tag-in-cell"]]
+]

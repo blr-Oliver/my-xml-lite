@@ -39,21 +39,21 @@ export class InCellComposer extends BaseComposer {
         if (this.hasElementInTableScope(tagName)) {
           this.generateImpliedEndTags();
           if (this.current.tagName !== tagName) {
-            this.error();
+            this.error('abrupt-end-of-cell');
             this.popUntilName(tagName);
           } else
             this.popCurrentElement();
           this.clearFormattingUpToMarker();
           return 'inRow';
         } else
-          this.error();
+          this.error('wrong-cell-end-tag');
         break;
       case 'body':
       case 'caption':
       case 'col':
       case 'colgroup':
       case 'html':
-        this.error();
+        this.error('unexpected-end-tag-in-cell');
         break;
       case 'table':
       case 'tbody':
@@ -62,7 +62,7 @@ export class InCellComposer extends BaseComposer {
       case 'tr':
         if (this.hasElementInTableScope(tagName))
           return this.closeTheCell(token);
-        this.error();
+        this.error('unexpected-end-tag-in-cell');
         break;
       default:
         return this.inBody(token);
