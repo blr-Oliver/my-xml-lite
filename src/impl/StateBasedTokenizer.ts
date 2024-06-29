@@ -417,8 +417,11 @@ export class StateBasedTokenizer implements IStateBasedTokenizer {
           return this.eof();
         case CodePoints.NUL:
           this.error('unexpected-null-character');
-          if (!this.composer.shouldUseForeignRules()) break;
-          else code = CodePoints.REPLACEMENT_CHAR;
+          if (!this.composer.shouldUseForeignRules()) {
+            code = this.nextCode();
+            break;
+          } else
+            code = CodePoints.REPLACEMENT_CHAR;
         default:
           this.appendCharacter(code);
           code = this.nextCode();

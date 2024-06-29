@@ -7,6 +7,7 @@
   ["text", "<table>A</table>", "A<table></table>", ["text-in-table"]],
   ["space + text", "<table> \n\t\fA</table>", " \n\t\fA<table></table>", ["text-in-table"]],
   ["space + text + space", "<table> \n\t\fA \n\t\f</table>", " \n\t\fA \n\t\f<table></table>", ["text-in-table"]],
+  ["NUL", "<table>\u0000</table>", "<table></table>", ["unexpected-null-character"]],
   ["table", "<table> <table>  </table>", "<table> </table><table>  </table>", ["table-in-table"]],
   ["col", "<table><col></table>", "<table><colgroup><col/></colgroup></table>", []],
   ["tr", "<table><tr></table>", "<table><tbody><tr></tr></tbody></table>", []],
