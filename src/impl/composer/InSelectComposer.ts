@@ -10,7 +10,7 @@ export class InSelectComposer extends BaseComposer {
         this.insertComment(token as CommentToken);
         break;
       case 'doctype':
-        this.error();
+        this.error('unexpected-doctype');
         break;
       case 'characters':
         this.insertCharacters(token as CharactersToken);
@@ -22,7 +22,7 @@ export class InSelectComposer extends BaseComposer {
       case 'eof':
         return this.inBody(token);
       default:
-        this.error();
+        this.error('unexpected-content-in-select');
     }
     return this.insertionMode;
   }
@@ -46,12 +46,12 @@ export class InSelectComposer extends BaseComposer {
         this.createAndInsertEmptyHTMLElement(token);
         break;
       case 'select':
-        this.error();
+        this.error('select-start-tag-in-select');
         return this.closeSelect(token, false, false);
       case 'input':
       case 'keygen':
       case 'textarea':
-        this.error();
+        this.error('input-inside-select');
         return this.closeSelect(token, true, false);
       case 'script':
       case 'template':
@@ -74,13 +74,13 @@ export class InSelectComposer extends BaseComposer {
         } else if (this.current.tagName === 'optgroup')
           this.popCurrentElement();
         else
-          this.error();
+          this.error('orphan-end-tag-inside-special-element');
         break;
       case 'option':
         if (this.current.tagName === 'option')
           this.popCurrentElement();
         else
-          this.error();
+          this.error('orphan-end-tag-inside-special-element');
         break;
       case 'select':
         return this.closeSelect(token, false, true);
@@ -99,7 +99,7 @@ export class InSelectComposer extends BaseComposer {
       if (reprocess)
         return this.process(token);
     } else if (errorIfMissing)
-      this.error();
+      this.error('orphan-end-tag');
     return this.insertionMode;
   }
 }
