@@ -1,7 +1,9 @@
 import {BodyContentSuite, DefaultRawTest} from './abstract-suite';
-import {default as rawTests} from './samples/in-select.json';
+import {default as commonTests} from './samples/in-select-common.json';
+import {default as selectTests} from './samples/in-select.json';
 
-const suite = new BodyContentSuite(rawTests as DefaultRawTest[]);
+const tests = (commonTests as DefaultRawTest[]).concat(selectTests as DefaultRawTest[]);
+const suite = new BodyContentSuite(tests as DefaultRawTest[]);
 
 beforeAll(() => suite.beforeAll());
 beforeEach(() => suite.beforeEach());

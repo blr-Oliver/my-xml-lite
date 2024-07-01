@@ -769,6 +769,7 @@ export class BaseComposer implements TokenSink {
     const parents: Map<ParentNode, [Node[], Element[]]> = new Map<ParentNode, [Node[], Element[]]>();
     for (let table of this.fosterTables.keys()) {
       const parent = table.parentNode!;
+      if (parents.has(parent)) continue;
       const newChildNodes: Node[] = [];
       const newChildren: Element[] = [];
       parents.set(parent, [newChildNodes, newChildren]);

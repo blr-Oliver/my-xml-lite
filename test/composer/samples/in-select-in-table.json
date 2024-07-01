@@ -1,0 +1,41 @@
+[
+  [
+    "select nested", "<select>A<select>B</select>C</select>", "<select>A</select>BC",
+    [
+      "select-start-tag-in-select",
+      "text-in-table",
+      "unexpected-content-in-table",
+      "orphan-end-tag-inside-special-element",
+      "text-in-table",
+      "unexpected-content-in-table",
+      "orphan-end-tag-inside-special-element"
+    ]
+  ],
+  [
+    "input", "<select>A<input></select>", "<select>A</select><input/>",
+    [
+      "input-inside-select",
+      "unexpected-content-in-table",
+      "unexpected-content-in-table",
+      "orphan-end-tag-inside-special-element"
+    ]
+  ],
+  [
+    "keygen", "<select>A<keygen></select>", "<select>A</select><keygen/>",
+    [
+      "input-inside-select",
+      "unexpected-content-in-table",
+      "unexpected-content-in-table",
+      "orphan-end-tag-inside-special-element"
+    ]
+  ],
+  [
+    "textarea", "<select>A<textarea></select>", "<select>A</select><textarea>&lt;/select>&lt;/table></textarea>",
+    [
+      "input-inside-select",
+      "unexpected-content-in-table",
+      "abrupt-end-of-document-in-text",
+      "abrupt-end-of-document"
+    ]
+  ]
+]

@@ -57,7 +57,7 @@ export class InSelectComposer extends BaseComposer {
       case 'template':
         return this.inHead(token);
       default:
-        this.error();
+        this.error('unexpected-content-in-select');
     }
     return this.insertionMode;
   }
@@ -87,7 +87,7 @@ export class InSelectComposer extends BaseComposer {
       case 'template':
         return this.inHead(token);
       default:
-        this.error();
+        this.error('unexpected-content-in-select');
     }
     return this.insertionMode;
   }
