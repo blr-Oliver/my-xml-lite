@@ -84,7 +84,7 @@ export class InTableComposer extends BaseComposer {
         }
         break;
       default:
-        this.inTableDefault(token);
+        return this.inTableDefault(token);
     }
     return this.insertionMode;
   }

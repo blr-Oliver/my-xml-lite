@@ -24,7 +24,7 @@ export class InSelectInTableComposer extends InSelectComposer {
       case 'tr':
       case 'td':
       case 'th':
-        this.error();
+        this.error('table-content-in-select-in-table');
         this.popUntilName('select');
         this.resetInsertionMode();
         return this.process(token);
@@ -43,7 +43,7 @@ export class InSelectInTableComposer extends InSelectComposer {
       case 'tr':
       case 'td':
       case 'th':
-        this.error();
+        this.error('table-content-in-select-in-table');
         if (this.hasElementInTableScope(token.name)) {
           this.popUntilName('select');
           this.resetInsertionMode();

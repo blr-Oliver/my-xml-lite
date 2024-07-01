@@ -1,0 +1,77 @@
+[
+  [
+    "table start", "<select>A<table>B</select>", "<select>A</select><table></table>B<table></table>",
+    [
+      "unexpected-content-in-table",
+      "table-content-in-select-in-table",
+      "table-in-table",
+      "text-in-table",
+      "unexpected-content-in-table",
+      "orphan-end-tag-inside-special-element"
+    ]
+  ],
+  [
+    "table end", "<select>A</table>B</select>", "<select>A</select><table></table>B",
+    [
+      "unexpected-content-in-table",
+      "table-content-in-select-in-table",
+      "orphan-end-tag-inside-special-element",
+      "orphan-end-tag-inside-special-element"
+    ]
+  ],
+  [
+    "tbody start", "<select>A<tbody>B</select>", "<select>A</select>B<table><tbody></tbody></table>",
+    [
+      "unexpected-content-in-table",
+      "table-content-in-select-in-table",
+      "text-in-table",
+      "unexpected-content-in-table",
+      "orphan-end-tag-inside-special-element"
+    ]
+  ],
+  [
+    "tbody end", "<select>A</tbody>B</select>", "<select>AB</select><table></table>",
+    [
+      "unexpected-content-in-table",
+      "table-content-in-select-in-table"
+    ]
+  ],
+  [
+    "table start in td",
+    "<tbody><tr><td>A<select>B<table>C</select>D</td></tr></tbody>",
+    "<table><tbody><tr><td>A<select>B</select>CD<table></table></td></tr></tbody></table>",
+    [
+      "table-content-in-select-in-table",
+      "text-in-table",
+      "unexpected-content-in-table",
+      "orphan-end-tag-inside-special-element",
+      "text-in-table",
+      "unexpected-end-tag-in-table",
+      "unexpected-end-tag-in-table",
+      "unexpected-end-tag-in-table",
+      "abrupt-end-of-document"
+    ]
+  ],
+  [
+    "table end in td",
+    "<tbody><tr><td>A<select>B</table>D</select>E</td></tr></tbody>",
+    "<table><tbody><tr><td>A<select>B</select></td></tr></tbody></table>DE",
+    [
+      "table-content-in-select-in-table",
+      "orphan-end-tag-inside-special-element",
+      "orphan-end-tag-inside-special-element",
+      "orphan-end-tag-inside-special-element",
+      "orphan-end-tag-inside-special-element",
+      "orphan-end-tag-inside-special-element"
+    ]
+  ],
+  [
+    "table with content in td",
+    "<tbody><tr><td>A<select>B<table><tr><td>C</td></tr></table>D</select>E</td></tr></tbody>",
+    "<table><tbody><tr><td>A<select>B</select><table><tbody><tr><td>C</td></tr></tbody></table>DE</td></tr></tbody></table>",
+    [
+      "table-content-in-select-in-table",
+      "orphan-end-tag-inside-special-element"
+    ]
+  ]
+]
