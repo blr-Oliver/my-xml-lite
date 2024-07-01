@@ -123,15 +123,49 @@ export class DefaultSuite<C extends CompositeComposer = CompositeComposer, R = D
   }
 }
 
-export class BodyContentSuite extends DefaultSuite {
-  constructor(testCases: DefaultRawTest[]) {
+export type ExcerptParams = {
+  prefixInput?: string;
+  suffixInput?: string;
+  prefixOutput?: string;
+  suffixOutput?: string;
+  prefixErrors?: string[];
+  suffixErrors?: string[];
+}
+
+export class ExcerptSuite extends DefaultSuite {
+  prefixInput: string;
+  suffixInput: string;
+  prefixOutput: string;
+  suffixOutput: string;
+  prefixErrors: string[];
+  suffixErrors: string[];
+
+  constructor(testCases: DefaultRawTest[], excerpt: ExcerptParams) {
     super(testCases);
+    this.prefixInput = excerpt.prefixInput || '';
+    this.suffixInput = excerpt.suffixInput || '';
+    this.prefixOutput = excerpt.prefixOutput || '';
+    this.suffixOutput = excerpt.suffixOutput || '';
+    this.prefixErrors = excerpt.prefixErrors || [];
+    this.suffixErrors = excerpt.suffixErrors || [];
   }
 
   prepareTest(rawTest: DefaultRawTest): DefaultTestCase {
     let result = super.prepareTest(rawTest) as DefaultTestCase;
-    result.output = '<html><head></head><body>' + result.output + '</body></html>';
-    result.errors.unshift('missing-doctype');
+    result.input = `${this.prefixInput}${result.input}${this.suffixInput}`;
+    result.output = `${this.prefixOutput}${result.output}${this.suffixOutput}`;
+    result.errors.unshift(...this.prefixErrors);
+    result.errors.push(...this.suffixErrors);
     return result;
+  }
+}
+
+export class BodyContentSuite extends ExcerptSuite {
+  constructor(testCases: DefaultRawTest[]) {
+    super(testCases, {
+      prefixOutput: '<html><head></head><body>',
+      suffixOutput: '</body></html>',
+      prefixErrors: ['missing-doctype']
+    });
   }
 }
