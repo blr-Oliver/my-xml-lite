@@ -320,7 +320,7 @@ export class InBodyComposer extends TokenAdjustingComposer {
   inBodyEndTag(token: TagToken): InsertionMode {
     switch (token.name) {
       case 'template':
-        return this.inHead(token);
+        return this.endTemplate();
       case 'body':
       case 'html':
         if (this.openCounts['body']) {

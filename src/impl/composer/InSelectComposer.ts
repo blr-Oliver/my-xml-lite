@@ -85,7 +85,7 @@ export class InSelectComposer extends BaseComposer {
       case 'select':
         return this.closeSelect(token, false, true);
       case 'template':
-        return this.inHead(token);
+        return this.endTemplate();
       default:
         this.error('unexpected-content-in-select');
     }

@@ -68,10 +68,7 @@ export class HeadComposer extends BaseComposer {
         this.popCurrentElement();
         return 'afterHead';
       case 'template':
-        if (this.openCounts['template'])
-          return this.endTemplate(token);
-        this.error();
-        break;
+        return this.endTemplate();
       case 'body':
       case 'html':
       case 'br':
@@ -224,7 +221,7 @@ export class HeadComposer extends BaseComposer {
   afterHeadEndTag(token: TagToken): InsertionMode {
     switch (token.name) {
       case 'template':
-        return this.inHeadEndTag(token);
+        return this.endTemplate();
       case 'body':
       case 'html':
       case 'br':

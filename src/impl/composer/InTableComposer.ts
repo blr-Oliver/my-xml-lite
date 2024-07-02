@@ -113,7 +113,7 @@ export class InTableComposer extends BaseComposer {
         this.error('unexpected-end-tag-in-table');
         break;
       case 'template':
-        return this.inHead(token);
+        return this.endTemplate();
       default:
         return this.inTableDefault(token);
     }

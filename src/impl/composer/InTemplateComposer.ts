@@ -40,9 +40,10 @@ export class InTemplateComposer extends BaseComposer {
       case 'noframes':
       case 'script':
       case 'style':
-      case 'template':
       case 'title':
         return this.inHead(token);
+      case 'template':
+        return this.startTemplate(token);
       case 'caption':
       case 'colgroup':
       case 'tbody':
@@ -64,9 +65,9 @@ export class InTemplateComposer extends BaseComposer {
   inTemplateEndTag(token: TagToken): InsertionMode {
     switch (token.name) {
       case 'template':
-        return this.inHead(token);
+        return this.endTemplate();
       default:
-        this.error();
+        this.error('unexpected-end-tag-in-template');
         return this.insertionMode;
     }
   }

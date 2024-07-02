@@ -41,7 +41,7 @@ export class InColumnGroupComposer extends BaseComposer {
         this.createAndInsertEmptyHTMLElement(token);
         break;
       case 'template':
-        return this.inHead(token);
+        return this.startTemplate(token);
       default:
         return this.inColumnGroupDefault(token);
     }
@@ -56,7 +56,7 @@ export class InColumnGroupComposer extends BaseComposer {
         this.error('void-html-element-end-tag');
         break;
       case 'template':
-        return this.inHead(token);
+        return this.endTemplate();
       default:
         return this.inColumnGroupDefault(token);
     }

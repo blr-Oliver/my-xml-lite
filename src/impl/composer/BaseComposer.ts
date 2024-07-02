@@ -406,8 +406,8 @@ export class BaseComposer implements TokenSink {
           case 'tfoot':
           case 'thead':
           case 'tr':
-            let lastTemplateIndex = this.openElements.findLastIndex(el => el.tagName === 'template');
-            let lastTableIndex = this.openElements.findLastIndex(el => el.tagName === 'table');
+            let lastTemplateIndex = this.openElements.findLastIndex(el => el.tagName === 'template' && el.namespaceURI === NS_HTML);
+            let lastTableIndex = this.openElements.findLastIndex(el => el.tagName === 'table' && el.namespaceURI === NS_HTML);
             if (lastTemplateIndex >= 0 && (lastTableIndex < 0 || lastTemplateIndex > lastTableIndex)) {
               result.parent = this.openElements[lastTemplateIndex];
             } else if (lastTableIndex < 0) {
@@ -418,7 +418,7 @@ export class BaseComposer implements TokenSink {
         }
       }
     }
-    if (isElement(result.parent) && result.parent.tagName === 'template') {
+    if (isElement(result.parent) && result.parent.tagName === 'template' && result.parent.namespaceURI === NS_HTML) {
       // TODO use template contents
     }
     return result;
@@ -513,11 +513,28 @@ export class BaseComposer implements TokenSink {
     return 'text';
   }
 
-  startTemplate(start: TagToken): InsertionMode { // TODO
-    return this.insertionMode;
+  startTemplate(token: TagToken): InsertionMode {
+    this.insertFormattingMarker();
+    this.framesetOk = false;
+    this.templateInsertionModes.push('inTemplate');
+    this.createAndInsertHTMLElement(token);
+    return 'inTemplate';
   }
 
-  endTemplate(end: TagToken): InsertionMode { // TODO
+  endTemplate(): InsertionMode {
+    if (this.openCounts['template']) {
+      this.generateImpliedEndTagsThoroughly();
+      let current = this.current
+      if (current.tagName !== 'template' || current.namespaceURI !== NS_HTML) {
+        this.error('abrupt-end-of-template');
+        this.popUntilName('template');
+      } else
+        this.popCurrentElement();
+      this.clearFormattingUpToMarker();
+      this.templateInsertionModes.pop();
+      this.resetInsertionMode();
+    } else
+      this.error('orphan-end-tag');
     return this.insertionMode;
   }
 
