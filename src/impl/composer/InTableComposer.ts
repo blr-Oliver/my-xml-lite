@@ -15,7 +15,6 @@ export class InTableComposer extends BaseComposer {
         this.error('unexpected-doctype');
         break;
       case 'characters':
-        this.pendingTableCharacters.length = 0;
         this.originalInsertionMode = this.insertionMode;
         return this.reprocessIn('inTableText', token);
       case 'startTag':
@@ -24,8 +23,6 @@ export class InTableComposer extends BaseComposer {
         return this.inTableEndTag(token as TagToken);
       case 'eof':
         return this.inBody(token);
-      default:
-        return this.inTableDefault(token);
     }
     return this.insertionMode;
   }
@@ -151,6 +148,7 @@ export class InTableComposer extends BaseComposer {
       return this.insertionMode;
     } else {
       const text = this.mergePendingCharacters();
+      this.pendingTableCharacters.length = 0;
       if (text.whitespaceOnly)
         this.insertCharacters(text);
       else {
