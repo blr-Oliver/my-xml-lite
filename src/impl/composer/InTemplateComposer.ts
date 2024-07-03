@@ -11,7 +11,7 @@ export class InTemplateComposer extends BaseComposer {
         return this.inBody(token);
       case 'eof':
         if (this.openCounts['template']) {
-          this.error();
+          this.error('abrupt-end-of-template');
           this.popUntilName('template');
           this.clearFormattingUpToMarker();
           this.templateInsertionModes.pop();
@@ -23,9 +23,6 @@ export class InTemplateComposer extends BaseComposer {
         return this.inTemplateStartTag(token as TagToken);
       case 'endTag':
         return this.inTemplateEndTag(token as TagToken);
-      default:
-        this.error();
-        break;
     }
     return this.insertionMode;
   }

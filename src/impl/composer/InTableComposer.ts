@@ -15,8 +15,7 @@ export class InTableComposer extends BaseComposer {
         this.error('unexpected-doctype');
         break;
       case 'characters':
-        this.originalInsertionMode = this.insertionMode;
-        return this.reprocessIn('inTableText', token);
+        return this.inTableCharacters(token as CharactersToken);
       case 'startTag':
         return this.inTableStartTag(token as TagToken);
       case 'endTag':
@@ -25,6 +24,23 @@ export class InTableComposer extends BaseComposer {
         return this.inBody(token);
     }
     return this.insertionMode;
+  }
+
+  inTableCharacters(token: CharactersToken) {
+    const current = this.current;
+    if (current.namespaceURI === NS_HTML) {
+      switch (current.tagName) {
+        case 'table':
+        case 'tbody':
+        case 'template':
+        case 'tfoot':
+        case 'thead':
+        case 'tr':
+          this.originalInsertionMode = this.insertionMode;
+          return this.reprocessIn('inTableText', token);
+      }
+    }
+    return this.inTableDefault(token);
   }
 
   inTableStartTag(token: TagToken): InsertionMode {
@@ -62,8 +78,9 @@ export class InTableComposer extends BaseComposer {
         break;
       case 'style':
       case 'script':
-      case 'template':
         return this.inHead(token);
+      case 'template':
+        return this.startTemplate(token);
       case 'input':
         const typeAttr = token.attributes.find(attr => attr.name === 'type');
         if (!typeAttr || (typeAttr.value || '').toLowerCase() !== 'hidden') {

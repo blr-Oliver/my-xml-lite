@@ -12,7 +12,7 @@ export interface TestCase {
   name: string;
 }
 
-export abstract class AbstractSuite<C extends CompositeComposer, R, T extends TestCase> {
+export abstract class AbstractSuite<R, T extends TestCase, C extends CompositeComposer> {
   testCases: R[];
   errorList: string[];
   tokenizer!: StateBasedTokenizer;
@@ -80,9 +80,10 @@ export interface DefaultTestCase extends TestCase {
   errors: string[];
 }
 
-export type DefaultRawTest = [string/*name*/, string/*input*/, string/*output*/, string[]/*errors*/];
+export type DefaultRawTestCore = [string/*name*/, string/*input*/, string/*output*/, string[]/*errors*/];
+export type DefaultRawTest = [...DefaultRawTestCore, ...any[]];
 
-export class DefaultSuite<C extends CompositeComposer = CompositeComposer, R = DefaultRawTest, T extends DefaultTestCase = DefaultTestCase> extends AbstractSuite<C, R, T> {
+export class DefaultSuite<R = DefaultRawTest, T extends DefaultTestCase = DefaultTestCase, C extends CompositeComposer = CompositeComposer> extends AbstractSuite<R, T, C> {
   constructor(testCases: R[]) {
     super(testCases);
   }
@@ -132,7 +133,7 @@ export type ExcerptParams = {
   suffixErrors?: string[];
 }
 
-export class ExcerptSuite extends DefaultSuite {
+export class ExcerptSuite<R extends DefaultRawTest = DefaultRawTest, T extends DefaultTestCase = DefaultTestCase, C extends CompositeComposer = CompositeComposer> extends DefaultSuite<R, T, C> {
   prefixInput: string;
   suffixInput: string;
   prefixOutput: string;
@@ -140,7 +141,7 @@ export class ExcerptSuite extends DefaultSuite {
   prefixErrors: string[];
   suffixErrors: string[];
 
-  constructor(testCases: DefaultRawTest[], excerpt: ExcerptParams) {
+  constructor(testCases: R[], excerpt: ExcerptParams) {
     super(testCases);
     this.prefixInput = excerpt.prefixInput || '';
     this.suffixInput = excerpt.suffixInput || '';
@@ -150,8 +151,8 @@ export class ExcerptSuite extends DefaultSuite {
     this.suffixErrors = excerpt.suffixErrors || [];
   }
 
-  prepareTest(rawTest: DefaultRawTest): DefaultTestCase {
-    let result = super.prepareTest(rawTest) as DefaultTestCase;
+  prepareTest(rawTest: R): T {
+    let result = super.prepareTest(rawTest);
     result.input = `${this.prefixInput}${result.input}${this.suffixInput}`;
     result.output = `${this.prefixOutput}${result.output}${this.suffixOutput}`;
     result.errors.unshift(...this.prefixErrors);

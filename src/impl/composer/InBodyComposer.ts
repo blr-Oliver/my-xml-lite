@@ -134,7 +134,7 @@ export class InBodyComposer extends TokenAdjustingComposer {
         break;
       case 'form':
         if (this.formElement && !this.openCounts['template']) {
-          this.error();
+          this.error('nested-form');
         } else {
           if (this.hasElementInButtonScope('p'))
             this.closeParagraph();
@@ -478,7 +478,7 @@ export class InBodyComposer extends TokenAdjustingComposer {
         } else
           this.popCurrentElement();
       } else
-        this.error();
+        this.error('orphan-end-tag');
     } else {
       const form = this.formElement;
       this.formElement = null;
@@ -490,7 +490,7 @@ export class InBodyComposer extends TokenAdjustingComposer {
         } else
           this.popCurrentElement();
       } else
-        this.error();
+        this.error('orphan-end-tag');
     }
   }
 

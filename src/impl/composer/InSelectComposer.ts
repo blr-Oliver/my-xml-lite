@@ -54,8 +54,9 @@ export class InSelectComposer extends BaseComposer {
         this.error('input-inside-select');
         return this.closeSelect(token, true, false);
       case 'script':
-      case 'template':
         return this.inHead(token);
+      case 'template':
+        return this.startTemplate(token);
       default:
         this.error('unexpected-content-in-select');
     }

@@ -32,7 +32,7 @@ class SingleModeComposer extends CompositeComposer {
 }
 
 // TODO consider errors
-class InitialModeSuite extends DefaultSuite<SingleModeComposer, ModeRawTest, FinalModeTest> {
+class InitialModeSuite extends DefaultSuite<ModeRawTest, FinalModeTest, SingleModeComposer> {
   extraTokens: Token[] = [];
 
   constructor(testCases: ModeRawTest[]) {
