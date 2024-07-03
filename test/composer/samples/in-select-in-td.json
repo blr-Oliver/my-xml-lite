@@ -25,7 +25,7 @@
     "textarea", "<select>A<textarea></select>", "<select>A</select><textarea>&lt;/select>&lt;/td>&lt;/tr>&lt;/tbody>&lt;/table></textarea>",
     [
       "input-inside-select",
-      "abrupt-end-of-document-in-text",
+      "abrupt-end-of-text",
       "abrupt-end-of-document"
     ]
   ]

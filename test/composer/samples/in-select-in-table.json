@@ -34,7 +34,7 @@
     [
       "input-inside-select",
       "unexpected-content-in-table",
-      "abrupt-end-of-document-in-text",
+      "abrupt-end-of-text",
       "abrupt-end-of-document"
     ]
   ]

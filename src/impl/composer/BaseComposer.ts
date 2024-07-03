@@ -278,7 +278,7 @@ export class BaseComposer implements TokenSink {
         this.insertCharacters(token as CharactersToken);
         break;
       case 'eof':
-        this.error('abrupt-end-of-document-in-text');
+        this.error('abrupt-end-of-text');
         this.popCurrentElement();
         return this.reprocessIn(this.originalInsertionMode, token);
       case 'endTag':
