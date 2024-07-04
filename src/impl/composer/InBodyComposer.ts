@@ -56,14 +56,14 @@ export class InBodyComposer extends TokenAdjustingComposer {
       case 'title':
         return this.inHead(token);
       case 'body':
-        this.error();
+        this.error('unexpected-body-start-tag');
         if (this.openElements.length > 1 && this.openElements[1].tagName === 'body' && !this.openCounts['template']) {
           this.framesetOk = false;
           this.addMissingAttributes(this.openElements[1], token);
         }
         break;
       case 'frameset':
-        this.error();
+        this.error('frameset-in-body');
         if (this.openElements.length > 1 && this.openElements[1].tagName === 'body' && !this.openCounts['template']) {
           if (this.framesetOk) {
             this.removeElementFromParent(this.openElements[0], this.openElements[1]);

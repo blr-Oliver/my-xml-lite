@@ -9,21 +9,20 @@ export class InFramesetComposer extends BaseComposer {
         this.insertComment(token as CommentToken);
         break;
       case 'doctype':
-        this.error();
+        this.error('unexpected-doctype');
         break;
       case 'characters':
+        // non-whitespace characters are filtered on tokenizer level
         this.insertCharacters(token as CharactersToken);
         break;
       case 'eof':
         if (this.openElements.length !== 1 || this.openElements[0].tagName !== 'html')
-          this.error();
+          this.error('abrupt-end-of-frameset');
         return this.stopParsing();
       case 'startTag':
         return this.inFramesetStartTag(token as TagToken);
       case 'endTag':
         return this.inFramesetEndTag(token as TagToken);
-      default:
-        this.error();
     }
     return this.insertionMode;
   }
@@ -41,7 +40,7 @@ export class InFramesetComposer extends BaseComposer {
       case 'noframes':
         return this.inHead(token);
       default:
-        this.error();
+        this.error('unexpected-content-in-frameset');
     }
     return this.insertionMode;
   }
@@ -49,14 +48,14 @@ export class InFramesetComposer extends BaseComposer {
   inFramesetEndTag(token: TagToken): InsertionMode {
     if (token.name === 'frameset') {
       if (this.openElements.length === 1 && this.openElements[0].tagName === 'html') {
-        this.error();
+        this.error('orphan-end-tag');
       } else {
         this.popCurrentElement();
         if (!this.contextElement && this.current.tagName !== 'frameset')
           return 'afterFrameset';
       }
     } else
-      this.error();
+      this.error('unexpected-content-in-frameset');
     return this.insertionMode;
   }
 }

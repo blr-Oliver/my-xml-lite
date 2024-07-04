@@ -9,6 +9,7 @@ import {InBodyComposer} from './composer/InBodyComposer';
 import {InCaptionComposer} from './composer/InCaptionComposer';
 import {InCellComposer} from './composer/InCellComposer';
 import {InColumnGroupComposer} from './composer/InColumnGroupComposer';
+import {InFramesetComposer} from './composer/InFramesetComposer';
 import {InRowComposer} from './composer/InRowComposer';
 import {InSelectComposer} from './composer/InSelectComposer';
 import {InSelectInTableComposer} from './composer/InSelectInTableComposer';
@@ -32,6 +33,7 @@ const SyntheticComposerClass = combine('SyntheticComposerClass',
     InSelectComposer,
     InSelectInTableComposer,
     InTemplateComposer,
+    InFramesetComposer,
     AfterBodyComposer,
     AfterFramesetComposer,
     AfterAfterComposer
@@ -49,6 +51,7 @@ const SyntheticComposerClass = combine('SyntheticComposerClass',
     InSelectComposer &
     InSelectInTableComposer &
     InTemplateComposer &
+    InFramesetComposer &
     AfterBodyComposer &
     AfterFramesetComposer &
     AfterAfterComposer>;
