@@ -43,10 +43,10 @@ export class AfterAfterComposer extends BaseComposer {
   afterAfterFrameset(token: Token): InsertionMode {
     switch (token.type) {
       case 'comment':
-        this.insertComment(token as CommentToken);
+        this.insertComment(token as CommentToken, this.document);
         break;
       case 'doctype':
-        this.error();
+        this.error('unexpected-doctype');
         break;
       case 'characters':
         return this.inBody(token);
@@ -55,7 +55,7 @@ export class AfterAfterComposer extends BaseComposer {
       case 'startTag':
         return this.afterAfterFramesetStartTag(token as TagToken);
       default:
-        this.error();
+        this.error('content-after-html');
     }
     return this.insertionMode;
   }
@@ -67,7 +67,7 @@ export class AfterAfterComposer extends BaseComposer {
       case 'noframes':
         return this.inHead(token);
       default:
-        this.error();
+        this.error('content-after-html');
     }
     return this.insertionMode;
   }
