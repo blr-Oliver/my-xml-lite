@@ -9,9 +9,10 @@ export class AfterFramesetComposer extends BaseComposer {
         this.insertComment(token as CommentToken);
         break;
       case 'doctype':
-        this.error();
+        this.error('unexpected-doctype');
         break;
       case 'characters':
+        // non-whitespace characters are filtered on tokenizer level
         this.insertCharacters(token as CharactersToken);
         break;
       case 'eof':
@@ -20,8 +21,6 @@ export class AfterFramesetComposer extends BaseComposer {
         return this.afterFramesetStartTag(token as TagToken);
       case 'endTag':
         return this.afterFramesetEndTag(token as TagToken);
-      default:
-        this.error();
     }
     return this.insertionMode;
   }
@@ -33,7 +32,7 @@ export class AfterFramesetComposer extends BaseComposer {
       case 'noframes':
         return this.inHead(token);
       default:
-        this.error();
+        this.error('unexpected-content-after-frameset');
     }
     return this.insertionMode;
   }
@@ -43,7 +42,7 @@ export class AfterFramesetComposer extends BaseComposer {
       case 'html':
         return 'afterAfterFrameset';
       default:
-        this.error();
+        this.error('unexpected-content-after-frameset');
     }
     return this.insertionMode;
   }
