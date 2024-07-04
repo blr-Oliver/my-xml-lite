@@ -514,7 +514,7 @@ export class InBodyComposer extends TokenAdjustingComposer {
 
   addMissingAttributes(element: Element, token: TagToken) {
     for (let attrToken of token.attributes) {
-      if (!element.hasAttribute(token.name))
+      if (!element.hasAttribute(attrToken.name))
         (element.attributes as StaticAttributes).addAttributeNode(new StaticAttr(attrToken, element));
     }
   }

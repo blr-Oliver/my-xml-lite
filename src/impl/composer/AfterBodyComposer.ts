@@ -1,4 +1,4 @@
-import {CommentToken, TagToken, Token} from '../tokens';
+import {CharactersToken, CommentToken, TagToken, Token} from '../tokens';
 import {BaseComposer} from './BaseComposer';
 import {InsertionMode} from './insertion-mode';
 
@@ -6,23 +6,27 @@ export class AfterBodyComposer extends BaseComposer {
   afterBody(token: Token): InsertionMode {
     switch (token.type) {
       case 'comment':
-        this.insertComment(token as CommentToken);
+        this.insertComment(token as CommentToken, this.openElements[0]);
         break;
       case 'doctype':
-        this.error();
+        this.error('unexpected-doctype');
         break;
       case 'characters':
-        return this.inBody(token);
+        return this.afterBodyCharacters(token as CharactersToken);
       case 'startTag':
         return this.afterBodyStartTag(token as TagToken);
       case 'endTag':
         return this.afterBodyEndTag(token as TagToken);
       case 'eof':
         return this.stopParsing();
-      default:
-        return this.afterBodyDefault(token);
     }
     return this.insertionMode;
+  }
+
+  afterBodyCharacters(token: CharactersToken): InsertionMode {
+    if (token.whitespaceOnly)
+      return this.inBody(token);
+    return this.afterBodyDefault(token);
   }
 
   afterBodyStartTag(token: TagToken): InsertionMode {
@@ -34,7 +38,7 @@ export class AfterBodyComposer extends BaseComposer {
   afterBodyEndTag(token: TagToken): InsertionMode {
     if (token.name === 'html') {
       if (this.contextElement) {
-        this.error();
+        this.error('unexpected-end-tag');
         return this.insertionMode;
       }
       return 'afterAfterBody';
@@ -43,7 +47,7 @@ export class AfterBodyComposer extends BaseComposer {
   }
 
   afterBodyDefault(token: Token): InsertionMode {
-    this.error();
+    this.error('content-after-body');
     return this.reprocessIn('inBody', token);
   }
 }
