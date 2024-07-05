@@ -24,7 +24,7 @@ export class BeforeHeadComposer extends BaseComposer {
   }
 
   beforeHeadCharacters(token: CharactersToken): InsertionMode {
-    if (token.whitespaceOnly)
+    if (!token.whitespaceOnly)
       return this.forceHead(token);
     return this.insertionMode;
   }

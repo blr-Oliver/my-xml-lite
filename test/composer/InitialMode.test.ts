@@ -1,71 +1,59 @@
 import {InsertionMode} from '../../src/impl/composer/insertion-mode';
 import {CompositeComposer} from '../../src/impl/composite-composer';
 import {Token} from '../../src/impl/tokens';
-import {DefaultSuite, DefaultTestCase} from './abstract-suite';
+import {trackProperty} from '../util/property-tracker';
+import {DefaultRawTestCore, DefaultSuite, DefaultTestCase} from './abstract-suite';
 import {default as rawTests} from './samples/initial.json';
 
-type ModeRawTest = [string/*name*/, string/*input*/, string/*output*/, string/*mode*/, number/*extra*/, string[]/*errors*/];
+type ModeTrackingRawTest = [...DefaultRawTestCore, InsertionMode[]/*modes*/];
 
-interface FinalModeTest extends DefaultTestCase {
-  mode: string;
-  extra: number;
+interface ModeTrackingTestCase extends DefaultTestCase {
+  modes: string[];
 }
 
-class SingleModeComposer extends CompositeComposer {
-  readonly focusMode: InsertionMode;
-  readonly extraTokens: Token[];
+class InitialModeSuite extends DefaultSuite<ModeTrackingRawTest, ModeTrackingTestCase> {
+  modes!: InsertionMode[];
 
-  constructor(focusMode: InsertionMode, extraTokens: Token[]) {
-    super();
-    this.focusMode = focusMode;
-    this.extraTokens = extraTokens;
-  }
-
-  process(token: Token): InsertionMode {
-    if (token.type === 'eof') return this.insertionMode;
-    if (this.insertionMode !== this.focusMode) {
-      this.extraTokens.push(token);
-      return this.insertionMode;
-    }
-    return super.process(token);
-  }
-}
-
-// TODO consider errors
-class InitialModeSuite extends DefaultSuite<ModeRawTest, FinalModeTest, SingleModeComposer> {
-  extraTokens: Token[] = [];
-
-  constructor(testCases: ModeRawTest[]) {
+  constructor(testCases: ModeTrackingRawTest[]) {
     super(testCases);
   }
 
-  createComposer(): SingleModeComposer {
-    return new SingleModeComposer('initial', this.extraTokens);
+  createComposer(): CompositeComposer {
+    return new class SwallowEOF extends CompositeComposer {
+      accept(token: Token) {
+        if (token.type !== 'eof')
+          super.accept(token);
+      }
+    }();
+  }
+
+  configure() {
+    super.configure();
+    this.modes = trackProperty(this.composer, 'insertionMode');
   }
 
   beforeEach() {
     super.beforeEach();
-    this.composer.setInsertionMode(this.composer.focusMode);
-    this.extraTokens.length = 0;
+    this.modes.length = 0;
   }
 
-  prepareTest(rawTest: ModeRawTest): FinalModeTest {
-    const [name, input, output, mode, extra, errors] = rawTest;
-    return {name, input, output, mode, extra, errors};
+  prepareTest(rawTest: ModeTrackingRawTest): ModeTrackingTestCase {
+    const result = super.prepareTest(rawTest);
+    result.modes = rawTest[4];
+    return result;
   }
 
-  runTest(test: FinalModeTest) {
+  runTest(test: ModeTrackingTestCase) {
     super.runTest(test);
   }
 
-  runChecks(test: FinalModeTest) {
+  runChecks(test: ModeTrackingTestCase) {
     super.runChecks(test);
-    expect(this.composer.insertionMode).toStrictEqual(test.mode);
-    expect(this.extraTokens.length).toStrictEqual(test.extra);
+    expect(this.modes).toStrictEqual(test.modes);
   }
 }
 
-const suite = new InitialModeSuite(rawTests as ModeRawTest[]);
+const suite = new InitialModeSuite(rawTests as ModeTrackingRawTest[]);
 
 beforeAll(() => suite.beforeAll());
 beforeEach(() => suite.beforeEach());
