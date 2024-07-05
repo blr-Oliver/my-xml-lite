@@ -1,0 +1,17 @@
+[
+  ["space", "<!DOCTYPE html> \n\f\t", "<!DOCTYPE html><html><head></head><body></body></html>", []],
+  ["comment", "<!DOCTYPE html><!--A-->", "<!DOCTYPE html><!--A--><html><head></head><body></body></html>", []],
+  ["doctype", "<!DOCTYPE html><!DOCTYPE html>", "<!DOCTYPE html><html><head></head><body></body></html>", ["unexpected-doctype"]],
+  ["space + doctype", "<!DOCTYPE html> \n\f\t<!DOCTYPE html>", "<!DOCTYPE html><html><head></head><body></body></html>", ["unexpected-doctype"]],
+  ["NUL", "<!DOCTYPE html>\u0000", "<!DOCTYPE html><html><head></head><body></body></html>", ["unexpected-null-character"]],
+  ["text", "<!DOCTYPE html>A", "<!DOCTYPE html><html><head></head><body>A</body></html>", []],
+  ["CDATA", "<!DOCTYPE html><![CDATA[A]]>", "<!DOCTYPE html><!--[CDATA[A]]--><html><head></head><body></body></html>", ["incorrectly-opened-comment"]],
+  ["html start", "<!DOCTYPE html><html a>", "<!DOCTYPE html><html a><head></head><body></body></html>", []],
+  ["head end", "<!DOCTYPE html></head>", "<!DOCTYPE html><html><head></head><body></body></html>", []],
+  ["body end", "<!DOCTYPE html></body>", "<!DOCTYPE html><html><head></head><body></body></html>", []],
+  ["html end", "<!DOCTYPE html></html>", "<!DOCTYPE html><html><head></head><body></body></html>", []],
+  ["br end", "<!DOCTYPE html></br>", "<!DOCTYPE html><html><head></head><body><br/></body></html>", []],
+  ["any start tag", "<!DOCTYPE html><tag>", "<!DOCTYPE html><html><head></head><body><tag></tag></body></html>", ["abrupt-end-of-document"]],
+  ["any end tag", "<!DOCTYPE html></tag>", "<!DOCTYPE html><html><head></head><body></body></html>", ["unexpected-tag-before-html"]],
+  ["any proper element", "<!DOCTYPE html><tag></tag>", "<!DOCTYPE html><html><head></head><body><tag></tag></body></html>", []]
+]
