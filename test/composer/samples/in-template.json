@@ -22,6 +22,7 @@
   ["tr", "<template>A<tr>B</template>C", "<template>A<tr></tr>B</template>C", ["text-in-table"], ["+inTemplate", "-inTemplate", "+inTableBody", "-inTableBody"]],
   ["td", "<template>A<td>B</template>C", "<template>A<td>B</td></template>C", [], ["+inTemplate", "-inTemplate", "+inRow", "-inRow"]],
   ["th", "<template>A<th>B</template>C", "<template>A<th>B</th></template>C", [], ["+inTemplate", "-inTemplate", "+inRow", "-inRow"]],
+  ["body", "<template>A<body a>B</template>C", "<template>AB</template>C", ["unexpected-body-start-tag"], ["+inTemplate", "-inTemplate", "+inBody", "-inBody"]],
   ["template start", "<template>A<template>B<div>C</template>D", "<template>A<template>B<div>C</div></template>D</template>", ["abrupt-end-of-template", "abrupt-end-of-template"], ["+inTemplate", "+inTemplate", "-inTemplate", "+inBody", "-inBody", "-inTemplate"]],
   ["nested template", "<template>A<template>B<div>C</template>D</template>", "<template>A<template>B<div>C</div></template>D</template>", ["abrupt-end-of-template"], ["+inTemplate", "+inTemplate", "-inTemplate", "+inBody", "-inBody", "-inTemplate"]],
   ["table-template-table", "<table>A<template>B<table>C</table>D</template>E</table>F", "AE<table><template>BC<table></table>D</template></table>F", ["text-in-table", "text-in-table", "text-in-table"], ["+inTemplate", "-inTemplate", "+inBody", "-inBody"]],
