@@ -10,6 +10,7 @@ import {InBodyComposer} from './composer/InBodyComposer';
 import {InCaptionComposer} from './composer/InCaptionComposer';
 import {InCellComposer} from './composer/InCellComposer';
 import {InColumnGroupComposer} from './composer/InColumnGroupComposer';
+import {InForeignContentComposer} from './composer/InForeignContentComposer';
 import {InFramesetComposer} from './composer/InFramesetComposer';
 import {InHeadComposer} from './composer/InHeadComposer';
 import {InHeadNoscriptComposer} from './composer/InHeadNoscriptComposer';
@@ -44,7 +45,8 @@ const SyntheticComposerClass = combine('SyntheticComposerClass',
     InFramesetComposer,
     AfterBodyComposer,
     AfterFramesetComposer,
-    AfterAfterComposer
+    AfterAfterComposer,
+    InForeignContentComposer
 ) as Class<BaseComposer &
     TokenAdjustingComposer &
     InitialComposer &
@@ -66,7 +68,8 @@ const SyntheticComposerClass = combine('SyntheticComposerClass',
     InFramesetComposer &
     AfterBodyComposer &
     AfterFramesetComposer &
-    AfterAfterComposer>;
+    AfterAfterComposer &
+    InForeignContentComposer>;
 
 export class CompositeComposer extends SyntheticComposerClass {
 }

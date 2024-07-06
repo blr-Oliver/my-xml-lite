@@ -1,0 +1,10 @@
+[
+  ["empty svg", "<svg></svg>", "<html><head></head><body><svg></svg></body></html>", []],
+  ["unclosed", "<svg>", "<html><head></head><body><svg></svg></body></html>", ["abrupt-end-of-document"]],
+  ["space", "<svg> \t\n\f</svg>", "<html><head></head><body><svg> \t\n\f</svg></body></html>", []],
+  ["comment", "<svg><!--A--></svg>", "<html><head></head><body><svg><!--A--></svg></body></html>", []],
+  ["doctype", "<svg><!DOCTYPE html></svg>", "<html><head></head><body><svg></svg></body></html>", ["unexpected-doctype"]],
+  ["text", "<svg>A</svg>", "<html><head></head><body><svg>A</svg></body></html>", []],
+  ["NUL", "<svg>\u0000</svg>", "<html><head></head><body><svg>\uFFFD</svg></body></html>", ["unexpected-null-character"]],
+  ["CDATA", "<svg><![CDATA[A]]></svg>", "<html><head></head><body><svg><![CDATA[A]]></svg></body></html>", []]
+]

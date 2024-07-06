@@ -65,7 +65,7 @@ function serializeContents(node: ParentNode, chunks: string[]) {
 }
 
 function serializeCData(node: CDATASection, chunks: string[]) {
-  chunks.push('<[[CDATA[');
+  chunks.push('<![CDATA[');
   chunks.push(node.data);
   chunks.push(']]>');
 }

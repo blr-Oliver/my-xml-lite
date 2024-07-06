@@ -11,7 +11,7 @@ export class InForeignContentComposer extends TokenAdjustingComposer {
         this.insertComment(token as CommentToken);
         break;
       case 'doctype':
-        this.error();
+        this.error('unexpected-doctype');
         break;
       case 'characters':
       case 'cdata':
