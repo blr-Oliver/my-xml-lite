@@ -9,7 +9,7 @@ export class AfterHeadComposer extends BaseComposer {
         this.insertComment(token as CommentToken);
         break;
       case 'doctype':
-        this.error();
+        this.error('unexpected-doctype');
         break;
       case 'characters':
         return this.afterHeadCharacters(token as CharactersToken);
@@ -34,7 +34,7 @@ export class AfterHeadComposer extends BaseComposer {
   afterHeadStartTag(token: TagToken): InsertionMode {
     switch (token.name) {
       case 'head':
-        this.error();
+        this.error('unexpected-start-tag');
         break;
       case 'html':
         return this.inBody(token);
@@ -55,7 +55,7 @@ export class AfterHeadComposer extends BaseComposer {
       case 'style':
       case 'template':
       case 'title':
-        this.error();
+        this.error('head-content-after-head');
         this.pushOpenElement(this.headElement!);
         let result = this.inHead(token);
         let index = this.openElements.indexOf(this.headElement!);
@@ -63,7 +63,9 @@ export class AfterHeadComposer extends BaseComposer {
           this.popCurrentElement();
         else {
           this.openElements.splice(index, 1);
-          this.openCounts['head']--;
+          // pushing directly and popping ensures every side-effect of removing top element
+          this.openElements.push(this.headElement!);
+          this.popCurrentElement();
         }
         return result;
       default:
@@ -75,13 +77,15 @@ export class AfterHeadComposer extends BaseComposer {
   afterHeadEndTag(token: TagToken): InsertionMode {
     switch (token.name) {
       case 'template':
+        // is there any well-formed case for this?
+        // if no, should just shortcut to error('orphan-end-tag')
         return this.endTemplate();
       case 'body':
       case 'html':
       case 'br':
         return this.forceElementAndState('body', 'inBody', token);
       default:
-        this.error();
+        this.error('unexpected-end-tag-after-head');
         return this.insertionMode;
     }
   }
