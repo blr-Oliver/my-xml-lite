@@ -44,12 +44,14 @@ export class InHeadComposer extends BaseComposer {
         break;
       case 'title':
         return this.startTextMode('rcdata', token);
-      case 'noscript':
       case 'noframes':
       case 'style':
         return this.startTextMode('rawtext', token);
       case 'script':
         return this.startTextMode('scriptData', token);
+      case 'noscript':
+        this.createAndInsertHTMLElement(token);
+        return 'inHeadNoscript';
       case 'template':
         return this.startTemplate(token);
       case 'head':
