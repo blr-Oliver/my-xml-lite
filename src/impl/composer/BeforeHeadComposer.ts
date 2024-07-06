@@ -1,4 +1,4 @@
-import {CharactersToken, CommentToken, TagToken, Token} from '../tokens';
+import {CommentToken, TagToken, Token} from '../tokens';
 import {BaseComposer} from './BaseComposer';
 import {InsertionMode} from './insertion-mode';
 
@@ -6,7 +6,8 @@ export class BeforeHeadComposer extends BaseComposer {
   beforeHead(token: Token): InsertionMode {
     switch (token.type) {
       case 'characters':
-        return this.beforeHeadCharacters(token as CharactersToken);
+        // whitespace will be blocked on tokenizer level
+        return this.forceHead(token);
       case 'comment':
         this.insertComment(token as CommentToken);
         break;
@@ -20,12 +21,6 @@ export class BeforeHeadComposer extends BaseComposer {
       default:
         return this.forceHead(token);
     }
-    return this.insertionMode;
-  }
-
-  beforeHeadCharacters(token: CharactersToken): InsertionMode {
-    if (!token.whitespaceOnly)
-      return this.forceHead(token);
     return this.insertionMode;
   }
 
