@@ -10,7 +10,7 @@
   ["head end", "<!DOCTYPE html></head>", "<!DOCTYPE html><html><head></head><body></body></html>", []],
   ["body end", "<!DOCTYPE html></body>", "<!DOCTYPE html><html><head></head><body></body></html>", []],
   ["html end", "<!DOCTYPE html></html>", "<!DOCTYPE html><html><head></head><body></body></html>", []],
-  ["br end", "<!DOCTYPE html></br>", "<!DOCTYPE html><html><head></head><body><br/></body></html>", []],
+  ["br end", "<!DOCTYPE html></br>", "<!DOCTYPE html><html><head></head><body><br/></body></html>", ["br-end-tag"]],
   ["any start tag", "<!DOCTYPE html><tag>", "<!DOCTYPE html><html><head></head><body><tag></tag></body></html>", ["abrupt-end-of-document"]],
   ["any end tag", "<!DOCTYPE html></tag>", "<!DOCTYPE html><html><head></head><body></body></html>", ["unexpected-tag-before-html"]],
   ["any proper element", "<!DOCTYPE html><tag></tag>", "<!DOCTYPE html><html><head></head><body><tag></tag></body></html>", []]

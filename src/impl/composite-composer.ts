@@ -2,15 +2,17 @@ import {Class, combine} from '../common/multi-class';
 import {AfterAfterComposer} from './composer/AfterAfterComposer';
 import {AfterBodyComposer} from './composer/AfterBodyComposer';
 import {AfterFramesetComposer} from './composer/AfterFramesetComposer';
+import {AfterHeadComposer} from './composer/AfterHeadComposer';
 import {BaseComposer} from './composer/BaseComposer';
 import {BeforeHeadComposer} from './composer/BeforeHeadComposer';
 import {BeforeHtmlComposer} from './composer/BeforeHtmlComposer';
-import {HeadComposer} from './composer/HeadComposer';
 import {InBodyComposer} from './composer/InBodyComposer';
 import {InCaptionComposer} from './composer/InCaptionComposer';
 import {InCellComposer} from './composer/InCellComposer';
 import {InColumnGroupComposer} from './composer/InColumnGroupComposer';
 import {InFramesetComposer} from './composer/InFramesetComposer';
+import {InHeadComposer} from './composer/InHeadComposer';
+import {InHeadNoscriptComposer} from './composer/InHeadNoscriptComposer';
 import {InitialComposer} from './composer/InitialComposer';
 import {InRowComposer} from './composer/InRowComposer';
 import {InSelectComposer} from './composer/InSelectComposer';
@@ -26,7 +28,9 @@ const SyntheticComposerClass = combine('SyntheticComposerClass',
     InitialComposer,
     BeforeHtmlComposer,
     BeforeHeadComposer,
-    HeadComposer,
+    InHeadComposer,
+    InHeadNoscriptComposer,
+    AfterHeadComposer,
     InBodyComposer,
     InTableComposer,
     InCaptionComposer,
@@ -46,7 +50,9 @@ const SyntheticComposerClass = combine('SyntheticComposerClass',
     InitialComposer &
     BeforeHtmlComposer &
     BeforeHeadComposer &
-    HeadComposer &
+    InHeadComposer &
+    InHeadNoscriptComposer &
+    AfterHeadComposer &
     InBodyComposer &
     InTableComposer &
     InCaptionComposer &

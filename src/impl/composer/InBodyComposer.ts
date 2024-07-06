@@ -446,6 +446,7 @@ export class InBodyComposer extends TokenAdjustingComposer {
         this.clearFormattingUpToMarker();
         break;
       case 'br':
+        this.error('br-end-tag');
         return this.inBodyStartTag({type: 'startTag', name: 'br', selfClosed: false, attributes: []});
       default:
         return this.inBodyEndTagDefault(token);
