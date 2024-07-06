@@ -383,12 +383,12 @@ export class BaseComposer implements TokenSink {
     if (element.hasAttribute('xmlns')) {
       const attr = element.getAttributeNode('xmlns')!;
       if (attr.namespaceURI === NS_XMLNS && attr.localName === 'xmlns' && attr.value !== element.namespaceURI)
-        this.error();
+        this.error('mismatched-xmlns-attribute');
     }
     if (element.hasAttribute('xmlns:xlink')) {
       const attr = element.getAttributeNode('xmlns:xlink')!;
       if (attr.namespaceURI === NS_XMLNS && attr.localName === 'xlink' && attr.value !== NS_XLINK)
-        this.error();
+        this.error('invalid-xlink-namespace');
     }
   }
 

@@ -6,5 +6,38 @@
   ["doctype", "<svg><!DOCTYPE html></svg>", "<html><head></head><body><svg></svg></body></html>", ["unexpected-doctype"]],
   ["text", "<svg>A</svg>", "<html><head></head><body><svg>A</svg></body></html>", []],
   ["NUL", "<svg>\u0000</svg>", "<html><head></head><body><svg>\uFFFD</svg></body></html>", ["unexpected-null-character"]],
-  ["CDATA", "<svg><![CDATA[A]]></svg>", "<html><head></head><body><svg><![CDATA[A]]></svg></body></html>", []]
+  ["CDATA", "<svg><![CDATA[A]]></svg>", "<html><head></head><body><svg><![CDATA[A]]></svg></body></html>", []],
+  ["svg correct namespace", "<svg xmlns=\"http://www.w3.org/2000/svg\"></svg>", "<html><head></head><body><svg xmlns=\"http://www.w3.org/2000/svg\"></svg></body></html>", []],
+  ["svg invalid namespace", "<svg xmlns=\"http://www.w3.org/1999/xhtml\"></svg>", "<html><head></head><body><svg xmlns=\"http://www.w3.org/1999/xhtml\"></svg></body></html>", ["mismatched-xmlns-attribute"]],
+  ["svg invalid xlink", "<svg xmlns:xlink=\"http://www.w3.org/1999/xhtml\"></svg>", "<html><head></head><body><svg xmlns:xlink=\"http://www.w3.org/1999/xhtml\"></svg></body></html>", ["invalid-xlink-namespace"]],
+  ["math correct namespace", "<math xmlns=\"http://www.w3.org/1998/Math/MathML\"></math>", "<html><head></head><body><math xmlns=\"http://www.w3.org/1998/Math/MathML\"></math></body></html>", []],
+  ["math invalid namespace", "<math xmlns=\"http://www.w3.org/1999/xhtml\"></math>", "<html><head></head><body><math xmlns=\"http://www.w3.org/1999/xhtml\"></math></body></html>", ["mismatched-xmlns-attribute"]],
+  ["inherited svg inner correct namespace", "<svg><tag xmlns=\"http://www.w3.org/2000/svg\"/></svg>", "<html><head></head><body><svg><tag xmlns=\"http://www.w3.org/2000/svg\"/></svg></body></html>", []],
+  ["inherited svg inner invalid namespace", "<svg><tag xmlns=\"http://www.w3.org/1999/xhtml\"/></svg>", "<html><head></head><body><svg><tag xmlns=\"http://www.w3.org/1999/xhtml\"/></svg></body></html>", ["mismatched-xmlns-attribute"]],
+  [
+    "inherited svg double invalid namespace",
+    "<svg xmlns=\"http://www.w3.org/1999/xhtml\"><tag xmlns=\"http://www.w3.org/1999/xhtml\"/></svg>",
+    "<html><head></head><body><svg xmlns=\"http://www.w3.org/1999/xhtml\"><tag xmlns=\"http://www.w3.org/1999/xhtml\"/></svg></body></html>",
+    ["mismatched-xmlns-attribute", "mismatched-xmlns-attribute"]
+  ],
+  [
+    "inherited svg outer invalid namespace",
+    "<svg xmlns=\"http://www.w3.org/1999/xhtml\">\u0000<tag xmlns=\"http://www.w3.org/2000/svg\"/></svg>",
+    "<html><head></head><body><svg xmlns=\"http://www.w3.org/1999/xhtml\">\uFFFD<tag xmlns=\"http://www.w3.org/2000/svg\"/></svg></body></html>",
+    ["mismatched-xmlns-attribute", "unexpected-null-character"]
+  ],
+  ["inherited math inner correct namespace", "<math><tag xmlns=\"http://www.w3.org/1998/Math/MathML\"/></math>", "<html><head></head><body><math><tag xmlns=\"http://www.w3.org/1998/Math/MathML\"/></math></body></html>", []],
+  ["inherited math inner invalid namespace", "<math><tag xmlns=\"http://www.w3.org/1999/xhtml\"/></math>", "<html><head></head><body><math><tag xmlns=\"http://www.w3.org/1999/xhtml\"/></math></body></html>", ["mismatched-xmlns-attribute"]],
+  [
+    "inherited math double invalid namespace",
+    "<math xmlns=\"http://www.w3.org/1999/xhtml\"><tag xmlns=\"http://www.w3.org/1999/xhtml\"/></math>",
+    "<html><head></head><body><math xmlns=\"http://www.w3.org/1999/xhtml\"><tag xmlns=\"http://www.w3.org/1999/xhtml\"/></math></body></html>",
+    ["mismatched-xmlns-attribute", "mismatched-xmlns-attribute"]
+  ],
+  [
+    "inherited math outer invalid namespace",
+    "<math xmlns=\"http://www.w3.org/1999/xhtml\">\u0000<tag xmlns=\"http://www.w3.org/1998/Math/MathML\"/></math>",
+    "<html><head></head><body><math xmlns=\"http://www.w3.org/1999/xhtml\">\uFFFD<tag xmlns=\"http://www.w3.org/1998/Math/MathML\"/></math></body></html>",
+    ["mismatched-xmlns-attribute", "unexpected-null-character"]
+  ]
 ]

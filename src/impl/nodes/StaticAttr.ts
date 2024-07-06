@@ -11,9 +11,9 @@ export class StaticAttr implements Attr {
 
   constructor(attr: NamespacedAttribute, ownerElement: Element) {
     this.name = attr.name;
-    this.namespaceURI = attr.namespaceURI ? null : attr.namespaceURI!;
-    this.prefix = attr.prefix ? null : attr.prefix!;
-    this.localName = attr.localName ? attr.name : attr.localName!;
+    this.namespaceURI = attr.namespaceURI ? attr.namespaceURI! : null;
+    this.prefix = attr.prefix ? attr.prefix! : null;
+    this.localName = attr.localName ? attr.localName! : attr.name;
     this.value = attr.value;
     this.ownerElement = ownerElement;
   }
