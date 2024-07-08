@@ -74,12 +74,16 @@ export class InForeignContentComposer extends TokenAdjustingComposer {
       case 'u':
       case 'ul':
       case 'var':
-        this.error('html-specific-start-tag-in-foreign-content');
-        this.popUntilMatches((n, e) => this.isHTMLContentRestricted(n, e));
-        return this.process(token);
+        return this.inForeignContentHtmlSpecificTag(token);
       default:
         return this.inForeignContentStartTagDefault(token);
     }
+  }
+
+  inForeignContentHtmlSpecificTag(token: TagToken) {
+    this.error('html-specific-tag-in-foreign-content');
+    this.popUntilMatches((n, e) => !this.canContainHtml(n, e));
+    return this.process(token);
   }
 
   inForeignContentStartTagDefault(token: TagToken): InsertionMode {
@@ -99,15 +103,14 @@ export class InForeignContentComposer extends TokenAdjustingComposer {
     switch (token.name) {
       case 'br':
       case 'p':
-        this.error();
-        this.popUntilMatches((n, e) => this.isHTMLContentRestricted(n, e));
-        return this.process(token);
+        return this.inForeignContentHtmlSpecificTag(token);
       default:
         if (token.name !== this.current.tagName.toLowerCase())
-          this.error();
+          this.error('unmatched-end-tag-in-foreign-content');
         for (let i = this.openElements.length - 1; i > 0; --i) {
           let node = this.openElements[i];
-          if (node.namespaceURI === NS_HTML) return this.process(token);
+          if (node.namespaceURI === NS_HTML)
+            return this.process(token);
           if (node.tagName.toLowerCase() === token.name) {
             while (this.openElements.length > i) {
               this.popCurrentElement();
@@ -119,7 +122,7 @@ export class InForeignContentComposer extends TokenAdjustingComposer {
     return this.insertionMode;
   }
   // TODO this should be static (or inlined)
-  isHTMLContentRestricted(name: string, element: Element): boolean {
-    return !(element.namespaceURI === NS_HTML || this.isMathMLIntegrationPoint(element) || this.isHTMLIntegrationPoint(element));
+  canContainHtml(name: string, element: Element): boolean {
+    return element.namespaceURI === NS_HTML || this.isMathMLIntegrationPoint(element) || this.isHTMLIntegrationPoint(element);
   }
 }

@@ -308,7 +308,7 @@ export class InBodyComposer extends TokenAdjustingComposer {
       case 'th':
       case 'thead':
       case 'tr':
-        this.error();
+        this.error('unexpected-start-tag-in-body');
         break;
       default:
         this.reconstructFormattingElements();
@@ -325,7 +325,7 @@ export class InBodyComposer extends TokenAdjustingComposer {
       case 'html':
         if (this.openCounts['body']) {
           if (this.hasExplicitlyClosableOnStack())
-            this.error();
+            this.error('abrupt-end-of-content');
           return token.name === 'body' ? 'afterBody' : this.reprocessIn('afterBody', token);
         }
         this.error();
@@ -370,7 +370,7 @@ export class InBodyComposer extends TokenAdjustingComposer {
         break;
       case 'p':
         if (!this.hasElementInButtonScope('p')) {
-          this.error();
+          this.error('orphan-p-end-tag');
           this.createAndInsertHTMLElement({type: 'startTag', name: 'p', selfClosed: false, attributes: []});
         }
         this.closeParagraph();
