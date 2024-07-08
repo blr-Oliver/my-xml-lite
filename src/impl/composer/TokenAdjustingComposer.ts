@@ -164,7 +164,7 @@ export class TokenAdjustingComposer extends BaseComposer {
   protected adjustMathMLAttributes(token: TagToken) {
     for (let attr of token.attributes) {
       if (attr.name === 'definitionurl')
-        token.name = 'definitionUrl';
+        attr.name = 'definitionURL';
     }
   }
 
@@ -177,6 +177,7 @@ export class TokenAdjustingComposer extends BaseComposer {
   }
 
   protected adjustForeignAttributes(token: TagToken) {
+    // TODO test it
     for (let attr of token.attributes) {
       const adjustment = FOREIGN_ATTR_ADJUSTMENT[attr.name];
       if (adjustment)

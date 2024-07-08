@@ -619,5 +619,7 @@ export class InBodyComposer extends TokenAdjustingComposer {
     return false;
   }
   adoptionAgency(token: TagToken) { // TODO this requires active tree modification which is not possible with current implementation
+    if (token.name === this.current.tagName)
+      this.popCurrentElement();
   }
 }

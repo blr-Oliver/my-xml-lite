@@ -149,6 +149,7 @@ export class BaseComposer implements TokenSink {
   }
 
   shouldUseForeignRules(token?: Token): boolean {
+    // TODO this should be carefully optimized
     if (!this.openElements.length) return false;
     const adjustedNode = this.adjustedCurrentNode;
     if (adjustedNode.namespaceURI === NS_HTML) return false;
@@ -310,12 +311,12 @@ export class BaseComposer implements TokenSink {
     switch (element.namespaceURI) {
       case NS_MATHML:
         if (element.tagName !== 'annotation-xml') return false;
-        const encoding = (element.getAttribute('encoding') || '').toLowerCase();
-        return encoding === 'text/html' || encoding === 'application/xhtml+xml';
+        let encoding = element.getAttribute('encoding');
+        return !!encoding && ((encoding = encoding!.toLowerCase()) === 'text/html' || encoding === 'application/xhtml+xml');
       case NS_SVG:
         switch (element.tagName) {
-          case 'foreignObject':
           case 'desc':
+          case 'foreignObject':
           case 'title':
             return true;
           default:

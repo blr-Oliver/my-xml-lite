@@ -74,8 +74,8 @@ export class InForeignContentComposer extends TokenAdjustingComposer {
       case 'u':
       case 'ul':
       case 'var':
-        this.error();
-        this.popUntilMatches(this.isHTMLContentRestricted);
+        this.error('html-specific-start-tag-in-foreign-content');
+        this.popUntilMatches((n, e) => this.isHTMLContentRestricted(n, e));
         return this.process(token);
       default:
         return this.inForeignContentStartTagDefault(token);
@@ -100,7 +100,7 @@ export class InForeignContentComposer extends TokenAdjustingComposer {
       case 'br':
       case 'p':
         this.error();
-        this.popUntilMatches(this.isHTMLContentRestricted);
+        this.popUntilMatches((n, e) => this.isHTMLContentRestricted(n, e));
         return this.process(token);
       default:
         if (token.name !== this.current.tagName.toLowerCase())
@@ -109,7 +109,7 @@ export class InForeignContentComposer extends TokenAdjustingComposer {
           let node = this.openElements[i];
           if (node.namespaceURI === NS_HTML) return this.process(token);
           if (node.tagName.toLowerCase() === token.name) {
-            while (this.openElements.length >= i) {
+            while (this.openElements.length > i) {
               this.popCurrentElement();
             }
             break;
@@ -118,7 +118,7 @@ export class InForeignContentComposer extends TokenAdjustingComposer {
     }
     return this.insertionMode;
   }
-
+  // TODO this should be static (or inlined)
   isHTMLContentRestricted(name: string, element: Element): boolean {
     return !(element.namespaceURI === NS_HTML || this.isMathMLIntegrationPoint(element) || this.isHTMLIntegrationPoint(element));
   }

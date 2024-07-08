@@ -39,5 +39,156 @@
     "<math xmlns=\"http://www.w3.org/1999/xhtml\">\u0000<tag xmlns=\"http://www.w3.org/1998/Math/MathML\"/></math>",
     "<html><head></head><body><math xmlns=\"http://www.w3.org/1999/xhtml\">\uFFFD<tag xmlns=\"http://www.w3.org/1998/Math/MathML\"/></math></body></html>",
     ["mismatched-xmlns-attribute", "unexpected-null-character"]
-  ]
+  ],
+  [
+    "math inheriting svg namespace correct",
+    "<svg><math xmlns=\"http://www.w3.org/2000/svg\"/></svg>",
+    "<html><head></head><body><svg><math xmlns=\"http://www.w3.org/2000/svg\"/></svg></body></html>", []
+  ],
+  [
+    "math inheriting svg namespace invalid",
+    "<svg><math xmlns=\"http://www.w3.org/1998/Math/MathML\"/></svg>",
+    "<html><head></head><body><svg><math xmlns=\"http://www.w3.org/1998/Math/MathML\"/></svg></body></html>",
+    ["mismatched-xmlns-attribute"]
+  ],
+  [
+    "svg inheriting math namespace correct",
+    "<math><svg xmlns=\"http://www.w3.org/1998/Math/MathML\"/></math>",
+    "<html><head></head><body><math><svg xmlns=\"http://www.w3.org/1998/Math/MathML\"/></math></body></html>", []
+  ],
+  [
+    "svg inheriting math namespace invalid",
+    "<math><svg xmlns=\"http://www.w3.org/2000/svg\"/></math>",
+    "<html><head></head><body><math><svg xmlns=\"http://www.w3.org/2000/svg\"/></math></body></html>",
+    ["mismatched-xmlns-attribute"]
+  ],
+  [
+    "math:mi",
+    "<math><![CDATA[A]]>B\u0000C<mi><![CDATA[D]]>E\u0000F<div xmlns=\"http://www.w3.org/1999/xhtml\"></div>G</mi></math>",
+    "<html><head></head><body><math><![CDATA[A]]>B\uFFFDC<mi><![CDATA[D]]>EF<div xmlns=\"http://www.w3.org/1999/xhtml\"></div>G</mi></math></body></html>",
+    ["unexpected-null-character", "unexpected-null-character"]
+  ],
+  [
+    "math:mo",
+    "<math><![CDATA[A]]>B\u0000C<mo><![CDATA[D]]>E\u0000F<div xmlns=\"http://www.w3.org/1999/xhtml\"></div>G</mo></math>",
+    "<html><head></head><body><math><![CDATA[A]]>B\uFFFDC<mo><![CDATA[D]]>EF<div xmlns=\"http://www.w3.org/1999/xhtml\"></div>G</mo></math></body></html>",
+    ["unexpected-null-character", "unexpected-null-character"]
+  ],
+  [
+    "math:mn",
+    "<math><![CDATA[A]]>B\u0000C<mn><![CDATA[D]]>E\u0000F<div xmlns=\"http://www.w3.org/1999/xhtml\"></div>G</mn></math>",
+    "<html><head></head><body><math><![CDATA[A]]>B\uFFFDC<mn><![CDATA[D]]>EF<div xmlns=\"http://www.w3.org/1999/xhtml\"></div>G</mn></math></body></html>",
+    ["unexpected-null-character", "unexpected-null-character"]
+  ],
+  [
+    "math:ms",
+    "<math><![CDATA[A]]>B\u0000C<ms><![CDATA[D]]>E\u0000F<div xmlns=\"http://www.w3.org/1999/xhtml\"></div>G</ms></math>",
+    "<html><head></head><body><math><![CDATA[A]]>B\uFFFDC<ms><![CDATA[D]]>EF<div xmlns=\"http://www.w3.org/1999/xhtml\"></div>G</ms></math></body></html>",
+    ["unexpected-null-character", "unexpected-null-character"]
+  ],
+  [
+    "math:mtext",
+    "<math><![CDATA[A]]>B\u0000C<mtext><![CDATA[D]]>E\u0000F<div xmlns=\"http://www.w3.org/1999/xhtml\"></div>G</mtext></math>",
+    "<html><head></head><body><math><![CDATA[A]]>B\uFFFDC<mtext><![CDATA[D]]>EF<div xmlns=\"http://www.w3.org/1999/xhtml\"></div>G</mtext></math></body></html>",
+    ["unexpected-null-character", "unexpected-null-character"]
+  ],
+  [
+    "math:mtext>mglyph",
+    "<math><![CDATA[A]]>B\u0000C<mtext><![CDATA[D]]>E\u0000F<mglyph xmlns=\"http://www.w3.org/1998/Math/MathML\"></mglyph>G</mtext></math>",
+    "<html><head></head><body><math><![CDATA[A]]>B\uFFFDC<mtext><![CDATA[D]]>EF<mglyph xmlns=\"http://www.w3.org/1998/Math/MathML\"></mglyph>G</mtext></math></body></html>",
+    ["unexpected-null-character", "unexpected-null-character"]
+  ],
+  [
+    "math:mtext>malignmark",
+    "<math><![CDATA[A]]>B\u0000C<mtext><![CDATA[D]]>E\u0000F<malignmark xmlns=\"http://www.w3.org/1998/Math/MathML\"/>G</mtext></math>",
+    "<html><head></head><body><math><![CDATA[A]]>B\uFFFDC<mtext><![CDATA[D]]>EF<malignmark xmlns=\"http://www.w3.org/1998/Math/MathML\"/>G</mtext></math></body></html>",
+    ["unexpected-null-character", "unexpected-null-character"]
+  ],
+  [
+    "math:annotation-xml>svg",
+    "<math><![CDATA[A]]>\u0000<annotation-xml><![CDATA[B]]>\u0000<svg xmlns=\"http://www.w3.org/2000/svg\"><![CDATA[C]]>\u0000</svg></annotation-xml></math>",
+    "<html><head></head><body><math><![CDATA[A]]>\uFFFD<annotation-xml><![CDATA[B]]>\uFFFD<svg xmlns=\"http://www.w3.org/2000/svg\"><![CDATA[C]]>\uFFFD</svg></annotation-xml></math></body></html>",
+    ["unexpected-null-character", "unexpected-null-character", "unexpected-null-character"]
+  ],
+  [
+    "math:annotation-xml>tag",
+    "<math><![CDATA[A]]>\u0000<annotation-xml><![CDATA[B]]>\u0000<tag xmlns=\"http://www.w3.org/1998/Math/MathML\"><![CDATA[C]]>\u0000</tag></annotation-xml></math>",
+    "<html><head></head><body><math><![CDATA[A]]>\uFFFD<annotation-xml><![CDATA[B]]>\uFFFD<tag xmlns=\"http://www.w3.org/1998/Math/MathML\"><![CDATA[C]]>\uFFFD</tag></annotation-xml></math></body></html>",
+    ["unexpected-null-character", "unexpected-null-character", "unexpected-null-character"]
+  ],
+  [
+    "math:annotation-xml[encoding='text/html']>svg",
+    "<math><![CDATA[A]]>\u0000<annotation-xml encoding=\"text/html\"><![CDATA[B]]>\u0000<svg xmlns=\"http://www.w3.org/2000/svg\"><![CDATA[C]]>\u0000</svg></annotation-xml></math>",
+    "<html><head></head><body><math><![CDATA[A]]>\uFFFD<annotation-xml encoding=\"text/html\"><![CDATA[B]]><svg xmlns=\"http://www.w3.org/2000/svg\"><![CDATA[C]]>\uFFFD</svg></annotation-xml></math></body></html>",
+    ["unexpected-null-character", "unexpected-null-character", "unexpected-null-character"]
+  ],
+  [
+    "math:annotation-xml[encoding='text/html']>math",
+    "<math><![CDATA[A]]>\u0000<annotation-xml encoding=\"TEXT/html\"><![CDATA[B]]>\u0000<math xmlns=\"http://www.w3.org/1998/Math/MathML\"><![CDATA[C]]>\u0000</math></annotation-xml></math>",
+    "<html><head></head><body><math><![CDATA[A]]>\uFFFD<annotation-xml encoding=\"TEXT/html\"><![CDATA[B]]><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><![CDATA[C]]>\uFFFD</math></annotation-xml></math></body></html>",
+    ["unexpected-null-character", "unexpected-null-character", "unexpected-null-character"]
+  ],
+  [
+    "math:annotation-xml[encoding='text/html']>tag",
+    "<math><![CDATA[A]]>\u0000<annotation-xml encoding=\"text/HTML\"><![CDATA[B]]>\u0000<tag xmlns=\"http://www.w3.org/1999/xhtml\"><![CDATA[C]]>\u0000</tag></annotation-xml></math>",
+    "<html><head></head><body><math><![CDATA[A]]>\uFFFD<annotation-xml encoding=\"text/HTML\"><![CDATA[B]]><tag xmlns=\"http://www.w3.org/1999/xhtml\"><!--[CDATA[C]]--></tag></annotation-xml></math></body></html>",
+    ["unexpected-null-character", "unexpected-null-character", "incorrectly-opened-comment", "unexpected-null-character"]
+  ],
+  [
+    "math:annotation-xml[encoding='application/xhtml+xml']>tag",
+    "<math><![CDATA[A]]>\u0000<annotation-xml encoding=\"application/xhtml+xml\"><![CDATA[B]]>\u0000<tag xmlns=\"http://www.w3.org/1999/xhtml\"><![CDATA[C]]>\u0000</tag></annotation-xml></math>",
+    "<html><head></head><body><math><![CDATA[A]]>\uFFFD<annotation-xml encoding=\"application/xhtml+xml\"><![CDATA[B]]><tag xmlns=\"http://www.w3.org/1999/xhtml\"><!--[CDATA[C]]--></tag></annotation-xml></math></body></html>",
+    ["unexpected-null-character", "unexpected-null-character", "incorrectly-opened-comment", "unexpected-null-character"]
+  ],
+  [
+    "math:annotation-xml[encoding='text/javascript']>svg",
+    "<math><![CDATA[A]]>\u0000<annotation-xml encoding=\"text/javascript\"><![CDATA[B]]>\u0000<svg xmlns=\"http://www.w3.org/2000/svg\"><![CDATA[C]]>\u0000</svg></annotation-xml></math>",
+    "<html><head></head><body><math><![CDATA[A]]>\uFFFD<annotation-xml encoding=\"text/javascript\"><![CDATA[B]]>\uFFFD<svg xmlns=\"http://www.w3.org/2000/svg\"><![CDATA[C]]>\uFFFD</svg></annotation-xml></math></body></html>",
+    ["unexpected-null-character", "unexpected-null-character", "unexpected-null-character"]
+  ],
+  [
+    "math:annotation-xml[encoding='text/javascript']>tag",
+    "<math><![CDATA[A]]>\u0000<annotation-xml encoding=\"text/javascript\"><![CDATA[B]]>\u0000<tag xmlns=\"http://www.w3.org/1998/Math/MathML\"><![CDATA[C]]>\u0000</tag></annotation-xml></math>",
+    "<html><head></head><body><math><![CDATA[A]]>\uFFFD<annotation-xml encoding=\"text/javascript\"><![CDATA[B]]>\uFFFD<tag xmlns=\"http://www.w3.org/1998/Math/MathML\"><![CDATA[C]]>\uFFFD</tag></annotation-xml></math></body></html>",
+    ["unexpected-null-character", "unexpected-null-character", "unexpected-null-character"]
+  ],
+  [
+    "svg:desc",
+    "<svg><![CDATA[A]]>B\u0000C<desc><![CDATA[D]]>E\u0000F<div xmlns=\"http://www.w3.org/1999/xhtml\"></div>G</desc></svg>",
+    "<html><head></head><body><svg><![CDATA[A]]>B\uFFFDC<desc><![CDATA[D]]>EF<div xmlns=\"http://www.w3.org/1999/xhtml\"></div>G</desc></svg></body></html>",
+    ["unexpected-null-character", "unexpected-null-character"]
+  ],
+  [
+    "svg:foreignObject",
+    "<svg><![CDATA[A]]>B\u0000C<foreignObject><![CDATA[D]]>E\u0000F<div xmlns=\"http://www.w3.org/1999/xhtml\"></div>G</foreignObject></svg>",
+    "<html><head></head><body><svg><![CDATA[A]]>B\uFFFDC<foreignObject><![CDATA[D]]>EF<div xmlns=\"http://www.w3.org/1999/xhtml\"></div>G</foreignObject></svg></body></html>",
+    ["unexpected-null-character", "unexpected-null-character"]
+  ],
+  [
+    "svg:title",
+    "<svg><![CDATA[A]]>B\u0000C<title><![CDATA[D]]>E\u0000F<div xmlns=\"http://www.w3.org/1999/xhtml\"></div>G</title></svg>",
+    "<html><head></head><body><svg><![CDATA[A]]>B\uFFFDC<title><![CDATA[D]]>EF<div xmlns=\"http://www.w3.org/1999/xhtml\"></div>G</title></svg></body></html>",
+    ["unexpected-null-character", "unexpected-null-character"]
+  ],
+  [
+    "svg CS tags",
+    "<svg><altglyph/><altglyphdef/><altglyphitem/><animatecolor/><animatemotion/><animatetransform/><clippath/><feblend/><fecolormatrix/><fecomponenttransfer/><fecomposite/><feconvolvematrix/><fediffuselighting/><fedisplacementmap/><fedistantlight/><fedropshadow/><feflood/><fefunca/><fefuncb/><fefuncg/><fefuncr/><fegaussianblur/><feimage/><femerge/><femergenode/><femorphology/><feoffset/><fepointlight/><fespecularlighting/><fespotlight/><fetile/><feturbulence/><foreignobject/><glyphref/><lineargradient/><radialgradient/><textpath/></svg>",
+    "<html><head></head><body><svg><altGlyph/><altGlyphDef/><altGlyphItem/><animateColor/><animateMotion/><animateTransform/><clipPath/><feBlend/><feColorMatrix/><feComponentTransfer/><feComposite/><feConvolveMatrix/><feDiffuseLighting/><feDisplacementMap/><feDistantLight/><feDropShadow/><feFlood/><feFuncA/><feFuncB/><feFuncG/><feFuncR/><feGaussianBlur/><feImage/><feMerge/><feMergeNode/><feMorphology/><feOffset/><fePointLight/><feSpecularLighting/><feSpotLight/><feTile/><feTurbulence/><foreignObject/><glyphRef/><linearGradient/><radialGradient/><textPath/></svg></body></html>", []
+  ],
+  ["svg CS tag in math context", "<math><altglyph/></math>", "<html><head></head><body><math><altglyph/></math></body></html>", []],
+  ["math CS attributes", "<math><mi definitionurl/></math>", "<html><head></head><body><math><mi definitionURL/></math></body></html>", []],
+  ["math CS attribute in svg context", "<svg><mi definitionurl/></svg>", "<html><head></head><body><svg><mi definitionurl/></svg></body></html>", []],
+  ["math CS attribute on root math element", "<math definitionurl/>", "<html><head></head><body><math definitionURL/></body></html>", []],
+  [
+    "svg CS attributes",
+    "<svg><g attributename attributetype basefrequency baseprofile calcmode clippathunits diffuseconstant edgemode filterunits glyphref gradienttransform gradientunits kernelmatrix kernelunitlength keypoints keysplines keytimes lengthadjust limitingconeangle markerheight markerunits markerwidth maskcontentunits maskunits numoctaves pathlength patterncontentunits patterntransform patternunits pointsatx pointsaty pointsatz preservealpha preserveaspectratio primitiveunits refx refy repeatcount repeatdur requiredextensions requiredfeatures specularconstant specularexponent spreadmethod startoffset stddeviation stitchtiles surfacescale systemlanguage tablevalues targetx targety textlength viewbox viewtarget xchannelselector ychannelselector zoomandpan /></svg>",
+    "<html><head></head><body><svg><g attributeName attributeType baseFrequency baseProfile calcMode clipPathUnits diffuseConstant edgeMode filterUnits glyphRef gradientTransform gradientUnits kernelMatrix kernelUnitLength keyPoints keySplines keyTimes lengthAdjust limitingConeAngle markerHeight markerUnits markerWidth maskContentUnits maskUnits numOctaves pathLength patternContentUnits patternTransform patternUnits pointsAtX pointsAtY pointsAtZ preserveAlpha preserveAspectRatio primitiveUnits refX refY repeatCount repeatDur requiredExtensions requiredFeatures specularConstant specularExponent spreadMethod startOffset stdDeviation stitchTiles surfaceScale systemLanguage tableValues targetX targetY textLength viewBox viewTarget xChannelSelector yChannelSelector zoomAndPan/></svg></body></html>", []
+  ],
+  ["svg CS attribute in math context", "<math><g attributename/></math>", "<html><head></head><body><math><g attributename/></math></body></html>", []],
+  ["svg CS attribute on root svg element", "<svg viewbox/>", "<html><head></head><body><svg viewBox/></body></html>", []],
+  ["font[]", "<svg><font>\u0000</font></svg>", "<html><head></head><body><svg><font>\uFFFD</font></svg></body></html>", ["unexpected-null-character"]],
+  ["font[foo]", "<svg><font foo>\u0000</font></svg>", "<html><head></head><body><svg><font foo>\uFFFD</font></svg></body></html>", ["unexpected-null-character"]],
+  ["font[color]", "<svg><font foo color>\u0000</font></svg>", "<html><head></head><body><svg></svg><font foo color></font></body></html>", ["html-specific-start-tag-in-foreign-content", "unexpected-null-character", "orphan-end-tag-inside-special-element"]],
+  ["font[face]", "<svg><font foo face>\u0000</font></svg>", "<html><head></head><body><svg></svg><font foo face></font></body></html>", ["html-specific-start-tag-in-foreign-content", "unexpected-null-character", "orphan-end-tag-inside-special-element"]],
+  ["font[size]", "<svg><font foo size>\u0000</font></svg>", "<html><head></head><body><svg></svg><font foo size></font></body></html>", ["html-specific-start-tag-in-foreign-content", "unexpected-null-character", "orphan-end-tag-inside-special-element"]]
 ]
