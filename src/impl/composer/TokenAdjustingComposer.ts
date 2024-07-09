@@ -83,7 +83,6 @@ export class TokenAdjustingComposer extends BaseComposer {
   }
 
   protected adjustForeignAttributes(token: TagToken) {
-    // TODO test it
     const attributes = token.attributes;
     const len = attributes.length;
     for (let i = 0; i < len; ++i) {
