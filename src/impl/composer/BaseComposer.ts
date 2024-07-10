@@ -8,7 +8,7 @@ import {StaticEmptyNode} from '../nodes/StaticEmptyNode';
 import {StaticParentNode} from '../nodes/StaticParentNode';
 import {StateBasedTokenizer} from '../StateBasedTokenizer';
 import {State} from '../states';
-import {CharactersToken, CommentToken, DoctypeToken, TagToken, TextToken, Token} from '../tokens';
+import {CharactersToken, CommentToken, DoctypeToken, TagToken, Token} from '../tokens';
 import {InsertionMode} from './insertion-mode';
 
 /*
@@ -346,14 +346,6 @@ export class BaseComposer implements TokenSink {
     }
   }
 
-  protected insertDataNode(token: TextToken) {
-    // TODO characters into document should be dropped on the floor
-    const nodeType = TokenTypeMapping[token.type];
-    const parent = this.adjustedCurrentNode || this.document;
-    const dataNode = new StaticDataNode(nodeType, parent, token.data);
-    this.push(parent.childNodes, dataNode);
-  }
-
   generateImpliedEndTagsFromSet(closable: { [tagName: string]: any }, exclude?: string) {
     this.popUntilMatches((name, el) => name !== exclude && (name in closable) && el.namespaceURI === NS_HTML);
   }
@@ -491,11 +483,6 @@ export class BaseComposer implements TokenSink {
   popUntilName(name: string, namespace: string = NS_HTML) {
     this.popUntilMatches((n, el) => n !== name || el.namespaceURI !== namespace);
     this.popCurrentElement();
-  }
-
-  popToLength(len: number) {
-    while (this.openElements.length > len)
-      this.popCurrentElement();
   }
 
   removeFromStack(element: Element) {
