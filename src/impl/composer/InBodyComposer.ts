@@ -74,6 +74,9 @@ export class InBodyComposer extends TokenAdjustingComposer {
           }
         }
         break;
+      case 'listing':
+      case 'pre':
+        this.framesetOk = false;
       case 'address':
       case 'article':
       case 'aside':
@@ -119,18 +122,11 @@ export class InBodyComposer extends TokenAdjustingComposer {
             case 'h4':
             case 'h5':
             case 'h6':
-              this.error();
+              this.error('immediately-nested-heading-start-tag');
               this.popCurrentElement();
           }
         }
         this.createAndInsertHTMLElement(token);
-        break;
-      case 'pre':
-      case 'listing':
-        if (this.hasElementInButtonScope('p'))
-          this.closeParagraph();
-        this.createAndInsertHTMLElement(token);
-        this.framesetOk = false;
         break;
       case 'form':
         if (this.formElement && !this.openCounts['template']) {
@@ -407,13 +403,13 @@ export class InBodyComposer extends TokenAdjustingComposer {
         if (this.hasMatchInScope(el => this.isHeaderLevelElement(el), el => this.isScopeFence(el))) {
           this.generateImpliedEndTags();
           if (this.current.namespaceURI !== NS_HTML || this.current.tagName !== token.name) {
-            this.error();
+            this.error('mismatched-heading-end-tag');
             this.popUntilMatches((name, el) => !this.isHeaderLevelElement(el));
             this.popCurrentElement();
           } else
             this.popCurrentElement();
         } else
-          this.error();
+          this.error('orphan-end-tag');
         break;
       case 'a':
       case 'b':

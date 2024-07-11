@@ -1,0 +1,57 @@
+[
+  ["empty", "<html><body></body></html>", "<html><head></head><body></body></html>", []],
+  ["unclosed", "<html><body></html>", "<html><head></head><body></body></html>", []],
+  ["space", "<html><body> \t\n\f</body></html>", "<html><head></head><body> \t\n\f</body></html>", []],
+  ["comment", "<html><body><!--A--></body></html>", "<html><head></head><body><!--A--></body></html>", []],
+  ["doctype", "<html><body><!DOCTYPE html></body></html>", "<html><head></head><body></body></html>", ["unexpected-doctype"]],
+  ["NUL", "<html><body>\u0000</body></html>", "<html><head></head><body></body></html>", ["unexpected-null-character"]],
+  ["text", "<html><body>A</body></html>", "<html><head></head><body>A</body></html>", []],
+  ["space + text + space", "<html><body> \t\nA \t\f</body></html>", "<html><head></head><body> \t\nA \t\f</body></html>", []],
+  ["CDATA", "<html><body><![CDATA[A]]></body></html>", "<html><head></head><body><!--[CDATA[A]]--></body></html>", ["incorrectly-opened-comment"]],
+  ["html start", "<html b a=\"a\"><body><html c a=\"b\"></body></html>", "<html b a=\"a\" c><head></head><body></body></html>", ["unexpected-html-start-tag"]],
+  ["body start", "<html><body b a=\"a\"><body c a=\"b\"></body></html>", "<html><head></head><body b a=\"a\" c></body></html>", ["unexpected-body-start-tag"]],
+  ["head void elements", "<html><body><base><basefont><bgsound><link><meta></body></html>", "<html><head></head><body><base/><basefont/><bgsound/><link/><meta/></body></html>", []],
+  [
+    "text elements",
+    "<html><body><noframes>&#x41;<tag></noframes><script>&#x41;<tag></script><style>&#x41;<tag></style><title>&#x41;<tag></title></body></html>",
+    "<html><head></head><body><noframes>&#x41;<tag></noframes><script>&#x41;<tag></script><style>&#x41;<tag></style><title>A&lt;tag></title></body></html>", []
+  ],
+  ["template", "<html><body><template><div><html a><body b></div></template></body></html>", "<html><head></head><body><template><div></div></template></body></html>", ["unexpected-html-start-tag", "unexpected-body-start-tag"]],
+  [
+    "known simple elements",
+    "<html><body><p>01<address>A01</address><p>02<article>A02</article><p>03<aside>A03</aside><p>04<blockquote>A04</blockquote><p>05<center>A05</center><p>06<details>A06</details><p>07<dialog>A07</dialog><p>08<dir>A08</dir><p>09<div>A09</div><p>10<dl>A10</dl><p>11<fieldset>A11</fieldset><p>12<figcaption>A12</figcaption><p>13<figure>A13</figure><p>14<footer>A14</footer><p>15<header>A15</header><p>16<hgroup>A16</hgroup><p>17<main>A17</main><p>18<menu>A18</menu><p>19<nav>A19</nav><p>20<ol>A20</ol><p>21<p>A21</p><p>22<search>A22</search><p>23<section>A23</section><p>24<summary>A24</summary><p>25<ul>A25</ul><p>26<pre>A26</pre><p>27<listing>A27</listing></body></html>",
+    "<html><head></head><body><p>01</p><address>A01</address><p>02</p><article>A02</article><p>03</p><aside>A03</aside><p>04</p><blockquote>A04</blockquote><p>05</p><center>A05</center><p>06</p><details>A06</details><p>07</p><dialog>A07</dialog><p>08</p><dir>A08</dir><p>09</p><div>A09</div><p>10</p><dl>A10</dl><p>11</p><fieldset>A11</fieldset><p>12</p><figcaption>A12</figcaption><p>13</p><figure>A13</figure><p>14</p><footer>A14</footer><p>15</p><header>A15</header><p>16</p><hgroup>A16</hgroup><p>17</p><main>A17</main><p>18</p><menu>A18</menu><p>19</p><nav>A19</nav><p>20</p><ol>A20</ol><p>21</p><p>A21</p><p>22</p><search>A22</search><p>23</p><section>A23</section><p>24</p><summary>A24</summary><p>25</p><ul>A25</ul><p>26</p><pre>A26</pre><p>27</p><listing>A27</listing></body></html>", []
+  ],
+  [
+    "known simple elements in buttons",
+    "<html><body><p>01<button>B01<address>A01</address></button><p>02<button>B02<article>A02</article></button><p>03<button>B03<aside>A03</aside></button><p>04<button>B04<blockquote>A04</blockquote></button><p>05<button>B05<center>A05</center></button><p>06<button>B06<details>A06</details></button><p>07<button>B07<dialog>A07</dialog></button><p>08<button>B08<dir>A08</dir></button><p>09<button>B09<div>A09</div></button><p>10<button>B10<dl>A10</dl></button><p>11<button>B11<fieldset>A11</fieldset></button><p>12<button>B12<figcaption>A12</figcaption></button><p>13<button>B13<figure>A13</figure></button><p>14<button>B14<footer>A14</footer></button><p>15<button>B15<header>A15</header></button><p>16<button>B16<hgroup>A16</hgroup></button><p>17<button>B17<main>A17</main></button><p>18<button>B18<menu>A18</menu></button><p>19<button>B19<nav>A19</nav></button><p>20<button>B20<ol>A20</ol></button><p>21<button>B21<p>A21</p></button><p>22<button>B22<search>A22</search></button><p>23<button>B23<section>A23</section></button><p>24<button>B24<summary>A24</summary></button><p>25<button>B25<ul>A25</ul></button><p>26<button>B26<pre>A26</pre></button><p>27<button>B27<listing>A27</listing></button></body></html>",
+    "<html><head></head><body><p>01<button>B01<address>A01</address></button></p><p>02<button>B02<article>A02</article></button></p><p>03<button>B03<aside>A03</aside></button></p><p>04<button>B04<blockquote>A04</blockquote></button></p><p>05<button>B05<center>A05</center></button></p><p>06<button>B06<details>A06</details></button></p><p>07<button>B07<dialog>A07</dialog></button></p><p>08<button>B08<dir>A08</dir></button></p><p>09<button>B09<div>A09</div></button></p><p>10<button>B10<dl>A10</dl></button></p><p>11<button>B11<fieldset>A11</fieldset></button></p><p>12<button>B12<figcaption>A12</figcaption></button></p><p>13<button>B13<figure>A13</figure></button></p><p>14<button>B14<footer>A14</footer></button></p><p>15<button>B15<header>A15</header></button></p><p>16<button>B16<hgroup>A16</hgroup></button></p><p>17<button>B17<main>A17</main></button></p><p>18<button>B18<menu>A18</menu></button></p><p>19<button>B19<nav>A19</nav></button></p><p>20<button>B20<ol>A20</ol></button></p><p>21<button>B21<p>A21</p></button></p><p>22<button>B22<search>A22</search></button></p><p>23<button>B23<section>A23</section></button></p><p>24<button>B24<summary>A24</summary></button></p><p>25<button>B25<ul>A25</ul></button></p><p>26<button>B26<pre>A26</pre></button></p><p>27<button>B27<listing>A27</listing></button></p></body></html>", []
+  ],
+  [
+    "heading elements",
+    "<html><body><p>1<h1>A1</h1><p>2<h2>A2</h2><p>3<h3>A3</h3><p>4<h4>A4</h4><p>5<h5>A5</h5><p>6<h6>A6</h6></body></html>",
+    "<html><head></head><body><p>1</p><h1>A1</h1><p>2</p><h2>A2</h2><p>3</p><h3>A3</h3><p>4</p><h4>A4</h4><p>5</p><h5>A5</h5><p>6</p><h6>A6</h6></body></html>", []
+  ],
+  [
+    "heading elements in buttons",
+    "<html><body><p>01<button>B01<h1>A01</h1></button><p>02<button>B02<h2>A02</h2></button><p>03<button>B03<h3>A03</h3></button><p>04<button>B04<h4>A04</h4></button><p>05<button>B05<h5>A05</h5></button><p>06<button>B06<h6>A06</h6></button></body></html>",
+    "<html><head></head><body><p>01<button>B01<h1>A01</h1></button></p><p>02<button>B02<h2>A02</h2></button></p><p>03<button>B03<h3>A03</h3></button></p><p>04<button>B04<h4>A04</h4></button></p><p>05<button>B05<h5>A05</h5></button></p><p>06<button>B06<h6>A06</h6></button></p></body></html>", []
+  ],
+  [
+    "nested heading elements",
+    "<html><body>0.1<h1>1.1<div>1.2<h2>2.1<h3>3.1<div>3.2<h4>4.1<h5>5.1<div>5.2<h6>6.1</h6>5.3</div>5.4</h5>4.2</h4>3.3</div>3.4</h3>2.2</h2>1.3</div>1.4</h1>0.2</body></html>",
+    "<html><head></head><body>0.1<h1>1.1<div>1.2<h2>2.1</h2><h3>3.1<div>3.2<h4>4.1</h4><h5>5.1<div>5.2<h6>6.1</h6>5.3</div>5.4</h5>4.2</div></h3>3.3</div>3.4</h1>2.21.31.40.2</body></html>",
+    [
+      "immediately-nested-heading-start-tag",
+      "immediately-nested-heading-start-tag",
+      "mismatched-heading-end-tag",
+      "mismatched-heading-end-tag",
+      "orphan-end-tag",
+      "orphan-end-tag",
+      "orphan-end-tag"
+    ]
+  ],
+  ["form start", "<html><body><p>A<form>B</form></body></html>", "<html><head></head><body><p>A</p><form>B</form></body></html>", []],
+  ["form start in button", "<html><body><p>A<button>B<form>C</form>D</button></body></html>", "<html><head></head><body><p>A<button>B<form>C</form>D</button></p></body></html>", []],
+  ["nested form", "<html><body>A<form>B<form>C</form>D</form>E</body></html>", "<html><head></head><body>A<form>BC</form>DE</body></html>", ["nested-form", "orphan-end-tag"]]
+]
