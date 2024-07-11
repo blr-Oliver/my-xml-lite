@@ -372,27 +372,11 @@ export class InBodyComposer extends TokenAdjustingComposer {
         this.closeParagraph();
         break;
       case 'li':
-        if (this.hasElementInListScope('li')) {
-          this.generateImpliedEndTags('li');
-          if (this.current.namespaceURI !== NS_HTML || this.current.tagName !== 'li') {
-            this.error();
-            this.popUntilName('li');
-          } else
-            this.popCurrentElement();
-        } else
-          this.error();
+        this.inBodyEndTagLi();
         break;
       case 'dd':
       case 'dt':
-        if (this.hasElementInScope(token.name)) {
-          this.generateImpliedEndTags(token.name);
-          if (this.current.namespaceURI !== NS_HTML || this.current.tagName !== token.name) {
-            this.error();
-            this.popUntilName(token.name);
-          } else
-            this.popCurrentElement();
-        } else
-          this.error();
+        this.inBodyEndTagDt(token);
         break;
       case 'h1':
       case 'h2':
@@ -532,17 +516,32 @@ export class InBodyComposer extends TokenAdjustingComposer {
       const tagName = node.tagName;
       if (tagName === 'li') {
         this.generateImpliedEndTags('li');
-        if (this.current.tagName !== 'li')
-          this.error();
-        this.popUntilName('li');
+        if (this.current.tagName !== 'li' || this.current.namespaceURI !== NS_HTML) {
+          this.error('mismatched-end-tag');
+          this.popUntilName('li');
+        } else
+          this.popCurrentElement();
         break;
-      } else if (this.isSpecial(node) && tagName !== 'address' && tagName !== 'div' && tagName !== 'p')
+      } else if (this.isSpecial(node) && tagName !== 'address' && tagName !== 'div' && tagName !== 'p') {
         break;
+      }
     }
     if (this.hasElementInButtonScope('p'))
       this.closeParagraph();
     this.createAndInsertHTMLElement(token);
     return this.insertionMode;
+  }
+
+  inBodyEndTagLi() {
+    if (this.hasElementInListScope('li')) {
+      this.generateImpliedEndTags('li');
+      if (this.current.namespaceURI !== NS_HTML || this.current.tagName !== 'li') {
+        this.error('mismatched-end-tag');
+        this.popUntilName('li');
+      } else
+        this.popCurrentElement();
+    } else
+      this.error('orphan-end-tag');
   }
 
   inBodyStartTagDt(token: TagToken): InsertionMode {
@@ -570,6 +569,18 @@ export class InBodyComposer extends TokenAdjustingComposer {
       this.closeParagraph();
     this.createAndInsertHTMLElement(token);
     return this.insertionMode;
+  }
+
+  inBodyEndTagDt(token: TagToken) {
+    if (this.hasElementInScope(token.name)) {
+      this.generateImpliedEndTags(token.name);
+      if (this.current.namespaceURI !== NS_HTML || this.current.tagName !== token.name) {
+        this.error('mismatched-end-tag');
+        this.popUntilName(token.name);
+      } else
+        this.popCurrentElement();
+    } else
+      this.error('orphan-end-tag');
   }
 
   inBodyStartTagAnchor(token: TagToken): InsertionMode {

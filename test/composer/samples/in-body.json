@@ -53,5 +53,27 @@
   ],
   ["form start", "<html><body><p>A<form>B</form></body></html>", "<html><head></head><body><p>A</p><form>B</form></body></html>", []],
   ["form start in button", "<html><body><p>A<button>B<form>C</form>D</button></body></html>", "<html><head></head><body><p>A<button>B<form>C</form>D</button></p></body></html>", []],
-  ["nested form", "<html><body>A<form>B<form>C</form>D</form>E</body></html>", "<html><head></head><body>A<form>BC</form>DE</body></html>", ["nested-form", "orphan-end-tag"]]
+  ["nested form", "<html><body>A<form>B<form>C</form>D</form>E</body></html>", "<html><head></head><body>A<form>BC</form>DE</body></html>", ["nested-form", "orphan-end-tag"]],
+  ["li", "<html><body><li></body></html>", "<html><head></head><body><li></li></body></html>", []],
+  ["li>li", "<html><body><li>A<li>B</body></html>", "<html><head></head><body><li>A</li><li>B</li></body></html>", []],
+  ["li>span>li", "<html><body><li>A<span>B<li>C</body></html>", "<html><head></head><body><li>A<span>B</span></li><li>C</li></body></html>", ["mismatched-end-tag"]],
+  ["li>address>li", "<html><body><li>A<address>B<li>C</body></html>", "<html><head></head><body><li>A<address>B</address></li><li>C</li></body></html>", ["mismatched-end-tag"]],
+  ["li>div>li", "<html><body><li>A<div>B<li>C</body></html>", "<html><head></head><body><li>A<div>B</div></li><li>C</li></body></html>", ["mismatched-end-tag"]],
+  ["li>p>li", "<html><body><li>A<p>B<li>C</body></html>", "<html><head></head><body><li>A<p>B</p></li><li>C</li></body></html>", []],
+  ["li>object>li", "<html><body><li>A<object>B<li>C</body></html>", "<html><head></head><body><li>A<object>B<li>C</li></object></li></body></html>", ["abrupt-end-of-content"]],
+  ["li>p>object>li", "<html><body><li>A<p>B<object>C<li>D</body></html>", "<html><head></head><body><li>A<p>B<object>C<li>D</li></object></p></li></body></html>", ["abrupt-end-of-content"]],
+  ["li>dt>dd>rb>rp>rt>rtc>li", "<html><body><li>B<dt>C<dd>D<rb>E<rp>F<rt>G<rtc>H<li>I</body></html>", "<html><head></head><body><li>B<dt>C</dt><dd>D<rb>E<rp>F<rt>G<rtc>H<li>I</li></rtc></rt></rp></rb></dd></li></body></html>", []],
+  ["li>p>dt>dd>rb>rp>rt>rtc>li", "<html><body><li>A<p>B<dt>C<dd>D<rb>E<rp>F<rt>G<rtc>H<li></body></html>", "<html><head></head><body><li>A<p>B</p><dt>C</dt><dd>D<rb>E<rp>F<rt>G<rtc>H<li></li></rtc></rt></rp></rb></dd></li></body></html>", []],
+  ["p>li>p>dt>dd>rb>rp>rt>rtc>li", "<html><body><p>P<li>A<p>B<dt>C<dd>D<rb>E<rp>F<rt>G<rtc>H<li></body></html>", "<html><head></head><body><p>P</p><li>A<p>B</p><dt>C</dt><dd>D<rb>E<rp>F<rt>G<rtc>H<li></li></rtc></rt></rp></rb></dd></li></body></html>", []],
+  [
+    "p>button>li>p>dt>dd>rb>rp>rt>rtc>li",
+    "<html><body><p>P<button>Bt<li>A<p>B<dt>C<dd>D<rb>E<rp>F<rt>G<rtc>H<li>I</button></body></html>",
+    "<html><head></head><body><p>P<button>Bt<li>A<p>B</p><dt>C</dt><dd>D<rb>E<rp>F<rt>G<rtc>H<li>I</li></rtc></rt></rp></rb></dd></li></button></p></body></html>", []
+  ],
+  ["p>li>dt>li", "<html><body>A<p>B<li>C<dt>D<li>E</body></html>", "<html><head></head><body>A<p>B</p><li>C<dt>D<li>E</li></dt></li></body></html>", []],
+  ["li end", "<html><body></li></body></html>", "<html><head></head><body></body></html>", ["orphan-end-tag"]],
+  ["li proper", "<html><body>A<li>B</li>C</body></html>", "<html><head></head><body>A<li>B</li>C</body></html>", []],
+  ["li>div li end", "<html><body>A<li>B<div>C</li>D</body></html>", "<html><head></head><body>A<li>B<div>C</div></li>D</body></html>", ["mismatched-end-tag"]],
+  ["li>ul li end", "<html><body>A<li>B<ul>C</li>D</body></html>", "<html><head></head><body>A<li>B<ul>CD</ul></li></body></html>", ["orphan-end-tag", "abrupt-end-of-content"]],
+  ["li>ol li end", "<html><body>A<li>B<ol>C</li>D</body></html>", "<html><head></head><body>A<li>B<ol>CD</ol></li></body></html>", ["orphan-end-tag", "abrupt-end-of-content"]]
 ]
