@@ -82,7 +82,7 @@ export class InForeignContentComposer extends TokenAdjustingComposer {
 
   inForeignContentHtmlSpecificTag(token: TagToken) {
     this.error('html-specific-tag-in-foreign-content');
-    this.popUntilMatches((n, e) => !this.canContainHtml(n, e));
+    this.popWhileMatches((n, e) => !this.canContainHtml(n, e));
     return this.process(token);
   }
 

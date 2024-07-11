@@ -347,7 +347,7 @@ export class BaseComposer implements TokenSink {
   }
 
   generateImpliedEndTagsFromSet(closable: { [tagName: string]: any }, exclude?: string) {
-    this.popUntilMatches((name, el) => name !== exclude && (name in closable) && el.namespaceURI === NS_HTML);
+    this.popWhileMatches((name, el) => name !== exclude && (name in closable) && el.namespaceURI === NS_HTML);
   }
   generateImpliedEndTags(exclude?: string) {
     return this.generateImpliedEndTagsFromSet(IMPLICITLY_CLOSABLE, exclude);
@@ -463,7 +463,7 @@ export class BaseComposer implements TokenSink {
     this.openCounts[element.tagName]--;
   }
 
-  popUntilMatches(test: (name: string, element: Element) => boolean) {
+  popWhileMatches(test: (name: string, element: Element) => boolean) {
     let i = this.openElements.length;
     if (i) {
       let element!: Element;
@@ -481,7 +481,7 @@ export class BaseComposer implements TokenSink {
   }
 
   popUntilName(name: string, namespace: string = NS_HTML) {
-    this.popUntilMatches((n, el) => n !== name || el.namespaceURI !== namespace);
+    this.popWhileMatches((n, el) => n !== name || el.namespaceURI !== namespace);
     this.popCurrentElement();
   }
 

@@ -135,7 +135,7 @@ export class InTableComposer extends BaseComposer {
   }
 
   clearStackToTableContext() {
-    this.popUntilMatches(this.notATableContext);
+    this.popWhileMatches(this.notATableContext);
   }
 
   protected notATableContext(name: string, element: Element): boolean {

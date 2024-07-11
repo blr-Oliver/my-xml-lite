@@ -75,7 +75,7 @@ export class InCellComposer extends BaseComposer {
     const currentTagName = this.current.tagName;
     if (currentTagName !== 'td' && currentTagName !== 'th') {
       this.error();
-      this.popUntilMatches((name, el) => name !== 'td' && name !== 'th' || el.namespaceURI !== NS_HTML);
+      this.popWhileMatches((name, el) => name !== 'td' && name !== 'th' || el.namespaceURI !== NS_HTML);
     }
     this.popCurrentElement();
     this.clearFormattingUpToMarker();

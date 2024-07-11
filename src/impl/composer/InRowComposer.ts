@@ -83,7 +83,7 @@ export class InRowComposer extends InTableComposer {
   }
 
   clearStackToRowContext() {
-    this.popUntilMatches(this.notARowContext);
+    this.popWhileMatches(this.notARowContext);
   }
 
   protected notARowContext(name: string, element: Element): boolean {

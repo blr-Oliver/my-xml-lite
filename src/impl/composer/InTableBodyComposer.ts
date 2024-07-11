@@ -82,7 +82,7 @@ export class InTableBodyComposer extends InTableComposer {
   }
 
   clearStackToTBodyContext() {
-    this.popUntilMatches(this.notATBodyContext);
+    this.popWhileMatches(this.notATBodyContext);
   }
 
   protected notATBodyContext(name: string, element: Element): boolean {

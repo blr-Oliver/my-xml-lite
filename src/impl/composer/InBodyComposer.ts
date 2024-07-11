@@ -404,7 +404,7 @@ export class InBodyComposer extends TokenAdjustingComposer {
           this.generateImpliedEndTags();
           if (this.current.namespaceURI !== NS_HTML || this.current.tagName !== token.name) {
             this.error('mismatched-heading-end-tag');
-            this.popUntilMatches((name, el) => !this.isHeaderLevelElement(el));
+            this.popWhileMatches((name, el) => !this.isHeaderLevelElement(el));
             this.popCurrentElement();
           } else
             this.popCurrentElement();
