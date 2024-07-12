@@ -140,10 +140,10 @@ export class InBodyComposer extends TokenAdjustingComposer {
         }
         break;
       case 'li':
-        return this.inBodyStartTagLi(token);
+        return this.inBodyStartItemTag(token, 'li');
       case 'dt':
       case 'dd':
-        return this.inBodyStartTagDt(token);
+        return this.inBodyStartItemTag(token, 'dd', 'dt');
       case 'plaintext':
         if (this.hasElementInButtonScope('p'))
           this.closeParagraph();
@@ -372,11 +372,17 @@ export class InBodyComposer extends TokenAdjustingComposer {
         this.closeParagraph();
         break;
       case 'li':
-        this.inBodyEndTagLi();
+        if (this.hasElementInListScope('li'))
+          this.inBodyEndItemTag('li');
+        else
+          this.error('orphan-end-tag');
         break;
       case 'dd':
       case 'dt':
-        this.inBodyEndTagDt(token);
+        if (this.hasElementInScope(token.name))
+          this.inBodyEndItemTag(token.name);
+        else
+          this.error('orphan-end-tag');
         break;
       case 'h1':
       case 'h2':
@@ -509,16 +515,16 @@ export class InBodyComposer extends TokenAdjustingComposer {
     staticParent.children.forEach(this.setElementIndex, this);
   }
 
-  inBodyStartTagLi(token: TagToken): InsertionMode {
+  inBodyStartItemTag(token: TagToken, name1: 'li' | 'dt' | 'dd', name2?: 'li' | 'dt' | 'dd') {
     this.framesetOk = false;
     for (let i = this.openElements.length - 1; ; --i) {
       const node = this.openElements[i];
       const tagName = node.tagName;
-      if (tagName === 'li') {
-        this.generateImpliedEndTags('li');
-        if (this.current.tagName !== 'li' || this.current.namespaceURI !== NS_HTML) {
-          this.error('mismatched-end-tag');
-          this.popUntilName('li');
+      if ((tagName === name1 || tagName === name2) && node.namespaceURI === NS_HTML) {
+        this.generateImpliedEndTags(tagName);
+        if (this.current.tagName !== tagName || this.current.namespaceURI !== NS_HTML) {
+          this.error('element-closed-before-children');
+          this.popUntilName(tagName);
         } else
           this.popCurrentElement();
         break;
@@ -532,55 +538,13 @@ export class InBodyComposer extends TokenAdjustingComposer {
     return this.insertionMode;
   }
 
-  inBodyEndTagLi() {
-    if (this.hasElementInListScope('li')) {
-      this.generateImpliedEndTags('li');
-      if (this.current.namespaceURI !== NS_HTML || this.current.tagName !== 'li') {
-        this.error('mismatched-end-tag');
-        this.popUntilName('li');
-      } else
-        this.popCurrentElement();
+  inBodyEndItemTag(name: 'li' | 'dt' | 'dd') {
+    this.generateImpliedEndTags(name);
+    if (this.current.tagName !== name || this.current.namespaceURI !== NS_HTML) {
+      this.error('element-closed-before-children');
+      this.popUntilName(name);
     } else
-      this.error('orphan-end-tag');
-  }
-
-  inBodyStartTagDt(token: TagToken): InsertionMode {
-    this.framesetOk = false;
-    for (let i = this.openElements.length - 1; ; --i) {
-      const node = this.openElements[i];
-      const tagName = node.tagName;
-      if (tagName === 'dd') {
-        this.generateImpliedEndTags('dd');
-        if (this.current.tagName !== 'dd')
-          this.error();
-        this.popUntilName('dd');
-        break;
-      } else if (tagName === 'dt') {
-        this.generateImpliedEndTags('dt');
-        if (this.current.tagName !== 'dt')
-          this.error();
-        this.popUntilName('dt');
-        break;
-      } else if (this.isSpecial(node) && tagName !== 'address' && tagName !== 'div' && tagName !== 'p') {
-        break;
-      }
-    }
-    if (this.hasElementInButtonScope('p'))
-      this.closeParagraph();
-    this.createAndInsertHTMLElement(token);
-    return this.insertionMode;
-  }
-
-  inBodyEndTagDt(token: TagToken) {
-    if (this.hasElementInScope(token.name)) {
-      this.generateImpliedEndTags(token.name);
-      if (this.current.namespaceURI !== NS_HTML || this.current.tagName !== token.name) {
-        this.error('mismatched-end-tag');
-        this.popUntilName(token.name);
-      } else
-        this.popCurrentElement();
-    } else
-      this.error('orphan-end-tag');
+      this.popCurrentElement();
   }
 
   inBodyStartTagAnchor(token: TagToken): InsertionMode {
