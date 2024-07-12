@@ -151,9 +151,10 @@ export class InBodyComposer extends TokenAdjustingComposer {
         this.tokenizer.state = 'plaintext';
         break;
       case 'button':
-        if (this.openCounts['button']) {
-          this.error();
-          this.generateImpliedEndTags();
+        if (this.hasElementInScope('button')) {
+          this.error('nested-button');
+          // https://github.com/whatwg/html/issues/10476
+          // this.generateImpliedEndTags();
           this.popUntilName('button');
         }
         this.reconstructFormattingElements();
@@ -180,7 +181,7 @@ export class InBodyComposer extends TokenAdjustingComposer {
       case 'nobr':
         this.reconstructFormattingElements();
         if (this.hasElementInScope('nobr')) {
-          this.error();
+          this.error('nested-nobr');
           this.adoptionAgency(token);
           this.reconstructFormattingElements();
         }
@@ -200,6 +201,9 @@ export class InBodyComposer extends TokenAdjustingComposer {
         this.createAndInsertHTMLElement(token);
         this.framesetOk = false;
         return 'inTable';
+      case 'image':
+        this.error('deprecated-image-tag');
+        token.name = 'img';
       case 'area':
       case 'br':
       case 'embed':
@@ -227,10 +231,6 @@ export class InBodyComposer extends TokenAdjustingComposer {
         this.createAndInsertEmptyHTMLElement(token);
         this.framesetOk = false;
         break;
-      case 'image':
-        this.error();
-        token.name = 'img';
-        return this.inBodyStartTag(token);
       case 'textarea':
         this.framesetOk = false;
         return this.startTextMode('rcdata', token);
@@ -268,7 +268,7 @@ export class InBodyComposer extends TokenAdjustingComposer {
         if (this.hasElementInScope('ruby')) {
           this.generateImpliedEndTags();
           if (this.current.tagName !== 'ruby')
-            this.error();
+            this.error('parent-not-ruby');
         }
         this.createAndInsertHTMLElement(token);
         break;
@@ -276,8 +276,8 @@ export class InBodyComposer extends TokenAdjustingComposer {
       case 'rt':
         if (this.hasElementInScope('ruby')) {
           this.generateImpliedEndTags('rtc');
-          if (this.current.tagName !== 'rtc' && this.current.tagName !== 'ruby')
-            this.error();
+          if (this.current.tagName !== 'ruby' && this.current.tagName !== 'rtc')
+            this.error('parent-not-ruby');
         }
         this.createAndInsertHTMLElement(token);
         break;
@@ -550,7 +550,7 @@ export class InBodyComposer extends TokenAdjustingComposer {
   inBodyStartTagAnchor(token: TagToken): InsertionMode {
     let activeAnchor = this.getActiveFormattingElement('a');
     if (activeAnchor) {
-      this.error();
+      this.error('nested-anchor');
       this.adoptionAgency(token);
       this.removeFormattingElement(activeAnchor);
       this.removeFromStack(activeAnchor);

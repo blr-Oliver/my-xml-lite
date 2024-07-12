@@ -13,8 +13,8 @@
   ["head void elements", "<html><body><base><basefont><bgsound><link><meta></body></html>", "<html><head></head><body><base/><basefont/><bgsound/><link/><meta/></body></html>", []],
   [
     "text elements",
-    "<html><body><noframes>&#x41;<tag></noframes><script>&#x41;<tag></script><style>&#x41;<tag></style><title>&#x41;<tag></title></body></html>",
-    "<html><head></head><body><noframes>&#x41;<tag></noframes><script>&#x41;<tag></script><style>&#x41;<tag></style><title>A&lt;tag></title></body></html>", []
+    "<html><body><noframes>&#x41;<tag></noframes><script>&#x41;<tag></script><style>&#x41;<tag></style><title>&#x41;<tag></title><textarea>&#x41;<tag></textarea><iframe>&#x41;<tag></iframe><noembed>&#x41;<tag></noembed></body></html>",
+    "<html><head></head><body><noframes>&#x41;<tag></noframes><script>&#x41;<tag></script><style>&#x41;<tag></style><title>A&lt;tag></title><textarea>A&lt;tag></textarea><iframe>&#x41;<tag></iframe><noembed>&#x41;<tag></noembed></body></html>", []
   ],
   ["template", "<html><body><template><div><html a><body b></div></template></body></html>", "<html><head></head><body><template><div></div></template></body></html>", ["unexpected-html-start-tag", "unexpected-body-start-tag"]],
   [
@@ -100,5 +100,30 @@
   ["dt>div dt end", "<html><body>A<dt>B<div>C</dt>D</body></html>", "<html><head></head><body>A<dt>B<div>C</div></dt>D</body></html>", ["element-closed-before-children"]],
   ["dd>div dd end", "<html><body>A<dd>B<div>C</dd>D</body></html>", "<html><head></head><body>A<dd>B<div>C</div></dd>D</body></html>", ["element-closed-before-children"]],
   ["dt>li dt end", "<html><body>A<dt>B<li>C</dt>D</body></html>", "<html><head></head><body>A<dt>B<li>C</li></dt>D</body></html>", []],
-  ["dd>li dd end", "<html><body>A<dd>B<li>C</dd>D</body></html>", "<html><head></head><body>A<dd>B<li>C</li></dd>D</body></html>", []]
+  ["dd>li dd end", "<html><body>A<dd>B<li>C</dd>D</body></html>", "<html><head></head><body>A<dd>B<li>C</li></dd>D</body></html>", []],
+  ["plaintext", "<html><body>A<plaintext>&#x41;</plaintext></body></html>", "<html><head></head><body>A<plaintext>&#x41;</plaintext></body></html></plaintext></body></html>", ["abrupt-end-of-document"]],
+  ["p>plaintext", "<html><body>A<p>B<plaintext>&#x41;</plaintext></body></html>", "<html><head></head><body>A<p>B</p><plaintext>&#x41;</plaintext></body></html></plaintext></body></html>", ["abrupt-end-of-document"]],
+  ["button", "<html><body>A<button>B</button>C</body></html>", "<html><head></head><body>A<button>B</button>C</body></html>", []],
+  ["nested button", "<html><body>A<button>B<button>C</button>D</button>E</body></html>", "<html><head></head><body>A<button>B</button><button>C</button>DE</body></html>", ["nested-button", "orphan-end-tag"]],
+  ["button-[scope]-button", "<html><body>A<button>B<object>C<button>D</button>E</object>F</button>G</body></html>", "<html><head></head><body>A<button>B<object>C<button>D</button>E</object>F</button>G</body></html>", []],
+  ["p>table", "<html><body>A<p>B<table><!--C--></table>D</body></html>", "<html><head></head><body>A<p>B</p><table><!--C--></table>D</body></html>", []],
+  ["p>button>table", "<html><body>A<p>B<button>C<table><!--D--></table>E</button>F</body></html>", "<html><head></head><body>A<p>B<button>C<table><!--D--></table>E</button>F</p></body></html>", []],
+  ["param, source, track", "<html><body>A<param>B<source>C<track>D</body></html>", "<html><head></head><body>A<param/>B<source/>C<track/>D</body></html>", []],
+  ["param, source, track start+end", "<html><body>A<param>B</param>C<source>D</source>E<track>F</track>G</body></html>", "<html><head></head><body>A<param/>BC<source/>DE<track/>FG</body></html>", ["orphan-end-tag-inside-special-element", "orphan-end-tag-inside-special-element", "orphan-end-tag-inside-special-element"]],
+  ["hr", "<html><body>A<p>B<hr>C<p>D</hr>E<p>F<hr/>G<p>H<hr>I</body></html>", "<html><head></head><body>A<p>B</p><hr/>C<p>DE</p><p>F</p><hr/>G<p>H</p><hr/>I</body></html>", ["orphan-end-tag-inside-special-element"]],
+  ["image", "<html><image a><image b/></html>", "<html><head></head><body><img a/><img b/></body></html>", ["deprecated-image-tag", "deprecated-image-tag"]],
+  ["xmp", "<html>A<xmp>&#x41;<tag></xmp>B<p>C<xmp>D</xmp>E<p>F<button>G<xmp>H</xmp>I</button>J</html>", "<html><head></head><body>A<xmp>&#x41;<tag></xmp>B<p>C</p><xmp>D</xmp>E<p>F<button>G<xmp>H</xmp>I</button>J</p></body></html>", []],
+  ["optgroup/option", "<html>A<option>B<option>C<optgroup><option>D</option>E<optgroup>F</html>", "<html><head></head><body>A<option>B</option><option>C</option><optgroup><option>D</option>E<optgroup>F</optgroup></optgroup></body></html>", []],
+  ["rb/rtc outside ruby", "<html>A<rb>B<rtc>C<rb>D</html>", "<html><head></head><body>A<rb>B<rtc>C<rb>D</rb></rtc></rb></body></html>", []],
+  ["rb/rtc inside ruby", "<html>A<ruby>B<rb>C<rtc>D<rb>E<span>F<rtc>G</ruby>H</html>", "<html><head></head><body>A<ruby>B<rb>C</rb><rtc>D</rtc><rb>E<span>F<rtc>G</rtc></span></rb></ruby>H</body></html>", ["parent-not-ruby", "misnested-end-tag"]],
+  ["rp/rt outside ruby", "<html>A<rp>B<rt>C<rp>D</html>", "<html><head></head><body>A<rp>B<rt>C<rp>D</rp></rt></rp></body></html>", []],
+  ["rp/rt inside ruby", "<html>A<ruby>B<rp>C<rt>D<rp>E<span>F<rt>G<rtc>H<rp>I</ruby>J</html>", "<html><head></head><body>A<ruby>B<rp>C</rp><rt>D</rt><rp>E<span>F<rt>G</rt><rtc>H<rp>I</rp></rtc></span></rp></ruby>J</body></html>", ["parent-not-ruby", "parent-not-ruby", "misnested-end-tag"]],
+  [
+    "forbidden start tags", "<html>A<caption>B<col>C<colgroup>D<frame>E<head>F<tbody>G<td>H<tfoot>I<th>J<thead>K<tr>L</html>", "<html><head></head><body>ABCDEFGHIJKL</body></html>",
+    [
+      "unexpected-start-tag-in-body", "unexpected-start-tag-in-body", "unexpected-start-tag-in-body", "unexpected-start-tag-in-body",
+      "unexpected-start-tag-in-body", "unexpected-start-tag-in-body", "unexpected-start-tag-in-body", "unexpected-start-tag-in-body",
+      "unexpected-start-tag-in-body", "unexpected-start-tag-in-body", "unexpected-start-tag-in-body"
+    ]
+  ]
 ]
