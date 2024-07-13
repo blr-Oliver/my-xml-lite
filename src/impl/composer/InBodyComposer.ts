@@ -353,12 +353,9 @@ export class InBodyComposer extends TokenAdjustingComposer {
       case 'section':
       case 'summary':
       case 'ul':
-        if (this.hasElementInScope(token.name)) {
-          this.generateImpliedEndTags();
-          if (this.current.tagName !== token.name)
-            this.error('misnested-end-tag');
-          this.popUntilName(token.name);
-        } else
+        if (this.hasElementInScope(token.name))
+          this.forceCloseElement(token.name);
+        else
           this.error('orphan-end-tag');
         break;
       case 'form':
@@ -373,14 +370,14 @@ export class InBodyComposer extends TokenAdjustingComposer {
         break;
       case 'li':
         if (this.hasElementInListScope('li'))
-          this.inBodyEndItemTag('li');
+          this.forceCloseElement('li');
         else
           this.error('orphan-end-tag');
         break;
       case 'dd':
       case 'dt':
         if (this.hasElementInScope(token.name))
-          this.inBodyEndItemTag(token.name);
+          this.forceCloseElement(token.name);
         else
           this.error('orphan-end-tag');
         break;
@@ -421,15 +418,10 @@ export class InBodyComposer extends TokenAdjustingComposer {
       case 'marquee':
       case 'object':
         if (this.hasElementInScope(token.name)) {
-          this.generateImpliedEndTags();
-          if (this.current.namespaceURI !== NS_HTML || this.current.tagName !== token.name) {
-            this.error();
-            this.popUntilName(token.name);
-          } else
-            this.popCurrentElement();
+          this.forceCloseElement(token.name);
+          this.clearFormattingUpToMarker();
         } else
-          this.error();
-        this.clearFormattingUpToMarker();
+          this.error('orphan-end-tag');
         break;
       case 'br':
         this.error('br-end-tag');
@@ -457,14 +449,9 @@ export class InBodyComposer extends TokenAdjustingComposer {
 
   inBodyEndTagForm() {
     if (this.openCounts['template']) {
-      if (this.hasElementInScope('form')) {
-        this.generateImpliedEndTags();
-        if (this.current.tagName !== 'form') {
-          this.error();
-          this.popUntilName('form');
-        } else
-          this.popCurrentElement();
-      } else
+      if (this.hasElementInScope('form'))
+        this.forceCloseElement('form');
+      else
         this.error('orphan-end-tag');
     } else {
       const form = this.formElement;
@@ -472,7 +459,7 @@ export class InBodyComposer extends TokenAdjustingComposer {
       if (form && this.isElementInScope(form)) {
         this.generateImpliedEndTags();
         if (this.current !== form) {
-          this.error();
+          this.error('element-closed-before-children');
           this.removeFromStack(form);
         } else
           this.popCurrentElement();
@@ -487,7 +474,7 @@ export class InBodyComposer extends TokenAdjustingComposer {
       if (token.name === node.tagName && node.namespaceURI === NS_HTML) {
         this.generateImpliedEndTags(token.name);
         if (this.current !== node)
-          this.error('misnested-end-tag');
+          this.error('element-closed-before-children');
         while (this.openElements.length > i)
           this.popCurrentElement();
         break;
@@ -521,12 +508,7 @@ export class InBodyComposer extends TokenAdjustingComposer {
       const node = this.openElements[i];
       const tagName = node.tagName;
       if ((tagName === name1 || tagName === name2) && node.namespaceURI === NS_HTML) {
-        this.generateImpliedEndTags(tagName);
-        if (this.current.tagName !== tagName || this.current.namespaceURI !== NS_HTML) {
-          this.error('element-closed-before-children');
-          this.popUntilName(tagName);
-        } else
-          this.popCurrentElement();
+        this.forceCloseElement(tagName);
         break;
       } else if (this.isSpecial(node) && tagName !== 'address' && tagName !== 'div' && tagName !== 'p') {
         break;
@@ -538,9 +520,9 @@ export class InBodyComposer extends TokenAdjustingComposer {
     return this.insertionMode;
   }
 
-  inBodyEndItemTag(name: 'li' | 'dt' | 'dd') {
+  forceCloseElement(name: string, namespace = NS_HTML) {
     this.generateImpliedEndTags(name);
-    if (this.current.tagName !== name || this.current.namespaceURI !== NS_HTML) {
+    if (this.current.tagName !== name || this.current.namespaceURI !== namespace) {
       this.error('element-closed-before-children');
       this.popUntilName(name);
     } else

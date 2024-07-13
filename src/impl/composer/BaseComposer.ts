@@ -62,6 +62,7 @@ type InsertionLocation = {
 }
 
 // TODO when partial composers are merged refine cross-calls where needed
+// TODO analyze all namespace checks for necessity
 export class BaseComposer implements TokenSink {
   tokenizer!: StateBasedTokenizer;
   insertionMode!: InsertionMode;
