@@ -1,4 +1,4 @@
-import {Element} from '../../decl/xml-lite-decl';
+import {Element, Node} from '../../decl/xml-lite-decl';
 import {StaticAttr} from '../nodes/StaticAttr';
 import {StaticAttributes} from '../nodes/StaticAttributes';
 import {StaticElement} from '../nodes/StaticElement';
@@ -176,7 +176,7 @@ export class InBodyComposer extends TokenAdjustingComposer {
       case 'tt':
       case 'u':
         this.reconstructFormattingElements();
-        this.formattingElements.push(this.createAndInsertHTMLElement(token));
+        this.pushFormattingElement(this.createAndInsertHTMLElement(token));
         break;
       case 'nobr':
         this.reconstructFormattingElements();
@@ -185,7 +185,7 @@ export class InBodyComposer extends TokenAdjustingComposer {
           this.adoptionAgency(token);
           this.reconstructFormattingElements();
         }
-        this.formattingElements.push(this.createAndInsertHTMLElement(token));
+        this.pushFormattingElement(this.createAndInsertHTMLElement(token));
         break;
       case 'applet':
       case 'marquee':
@@ -427,7 +427,8 @@ export class InBodyComposer extends TokenAdjustingComposer {
         this.error('br-end-tag');
         return this.inBodyStartTag({type: 'startTag', name: 'br', selfClosed: false, attributes: []});
       default:
-        return this.inBodyEndTagDefault(token);
+        this.inBodyEndTagDefault(token);
+        return this.insertionMode;
     }
     return this.insertionMode;
   }
@@ -468,7 +469,7 @@ export class InBodyComposer extends TokenAdjustingComposer {
     }
   }
 
-  inBodyEndTagDefault(token: TagToken): InsertionMode {
+  inBodyEndTagDefault(token: TagToken): void {
     for (let i = this.openElements.length - 1; i >= 0; --i) {
       const node = this.openElements[i];
       if (token.name === node.tagName && node.namespaceURI === NS_HTML) {
@@ -483,7 +484,6 @@ export class InBodyComposer extends TokenAdjustingComposer {
         break;
       }
     }
-    return this.insertionMode;
   }
 
   addMissingAttributes(element: Element, token: TagToken) {
@@ -562,8 +562,101 @@ export class InBodyComposer extends TokenAdjustingComposer {
     }
     return false;
   }
+
   adoptionAgency(token: TagToken) { // TODO this requires active tree modification which is not possible with current implementation
-    if (token.name === this.current.tagName)
+    const subject = token.name;
+    if (subject === this.current.tagName && !this.isInFormattingList(this.current))
       this.popCurrentElement();
+    else
+      for (let outer = 0; outer < 8; ++outer) {
+        let formattingElement = this.getActiveFormattingElement(subject);
+        if (!formattingElement)
+          return this.inBodyEndTagDefault(token);
+        let position = this.openElements.indexOf(formattingElement);
+        if (position === -1) {
+          this.error('formatting-element-already-closed');
+          this.removeFormattingElement(formattingElement);
+          return;
+        }
+        if (!this.isElementInScope(formattingElement)) {
+          this.error('formatting-element-out-of-scope');
+          return;
+        }
+        if (formattingElement !== this.current) {
+          this.error('element-closed-before-children');
+        }
+        let furthestBlock = this.openElements.slice(position + 1).find(this.isSpecial, this);
+        if (!furthestBlock) {
+          while (this.openElements.length > position)
+            this.popCurrentElement();
+          this.removeFormattingElement(formattingElement);
+          return;
+        } else {
+          let commonAncestor = this.openElements[position - 1];
+          // bookmark?
+          let node = furthestBlock, lastNode = furthestBlock;
+          let inner = 0;
+          while (true) {
+            ++inner;
+            node = getPreviousElementInStack(node);
+            if (node === formattingElement) break;
+            if (!this.isInFormattingList(node)) {
+              this.removeFromStack(node);
+              continue;
+            }
+            if (inner > 3)
+              this.removeFormattingElement(node);
+            const originalToken = getOriginalToken(node);
+            const replacement = this.createElementNS(originalToken, NS_HTML, commonAncestor);
+            replaceElement(this.formattingElements, node, replacement);
+            replaceElement(this.openElements, node, replacement);
+            node = replacement;
+            appendNode(lastNode, node);
+            lastNode = node;
+          }
+          this.insertNodeAtLocation(lastNode, {parent: commonAncestor});
+          const formattingToken = getOriginalToken(formattingElement);
+          const newFormatting = this.createElementNS(formattingToken, NS_HTML, furthestBlock);
+          const childNodes = (furthestBlock.childNodes as Node[]).slice();
+          for (let child of childNodes)
+            appendNode(child, newFormatting);
+          // @ts-ignore
+          furthestBlock.childNodes.length = furthestBlock.children.length = 0;
+          appendNode(newFormatting, furthestBlock);
+          this.removeFormattingElement(formattingElement);
+          // TODO add formattingElement at bookmark
+          const formattingPosition = this.openElements.indexOf(formattingElement);
+          this.openElements.splice(position, 1);
+          const furthestPosition = this.openElements.indexOf(furthestBlock);
+          this.openElements.splice(furthestPosition, 0, newFormatting);
+        }
+      }
+
+    function getPreviousFormattingElement(element: Element): Element {
+      return element;
+    }
+
+    function getPreviousElementInStack(element: Element): Element {
+      return element.parentElement!;
+    }
+
+    function getOriginalToken(element: Element): TagToken {
+      return {
+        type: 'startTag',
+        name: element.tagName,
+        selfClosed: element.selfClosed,
+        attributes: [/* TODO */]
+      };
+    }
+
+    function replaceElement(list: Element[], element: Element, replacement: Element) {
+      const index = list.indexOf(element);
+      list[index] = replacement;
+    }
+
+    function appendNode(node: Node, target: Element) {
+      // TODO
+    }
+
   }
 }

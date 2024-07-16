@@ -546,7 +546,14 @@ export class BaseComposer implements TokenSink {
   insertFormattingMarker() { // TODO
   }
 
+  pushFormattingElement(element: Element) { //TODO
+  }
+
   reconstructFormattingElements() { // TODO
+  }
+
+  isInFormattingList(element: Element): boolean { // TODO
+    return false;
   }
 
   getActiveFormattingElement(name: string): Element | null { // TODO
