@@ -103,7 +103,7 @@ export class InBodyComposer extends TokenAdjustingComposer {
       case 'summary':
       case 'ul':
         if (this.hasElementInButtonScope('p'))
-          this.closeParagraph();
+          this.forceCloseElement('p');
         this.createAndInsertHTMLElement(token);
         break;
       case 'h1':
@@ -113,7 +113,7 @@ export class InBodyComposer extends TokenAdjustingComposer {
       case 'h5':
       case 'h6':
         if (this.hasElementInButtonScope('p'))
-          this.closeParagraph();
+          this.forceCloseElement('p');
         if (this.current.namespaceURI === NS_HTML) {
           switch (this.current.tagName) {
             case 'h1':
@@ -133,7 +133,7 @@ export class InBodyComposer extends TokenAdjustingComposer {
           this.error('nested-form');
         } else {
           if (this.hasElementInButtonScope('p'))
-            this.closeParagraph();
+            this.forceCloseElement('p');
           const element = this.createAndInsertHTMLElement(token);
           if (!this.openCounts['template'])
             this.formElement = element;
@@ -146,7 +146,7 @@ export class InBodyComposer extends TokenAdjustingComposer {
         return this.inBodyStartItemTag(token, 'dd', 'dt');
       case 'plaintext':
         if (this.hasElementInButtonScope('p'))
-          this.closeParagraph();
+          this.forceCloseElement('p');
         this.createAndInsertHTMLElement(token);
         this.tokenizer.state = 'plaintext';
         break;
@@ -197,7 +197,7 @@ export class InBodyComposer extends TokenAdjustingComposer {
         break;
       case 'table':
         if (this.hasElementInButtonScope('p'))
-          this.closeParagraph();
+          this.forceCloseElement('p');
         this.createAndInsertHTMLElement(token);
         this.framesetOk = false;
         return 'inTable';
@@ -227,7 +227,7 @@ export class InBodyComposer extends TokenAdjustingComposer {
         break;
       case 'hr':
         if (this.hasElementInButtonScope('p'))
-          this.closeParagraph();
+          this.forceCloseElement('p');
         this.createAndInsertEmptyHTMLElement(token);
         this.framesetOk = false;
         break;
@@ -236,7 +236,7 @@ export class InBodyComposer extends TokenAdjustingComposer {
         return this.startTextMode('rcdata', token);
       case 'xmp':
         if (this.hasElementInButtonScope('p'))
-          this.closeParagraph();
+          this.forceCloseElement('p');
         this.reconstructFormattingElements();
       case 'iframe': // ok no break
         this.framesetOk = false;
@@ -366,7 +366,7 @@ export class InBodyComposer extends TokenAdjustingComposer {
           this.error('orphan-p-end-tag');
           this.createAndInsertHTMLElement({type: 'startTag', name: 'p', selfClosed: false, attributes: []});
         }
-        this.closeParagraph();
+        this.forceCloseElement('p');
         break;
       case 'li':
         if (this.hasElementInListScope('li'))
@@ -515,18 +515,9 @@ export class InBodyComposer extends TokenAdjustingComposer {
       }
     }
     if (this.hasElementInButtonScope('p'))
-      this.closeParagraph();
+      this.forceCloseElement('p');
     this.createAndInsertHTMLElement(token);
     return this.insertionMode;
-  }
-
-  forceCloseElement(name: string, namespace = NS_HTML) {
-    this.generateImpliedEndTags(name);
-    if (this.current.tagName !== name || this.current.namespaceURI !== namespace) {
-      this.error('element-closed-before-children');
-      this.popUntilName(name);
-    } else
-      this.popCurrentElement();
   }
 
   inBodyStartTagAnchor(token: TagToken): InsertionMode {

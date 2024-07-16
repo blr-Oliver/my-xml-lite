@@ -513,7 +513,7 @@ export class BaseComposer implements TokenSink {
   endTemplate(): InsertionMode {
     if (this.openCounts['template']) {
       this.generateImpliedEndTagsThoroughly();
-      let current = this.current
+      let current = this.current;
       if (current.tagName !== 'template' || current.namespaceURI !== NS_HTML) {
         this.error('abrupt-end-of-template');
         this.popUntilName('template');
@@ -531,11 +531,13 @@ export class BaseComposer implements TokenSink {
     this.tokenizer.env.errors.push(error || 'error');
   }
 
-  closeParagraph() {
-    this.generateImpliedEndTags('p');
-    if (this.current.tagName !== 'p')
-      this.error();
-    this.popUntilName('p');
+  forceCloseElement(name: string, error: string = 'element-closed-before-children', namespace = NS_HTML) {
+    this.generateImpliedEndTags(name);
+    if (this.current.tagName !== name || this.current.namespaceURI !== namespace) {
+      this.error(error);
+      this.popUntilName(name);
+    } else
+      this.popCurrentElement();
   }
 
   clearFormattingUpToMarker() { // TODO
