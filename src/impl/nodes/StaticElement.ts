@@ -1,4 +1,4 @@
-import {Attr, Document, DOMTokenList, Element, NamedNodeMap, Node, NodeType, ParentNode} from '../../decl/xml-lite-decl';
+import {Attr, Document, Element, Node, NodeType, ParentNode} from '../../decl/xml-lite-decl';
 import {TagToken} from '../tokens';
 import {StaticAttributes} from './StaticAttributes';
 import {StaticParentNode} from './StaticParentNode';
@@ -6,8 +6,8 @@ import {StaticTokenList} from './StaticTokenList';
 
 export class StaticElement extends StaticParentNode implements Element {
   declare readonly ownerDocument: Document;
-  readonly attributes: NamedNodeMap;
-  readonly classList: DOMTokenList;
+  readonly attributes: StaticAttributes;
+  readonly classList: StaticTokenList;
   readonly id: string;
   readonly className: string;
   readonly namespaceURI: string | null;
@@ -19,21 +19,21 @@ export class StaticElement extends StaticParentNode implements Element {
   readonly attributeNames: string[];
   parentElementIndex: number;
 
-  constructor(tag: TagToken,
+  constructor(token: TagToken,
               namespaceURI: string | null,
               parentNode: ParentNode,
               childNodes: Node[],
               children: Element[]) {
     super(NodeType.ELEMENT_NODE, parentNode, childNodes, children);
     this.namespaceURI = namespaceURI;
-    this.attributeNames = tag.attributes.map(attr => attr.name);
-    this.attributes = new StaticAttributes(tag.attributes, this);
+    this.attributeNames = token.attributes.map(attr => attr.name);
+    this.attributes = new StaticAttributes(token.attributes, this);
     this.id = this.attributes.getNamedItem('id')?.value || '';
     this.className = this.attributes.getNamedItem('class')?.value || '';
     this.classList = new StaticTokenList(this.className);
     this.prefix = null;
-    this.tagName = this.localName = tag.name;
-    this.selfClosed = tag.selfClosed;
+    this.tagName = this.localName = token.name;
+    this.selfClosed = token.selfClosed;
     this.parentElementIndex = parentNode.childElementCount;
   }
 

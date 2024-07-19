@@ -1,5 +1,7 @@
 import {TokenSink} from '../../decl/ParserEnvironment';
 import {Attr, Document, Element, isDocument, isElement, Node, NodeType, ParentNode} from '../../decl/xml-lite-decl';
+import {StaticAttr} from '../nodes/StaticAttr';
+import {StaticAttributes} from '../nodes/StaticAttributes';
 import {StaticDataNode} from '../nodes/StaticDataNode';
 import {StaticDocument} from '../nodes/StaticDocument';
 import {StaticDocumentType} from '../nodes/StaticDocumentType';
@@ -111,7 +113,7 @@ export class BaseComposer implements TokenSink {
     this.formattingElements.length = 0;
     this.formattingArk = {};
     this.formattingZones.length = 0;
-    this.document = new StaticDocument([], []);
+    this.document = this._createEmptyDocument();
     if (!(this.contextElement = contextElement)) {
       this.tokenizer.state = 'data';
       this.setInsertionMode('initial');
@@ -339,20 +341,20 @@ export class BaseComposer implements TokenSink {
   }
 
   protected insertDoctype(doctypeToken: DoctypeToken) {
-    const documentType = new StaticDocumentType(this.document, doctypeToken.name ?? 'html', doctypeToken.publicId ?? '', doctypeToken.systemId ?? '');
-    this.push(this.document.childNodes, documentType);
+    const documentType = this._createDoctype(this.document, doctypeToken.name ?? 'html', doctypeToken.publicId ?? '', doctypeToken.systemId ?? '');
+    this._push(this.document.childNodes, documentType);
   }
 
   protected insertComment(token: CommentToken, override?: ParentNode) {
     const location = this.getInsertionLocation(override);
-    const node = new StaticDataNode(TokenTypeMapping[token.type], location.parent, token.data);
+    const node = this._createDataNode(NodeType.COMMENT_NODE, location.parent, token.data);
     this.insertNodeAtLocation(node, location);
   }
 
   protected insertCharacters(token: CharactersToken) {
     const location = this.getInsertionLocation();
     if (!isDocument(location.parent)) {
-      const node = new StaticDataNode(TokenTypeMapping[token.type], location.parent, token.data);
+      const node = this._createDataNode(TokenTypeMapping[token.type], location.parent, token.data);
       this.insertNodeAtLocation(node, location);
     }
   }
@@ -378,7 +380,7 @@ export class BaseComposer implements TokenSink {
   }
 
   createElementNS(token: TagToken, namespace: string | null, parent: ParentNode): Element {
-    const element = new StaticElement(token, namespace, parent, [], []);
+    const element = this._createElementNode(token, namespace, parent);
     this.validateNsAttributes(element);
     return element;
   }
@@ -432,9 +434,9 @@ export class BaseComposer implements TokenSink {
     const {parent, before} = location;
     // TODO is it whenever a case when insertion is not possible?
     if (!before) {
-      this.push(parent.childNodes, node);
+      this._push(parent.childNodes, node);
       if (isElement(node))
-        this.push(parent.children, node);
+        this._push(parent.children, node);
     } else {
       if (!this.fosterTables.has(before))
         this.fosterTables.set(before, []);
@@ -890,6 +892,12 @@ export class BaseComposer implements TokenSink {
     }
     childNodes.push(node);
   }
+
+  stopParsing(): InsertionMode { // TODO
+    this.settleFosterChildren();
+    return this.insertionMode;
+  }
+
   // TODO these methods are tied to StaticXXX implementation - not good
   _setNodeIndex(node: Node, nodeIndex: number) {
     (node as StaticEmptyNode).parentIndex = nodeIndex;
@@ -930,13 +938,46 @@ export class BaseComposer implements TokenSink {
     }
   }
 
-  stopParsing(): InsertionMode { // TODO
-    this.settleFosterChildren();
-    return this.insertionMode;
-  }
-
-  push<T>(list: ArrayLike<T>, el: T) {
+  _push<T>(list: ArrayLike<T>, el: T) {
+    // TODO create possibility to always directly work with arrays
     if (Array.isArray(list)) list.push(el);
     else Array.prototype.push.call(list, el);
+  }
+
+  _addMissingAttributes(element: Element, token: TagToken) {
+    for (let attrToken of token.attributes) {
+      if (!element.hasAttribute(attrToken.name))
+        (element.attributes as StaticAttributes).addAttributeNode(new StaticAttr(attrToken, element));
+    }
+  }
+
+  _createDataNode(nodeType: NodeType, parent: ParentNode, data: string) {
+    return new StaticDataNode(nodeType, parent, data);
+  }
+
+  _createEmptyDocument() {
+    return new StaticDocument([], []);
+  }
+
+  _createDoctype(document: Document, name: string, publicId: string, systemId: string) {
+    return new StaticDocumentType(document, name, publicId, systemId);
+  }
+
+  _createElementNode(token: TagToken, namespace: string | null, parent: ParentNode) {
+    return new StaticElement(token, namespace, parent, [], []);
+  }
+
+  _removeElementFromParent(parent: Element, child: Element) {
+    const staticParent = parent as StaticElement;
+    const staticChild = child as StaticElement;
+    staticParent.childNodes.splice(staticChild.parentIndex, 1);
+    staticParent.children.splice(staticChild.parentElementIndex, 1);
+    staticParent.childNodes.forEach(this._setNodeIndex, this);
+    staticParent.children.forEach(this._setElementIndex, this);
+  }
+
+  _clearList(list: ArrayLike<unknown>) {
+    // @ts-ignore
+    list.length = 0;
   }
 }

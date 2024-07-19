@@ -1,7 +1,4 @@
 import {Element, Node} from '../../decl/xml-lite-decl';
-import {StaticAttr} from '../nodes/StaticAttr';
-import {StaticAttributes} from '../nodes/StaticAttributes';
-import {StaticElement} from '../nodes/StaticElement';
 import {CharactersToken, CommentToken, TagToken, Token} from '../tokens';
 import {NS_HTML, NS_MATHML, NS_SVG} from './BaseComposer';
 import {InsertionMode} from './insertion-mode';
@@ -42,7 +39,7 @@ export class InBodyComposer extends TokenAdjustingComposer {
       case 'html':
         this.error('unexpected-html-start-tag');
         if (!this.openCounts['template'])
-          this.addMissingAttributes(this.openElements[0], token);
+          this._addMissingAttributes(this.openElements[0], token);
         break;
       case 'base':
       case 'basefont':
@@ -59,14 +56,14 @@ export class InBodyComposer extends TokenAdjustingComposer {
         this.error('unexpected-body-start-tag');
         if (this.openElements.length > 1 && this.openElements[1].tagName === 'body' && !this.openCounts['template']) {
           this.framesetOk = false;
-          this.addMissingAttributes(this.openElements[1], token);
+          this._addMissingAttributes(this.openElements[1], token);
         }
         break;
       case 'frameset':
         this.error('frameset-in-body');
         if (this.openElements.length > 1 && this.openElements[1].tagName === 'body' && !this.openCounts['template']) {
           if (this.framesetOk) {
-            this.removeElementFromParent(this.openElements[0], this.openElements[1]);
+            this._removeElementFromParent(this.openElements[0], this.openElements[1]);
             while (this.openElements.length > 1)
               this.popCurrentElement();
             this.createAndInsertHTMLElement(token);
@@ -486,22 +483,6 @@ export class InBodyComposer extends TokenAdjustingComposer {
     }
   }
 
-  addMissingAttributes(element: Element, token: TagToken) {
-    for (let attrToken of token.attributes) {
-      if (!element.hasAttribute(attrToken.name))
-        (element.attributes as StaticAttributes).addAttributeNode(new StaticAttr(attrToken, element));
-    }
-  }
-
-  removeElementFromParent(parent: Element, child: Element) {
-    const staticParent = parent as StaticElement;
-    const staticChild = child as StaticElement;
-    staticParent.childNodes.splice(staticChild.parentIndex, 1);
-    staticParent.children.splice(staticChild.parentElementIndex, 1);
-    staticParent.childNodes.forEach(this._setNodeIndex, this);
-    staticParent.children.forEach(this._setElementIndex, this);
-  }
-
   inBodyStartItemTag(token: TagToken, name1: 'li' | 'dt' | 'dd', name2?: 'li' | 'dt' | 'dd') {
     this.framesetOk = false;
     for (let i = this.openElements.length - 1; ; --i) {
@@ -622,8 +603,8 @@ export class InBodyComposer extends TokenAdjustingComposer {
           const childNodes = (furthestBlock.childNodes as Node[]).slice();
           for (let child of childNodes)
             this._appendNode(child, newFormatting);
-          // @ts-ignore
-          furthestBlock.childNodes.length = furthestBlock.children.length = 0;
+          this._clearList(furthestBlock.childNodes);
+          this._clearList(furthestBlock.children);
           this._appendNode(newFormatting, furthestBlock);
           this.removeFormattingElement(formattingElement);
           const key = this.computeFormattingElementKey(formattingElement);
