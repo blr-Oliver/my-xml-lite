@@ -44,6 +44,8 @@ export abstract class AbstractSuite<R, T extends TestCase, C extends CompositeCo
     this.composer.openCounts = {};
     this.composer.fosterTables = new Map<any, any>();
     this.composer.formattingElements = [];
+    this.composer.formattingArk = {};
+    this.composer.formattingZones = [];
     this.composer.pendingTableCharacters = [];
 
     this.tokenizer.env = {

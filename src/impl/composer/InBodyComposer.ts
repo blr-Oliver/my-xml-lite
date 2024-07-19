@@ -498,8 +498,8 @@ export class InBodyComposer extends TokenAdjustingComposer {
     const staticChild = child as StaticElement;
     staticParent.childNodes.splice(staticChild.parentIndex, 1);
     staticParent.children.splice(staticChild.parentElementIndex, 1);
-    staticParent.childNodes.forEach(this.setNodeIndex, this);
-    staticParent.children.forEach(this.setElementIndex, this);
+    staticParent.childNodes.forEach(this._setNodeIndex, this);
+    staticParent.children.forEach(this._setElementIndex, this);
   }
 
   inBodyStartItemTag(token: TagToken, name1: 'li' | 'dt' | 'dd', name2?: 'li' | 'dt' | 'dd') {
@@ -521,7 +521,7 @@ export class InBodyComposer extends TokenAdjustingComposer {
   }
 
   inBodyStartTagAnchor(token: TagToken): InsertionMode {
-    let activeAnchor = this.getActiveFormattingElement('a');
+    let activeAnchor = this.getLastFormattingElementForName('a');
     if (activeAnchor) {
       this.error('nested-anchor');
       this.adoptionAgency(token);
@@ -563,13 +563,13 @@ export class InBodyComposer extends TokenAdjustingComposer {
     return false;
   }
 
-  adoptionAgency(token: TagToken) { // TODO this requires active tree modification which is not possible with current implementation
+  adoptionAgency(token: TagToken) {
     const subject = token.name;
     if (subject === this.current.tagName && !this.isInFormattingList(this.current))
       this.popCurrentElement();
     else
       for (let outer = 0; outer < 8; ++outer) {
-        let formattingElement = this.getActiveFormattingElement(subject);
+        let formattingElement = this.getLastFormattingElementForName(subject);
         if (!formattingElement)
           return this.inBodyEndTagDefault(token);
         let position = this.openElements.indexOf(formattingElement);
@@ -593,7 +593,7 @@ export class InBodyComposer extends TokenAdjustingComposer {
           return;
         } else {
           let commonAncestor = this.openElements[position - 1];
-          // bookmark?
+          const bookmark = this.formattingElements.indexOf(formattingElement);
           let node = furthestBlock, lastNode = furthestBlock;
           let inner = 0;
           while (true) {
@@ -606,57 +606,41 @@ export class InBodyComposer extends TokenAdjustingComposer {
             }
             if (inner > 3)
               this.removeFormattingElement(node);
-            const originalToken = getOriginalToken(node);
+            const originalToken = this.getOriginalToken(node);
             const replacement = this.createElementNS(originalToken, NS_HTML, commonAncestor);
+            const key = this.computeFormattingElementKey(node);
             replaceElement(this.formattingElements, node, replacement);
+            replaceElement(this.formattingArk[key]!, node, replacement);
             replaceElement(this.openElements, node, replacement);
             node = replacement;
-            appendNode(lastNode, node);
+            this._appendNode(lastNode, node);
             lastNode = node;
           }
           this.insertNodeAtLocation(lastNode, {parent: commonAncestor});
-          const formattingToken = getOriginalToken(formattingElement);
+          const formattingToken = this.getOriginalToken(formattingElement);
           const newFormatting = this.createElementNS(formattingToken, NS_HTML, furthestBlock);
           const childNodes = (furthestBlock.childNodes as Node[]).slice();
           for (let child of childNodes)
-            appendNode(child, newFormatting);
+            this._appendNode(child, newFormatting);
           // @ts-ignore
           furthestBlock.childNodes.length = furthestBlock.children.length = 0;
-          appendNode(newFormatting, furthestBlock);
+          this._appendNode(newFormatting, furthestBlock);
           this.removeFormattingElement(formattingElement);
-          // TODO add formattingElement at bookmark
-          const formattingPosition = this.openElements.indexOf(formattingElement);
-          this.openElements.splice(position, 1);
+          const key = this.computeFormattingElementKey(formattingElement);
+          this.formattingArk[key].push(newFormatting);
+          this.formattingElements.splice(bookmark, 0, newFormatting);
           const furthestPosition = this.openElements.indexOf(furthestBlock);
           this.openElements.splice(furthestPosition, 0, newFormatting);
         }
       }
 
-    function getPreviousFormattingElement(element: Element): Element {
-      return element;
-    }
-
     function getPreviousElementInStack(element: Element): Element {
       return element.parentElement!;
-    }
-
-    function getOriginalToken(element: Element): TagToken {
-      return {
-        type: 'startTag',
-        name: element.tagName,
-        selfClosed: element.selfClosed,
-        attributes: [/* TODO */]
-      };
     }
 
     function replaceElement(list: Element[], element: Element, replacement: Element) {
       const index = list.indexOf(element);
       list[index] = replacement;
     }
-
-    function appendNode(node: Node, target: Element) {
-      // TODO
-    }
-
   }
 }

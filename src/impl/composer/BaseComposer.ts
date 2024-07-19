@@ -1,5 +1,5 @@
 import {TokenSink} from '../../decl/ParserEnvironment';
-import {Document, Element, isDocument, isElement, Node, NodeType, ParentNode} from '../../decl/xml-lite-decl';
+import {Attr, Document, Element, isDocument, isElement, Node, NodeType, ParentNode} from '../../decl/xml-lite-decl';
 import {StaticDataNode} from '../nodes/StaticDataNode';
 import {StaticDocument} from '../nodes/StaticDocument';
 import {StaticDocumentType} from '../nodes/StaticDocumentType';
@@ -61,6 +61,12 @@ type InsertionLocation = {
   before?: Element // this can only be a table
 }
 
+type FormattingArk = { [formattingKey: string]: Element[] };
+type FormattingZone = {
+  formattingElements: Element[];
+  formattingArk: FormattingArk;
+}
+
 // TODO when partial composers are merged refine cross-calls where needed
 // TODO analyze all namespace checks for necessity
 export class BaseComposer implements TokenSink {
@@ -83,6 +89,8 @@ export class BaseComposer implements TokenSink {
 
   framesetOk: boolean = true;
   formattingElements: Element[] = [];
+  formattingArk: FormattingArk = {};
+  formattingZones: FormattingZone[] = [];
 
   get current(): Element {
     return this.openElements[this.openElements.length - 1];
@@ -101,6 +109,8 @@ export class BaseComposer implements TokenSink {
     this.fosterTables.clear();
     this.framesetOk = true;
     this.formattingElements.length = 0;
+    this.formattingArk = {};
+    this.formattingZones.length = 0;
     this.document = new StaticDocument([], []);
     if (!(this.contextElement = contextElement)) {
       this.tokenizer.state = 'data';
@@ -540,27 +550,95 @@ export class BaseComposer implements TokenSink {
       this.popCurrentElement();
   }
 
-  clearFormattingUpToMarker() { // TODO
+  clearFormattingUpToMarker() {
+    let zone = this.formattingZones.pop();
+    this.formattingElements = zone?.formattingElements || [];
+    this.formattingArk = zone?.formattingArk || {};
   }
 
-  insertFormattingMarker() { // TODO
+  insertFormattingMarker() {
+    this.formattingZones.push({
+      formattingElements: this.formattingElements,
+      formattingArk: this.formattingArk
+    });
+    this.formattingElements = [];
+    this.formattingArk = {};
   }
 
-  pushFormattingElement(element: Element) { //TODO
+  pushFormattingElement(element: Element) {
+    const key = this.computeFormattingElementKey(element);
+    let previous = this.formattingArk[key];
+    if (previous) {
+      if (previous.length === 3) {
+        const index = this.formattingElements.indexOf(previous[0]);
+        this.formattingElements.splice(index, 1);
+        previous.shift();
+      }
+    } else
+      previous = this.formattingArk[key] = [];
+    previous.push(element);
+    this.formattingElements.push(element);
   }
 
-  reconstructFormattingElements() { // TODO
+  reconstructFormattingElements() {
+    const len = this.formattingElements.length;
+    let index = this.formattingElements.findLastIndex(el => this.openElements.indexOf(el) !== -1);
+    while (++index < len) {
+      const element = this.formattingElements[index];
+      const token = this.getOriginalToken(element);
+      const replacement = this.createAndInsertHTMLElement(token);
+      this.formattingElements[index] = replacement;
+      const key = this.computeFormattingElementKey(element);
+      const arkElements = this.formattingArk[key]!;
+      const arkIndex = arkElements.indexOf(element);
+      arkElements[arkIndex] = replacement;
+    }
   }
 
-  isInFormattingList(element: Element): boolean { // TODO
-    return false;
+  isInFormattingList(element: Element): boolean {
+    return this.formattingElements.indexOf(element) !== -1;
   }
 
-  getActiveFormattingElement(name: string): Element | null { // TODO
-    return null;
+  getLastFormattingElementForName(name: string): Element | undefined {
+    return this.formattingElements.findLast(el => el.tagName === name);
   }
 
-  removeFormattingElement(element: Element) { // TODO
+  removeFormattingElement(element: Element) {
+    const listIndex = this.formattingElements.indexOf(element);
+    if (listIndex !== -1) {
+      this.formattingElements.splice(listIndex, 1);
+      const key = this.computeFormattingElementKey(element);
+      const arkElements = this.formattingArk[key]!;
+      const arkIndex = arkElements.indexOf(element);
+      arkElements.splice(arkIndex, 1);
+    }
+  }
+
+  computeFormattingElementKey(element: Element): string {
+    const attributes = element.attributes;
+    const attrCount = attributes.length;
+    const attrList: Attr[] = Array(attrCount);
+    for (let i = 0; i < attrCount; ++i)
+      attrList[i] = attributes.item(i)!;
+    attrList.sort((a, b) => a.name > b.name ? 1 : a.name < b.name ? -1 : 0);
+    const attrKeys: string[] = Array(attrCount);
+    for (let i = 0; i < attrCount; ++i) {
+      const attr = attrList[i];
+      attrKeys[i] = `${attr.name}\r${attr.value === null ? '\u0000' : attr.value}`;
+    }
+    return `${element.tagName}\r${attrKeys.join('\r')}`;
+  }
+
+  getOriginalToken(element: Element): TagToken {
+    return {
+      type: 'startTag',
+      name: element.tagName,
+      selfClosed: element.selfClosed,
+      attributes: [...element.attributes].map((attr: Attr) => ({
+        name: attr.name,
+        value: attr.value
+      }))
+    };
   }
 
   hasMatchInScope(test: (el: Element) => boolean, fenceTest: (el: Element) => boolean) {
@@ -793,9 +871,9 @@ export class BaseComposer implements TokenSink {
       }
     }
     for (let [parent, [childNodes, children]] of parents) {
-      childNodes.forEach(this.setNodeIndex, this);
-      children.forEach(this.setElementIndex, this);
-      this.setNestedNodes(parent, childNodes, children);
+      childNodes.forEach(this._setNodeIndex, this);
+      children.forEach(this._setElementIndex, this);
+      this._setNestedNodes(parent, childNodes, children);
     }
     this.fosterTables.clear();
   }
@@ -813,17 +891,43 @@ export class BaseComposer implements TokenSink {
     childNodes.push(node);
   }
   // TODO these methods are tied to StaticXXX implementation - not good
-  setNodeIndex(node: Node, nodeIndex: number) {
+  _setNodeIndex(node: Node, nodeIndex: number) {
     (node as StaticEmptyNode).parentIndex = nodeIndex;
   }
-  setElementIndex(el: Element, elementIndex: number) {
+  _setElementIndex(el: Element, elementIndex: number) {
     (el as StaticElement).parentElementIndex = elementIndex;
   }
-  setNestedNodes(parent: ParentNode, childNodes: Node[], children: Element[]) {
+  _setNestedNodes(parent: ParentNode, childNodes: Node[], children: Element[]) {
     //@ts-ignore
     (parent as StaticParentNode).childNodes = childNodes;
     //@ts-ignore
     (parent as StaticParentNode).children = children;
+  }
+
+  _appendNode(node: Node, target: Element) {
+    const staticNode = node as StaticEmptyNode;
+    const staticTarget = target as StaticElement;
+    if (staticNode.parentNode) {
+      const staticParent = staticNode.parentNode as StaticParentNode;
+      staticParent.childNodes.splice(staticNode.parentIndex, 1);
+      for (let i = 0; i < staticParent.childNodes.length; ++i) {
+        (staticParent.childNodes[i] as StaticEmptyNode).parentIndex = i;
+      }
+      if (isElement(staticNode)) {
+        staticParent.children.splice((staticNode as StaticElement).parentElementIndex, 1);
+        for (let i = 0; i < staticParent.children.length; ++i) {
+          (staticParent.children[i] as StaticElement).parentElementIndex = i;
+        }
+      }
+    }
+    // @ts-ignore
+    staticNode.parentNode = staticNode.parentElement = staticTarget;
+    staticTarget.childNodes.push(staticNode);
+    staticNode.parentIndex = staticTarget.childNodes.length;
+    if (isElement(staticNode)) {
+      staticTarget.children.push(staticNode);
+      (staticNode as StaticElement).parentElementIndex = staticTarget.children.length;
+    }
   }
 
   stopParsing(): InsertionMode { // TODO
