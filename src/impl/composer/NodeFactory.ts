@@ -33,7 +33,7 @@ export interface NodeFactory<T extends NodeTypeMapping = NodeTypeMapping> {
   createCData(parent: T['ParentNode'], data: string): T['CDATASection'];
   createProcessingInstruction(parent: T['ParentNode'], target: string, data: string): T['ProcessingInstruction'];
   createComment(parent: T['ParentNode'], data: string): T['Comment'];
-  createDocument(childNodes: T['Node'][], children: T['Element'][], doctype: T['DocumentType'] | undefined): T['Document'];
+  createDocument(childNodes: T['Node'][], children: T['Element'][]): T['Document'];
   createDoctype(parent: T['Document'], name: string, publicId: string | null, systemId: string | null): T['DocumentType'];
   createAttributes(token: TagToken): T['NamedNodeMap'];
   combineAttributes(attributes: T['NamedNodeMap'], token: TagToken): T['NamedNodeMap'];

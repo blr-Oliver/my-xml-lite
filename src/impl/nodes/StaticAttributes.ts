@@ -7,7 +7,8 @@ export class StaticAttributes implements NamedNodeMap {
   readonly #map: { [name: string]: Attr };
   readonly [index: number]: Attr;
 
-  constructor(attributes: NamespacedAttribute[], ownerElement: Element) {
+  // TODO keep ownerElement reference
+  constructor(attributes: NamespacedAttribute[], ownerElement: Element | null) {
     const length = attributes.length;
     this.#attrs = new Array(length);
     this.#map = {};

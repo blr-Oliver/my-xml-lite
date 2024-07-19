@@ -9,13 +9,14 @@ export class StaticAttr implements Attr {
   readonly prefix: string | null;
   readonly value: string | null;
 
-  constructor(attr: NamespacedAttribute, ownerElement: Element) {
+  // TODO bind to attribute list, not to element
+  constructor(attr: NamespacedAttribute, ownerElement: Element | null) {
     this.name = attr.name;
     this.namespaceURI = attr.namespaceURI ? attr.namespaceURI! : null;
     this.prefix = attr.prefix ? attr.prefix! : null;
     this.localName = attr.localName ? attr.localName! : attr.name;
     this.value = attr.value;
-    this.ownerElement = ownerElement;
+    this.ownerElement = ownerElement!;
   }
 
   get ownerDocument(): Document {
