@@ -1,10 +1,5 @@
 import {TokenSink} from '../../decl/ParserEnvironment';
-import {Attr, Document, Element, isDocument, isElement, Node, NodeType, ParentNode} from '../../decl/xml-lite-decl';
-import {StaticAttr} from '../nodes/StaticAttr';
-import {StaticAttributes} from '../nodes/StaticAttributes';
-import {StaticDataNode} from '../nodes/StaticDataNode';
-import {StaticDocument} from '../nodes/StaticDocument';
-import {StaticDocumentType} from '../nodes/StaticDocumentType';
+import {Attr, CharacterData, Document, Element, isDocument, isElement, Node, ParentNode} from '../../decl/xml-lite-decl';
 import {StaticElement} from '../nodes/StaticElement';
 import {StaticEmptyNode} from '../nodes/StaticEmptyNode';
 import {StaticParentNode} from '../nodes/StaticParentNode';
@@ -12,19 +7,7 @@ import {StateBasedTokenizer} from '../StateBasedTokenizer';
 import {State} from '../states';
 import {CharactersToken, CommentToken, DoctypeToken, TagToken, Token} from '../tokens';
 import {InsertionMode} from './insertion-mode';
-
-/*
-void elements
-area, base, br, col, embed, hr, img, input, link, meta, source, track, wbr
-*/
-const TokenTypeMapping = {
-  'doctype': NodeType.DOCUMENT_TYPE_NODE,
-  'startTag': NodeType.ELEMENT_NODE,
-  'endTag': NodeType.ELEMENT_NODE,
-  'comment': NodeType.COMMENT_NODE,
-  'characters': NodeType.TEXT_NODE,
-  'cdata': NodeType.CDATA_SECTION_NODE
-};
+import {NodeFactory} from './NodeFactory';
 
 const IMPLICITLY_CLOSABLE = {
   'dd': true,
@@ -72,6 +55,8 @@ type FormattingZone = {
 // TODO when partial composers are merged refine cross-calls where needed
 // TODO analyze all namespace checks for necessity
 export class BaseComposer implements TokenSink {
+  nodeFactory!: NodeFactory;
+
   tokenizer!: StateBasedTokenizer;
   insertionMode!: InsertionMode;
   originalInsertionMode!: InsertionMode;
@@ -113,7 +98,7 @@ export class BaseComposer implements TokenSink {
     this.formattingElements.length = 0;
     this.formattingArk = {};
     this.formattingZones.length = 0;
-    this.document = this._createEmptyDocument();
+    this.document = this.nodeFactory.createDocument([], []);
     if (!(this.contextElement = contextElement)) {
       this.tokenizer.state = 'data';
       this.setInsertionMode('initial');
@@ -341,20 +326,30 @@ export class BaseComposer implements TokenSink {
   }
 
   protected insertDoctype(doctypeToken: DoctypeToken) {
-    const documentType = this._createDoctype(this.document, doctypeToken.name ?? 'html', doctypeToken.publicId ?? '', doctypeToken.systemId ?? '');
+    const documentType = this.nodeFactory.createDoctype(this.document, doctypeToken.name ?? 'html', doctypeToken.publicId, doctypeToken.systemId);
     this._push(this.document.childNodes, documentType);
   }
 
   protected insertComment(token: CommentToken, override?: ParentNode) {
     const location = this.getInsertionLocation(override);
-    const node = this._createDataNode(NodeType.COMMENT_NODE, location.parent, token.data);
+    const node = this.nodeFactory.createComment(location.parent, token.data);
     this.insertNodeAtLocation(node, location);
   }
 
   protected insertCharacters(token: CharactersToken) {
     const location = this.getInsertionLocation();
     if (!isDocument(location.parent)) {
-      const node = this._createDataNode(TokenTypeMapping[token.type], location.parent, token.data);
+      let node: CharacterData;
+      switch (token.type) {
+        case 'characters':
+          node = this.nodeFactory.createText(location.parent, token.data);
+          break;
+        case 'cdata':
+          node = this.nodeFactory.createCData(location.parent, token.data);
+          break;
+        default:
+          throw new Error('!');
+      }
       this.insertNodeAtLocation(node, location);
     }
   }
@@ -380,7 +375,7 @@ export class BaseComposer implements TokenSink {
   }
 
   createElementNS(token: TagToken, namespace: string | null, parent: ParentNode): Element {
-    const element = this._createElementNode(token, namespace, parent);
+    const element = this.nodeFactory.createElement(parent, token, namespace, null, [], []);
     this.validateNsAttributes(element);
     return element;
   }
@@ -942,29 +937,6 @@ export class BaseComposer implements TokenSink {
     // TODO create possibility to always directly work with arrays
     if (Array.isArray(list)) list.push(el);
     else Array.prototype.push.call(list, el);
-  }
-
-  _addMissingAttributes(element: Element, token: TagToken) {
-    for (let attrToken of token.attributes) {
-      if (!element.hasAttribute(attrToken.name))
-        (element.attributes as StaticAttributes).addAttributeNode(new StaticAttr(attrToken, element));
-    }
-  }
-
-  _createDataNode(nodeType: NodeType, parent: ParentNode, data: string) {
-    return new StaticDataNode(nodeType, parent, data);
-  }
-
-  _createEmptyDocument() {
-    return new StaticDocument([], []);
-  }
-
-  _createDoctype(document: Document, name: string, publicId: string, systemId: string) {
-    return new StaticDocumentType(document, name, publicId, systemId);
-  }
-
-  _createElementNode(token: TagToken, namespace: string | null, parent: ParentNode) {
-    return new StaticElement(token, namespace, parent, [], []);
   }
 
   _removeElementFromParent(parent: Element, child: Element) {

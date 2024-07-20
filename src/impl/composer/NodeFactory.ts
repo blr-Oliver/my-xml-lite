@@ -28,13 +28,14 @@ export interface NodeTypeMapping {
 }
 
 export interface NodeFactory<T extends NodeTypeMapping = NodeTypeMapping> {
-  createElement(parent: T['ParentNode'], token: TagToken, namespaceURI: string | null, attributes: T['NamedNodeMap'], childNodes: T['Node'][], children: T['Element'][]): T['Element'];
+  // TODO restrict null attributes here
+  createElement(parent: T['ParentNode'], token: TagToken, namespaceURI: string | null, attributes: T['NamedNodeMap'] | null, childNodes: T['Node'][], children: T['Element'][]): T['Element'];
   createText(parent: T['ParentNode'], data: string): T['Text'];
   createCData(parent: T['ParentNode'], data: string): T['CDATASection'];
   createProcessingInstruction(parent: T['ParentNode'], target: string, data: string): T['ProcessingInstruction'];
   createComment(parent: T['ParentNode'], data: string): T['Comment'];
   createDocument(childNodes: T['Node'][], children: T['Element'][]): T['Document'];
-  createDoctype(parent: T['Document'], name: string, publicId: string | null, systemId: string | null): T['DocumentType'];
+  createDoctype(parent: T['Document'], name: string, publicId: string | undefined, systemId: string | undefined): T['DocumentType'];
   createAttributes(token: TagToken): T['NamedNodeMap'];
   combineAttributes(attributes: T['NamedNodeMap'], token: TagToken): T['NamedNodeMap'];
   createTokenList(value: string): T['DOMTokenList'];

@@ -5,6 +5,7 @@ import {ParserEnvironment} from '../../src/decl/ParserEnvironment';
 import {buildIndex} from '../../src/impl/build-index';
 import {CompositeComposer} from '../../src/impl/composite-composer';
 import {FixedSizeStringBuilder} from '../../src/impl/FixedSizeStringBuilder';
+import {StaticNodeFactory} from '../../src/impl/nodes/static-factory';
 import {serialize} from '../../src/impl/Serializer';
 import {StateBasedTokenizer} from '../../src/impl/StateBasedTokenizer';
 
@@ -39,6 +40,7 @@ export abstract class AbstractSuite<R, T extends TestCase, C extends CompositeCo
     this.composer.tokenizer = this.tokenizer;
     this.tokenizer.composer = this.composer;
 
+    this.composer.nodeFactory = new StaticNodeFactory();
     this.composer.templateInsertionModes = [];
     this.composer.openElements = [];
     this.composer.openCounts = {};

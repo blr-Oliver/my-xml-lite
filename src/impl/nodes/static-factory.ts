@@ -23,7 +23,7 @@ export interface StaticNodeTypeMapping extends NodeTypeMapping {
 }
 
 export class StaticNodeFactory implements NodeFactory<StaticNodeTypeMapping> {
-  createElement(parent: StaticParentNode, token: TagToken, namespaceURI: string | null, attributes: StaticAttributes, childNodes: Node[], children: StaticElement[]): StaticElement {
+  createElement(parent: StaticParentNode, token: TagToken, namespaceURI: string | null, attributes: StaticAttributes | null, childNodes: Node[], children: StaticElement[]): StaticElement {
     return new StaticElement(token, namespaceURI, parent, childNodes, children);
   }
   createText(parent: StaticParentNode, data: string): StaticDataNode {
@@ -41,7 +41,7 @@ export class StaticNodeFactory implements NodeFactory<StaticNodeTypeMapping> {
   createDocument(childNodes: Node[], children: StaticElement[]): StaticDocument {
     return new StaticDocument(childNodes, children);
   }
-  createDoctype(parent: StaticDocument, name: string, publicId: string | null, systemId: string | null): StaticDocumentType {
+  createDoctype(parent: StaticDocument, name: string, publicId: string | undefined, systemId: string | undefined): StaticDocumentType {
     return new StaticDocumentType(parent, name, publicId || '', systemId || '');
   }
   createAttributes(token: TagToken): StaticAttributes {

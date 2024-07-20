@@ -39,7 +39,7 @@ export class InBodyComposer extends TokenAdjustingComposer {
       case 'html':
         this.error('unexpected-html-start-tag');
         if (!this.openCounts['template'])
-          this._addMissingAttributes(this.openElements[0], token);
+          this.nodeFactory.combineAttributes(this.openElements[0].attributes, token);
         break;
       case 'base':
       case 'basefont':
@@ -56,7 +56,7 @@ export class InBodyComposer extends TokenAdjustingComposer {
         this.error('unexpected-body-start-tag');
         if (this.openElements.length > 1 && this.openElements[1].tagName === 'body' && !this.openCounts['template']) {
           this.framesetOk = false;
-          this._addMissingAttributes(this.openElements[1], token);
+          this.nodeFactory.combineAttributes(this.openElements[1].attributes, token);
         }
         break;
       case 'frameset':
