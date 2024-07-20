@@ -1,10 +1,12 @@
-import {Document, Element, Node, NodeType} from '../../decl/xml-lite-decl';
+import {Document, Element, NodeType} from '../../decl/xml-lite-decl';
+import {StaticElement} from './StaticElement';
+import {StaticEmptyNode} from './StaticEmptyNode';
 import {StaticParentNode} from './StaticParentNode';
 
 export class StaticDocument extends StaticParentNode implements Document {
   declare readonly ownerDocument: null;
 
-  constructor(childNodes: Node[], children?: Element[]) {
+  constructor(childNodes: StaticEmptyNode[], children?: StaticElement[]) {
     super(NodeType.DOCUMENT_NODE, null, childNodes, children);
   }
 

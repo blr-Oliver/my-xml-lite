@@ -1,23 +1,26 @@
-import {Document, Element, Node, NodeType, ParentNode} from '../../decl/xml-lite-decl';
+import {Node, NodeType} from '../../decl/xml-lite-decl';
+import {StaticDocument} from './StaticDocument';
+import {StaticElement} from './StaticElement';
+import {StaticParentNode} from './StaticParentNode';
 
-const EMPTY_LIST: Node[] = [] as const;
+const EMPTY_LIST: StaticEmptyNode[] = [] as const;
 
 export abstract class StaticEmptyNode {
-  readonly ownerDocument: Document | null;
+  readonly ownerDocument: StaticDocument | null;
   readonly nodeType: NodeType;
-  readonly parentNode: ParentNode | null;
-  readonly parentElement: Element | null;
-  readonly childNodes: Node[];
+  readonly parentNode: StaticParentNode | null;
+  readonly parentElement: StaticElement | null;
+  readonly childNodes: StaticEmptyNode[];
 
   parentIndex: number;
 
   protected constructor(nodeType: NodeType,
-                        parentNode: ParentNode | null,
-                        childNodes: Node[] = EMPTY_LIST) {
-    this.ownerDocument = parentNode ? parentNode.ownerDocument || (parentNode as Document) : null;
+                        parentNode: StaticParentNode | null,
+                        childNodes: StaticEmptyNode[] = EMPTY_LIST) {
+    this.ownerDocument = parentNode ? parentNode.ownerDocument || (parentNode as StaticDocument) : null;
     this.nodeType = nodeType;
     this.parentNode = parentNode;
-    this.parentElement = parentNode && parentNode.nodeType === NodeType.ELEMENT_NODE ? parentNode as Element : null;
+    this.parentElement = parentNode && parentNode.nodeType === NodeType.ELEMENT_NODE ? parentNode as StaticElement : null;
     this.childNodes = childNodes;
     this.parentIndex = parentNode ? parentNode.childNodes.length : -1;
   }

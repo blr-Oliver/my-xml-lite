@@ -327,7 +327,7 @@ export class BaseComposer implements TokenSink {
 
   protected insertDoctype(doctypeToken: DoctypeToken) {
     const documentType = this.nodeFactory.createDoctype(this.document, doctypeToken.name ?? 'html', doctypeToken.publicId, doctypeToken.systemId);
-    this._push(this.document.childNodes, documentType);
+    this._appendNode(this.document, documentType);
   }
 
   protected insertComment(token: CommentToken, override?: ParentNode) {
@@ -429,9 +429,9 @@ export class BaseComposer implements TokenSink {
     const {parent, before} = location;
     // TODO is it whenever a case when insertion is not possible?
     if (!before) {
-      this._push(parent.childNodes, node);
+      this._appendNode(parent, node);
       if (isElement(node))
-        this._push(parent.children, node);
+        this._appendElement(parent, node);
     } else {
       if (!this.fosterTables.has(before))
         this.fosterTables.set(before, []);
@@ -868,8 +868,6 @@ export class BaseComposer implements TokenSink {
       }
     }
     for (let [parent, [childNodes, children]] of parents) {
-      childNodes.forEach(this._setNodeIndex, this);
-      children.forEach(this._setElementIndex, this);
       this._setNestedNodes(parent, childNodes, children);
     }
     this.fosterTables.clear();
@@ -900,52 +898,64 @@ export class BaseComposer implements TokenSink {
   _setElementIndex(el: Element, elementIndex: number) {
     (el as StaticElement).parentElementIndex = elementIndex;
   }
+  _setParent(node: Node, parent: ParentNode) {
+    // @ts-ignore
+    (node as StaticEmptyNode).parentNode = (node as StaticEmptyNode).parentElement = parent as StaticParentNode;
+  }
   _setNestedNodes(parent: ParentNode, childNodes: Node[], children: Element[]) {
     //@ts-ignore
     (parent as StaticParentNode).childNodes = childNodes;
     //@ts-ignore
     (parent as StaticParentNode).children = children;
+    childNodes.forEach(this._setNodeIndex, this);
+    children.forEach(this._setElementIndex, this);
   }
 
-  _appendNode(node: Node, target: Element) {
+  _relocateNode(target: Element, node: Node) {
+    if (node.parentNode === target) return;
+    this._removeNode(node);
+    this._setParent(node, target);
+    this._setNodeIndex(node, target.childNodes.length);
+    this._appendNode(target, node);
+    if (isElement(node)) {
+      this._setElementIndex(node, target.children.length);
+      this._appendElement(target, node);
+    }
+  }
+
+  _appendNode(parent: ParentNode, node: Node) {
+    (parent.childNodes as Node[]).push(node);
+  }
+
+  _appendElement(parent: ParentNode, element: Element) {
+    (parent.children as Element[]).push(element);
+  }
+
+  _removeNode(node: Node) {
+    if (!node.parentNode) return;
     const staticNode = node as StaticEmptyNode;
-    const staticTarget = target as StaticElement;
-    if (staticNode.parentNode) {
-      const staticParent = staticNode.parentNode as StaticParentNode;
-      staticParent.childNodes.splice(staticNode.parentIndex, 1);
-      for (let i = 0; i < staticParent.childNodes.length; ++i) {
-        (staticParent.childNodes[i] as StaticEmptyNode).parentIndex = i;
-      }
-      if (isElement(staticNode)) {
-        staticParent.children.splice((staticNode as StaticElement).parentElementIndex, 1);
-        for (let i = 0; i < staticParent.children.length; ++i) {
-          (staticParent.children[i] as StaticElement).parentElementIndex = i;
-        }
+    const staticParent = staticNode.parentNode!;
+    const childNodes = staticParent.childNodes;
+    if (staticNode.parentIndex === childNodes.length - 1)
+      childNodes.pop();
+    else {
+      childNodes.splice(staticNode.parentIndex, 1);
+      const len = childNodes.length;
+      for (let i = staticNode.parentIndex; i < len; ++i)
+        this._setNodeIndex(childNodes[i], i);
+    }
+    if (isElement(node)) {
+      const staticElement = node as StaticElement;
+      const children = staticParent.children;
+      if (staticElement.parentElementIndex === children.length - 1)
+        children.pop();
+      else {
+        children.splice(staticElement.parentElementIndex, 1);
+        const len = children.length;
+        for (let i = staticElement.parentElementIndex; i < len; ++i)
+          this._setElementIndex(children[i], i);
       }
     }
-    // @ts-ignore
-    staticNode.parentNode = staticNode.parentElement = staticTarget;
-    staticTarget.childNodes.push(staticNode);
-    staticNode.parentIndex = staticTarget.childNodes.length;
-    if (isElement(staticNode)) {
-      staticTarget.children.push(staticNode);
-      (staticNode as StaticElement).parentElementIndex = staticTarget.children.length;
-    }
-  }
-
-  _push<T>(list: ArrayLike<T>, el: T) {
-    // TODO create possibility to always directly work with arrays
-    if (Array.isArray(list)) list.push(el);
-    else Array.prototype.push.call(list, el);
-  }
-
-  _removeElementFromParent(parent: Element, child: Element) {
-    const staticParent = parent as StaticElement;
-    const staticChild = child as StaticElement;
-    staticParent.childNodes.splice(staticChild.parentIndex, 1);
-    staticParent.children.splice(staticChild.parentElementIndex, 1);
-    staticParent.childNodes.forEach(this._setNodeIndex, this);
-    staticParent.children.forEach(this._setElementIndex, this);
   }
 
   _clearList(list: ArrayLike<unknown>) {

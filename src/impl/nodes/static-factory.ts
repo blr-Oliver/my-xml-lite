@@ -1,4 +1,4 @@
-import {Node, NodeType, ProcessingInstruction} from '../../decl/xml-lite-decl';
+import {NodeType, ProcessingInstruction} from '../../decl/xml-lite-decl';
 import {NodeFactory, NodeTypeMapping} from '../composer/NodeFactory';
 import {TagToken} from '../tokens';
 import {StaticAttr} from './StaticAttr';
@@ -7,6 +7,7 @@ import {StaticDataNode} from './StaticDataNode';
 import {StaticDocument} from './StaticDocument';
 import {StaticDocumentType} from './StaticDocumentType';
 import {StaticElement} from './StaticElement';
+import {StaticEmptyNode} from './StaticEmptyNode';
 import {StaticParentNode} from './StaticParentNode';
 import {StaticTokenList} from './StaticTokenList';
 
@@ -18,12 +19,13 @@ export interface StaticNodeTypeMapping extends NodeTypeMapping {
   DOMTokenList: StaticTokenList;
   Element: StaticElement;
   NamedNodeMap: StaticAttributes;
+  Node: StaticEmptyNode;
   ParentNode: StaticParentNode;
   Text: StaticDataNode;
 }
 
 export class StaticNodeFactory implements NodeFactory<StaticNodeTypeMapping> {
-  createElement(parent: StaticParentNode, token: TagToken, namespaceURI: string | null, attributes: StaticAttributes | null, childNodes: Node[], children: StaticElement[]): StaticElement {
+  createElement(parent: StaticParentNode, token: TagToken, namespaceURI: string | null, attributes: StaticAttributes | null, childNodes: StaticEmptyNode[], children: StaticElement[]): StaticElement {
     return new StaticElement(token, namespaceURI, parent, childNodes, children);
   }
   createText(parent: StaticParentNode, data: string): StaticDataNode {
@@ -38,7 +40,7 @@ export class StaticNodeFactory implements NodeFactory<StaticNodeTypeMapping> {
   createComment(parent: StaticParentNode, data: string): StaticDataNode {
     return new StaticDataNode(NodeType.COMMENT_NODE, parent, data);
   }
-  createDocument(childNodes: Node[], children: StaticElement[]): StaticDocument {
+  createDocument(childNodes: StaticEmptyNode[], children: StaticElement[]): StaticDocument {
     return new StaticDocument(childNodes, children);
   }
   createDoctype(parent: StaticDocument, name: string, publicId: string | undefined, systemId: string | undefined): StaticDocumentType {

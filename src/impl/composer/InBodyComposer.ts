@@ -63,7 +63,7 @@ export class InBodyComposer extends TokenAdjustingComposer {
         this.error('frameset-in-body');
         if (this.openElements.length > 1 && this.openElements[1].tagName === 'body' && !this.openCounts['template']) {
           if (this.framesetOk) {
-            this._removeElementFromParent(this.openElements[0], this.openElements[1]);
+            this._removeNode(this.openElements[1]);
             while (this.openElements.length > 1)
               this.popCurrentElement();
             this.createAndInsertHTMLElement(token);
@@ -594,7 +594,7 @@ export class InBodyComposer extends TokenAdjustingComposer {
             replaceElement(this.formattingArk[key]!, node, replacement);
             replaceElement(this.openElements, node, replacement);
             node = replacement;
-            this._appendNode(lastNode, node);
+            this._relocateNode(node, lastNode);
             lastNode = node;
           }
           this.insertNodeAtLocation(lastNode, {parent: commonAncestor});
@@ -602,10 +602,10 @@ export class InBodyComposer extends TokenAdjustingComposer {
           const newFormatting = this.createElementNS(formattingToken, NS_HTML, furthestBlock);
           const childNodes = (furthestBlock.childNodes as Node[]).slice();
           for (let child of childNodes)
-            this._appendNode(child, newFormatting);
+            this._relocateNode(newFormatting, child);
           this._clearList(furthestBlock.childNodes);
           this._clearList(furthestBlock.children);
-          this._appendNode(newFormatting, furthestBlock);
+          this._relocateNode(furthestBlock, newFormatting);
           this.removeFormattingElement(formattingElement);
           const key = this.computeFormattingElementKey(formattingElement);
           this.formattingArk[key].push(newFormatting);

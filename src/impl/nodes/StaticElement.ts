@@ -1,11 +1,13 @@
-import {Attr, Document, Element, Node, NodeType, ParentNode} from '../../decl/xml-lite-decl';
+import {Attr, Element, NodeType} from '../../decl/xml-lite-decl';
 import {TagToken} from '../tokens';
 import {StaticAttributes} from './StaticAttributes';
+import {StaticDocument} from './StaticDocument';
+import {StaticEmptyNode} from './StaticEmptyNode';
 import {StaticParentNode} from './StaticParentNode';
 import {StaticTokenList} from './StaticTokenList';
 
 export class StaticElement extends StaticParentNode implements Element {
-  declare readonly ownerDocument: Document;
+  declare readonly ownerDocument: StaticDocument;
   readonly attributes: StaticAttributes;
   readonly classList: StaticTokenList;
   readonly id: string;
@@ -21,9 +23,9 @@ export class StaticElement extends StaticParentNode implements Element {
 
   constructor(token: TagToken,
               namespaceURI: string | null,
-              parentNode: ParentNode,
-              childNodes: Node[],
-              children: Element[]) {
+              parentNode: StaticParentNode,
+              childNodes: StaticEmptyNode[],
+              children: StaticElement[]) {
     super(NodeType.ELEMENT_NODE, parentNode, childNodes, children);
     this.namespaceURI = namespaceURI;
     this.attributeNames = token.attributes.map(attr => attr.name);
