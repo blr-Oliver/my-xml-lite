@@ -39,4 +39,11 @@ export interface NodeFactory<T extends NodeTypeMapping = NodeTypeMapping> {
   createAttributes(token: TagToken): T['NamedNodeMap'];
   combineAttributes(attributes: T['NamedNodeMap'], token: TagToken): T['NamedNodeMap'];
   createTokenList(value: string): T['DOMTokenList'];
+
+  appendNode(parent: T['ParentNode'], node: T['Node']): void;
+  appendElement(parent: T['ParentNode'], node: T['Element']): void;
+  setNestedNodes(parent: T['ParentNode'], childNodes: T['Node'][], children: T['Element'][]): void;
+  relocateNode(target: T['ParentNode'], node: T['Node']): void;
+  relocateChildNodes(target: T['ParentNode'], parent: T['ParentNode']): void;
+  removeNode(node: T['Node']): void;
 }

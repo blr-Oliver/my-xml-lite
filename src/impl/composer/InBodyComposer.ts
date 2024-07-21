@@ -1,4 +1,4 @@
-import {Element, Node} from '../../decl/xml-lite-decl';
+import {Element} from '../../decl/xml-lite-decl';
 import {CharactersToken, CommentToken, TagToken, Token} from '../tokens';
 import {NS_HTML, NS_MATHML, NS_SVG} from './BaseComposer';
 import {InsertionMode} from './insertion-mode';
@@ -63,7 +63,7 @@ export class InBodyComposer extends TokenAdjustingComposer {
         this.error('frameset-in-body');
         if (this.openElements.length > 1 && this.openElements[1].tagName === 'body' && !this.openCounts['template']) {
           if (this.framesetOk) {
-            this._removeNode(this.openElements[1]);
+            this.nodeFactory.removeNode(this.openElements[1]);
             while (this.openElements.length > 1)
               this.popCurrentElement();
             this.createAndInsertHTMLElement(token);
@@ -579,7 +579,7 @@ export class InBodyComposer extends TokenAdjustingComposer {
           let inner = 0;
           while (true) {
             ++inner;
-            node = getPreviousElementInStack(node);
+            node = node.parentElement!;
             if (node === formattingElement) break;
             if (!this.isInFormattingList(node)) {
               this.removeFromStack(node);
@@ -594,18 +594,14 @@ export class InBodyComposer extends TokenAdjustingComposer {
             replaceElement(this.formattingArk[key]!, node, replacement);
             replaceElement(this.openElements, node, replacement);
             node = replacement;
-            this._relocateNode(node, lastNode);
+            this.nodeFactory.relocateNode(node, lastNode);
             lastNode = node;
           }
           this.insertNodeAtLocation(lastNode, {parent: commonAncestor});
           const formattingToken = this.getOriginalToken(formattingElement);
           const newFormatting = this.createElementNS(formattingToken, NS_HTML, furthestBlock);
-          const childNodes = (furthestBlock.childNodes as Node[]).slice();
-          for (let child of childNodes)
-            this._relocateNode(newFormatting, child);
-          this._clearList(furthestBlock.childNodes);
-          this._clearList(furthestBlock.children);
-          this._relocateNode(furthestBlock, newFormatting);
+          this.nodeFactory.relocateNode(newFormatting, furthestBlock);
+          this.nodeFactory.appendElement(furthestBlock, newFormatting);
           this.removeFormattingElement(formattingElement);
           const key = this.computeFormattingElementKey(formattingElement);
           this.formattingArk[key].push(newFormatting);
@@ -614,10 +610,6 @@ export class InBodyComposer extends TokenAdjustingComposer {
           this.openElements.splice(furthestPosition, 0, newFormatting);
         }
       }
-
-    function getPreviousElementInStack(element: Element): Element {
-      return element.parentElement!;
-    }
 
     function replaceElement(list: Element[], element: Element, replacement: Element) {
       const index = list.indexOf(element);

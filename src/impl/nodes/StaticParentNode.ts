@@ -3,7 +3,7 @@ import {StaticElement} from './StaticElement';
 import {StaticEmptyNode} from './StaticEmptyNode';
 
 export class StaticParentNode extends StaticEmptyNode implements ParentNode {
-  readonly children: Element[];
+  readonly children: StaticElement[];
 
   constructor(nodeType: NodeType,
               parentNode: StaticParentNode | null,
