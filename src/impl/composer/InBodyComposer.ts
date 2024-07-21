@@ -546,7 +546,7 @@ export class InBodyComposer extends TokenAdjustingComposer {
 
   adoptionAgency(token: TagToken) {
     const subject = token.name;
-    if (subject === this.current.tagName && !this.isInFormattingList(this.current))
+    if (subject === this.current.tagName && this.current.namespaceURI == NS_HTML && !this.isInFormattingList(this.current))
       this.popCurrentElement();
     else
       for (let outer = 0; outer < 8; ++outer) {
@@ -573,7 +573,7 @@ export class InBodyComposer extends TokenAdjustingComposer {
           this.removeFormattingElement(formattingElement);
           return;
         } else {
-          let commonAncestor = this.openElements[position - 1];
+          const commonAncestor = this.openElements[position - 1];
           const bookmark = this.formattingElements.indexOf(formattingElement);
           let node = furthestBlock, lastNode = furthestBlock;
           let inner = 0;
@@ -597,17 +597,21 @@ export class InBodyComposer extends TokenAdjustingComposer {
             this.nodeFactory.relocateNode(node, lastNode);
             lastNode = node;
           }
-          this.insertNodeAtLocation(lastNode, {parent: commonAncestor});
+          const insertionLocation = this.getInsertionLocation(commonAncestor);
+          this.nodeFactory.relocateNode(insertionLocation.parent, lastNode, insertionLocation.before);
           const formattingToken = this.getOriginalToken(formattingElement);
           const newFormatting = this.createElementNS(formattingToken, NS_HTML, furthestBlock);
-          this.nodeFactory.relocateNode(newFormatting, furthestBlock);
+          this.nodeFactory.relocateChildNodes(newFormatting, furthestBlock);
           this.nodeFactory.appendElement(furthestBlock, newFormatting);
+          this.nodeFactory.appendNode(furthestBlock, newFormatting);
           this.removeFormattingElement(formattingElement);
           const key = this.computeFormattingElementKey(formattingElement);
           this.formattingArk[key].push(newFormatting);
           this.formattingElements.splice(bookmark, 0, newFormatting);
+          const formattingPosition = this.openElements.indexOf(formattingElement);
+          this.openElements.splice(formattingPosition, 1);
           const furthestPosition = this.openElements.indexOf(furthestBlock);
-          this.openElements.splice(furthestPosition, 0, newFormatting);
+          this.openElements.splice(furthestPosition + 1, 0, newFormatting);
         }
       }
 

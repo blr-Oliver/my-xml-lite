@@ -77,19 +77,46 @@ export class StaticNodeFactory implements NodeFactory<StaticNodeTypeMapping> {
     childNodes.forEach(this.__setNodeIndex, this);
     children.forEach(this.__setElementIndex, this);
   }
-  relocateNode(target: StaticParentNode, node: StaticEmptyNode) {
-    if (node.parentNode === target) return;
+  relocateNode(target: StaticParentNode, node: StaticEmptyNode, before?: StaticEmptyNode) {
+    if (node.parentNode === target && (!before || node.nextSibling === before)) return;
     this.removeNode(node);
     this.__setParent(node, target);
-    node.parentIndex = target.childNodes.length;
-    this.appendNode(target, node);
-    if (isElement(node)) {
-      (node as StaticElement).parentElementIndex = target.children.length;
-      this.appendElement(target, node as StaticElement);
+    if (before) {
+      let beforeIndex = before.parentIndex;
+      target.childNodes.splice(beforeIndex, 0, node);
+      for (let i = beforeIndex; i < target.childNodes.length; ++i)
+        target.childNodes[i].parentIndex = i;
+      if (isElement(node)) {
+        const element = node as StaticElement;
+        let beforeElementIndex: number;
+        if (isElement(before))
+          beforeElementIndex = (before as StaticElement).parentElementIndex;
+        else {
+          beforeElementIndex = beforeIndex;
+          while (beforeElementIndex > 0) {
+            if (isElement(target.childNodes[beforeElementIndex])) {
+              beforeElementIndex = (target.childNodes[beforeElementIndex] as StaticElement).parentElementIndex;
+              break;
+            }
+            --beforeElementIndex;
+          }
+        }
+        target.children.splice(beforeElementIndex, 0, element);
+        for (let i = beforeElementIndex; i < target.children.length; ++i)
+          target.children[i].parentElementIndex = i;
+      }
+    } else {
+      node.parentIndex = target.childNodes.length;
+      this.appendNode(target, node);
+      if (isElement(node)) {
+        const element = node as StaticElement;
+        element.parentElementIndex = target.children.length;
+        this.appendElement(target, element);
+      }
     }
   }
   relocateChildNodes(target: StaticParentNode, parent: StaticParentNode) {
-    const childNodes = parent.childNodes.slice();
+    if(target === parent) return; const childNodes = parent.childNodes.slice();
     for (let child of childNodes)
       this.relocateNode(target, child);
     parent.childNodes.length = 0;
