@@ -78,9 +78,10 @@ export class StaticNodeFactory implements NodeFactory<StaticNodeTypeMapping> {
     children.forEach(this.__setElementIndex, this);
   }
   relocateNode(target: StaticParentNode, node: StaticEmptyNode, before?: StaticEmptyNode) {
-    if (node.parentNode === target && (!before || node.nextSibling === before)) return;
-    this.removeNode(node);
-    this.__setParent(node, target);
+    if (node.parentNode !== target) {
+      this.removeNode(node);
+      this.__setParent(node, target);
+    }
     if (before) {
       let beforeIndex = before.parentIndex;
       target.childNodes.splice(beforeIndex, 0, node);
@@ -116,7 +117,8 @@ export class StaticNodeFactory implements NodeFactory<StaticNodeTypeMapping> {
     }
   }
   relocateChildNodes(target: StaticParentNode, parent: StaticParentNode) {
-    if(target === parent) return; const childNodes = parent.childNodes.slice();
+    if (target === parent) return;
+    const childNodes = parent.childNodes.slice();
     for (let child of childNodes)
       this.relocateNode(target, child);
     parent.childNodes.length = 0;

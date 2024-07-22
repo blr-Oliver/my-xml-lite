@@ -72,4 +72,17 @@ export class StaticElement extends StaticParentNode implements Element {
   hasAttributes(): boolean {
     return this.attributes.length !== 0;
   }
+  get debug(): string {
+    const chunks: string[] = ['<', this.tagName];
+    const attrCount = this.attributes.length;
+    for (let i = 0; i < attrCount; ++i) {
+      const attr = this.attributes.item(i);
+      chunks.push(' ', attr.name);
+      if (attr.value !== null)
+        chunks.push('="', attr.value, '"');
+    }
+    if (this.selfClosed) chunks.push('/');
+    chunks.push('>');
+    return chunks.join('');
+  }
 }

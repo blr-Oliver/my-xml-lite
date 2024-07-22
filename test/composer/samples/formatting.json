@@ -11,5 +11,20 @@
   ["reconstruct local formatting after marker", "<p><b>A<p><object><p><b a>B<p>C</object>", "<p><b>A</b></p><p><b><object><p><b a>B</b></p><p><b a>C</b></p></object></b></p>", ["element-closed-before-children", "element-closed-before-children", "element-closed-before-children", "abrupt-end-of-content"]],
   ["formatting already closed", "<p><b>A<div></b>", "<p><b>A</b></p><div></div>", ["element-closed-before-children", "formatting-element-already-closed", "abrupt-end-of-content"]],
   ["formatting started outside scope", "<b><math><mo></b>", "<b><math><mo></mo></math></b>", ["unmatched-end-tag-in-foreign-content", "formatting-element-out-of-scope", "unmatched-end-tag-in-foreign-content", "abrupt-end-of-content"]],
-  ["formatting incorrectly closed", "<b><div><i></b>", "<b></b><div><b><i></i></b></div>", ["element-closed-before-children", "element-closed-before-children", "abrupt-end-of-content"]]
+  ["formatting incorrectly closed near", "<b><hr a/><div><hr b/><i><hr c/></b>", "<b><hr a/></b><div><b><hr b/><i><hr c/></i></b></div>", ["element-closed-before-children", "element-closed-before-children", "abrupt-end-of-content"]],
+  ["formatting incorrectly closed far", "<b><hr a/><i><hr b/><div><hr c/></b>", "<b><hr a/><i><hr b/></i></b><i><div><b><hr c/></b></div></i>", ["element-closed-before-children", "abrupt-end-of-content"]],
+  ["example 1", "A<em>B<address>C</em>D</address>E", "A<em>B</em><address><em>C</em>D</address>E", ["element-closed-before-children"]],
+  ["example 2", "<p>1<b>2<i>3</b>4</i>5</p>", "<p>1<b>2<i>3</i></b><i>4</i>5</p>", ["element-closed-before-children"]],
+  ["example 3", "<b>1<p>2</b>3</p>", "<b>1</b><p><b>2</b>3</p>", ["element-closed-before-children"]],
+  ["example 4", "<table><b><tr><td>aaa</td></tr>bbb</table>ccc", "<b></b><b>bbb</b><table><tbody><tr><td>aaa</td></tr></tbody></table><b>ccc</b>", ["unexpected-content-in-table", "text-in-table", "abrupt-end-of-content"]],
+  [
+    "example 5",
+    "<p><b class=x><b class=x><b><b class=x><b class=x><b>X\n<p>X\n<p><b><b class=x><b>X\n<p></b></b></b></b></b></b>X",
+    "<p><b class=\"x\"><b class=\"x\"><b><b class=\"x\"><b class=\"x\"><b>X\n</b></b></b></b></b></b></p><p><b class=\"x\"><b><b class=\"x\"><b class=\"x\"><b>X\n</b></b></b></b></b></p><p><b class=\"x\"><b><b class=\"x\"><b class=\"x\"><b><b><b class=\"x\"><b>X\n</b></b></b></b></b></b></b></b></p><p>X</p>",
+    [
+      "element-closed-before-children", "element-closed-before-children", "element-closed-before-children",
+      "formatting-element-already-closed", "formatting-element-already-closed", "formatting-element-already-closed", "formatting-element-already-closed", "formatting-element-already-closed", "formatting-element-already-closed"
+    ]
+  ],
+  ["example 6", "<a href=\"a\">A<table><a href=\"b\">B</table>X", "<a href=\"a\">A<a href=\"b\">B</a><table></table></a><a href=\"b\">X</a>", ["unexpected-content-in-table", "nested-anchor", "formatting-element-out-of-scope", "abrupt-end-of-content"]]
 ]

@@ -597,8 +597,8 @@ export class BaseComposer implements TokenSink {
     return this.formattingElements.findLast(el => el.tagName === name);
   }
 
-  removeFormattingElement(element: Element) {
-    const listIndex = this.formattingElements.indexOf(element);
+  removeFormattingElement(element: Element, index: number = -1) {
+    const listIndex = index === -1 ? this.formattingElements.indexOf(element) : index;
     if (listIndex !== -1) {
       this.formattingElements.splice(listIndex, 1);
       const key = this.computeFormattingElementKey(element);

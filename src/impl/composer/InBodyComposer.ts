@@ -511,7 +511,7 @@ export class InBodyComposer extends TokenAdjustingComposer {
     }
     this.reconstructFormattingElements();
     const element = this.createAndInsertHTMLElement(token);
-    this.formattingElements.push(element);
+    this.pushFormattingElement(element);
     return this.insertionMode;
   }
 
@@ -545,16 +545,18 @@ export class InBodyComposer extends TokenAdjustingComposer {
   }
 
   adoptionAgency(token: TagToken) {
+    // FIXME optimize this
     const subject = token.name;
     if (subject === this.current.tagName && this.current.namespaceURI == NS_HTML && !this.isInFormattingList(this.current))
       this.popCurrentElement();
     else
       for (let outer = 0; outer < 8; ++outer) {
-        let formattingElement = this.getLastFormattingElementForName(subject);
-        if (!formattingElement)
+        let bookmark = this.formattingElements.findLastIndex(el => el.tagName === subject);
+        if (bookmark === -1)
           return this.inBodyEndTagDefault(token);
-        let position = this.openElements.indexOf(formattingElement);
-        if (position === -1) {
+        let formattingElement = this.formattingElements[bookmark];
+        let formattingPosition = this.openElements.indexOf(formattingElement);
+        if (formattingPosition === -1) {
           this.error('formatting-element-already-closed');
           this.removeFormattingElement(formattingElement);
           return;
@@ -566,53 +568,61 @@ export class InBodyComposer extends TokenAdjustingComposer {
         if (formattingElement !== this.current) {
           this.error('element-closed-before-children');
         }
-        let furthestBlock = this.openElements.slice(position + 1).find(this.isSpecial, this);
+        let furthestPosition = formattingPosition;
+        let furthestBlock: Element | undefined;
+        while (++furthestPosition < this.openElements.length) {
+          if (this.isSpecial(this.openElements[furthestPosition])) {
+            furthestBlock = this.openElements[furthestPosition];
+            break;
+          }
+        }
         if (!furthestBlock) {
-          while (this.openElements.length > position)
+          while (this.openElements.length > formattingPosition)
             this.popCurrentElement();
           this.removeFormattingElement(formattingElement);
           return;
-        } else {
-          const commonAncestor = this.openElements[position - 1];
-          const bookmark = this.formattingElements.indexOf(formattingElement);
-          let node = furthestBlock, lastNode = furthestBlock;
-          let inner = 0;
-          while (true) {
-            ++inner;
-            node = node.parentElement!;
-            if (node === formattingElement) break;
-            if (!this.isInFormattingList(node)) {
-              this.removeFromStack(node);
-              continue;
-            }
-            if (inner > 3)
-              this.removeFormattingElement(node);
-            const originalToken = this.getOriginalToken(node);
-            const replacement = this.createElementNS(originalToken, NS_HTML, commonAncestor);
-            const key = this.computeFormattingElementKey(node);
-            replaceElement(this.formattingElements, node, replacement);
-            replaceElement(this.formattingArk[key]!, node, replacement);
-            replaceElement(this.openElements, node, replacement);
-            node = replacement;
-            this.nodeFactory.relocateNode(node, lastNode);
-            lastNode = node;
-          }
-          const insertionLocation = this.getInsertionLocation(commonAncestor);
-          this.nodeFactory.relocateNode(insertionLocation.parent, lastNode, insertionLocation.before);
-          const formattingToken = this.getOriginalToken(formattingElement);
-          const newFormatting = this.createElementNS(formattingToken, NS_HTML, furthestBlock);
-          this.nodeFactory.relocateChildNodes(newFormatting, furthestBlock);
-          this.nodeFactory.appendElement(furthestBlock, newFormatting);
-          this.nodeFactory.appendNode(furthestBlock, newFormatting);
-          this.removeFormattingElement(formattingElement);
-          const key = this.computeFormattingElementKey(formattingElement);
-          this.formattingArk[key].push(newFormatting);
-          this.formattingElements.splice(bookmark, 0, newFormatting);
-          const formattingPosition = this.openElements.indexOf(formattingElement);
-          this.openElements.splice(formattingPosition, 1);
-          const furthestPosition = this.openElements.indexOf(furthestBlock);
-          this.openElements.splice(furthestPosition + 1, 0, newFormatting);
         }
+        const commonAncestor = this.openElements[formattingPosition - 1];
+        let node = furthestBlock, lastNode = furthestBlock;
+        let inner = 0;
+        while (true) {
+          ++inner;
+          node = this.openElements[--furthestPosition];
+          if (node === formattingElement) break;
+          let nodeFormattingIndex = this.formattingElements.indexOf(node);
+          if (nodeFormattingIndex !== -1 && inner > 3) {
+            this.removeFormattingElement(node, nodeFormattingIndex);
+            nodeFormattingIndex = -1;
+          }
+          if (nodeFormattingIndex === -1) {
+            this.removeFromStack(node);
+            continue;
+          }
+          const nodeToken = this.getOriginalToken(node);
+          const replacement = this.createElementNS(nodeToken, NS_HTML, commonAncestor);
+          const key = this.computeFormattingElementKey(node);
+          this.formattingElements[nodeFormattingIndex] = replacement;
+          replaceElement(this.formattingArk[key]!, node, replacement);
+          this.openElements[furthestPosition] = replacement;
+          node = replacement;
+          if (lastNode === furthestBlock)
+            bookmark = nodeFormattingIndex + 1;
+          this.nodeFactory.relocateNode(node, lastNode);
+          lastNode = node;
+        }
+        const insertionLocation = this.getInsertionLocation(commonAncestor);
+        this.nodeFactory.relocateNode(insertionLocation.parent, lastNode, insertionLocation.before); // TODO actually insert
+        const formattingToken = this.getOriginalToken(formattingElement);
+        const newFormatting = this.createElementNS(formattingToken, NS_HTML, furthestBlock);
+        this.nodeFactory.relocateChildNodes(newFormatting, furthestBlock);
+        this.nodeFactory.appendElement(furthestBlock, newFormatting);
+        this.nodeFactory.appendNode(furthestBlock, newFormatting);
+        this.removeFormattingElement(formattingElement);
+        const key = this.computeFormattingElementKey(formattingElement);
+        this.formattingArk[key].push(newFormatting);
+        this.formattingElements.splice(bookmark, 0, newFormatting);
+        this.openElements.splice(this.openElements.indexOf(formattingElement), 1);
+        this.openElements.splice(this.openElements.indexOf(furthestBlock) + 1, 0, newFormatting);
       }
 
     function replaceElement(list: Element[], element: Element, replacement: Element) {
