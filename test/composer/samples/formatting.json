@@ -9,10 +9,95 @@
   ["reconstruct mixed", "<p><b><b a><b><b a><b><b a><b><b a>A<p>B", "<p><b><b a><b><b a><b><b a><b><b a>A</b></b></b></b></b></b></b></b></p><p><b><b a><b><b a><b><b a>B</b></b></b></b></b></b></p>", ["element-closed-before-children", "abrupt-end-of-content"]],
   ["reconstruct immediately after marker", "<p><b>A<p><object>B</object>", "<p><b>A</b></p><p><b><object>B</object></b></p>", ["element-closed-before-children", "abrupt-end-of-content"]],
   ["reconstruct local formatting after marker", "<p><b>A<p><object><p><b a>B<p>C</object>", "<p><b>A</b></p><p><b><object><p><b a>B</b></p><p><b a>C</b></p></object></b></p>", ["element-closed-before-children", "element-closed-before-children", "element-closed-before-children", "abrupt-end-of-content"]],
-  ["formatting already closed", "<p><b>A<div></b>", "<p><b>A</b></p><div></div>", ["element-closed-before-children", "formatting-element-already-closed", "abrupt-end-of-content"]],
-  ["formatting started outside scope", "<b><math><mo></b>", "<b><math><mo></mo></math></b>", ["unmatched-end-tag-in-foreign-content", "formatting-element-out-of-scope", "unmatched-end-tag-in-foreign-content", "abrupt-end-of-content"]],
-  ["formatting incorrectly closed near", "<b><hr a/><div><hr b/><i><hr c/></b>", "<b><hr a/></b><div><b><hr b/><i><hr c/></i></b></div>", ["element-closed-before-children", "element-closed-before-children", "abrupt-end-of-content"]],
-  ["formatting incorrectly closed far", "<b><hr a/><i><hr b/><div><hr c/></b>", "<b><hr a/><i><hr b/></i></b><i><div><b><hr c/></b></div></i>", ["element-closed-before-children", "abrupt-end-of-content"]],
+  ["AAA already closed", "<p><b>A<div></b>B", "<p><b>A</b></p><div>B</div>", ["element-closed-before-children", "formatting-element-already-closed", "abrupt-end-of-content"]],
+  ["AAA started outside scope", "<b><math><mo></b>A", "<b><math><mo>A</mo></math></b>", ["unmatched-end-tag-in-foreign-content", "formatting-element-out-of-scope", "unmatched-end-tag-in-foreign-content", "abrupt-end-of-content"]],
+  [
+    "AAA F-special",
+    "<b><hr a/><div><hr b/><i><hr c/></b>A",
+    "<b><hr a/></b><div><b><hr b/><i><hr c/></i></b><i>A</i></div>",
+    ["element-closed-before-children", "element-closed-before-children", "abrupt-end-of-content"]
+  ],
+  [
+    "AAA F-f-special",
+    "<b><hr a/><i><hr b/><div><hr c/></b>A",
+    "<b><hr a/><i><hr b/></i></b><i><div><b><hr c/></b>A</div></i>",
+    ["element-closed-before-children", "abrupt-end-of-content"]
+  ],
+  [
+    "AAA F-any-special",
+    "<b><hr a/><foo><hr b/><div><hr c/></b>A",
+    "<b><hr a/><foo><hr b/></foo></b><div><b><hr c/></b>A</div>",
+    ["element-closed-before-children", "abrupt-end-of-content"]
+  ],
+  [
+    "AAA F-any-f-any-special",
+    "<b><hr a/><foo><hr b/><i><hr c/><bar><hr d/><div><hr e/></b>A",
+    "<b><hr a/><foo><hr b/><i><hr c/><bar><hr d/></bar></i></foo></b><i><div><b><hr e/></b>A</div></i>",
+    ["element-closed-before-children", "abrupt-end-of-content"]
+  ],
+  [
+    "AAA F-f-any-any-any-special",
+    "<b><hr a/><i><hr b/><foo><hr c/><bar><hr d/><baz><hr e/><div><hr f/></b>A",
+    "<b><hr a/><i><hr b/><foo><hr c/><bar><hr d/><baz><hr e/></baz></bar></foo></i></b><div><b><hr f/></b>A</div>",
+    ["element-closed-before-children", "abrupt-end-of-content"]
+  ],
+  [
+    "AAA F-f-f-f-special",
+    "<b><hr a/><i><hr b/><u><hr c/><em><hr d/><div><hr e/></b>A",
+    "<b><hr a/><i><hr b/><u><hr c/><em><hr d/></em></u></i></b><i><u><em><div><b><hr e/></b>A</div></em></u></i>",
+    ["element-closed-before-children", "abrupt-end-of-content"]
+  ],
+  [
+    "AAA F-f-f-f-f-special",
+    "<b><hr a/><i><hr b/><u><hr c/><em><hr d/><s><hr e/><div><hr f/></b>A",
+    "<b><hr a/><i><hr b/><u><hr c/><em><hr d/><s><hr e/></s></em></u></i></b><u><em><s><div><b><hr f/></b>A</div></s></em></u>",
+    ["element-closed-before-children", "abrupt-end-of-content"]
+  ],
+  [
+    "AAA F-f-f-f-f-special-f-f-f (bookmark check)",
+    "<b><hr a/><i><hr b/><u><hr c/><em><hr d/><s><hr e/><div><hr f/><tt><hr g/><strike><hr h/><code><hr i/></b></div>A",
+    "<b><hr a/><i><hr b/><u><hr c/><em><hr d/><s><hr e/></s></em></u></i></b><u><em><s><div><b><hr f/><tt><hr g/><strike><hr h/><code><hr i/></code></strike></tt></b></div><tt><strike><code>A</code></strike></tt></s></em></u>",
+    ["element-closed-before-children", "element-closed-before-children", "abrupt-end-of-content"]
+  ],
+  [
+    "AAA 7 nested",
+    "<b><hr a/><div><hr b/><div><hr c/><div><hr d/><div><hr e/><div><hr f/><div><hr g/><div><hr h/></b><hr i/></div></div></div></div></div></div></div></div>A",
+    "<b><hr a/></b><div><b><hr b/></b><div><b><hr c/></b><div><b><hr d/></b><div><b><hr e/></b><div><b><hr f/></b><div><b><hr g/></b><div><b><hr h/></b><hr i/></div></div></div></div></div></div></div>A",
+    [
+      "element-closed-before-children", "element-closed-before-children", "element-closed-before-children", "element-closed-before-children",
+      "element-closed-before-children", "element-closed-before-children", "element-closed-before-children", "orphan-end-tag"
+    ]
+  ],
+  [
+    "AAA 8 nested",
+    "<b><hr a/><div><hr b/><div><hr c/><div><hr d/><div><hr e/><div><hr f/><div><hr g/><div><hr h/><div><hr i/></b><hr j/></div></div></div></div></div></div></div></div></div>A",
+    "<b><hr a/></b><div><b><hr b/></b><div><b><hr c/></b><div><b><hr d/></b><div><b><hr e/></b><div><b><hr f/></b><div><b><hr g/></b><div><b><hr h/></b><div><b><hr i/><hr j/></b></div></div></div></div></div></div></div></div><b>A</b>",
+    [
+      "element-closed-before-children", "element-closed-before-children", "element-closed-before-children", "element-closed-before-children",
+      "element-closed-before-children", "element-closed-before-children", "element-closed-before-children", "element-closed-before-children",
+      "element-closed-before-children", "orphan-end-tag", "abrupt-end-of-content"
+    ]
+  ],
+  [
+    "AAA 9 nested",
+    "<b><hr a/><div><hr b/><div><hr c/><div><hr d/><div><hr e/><div><hr f/><div><hr g/><div><hr h/><div><hr i/><div><hr j/></b><hr k/></div></div></div></div></div></div></div></div></div></div>A",
+    "<b><hr a/></b><div><b><hr b/></b><div><b><hr c/></b><div><b><hr d/></b><div><b><hr e/></b><div><b><hr f/></b><div><b><hr g/></b><div><b><hr h/></b><div><b><hr i/><div><hr j/><hr k/></div></b></div></div></div></div></div></div></div></div><b>A</b>",
+    [
+      "element-closed-before-children", "element-closed-before-children", "element-closed-before-children", "element-closed-before-children",
+      "element-closed-before-children", "element-closed-before-children", "element-closed-before-children", "element-closed-before-children",
+      "element-closed-before-children", "orphan-end-tag", "abrupt-end-of-content"
+    ]
+  ],
+  [
+    "AAA 8 nested + bookmark check",
+    "<b><hr a/><i><hr b/><u><hr c/><em><hr d/><s><hr e/><div><hr f/><div><hr g/><div><hr h/><div><hr i/><div><hr j/><div><hr k/><div><hr l/><div><hr m/><tt><hr n/><strike><hr o/><code><hr p/></b><hr q/></div></div></div></div></div></div></div></div></div>A",
+    "<b><hr a/><i><hr b/><u><hr c/><em><hr d/><s><hr e/></s></em></u></i></b><u><em><s><div><b><hr f/></b><div><b><hr g/></b><div><b><hr h/></b><div><b><hr i/></b><div><b><hr j/></b><div><b><hr k/></b><div><b><hr l/></b><div><b><hr m/><tt><hr n/><strike><hr o/><code><hr p/><hr q/></code></strike></tt></b></div></div></div></div></div></div></div></div><b><tt><strike><code>A</code></strike></tt></b></s></em></u>",
+    [
+      "element-closed-before-children", "element-closed-before-children", "element-closed-before-children", "element-closed-before-children",
+      "element-closed-before-children", "element-closed-before-children", "element-closed-before-children", "element-closed-before-children",
+      "element-closed-before-children", "orphan-end-tag", "abrupt-end-of-content"
+    ]
+  ],
   ["example 1", "A<em>B<address>C</em>D</address>E", "A<em>B</em><address><em>C</em>D</address>E", ["element-closed-before-children"]],
   ["example 2", "<p>1<b>2<i>3</b>4</i>5</p>", "<p>1<b>2<i>3</i></b><i>4</i>5</p>", ["element-closed-before-children"]],
   ["example 3", "<b>1<p>2</b>3</p>", "<b>1</b><p><b>2</b>3</p>", ["element-closed-before-children"]],

@@ -551,10 +551,10 @@ export class InBodyComposer extends TokenAdjustingComposer {
       this.popCurrentElement();
     else
       for (let outer = 0; outer < 8; ++outer) {
-        let bookmark = this.formattingElements.findLastIndex(el => el.tagName === subject);
-        if (bookmark === -1)
+        let bookmarkIndex = this.formattingElements.findLastIndex(el => el.tagName === subject);
+        if (bookmarkIndex === -1)
           return this.inBodyEndTagDefault(token);
-        let formattingElement = this.formattingElements[bookmark];
+        let formattingElement = this.formattingElements[bookmarkIndex];
         let formattingPosition = this.openElements.indexOf(formattingElement);
         if (formattingPosition === -1) {
           this.error('formatting-element-already-closed');
@@ -583,30 +583,31 @@ export class InBodyComposer extends TokenAdjustingComposer {
           return;
         }
         const commonAncestor = this.openElements[formattingPosition - 1];
+        let bookmarkElement: Element | undefined = this.formattingElements[bookmarkIndex - 1];
         let node = furthestBlock, lastNode = furthestBlock;
         let inner = 0;
         while (true) {
           ++inner;
           node = this.openElements[--furthestPosition];
           if (node === formattingElement) break;
-          let nodeFormattingIndex = this.formattingElements.indexOf(node);
-          if (nodeFormattingIndex !== -1 && inner > 3) {
-            this.removeFormattingElement(node, nodeFormattingIndex);
-            nodeFormattingIndex = -1;
+          let nodeIndex = this.formattingElements.indexOf(node);
+          if (nodeIndex !== -1 && inner > 3) {
+            this.removeFormattingElement(node, nodeIndex);
+            nodeIndex = -1;
           }
-          if (nodeFormattingIndex === -1) {
+          if (nodeIndex === -1) {
             this.removeFromStack(node);
             continue;
           }
           const nodeToken = this.getOriginalToken(node);
           const replacement = this.createElementNS(nodeToken, NS_HTML, commonAncestor);
           const key = this.computeFormattingElementKey(node);
-          this.formattingElements[nodeFormattingIndex] = replacement;
+          this.formattingElements[nodeIndex] = replacement;
           replaceElement(this.formattingArk[key]!, node, replacement);
           this.openElements[furthestPosition] = replacement;
           node = replacement;
           if (lastNode === furthestBlock)
-            bookmark = nodeFormattingIndex + 1;
+            bookmarkElement = node;
           this.nodeFactory.relocateNode(node, lastNode);
           lastNode = node;
         }
@@ -620,7 +621,9 @@ export class InBodyComposer extends TokenAdjustingComposer {
         this.removeFormattingElement(formattingElement);
         const key = this.computeFormattingElementKey(formattingElement);
         this.formattingArk[key].push(newFormatting);
-        this.formattingElements.splice(bookmark, 0, newFormatting);
+        // inserting AFTER the bookmark element
+        // if it happens to be none, insert at the start
+        this.formattingElements.splice(this.formattingElements.indexOf(bookmarkElement) + 1, 0, newFormatting);
         this.openElements.splice(this.openElements.indexOf(formattingElement), 1);
         this.openElements.splice(this.openElements.indexOf(furthestBlock) + 1, 0, newFormatting);
       }
