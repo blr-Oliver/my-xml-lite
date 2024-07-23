@@ -3,6 +3,7 @@ import {DirectCharacterSource} from '../../src/common/stream-source';
 import {HTML_SPECIAL} from '../../src/decl/known-named-refs';
 import {ParserEnvironment} from '../../src/decl/ParserEnvironment';
 import {buildIndex} from '../../src/impl/build-index';
+import {TreeComposer} from '../../src/impl/composer/TreeComposer';
 import {CompositeComposer} from '../../src/impl/composite-composer';
 import {FixedSizeStringBuilder} from '../../src/impl/FixedSizeStringBuilder';
 import {StaticNodeFactory} from '../../src/impl/nodes/static-factory';
@@ -40,7 +41,8 @@ export abstract class AbstractSuite<R, T extends TestCase, C extends CompositeCo
     this.composer.tokenizer = this.tokenizer;
     this.tokenizer.composer = this.composer;
 
-    this.composer.nodeFactory = new StaticNodeFactory();
+    this.composer.reset();
+    /*
     this.composer.templateInsertionModes = [];
     this.composer.openElements = [];
     this.composer.openCounts = {};
@@ -49,6 +51,7 @@ export abstract class AbstractSuite<R, T extends TestCase, C extends CompositeCo
     this.composer.formattingArk = {};
     this.composer.formattingZones = [];
     this.composer.pendingTableCharacters = [];
+    */
 
     this.tokenizer.env = {
       buffer: new FixedSizeStringBuilder(1000),
@@ -93,7 +96,7 @@ export class DefaultSuite<R = DefaultRawTest, T extends DefaultTestCase = Defaul
   }
 
   createComposer(): C {
-    return new CompositeComposer() as C;
+    return new TreeComposer(new StaticNodeFactory()) as unknown as C;
   }
 
   prepareTest(rawTest: R): T {
