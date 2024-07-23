@@ -1,8 +1,7 @@
-import {InsertionMode} from '../../src/impl/composer/insertion-mode';
-import {TreeComposer} from '../../src/impl/composer/TreeComposer';
-import {CompositeComposer} from '../../src/impl/composite-composer';
+import {InsertionMode} from '../../src/impl/insertion-mode';
 import {StaticNodeFactory} from '../../src/impl/nodes/static-factory';
 import {Token} from '../../src/impl/tokens';
+import {TreeComposer} from '../../src/impl/TreeComposer';
 import {trackProperty} from '../util/property-tracker';
 import {DefaultRawTestCore, DefaultSuite, DefaultTestCase} from './abstract-suite';
 import {default as rawTests} from './samples/initial.json';
@@ -20,7 +19,7 @@ class InitialModeSuite extends DefaultSuite<ModeTrackingRawTest, ModeTrackingTes
     super(testCases);
   }
 
-  createComposer(): CompositeComposer {
+  createComposer(): TreeComposer {
     return new class SwallowEOF extends TreeComposer {
       constructor() {
         super(new StaticNodeFactory());
@@ -29,7 +28,7 @@ class InitialModeSuite extends DefaultSuite<ModeTrackingRawTest, ModeTrackingTes
         if (token.type !== 'eof')
           super.accept(token);
       }
-    }() as unknown as CompositeComposer;
+    }();
   }
 
   configure() {

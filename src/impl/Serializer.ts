@@ -1,5 +1,5 @@
 import {CDATASection, Comment, DocumentType, Element, Node, NodeType, ParentNode, ProcessingInstruction, Text} from '../decl/xml-lite-decl';
-import {NS_HTML} from './composer/BaseComposer';
+import {NS_HTML} from './TreeComposer';
 
 export function serialize(node: Node): string {
   return serializeInChunks(node).join('');

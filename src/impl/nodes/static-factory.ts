@@ -1,5 +1,5 @@
 import {isElement, NodeType, ProcessingInstruction} from '../../decl/xml-lite-decl';
-import {NodeFactory, NodeTypeMapping} from '../composer/NodeFactory';
+import {NodeFactory, NodeTypeMapping} from '../NodeFactory';
 import {TagToken} from '../tokens';
 import {StaticAttr} from './StaticAttr';
 import {StaticAttributes} from './StaticAttributes';

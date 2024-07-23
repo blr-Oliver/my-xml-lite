@@ -1,11 +1,10 @@
-import {TokenSink} from '../../decl/ParserEnvironment';
-import {Attr, CharacterData, Document, Element, isDocument, isElement, Node, ParentNode} from '../../decl/xml-lite-decl';
-import {StateBasedTokenizer} from '../StateBasedTokenizer';
-import {State} from '../states';
-import {CharactersToken, CommentToken, DoctypeToken, NamespacedAttribute, TagToken, Token} from '../tokens';
-import {NS_HTML, NS_MATHML, NS_SVG, NS_XLINK, NS_XML, NS_XMLNS} from './BaseComposer';
+import {TokenSink} from '../decl/ParserEnvironment';
+import {Attr, CharacterData, Document, Element, isDocument, isElement, Node, ParentNode} from '../decl/xml-lite-decl';
 import {InsertionMode} from './insertion-mode';
 import {NodeFactory} from './NodeFactory';
+import {StateBasedTokenizer} from './StateBasedTokenizer';
+import {State} from './states';
+import {CharactersToken, CommentToken, DoctypeToken, NamespacedAttribute, TagToken, Token} from './tokens';
 
 const IMPLICITLY_CLOSABLE = {
   'dd': true,
@@ -31,6 +30,13 @@ const IMPLICITLY_THOROUGHLY_CLOSABLE = {
   'thead': true,
   'tr': true
 };
+
+export const NS_HTML = 'http://www.w3.org/1999/xhtml';
+export const NS_MATHML = 'http://www.w3.org/1998/Math/MathML';
+export const NS_SVG = 'http://www.w3.org/2000/svg';
+export const NS_XLINK = 'http://www.w3.org/1999/xlink';
+export const NS_XML = 'http://www.w3.org/XML/1998/namespace';
+export const NS_XMLNS = 'http://www.w3.org/2000/xmlns/';
 
 type InsertionLocation = {
   parent: ParentNode,

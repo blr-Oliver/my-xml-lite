@@ -15,9 +15,9 @@ import {CodePoints} from '../common/code-points';
 import {stringToArray} from '../common/code-sequences';
 import {PrefixNode} from '../decl/entity-ref-index';
 import {ParserEnvironment} from '../decl/ParserEnvironment';
-import {BaseComposer, NS_HTML} from './composer/BaseComposer';
 import {State} from './states';
 import {Attribute, CDataToken, CharactersToken, CommentToken, DoctypeToken, EOF_TOKEN, TagToken, Token} from './tokens';
+import {NS_HTML, TreeComposer} from './TreeComposer';
 
 const SCRIPT: number[] = [0x73, 0x63, 0x72, 0x69, 0x70, 0x74];
 const TWO_HYPHENS: number[] = [CodePoints.HYPHEN, CodePoints.HYPHEN];
@@ -38,7 +38,7 @@ interface IStateBasedTokenizer {
   readonly state: State;
   readonly active: boolean;
   lastOpenTag?: string;
-  composer?: BaseComposer;
+  composer?: TreeComposer;
   proceed(): void;
 }
 
@@ -76,7 +76,7 @@ export class StateBasedTokenizer implements IStateBasedTokenizer {
   whitespaceMode: WhitespaceMode = 'mixed';
   hasWhitespaceOnly: boolean = true;
 
-  composer!: BaseComposer;
+  composer!: TreeComposer;
 
   constructor(refsIndex: PrefixNode<number[]>) {
     this.refsIndex = refsIndex;

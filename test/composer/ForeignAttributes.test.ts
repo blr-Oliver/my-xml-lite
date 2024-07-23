@@ -1,4 +1,4 @@
-import {NS_XLINK, NS_XML, NS_XMLNS} from '../../src/impl/composer/BaseComposer';
+import {NS_XLINK, NS_XML, NS_XMLNS} from '../../src/impl/TreeComposer';
 import {DefaultRawTest, DefaultTestCase, ExcerptSuite} from './abstract-suite';
 import {default as rawTests} from './samples/foreign-attributes.json';
 

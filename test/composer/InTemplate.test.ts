@@ -1,4 +1,4 @@
-import {InsertionMode} from '../../src/impl/composer/insertion-mode';
+import {InsertionMode} from '../../src/impl/insertion-mode';
 import {DefaultRawTestCore, DefaultTestCase, ExcerptSuite} from './abstract-suite';
 import {default as rawTests} from './samples/in-template.json';
 

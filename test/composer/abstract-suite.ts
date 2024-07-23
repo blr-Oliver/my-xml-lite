@@ -3,18 +3,17 @@ import {DirectCharacterSource} from '../../src/common/stream-source';
 import {HTML_SPECIAL} from '../../src/decl/known-named-refs';
 import {ParserEnvironment} from '../../src/decl/ParserEnvironment';
 import {buildIndex} from '../../src/impl/build-index';
-import {TreeComposer} from '../../src/impl/composer/TreeComposer';
-import {CompositeComposer} from '../../src/impl/composite-composer';
 import {FixedSizeStringBuilder} from '../../src/impl/FixedSizeStringBuilder';
 import {StaticNodeFactory} from '../../src/impl/nodes/static-factory';
 import {serialize} from '../../src/impl/Serializer';
 import {StateBasedTokenizer} from '../../src/impl/StateBasedTokenizer';
+import {TreeComposer} from '../../src/impl/TreeComposer';
 
 export interface TestCase {
   name: string;
 }
 
-export abstract class AbstractSuite<R, T extends TestCase, C extends CompositeComposer> {
+export abstract class AbstractSuite<R, T extends TestCase, C extends TreeComposer> {
   testCases: R[];
   errorList: string[];
   tokenizer!: StateBasedTokenizer;
@@ -90,7 +89,7 @@ export interface DefaultTestCase extends TestCase {
 export type DefaultRawTestCore = [string/*name*/, string/*input*/, string/*output*/, string[]/*errors*/];
 export type DefaultRawTest = [...DefaultRawTestCore, ...any[]];
 
-export class DefaultSuite<R = DefaultRawTest, T extends DefaultTestCase = DefaultTestCase, C extends CompositeComposer = CompositeComposer> extends AbstractSuite<R, T, C> {
+export class DefaultSuite<R = DefaultRawTest, T extends DefaultTestCase = DefaultTestCase, C extends TreeComposer = TreeComposer> extends AbstractSuite<R, T, C> {
   constructor(testCases: R[]) {
     super(testCases);
   }
@@ -140,7 +139,7 @@ export type ExcerptParams = {
   suffixErrors?: string[];
 }
 
-export class ExcerptSuite<R extends DefaultRawTest = DefaultRawTest, T extends DefaultTestCase = DefaultTestCase, C extends CompositeComposer = CompositeComposer> extends DefaultSuite<R, T, C> {
+export class ExcerptSuite<R extends DefaultRawTest = DefaultRawTest, T extends DefaultTestCase = DefaultTestCase, C extends TreeComposer = TreeComposer> extends DefaultSuite<R, T, C> {
   prefixInput: string;
   suffixInput: string;
   prefixOutput: string;

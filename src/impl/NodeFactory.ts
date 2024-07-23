@@ -10,8 +10,8 @@ import {
   ParentNode,
   ProcessingInstruction,
   Text
-} from '../../decl/xml-lite-decl';
-import {TagToken} from '../tokens';
+} from '../decl/xml-lite-decl';
+import {TagToken} from './tokens';
 
 export interface NodeTypeMapping {
   CDATASection: CDATASection;
