@@ -6,7 +6,7 @@ import {buildIndex} from '../../src/impl/build-index';
 import {FixedSizeStringBuilder} from '../../src/impl/FixedSizeStringBuilder';
 import {StaticNodeFactory} from '../../src/impl/nodes/static-factory';
 import {serialize} from '../../src/impl/Serializer';
-import {StateBasedTokenizer} from '../../src/impl/StateBasedTokenizer';
+import {Tokenizer} from '../../src/impl/Tokenizer';
 import {TreeComposer} from '../../src/impl/TreeComposer';
 
 export interface TestCase {
@@ -16,7 +16,7 @@ export interface TestCase {
 export abstract class AbstractSuite<R, T extends TestCase, C extends TreeComposer> {
   testCases: R[];
   errorList: string[];
-  tokenizer!: StateBasedTokenizer;
+  tokenizer!: Tokenizer;
   composer!: C;
 
   protected constructor(testCases: R[]) {
@@ -32,8 +32,8 @@ export abstract class AbstractSuite<R, T extends TestCase, C extends TreeCompose
 
   abstract createComposer(): C;
 
-  createTokenizer(): StateBasedTokenizer {
-    return new StateBasedTokenizer(buildIndex(HTML_SPECIAL));
+  createTokenizer(): Tokenizer {
+    return new Tokenizer(buildIndex(HTML_SPECIAL));
   }
 
   configure() {

@@ -33,7 +33,7 @@ const CHAR_REF_REPLACEMENT: number[] = [
   0x02DC, 0x2122, 0x0161, 0x203A, 0x0153, 0x0000, 0x017E, 0x0178
 ];
 
-interface IStateBasedTokenizer {
+interface ITokenizer {
   readonly env: ParserEnvironment;
   readonly state: State;
   readonly active: boolean;
@@ -44,7 +44,7 @@ interface IStateBasedTokenizer {
 
 export type WhitespaceMode = 'ignoreLeading' | 'emitLeading' | 'mixed' | 'whitespaceOnly';
 
-export class StateBasedTokenizer implements IStateBasedTokenizer {
+export class Tokenizer implements ITokenizer {
   env!: ParserEnvironment;
   state: State = 'data';
   active: boolean = true;

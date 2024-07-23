@@ -4,7 +4,7 @@ import {HTML_SPECIAL} from '../../src/decl/known-named-refs';
 import {ParserEnvironment} from '../../src/decl/ParserEnvironment';
 import {buildIndex} from '../../src/impl/build-index';
 import {FixedSizeStringBuilder} from '../../src/impl/FixedSizeStringBuilder';
-import {StateBasedTokenizer} from '../../src/impl/StateBasedTokenizer';
+import {Tokenizer} from '../../src/impl/Tokenizer';
 import {CharactersToken, CommentToken, EOF_TOKEN, Token} from '../../src/impl/tokens';
 import {default as rawTests} from './samples/comment.json';
 
@@ -12,12 +12,12 @@ type TestCase = [string/*name*/, string/*input*/, string/*comment data*/, string
 const testCases = rawTests as TestCase[];
 
 function suite() {
-  let parser!: StateBasedTokenizer;
+  let parser!: Tokenizer;
   let tokenList: Token[] = [];
   let errorList: string[] = [];
 
   beforeAll(() => {
-    parser = new StateBasedTokenizer(buildIndex(HTML_SPECIAL));
+    parser = new Tokenizer(buildIndex(HTML_SPECIAL));
     parser.env = {
       buffer: new FixedSizeStringBuilder(1000),
       tokens: {

@@ -2,7 +2,7 @@ import {TokenSink} from '../decl/ParserEnvironment';
 import {Attr, CharacterData, Document, Element, isDocument, isElement, Node, ParentNode} from '../decl/xml-lite-decl';
 import {InsertionMode} from './insertion-mode';
 import {NodeFactory} from './NodeFactory';
-import {StateBasedTokenizer} from './StateBasedTokenizer';
+import {Tokenizer} from './Tokenizer';
 import {State} from './states';
 import {CharactersToken, CommentToken, DoctypeToken, NamespacedAttribute, TagToken, Token} from './tokens';
 
@@ -54,7 +54,7 @@ type FormattingZone = {
 export class TreeComposer implements TokenSink {
   nodeFactory: NodeFactory;
 
-  tokenizer!: StateBasedTokenizer;
+  tokenizer!: Tokenizer;
   insertionMode!: InsertionMode;
   originalInsertionMode!: InsertionMode;
   templateInsertionModes: InsertionMode[] = [];

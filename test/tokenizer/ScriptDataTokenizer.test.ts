@@ -4,8 +4,8 @@ import {HTML_SPECIAL} from '../../src/decl/known-named-refs';
 import {ParserEnvironment} from '../../src/decl/ParserEnvironment';
 import {buildIndex} from '../../src/impl/build-index';
 import {FixedSizeStringBuilder} from '../../src/impl/FixedSizeStringBuilder';
-import {StateBasedTokenizer} from '../../src/impl/StateBasedTokenizer';
 import {State} from '../../src/impl/states';
+import {Tokenizer} from '../../src/impl/Tokenizer';
 import {CharactersToken, EOF_TOKEN, TagToken, Token} from '../../src/impl/tokens';
 import {default as rawTests} from './samples/script-data.json';
 
@@ -13,13 +13,13 @@ type TestCase = [string/*name*/, string/*input*/, string/*comment data*/, string
 const testCases = rawTests as TestCase[];
 
 function suite() {
-  let parser!: StateBasedTokenizer;
+  let parser!: Tokenizer;
   let tokenList: Token[] = [];
   let errorList: string[] = [];
   let lastState!: State;
 
   beforeAll(() => {
-    class MockCompositeTokenizer extends StateBasedTokenizer {
+    class MockCompositeTokenizer extends Tokenizer {
       data(code: number): State {
         if (tokenList.length === 1 && tokenList[0].type === 'startTag' && (tokenList[0] as TagToken).name === 'script') {
           parser.lastOpenTag = 'script';

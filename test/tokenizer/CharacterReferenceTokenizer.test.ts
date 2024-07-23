@@ -6,8 +6,8 @@ import {HTML_SPECIAL} from '../../src/decl/known-named-refs';
 import {ParserEnvironment} from '../../src/decl/ParserEnvironment';
 import {buildIndex} from '../../src/impl/build-index';
 import {FixedSizeStringBuilder} from '../../src/impl/FixedSizeStringBuilder';
-import {StateBasedTokenizer} from '../../src/impl/StateBasedTokenizer';
 import {State} from '../../src/impl/states';
+import {Tokenizer} from '../../src/impl/Tokenizer';
 import {EOF_TOKEN, Token} from '../../src/impl/tokens';
 import {default as rawTests} from './samples/char-ref.json';
 
@@ -15,13 +15,13 @@ type TestCase = [string/*name*/, string/*input*/, string/*output*/, string[]/*er
 const testCases = rawTests as TestCase[];
 
 function suite() {
-  let parser!: StateBasedTokenizer;
+  let parser!: Tokenizer;
   let tokenList: Token[] = [];
   let errorList: string[] = [];
   let lastState!: State;
 
   beforeAll(() => {
-    class MockCompositeTokenizer extends StateBasedTokenizer {
+    class MockCompositeTokenizer extends Tokenizer {
       constructor(refsIndex: PrefixNode<number[]>) {
         super(refsIndex);
       }

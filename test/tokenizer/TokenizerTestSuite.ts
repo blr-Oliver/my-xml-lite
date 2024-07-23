@@ -4,13 +4,13 @@ import {HTML_SPECIAL} from '../../src/decl/known-named-refs';
 import {ParserEnvironment} from '../../src/decl/ParserEnvironment';
 import {buildIndex} from '../../src/impl/build-index';
 import {FixedSizeStringBuilder} from '../../src/impl/FixedSizeStringBuilder';
-import {StateBasedTokenizer} from '../../src/impl/StateBasedTokenizer';
 import {State} from '../../src/impl/states';
+import {Tokenizer} from '../../src/impl/Tokenizer';
 import {Token} from '../../src/impl/tokens';
 
 export abstract class TokenizerTestSuite<T/*test case*/> {
   name!: string;
-  parser!: StateBasedTokenizer;
+  parser!: Tokenizer;
   tokenList: Token[] = [];
   errorList: string[] = [];
   lastState!: State;
@@ -19,9 +19,9 @@ export abstract class TokenizerTestSuite<T/*test case*/> {
     this.name = name;
   }
 
-  defineTokenizerClass(): typeof StateBasedTokenizer {
+  defineTokenizerClass(): typeof Tokenizer {
     const suite = this;
-    return class extends StateBasedTokenizer {
+    return class extends Tokenizer {
       eof(): State {
         suite.lastState = this.state;
         return super.eof();
@@ -29,7 +29,7 @@ export abstract class TokenizerTestSuite<T/*test case*/> {
     };
   }
 
-  createTokenizer(): StateBasedTokenizer {
+  createTokenizer(): Tokenizer {
     return new (this.defineTokenizerClass())(buildIndex(HTML_SPECIAL));
   }
 
