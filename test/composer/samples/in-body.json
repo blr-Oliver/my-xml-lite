@@ -39,8 +39,8 @@
   ],
   [
     "nested heading elements",
-    "<html><body>0.1<h1>1.1<div>1.2<h2>2.1<h3>3.1<div>3.2<h4>4.1<h5>5.1<div>5.2<h6>6.1</h6>5.3</div>5.4</h5>4.2</h4>3.3</div>3.4</h3>2.2</h2>1.3</div>1.4</h1>0.2</body></html>",
-    "<html><head></head><body>0.1<h1>1.1<div>1.2<h2>2.1</h2><h3>3.1<div>3.2<h4>4.1</h4><h5>5.1<div>5.2<h6>6.1</h6>5.3</div>5.4</h5>4.2</div></h3>3.3</div>3.4</h1>2.21.31.40.2</body></html>",
+    "<html><body>0.1<h2>1.1<div>1.2<h1>2.1<h3>3.1<div>3.2<h4>4.1<h5>5.1<div>5.2<h6>6.1</h6>5.3</div>5.4</h5>4.2</h4>3.3</div>3.4</h3>2.2</h1>1.3</div>1.4</h2>0.2</body></html>",
+    "<html><head></head><body>0.1<h2>1.1<div>1.2<h1>2.1</h1><h3>3.1<div>3.2<h4>4.1</h4><h5>5.1<div>5.2<h6>6.1</h6>5.3</div>5.4</h5>4.2</div></h3>3.3</div>3.4</h2>2.21.31.40.2</body></html>",
     [
       "immediately-nested-heading-start-tag",
       "immediately-nested-heading-start-tag",
@@ -157,5 +157,13 @@
   ["ul end", "<html><body>A</ul>B<ul>C<dd>D</ul>E<ul>F<div>G<dd>H</ul>I<ul>J<object>K</ul>L</object>M</ul>N</body></html>", "<html><head></head><body>AB<ul>C<dd>D</dd></ul>E<ul>F<div>G<dd>H</dd></div></ul>I<ul>J<object>KL</object>M</ul>N</body></html>", ["orphan-end-tag", "element-closed-before-children", "orphan-end-tag"]],
   ["applet end", "<html><body>A</applet>B<applet>C<dd>D</applet>E<applet>F<div>G<dd>H</applet>I<applet>J<object>K</applet>L</object>M</applet>N</body></html>", "<html><head></head><body>AB<applet>C<dd>D</dd></applet>E<applet>F<div>G<dd>H</dd></div></applet>I<applet>J<object>KL</object>M</applet>N</body></html>", ["orphan-end-tag", "element-closed-before-children", "orphan-end-tag"]],
   ["marquee end", "<html><body>A</marquee>B<marquee>C<dd>D</marquee>E<marquee>F<div>G<dd>H</marquee>I<marquee>J<object>K</marquee>L</object>M</marquee>N</body></html>", "<html><head></head><body>AB<marquee>C<dd>D</dd></marquee>E<marquee>F<div>G<dd>H</dd></div></marquee>I<marquee>J<object>KL</object>M</marquee>N</body></html>", ["orphan-end-tag", "element-closed-before-children", "orphan-end-tag"]],
-  ["object end", "<html><body>A</object>B<object>C<dd>D</object>E<object>F<div>G<dd>H</object>I<object>J<marquee>K</object>L</marquee>M</object>N</body></html>", "<html><head></head><body>AB<object>C<dd>D</dd></object>E<object>F<div>G<dd>H</dd></div></object>I<object>J<marquee>KL</marquee>M</object>N</body></html>", ["orphan-end-tag", "element-closed-before-children", "orphan-end-tag"]]
+  ["object end", "<html><body>A</object>B<object>C<dd>D</object>E<object>F<div>G<dd>H</object>I<object>J<marquee>K</object>L</marquee>M</object>N</body></html>", "<html><head></head><body>AB<object>C<dd>D</dd></object>E<object>F<div>G<dd>H</dd></div></object>I<object>J<marquee>KL</marquee>M</object>N</body></html>", ["orphan-end-tag", "element-closed-before-children", "orphan-end-tag"]],
+  ["nobr single start", "<html><body><b><object><p><i><div><nobr></div></object></b></body></html>", "<html><head></head><body><b><object><p><i></i></p><div><i><nobr></nobr></i></div></object></b></body></html>", ["element-closed-before-children", "element-closed-before-children"]],
+  ["nobr nested over scope fence", "<html><body><nobr><object><p><i><div><nobr></div></object></nobr></body></html>", "<html><head></head><body><nobr><object><p><i></i></p><div><i><nobr></nobr></i></div></object></nobr></body></html>", ["element-closed-before-children", "element-closed-before-children"]],
+  [
+    "nobr nested",
+    "<html><body><a><object><nobr a><p><i><div></div><u><s><em><div><nobr b></div></object></a></body></html>",
+    "<html><head></head><body><a><object><nobr a><p><i></i></p><div></div><i><u><s><em></em></s></u></i></nobr><u><s><em><div><nobr a></nobr><nobr b></nobr></div></em></s></u></object></a></body></html>",
+    ["element-closed-before-children", "nested-nobr", "element-closed-before-children", "element-closed-before-children", "element-closed-before-children"]
+  ]
 ]
