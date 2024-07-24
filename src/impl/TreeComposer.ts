@@ -69,7 +69,6 @@ export class TreeComposer implements TokenSink {
 
   pendingTableCharacters: CharactersToken[] = [];
   fosterParentingEnabled: boolean = false;
-  fosterTables: Map<Element, Node[]> = new Map<Element, Node[]>(); // keys are table elements, values are collection of elements inserted just before them
 
   framesetOk: boolean = true;
   formattingElements: Element[] = [];
@@ -95,7 +94,6 @@ export class TreeComposer implements TokenSink {
     this.formElement = null;
     this.pendingTableCharacters.length = 0;
     this.fosterParentingEnabled = false;
-    this.fosterTables.clear();
     this.framesetOk = true;
     this.formattingElements.length = 0;
     this.formattingArk = {};
@@ -416,9 +414,10 @@ export class TreeComposer implements TokenSink {
       else
         this.nodeFactory.appendNode(parent, node);
     } else {
-      if (!this.fosterTables.has(before))
-        this.fosterTables.set(before, []);
-      this.fosterTables.get(before)!.push(node);
+      if (isElementHint ?? isElement(node))
+        this.nodeFactory.insertElement(before, node as Element);
+      else
+        this.nodeFactory.insertNode(before, node);
     }
   }
 
@@ -853,39 +852,7 @@ export class TreeComposer implements TokenSink {
     }
   }
 
-  settleFosterChildren() {
-    const parents: Map<ParentNode, [Node[], Element[]]> = new Map<ParentNode, [Node[], Element[]]>();
-    for (let table of this.fosterTables.keys()) {
-      const parent = table.parentNode!;
-      if (parents.has(parent)) continue;
-      const newChildNodes: Node[] = [];
-      const newChildren: Element[] = [];
-      parents.set(parent, [newChildNodes, newChildren]);
-      for (let node of parent.childNodes) {
-        this.collectFosterNode(node, newChildNodes, newChildren);
-      }
-    }
-    for (let [parent, [childNodes, children]] of parents) {
-      this.nodeFactory.setNestedNodes(parent, childNodes, children);
-    }
-    this.fosterTables.clear();
-  }
-
-  collectFosterNode(node: Node, childNodes: Node[], children: Element[]) {
-    if (isElement(node)) {
-      if (this.fosterTables.has(node)) {
-        const predecessors = this.fosterTables.get(node)!;
-        for (let extraNode of predecessors)
-          this.collectFosterNode(extraNode, childNodes, children);
-        predecessors.length = 0;
-      }
-      children.push(node);
-    }
-    childNodes.push(node);
-  }
-
   stopParsing(): InsertionMode { // TODO
-    this.settleFosterChildren();
     return this.insertionMode;
   }
 
@@ -2091,7 +2058,7 @@ export class TreeComposer implements TokenSink {
           lastNode = node;
         }
         const insertionLocation = this.getInsertionLocation(commonAncestor);
-        this.nodeFactory.relocateNode(insertionLocation.parent, lastNode, insertionLocation.before); // TODO actually insert
+        this.nodeFactory.relocateNode(insertionLocation.parent, lastNode, insertionLocation.before);
         const formattingToken = this.getOriginalToken(formattingElement);
         const newFormatting = this.createElementNS(formattingToken, NS_HTML, furthestBlock);
         this.nodeFactory.relocateChildNodes(newFormatting, furthestBlock);

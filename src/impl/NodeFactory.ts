@@ -28,7 +28,6 @@ export interface NodeFactory<T extends NodeTypeMapping = NodeTypeMapping> {
   appendElement(parent: T['ParentNode'], node: T['Element']): void;
   insertNode(before: T['Node'], node: T['Node']): void;
   insertElement(before: T['Node'], element: T['Element']): void;
-  setNestedNodes(parent: T['ParentNode'], childNodes: T['Node'][], children: T['Element'][]): void;
   relocateNode(target: T['ParentNode'], node: T['Node'], before?: T['Node']): void;
   relocateChildNodes(target: T['ParentNode'], parent: T['ParentNode']): void;
   removeNode(node: T['Node']): void;

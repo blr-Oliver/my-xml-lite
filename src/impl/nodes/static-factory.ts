@@ -98,15 +98,6 @@ export class StaticNodeFactory implements NodeFactory<StaticNodeTypeMapping> {
     return beforeIndex;
   }
 
-  setNestedNodes(parent: StaticParentNode, childNodes: StaticEmptyNode[], children: StaticElement[]) {
-    //@ts-ignore
-    parent.childNodes = childNodes;
-    //@ts-ignore
-    parent.children = children;
-    childNodes.forEach(this.__setNodeIndex, this);
-    children.forEach(this.__setElementIndex, this);
-  }
-
   relocateNode(target: StaticParentNode, node: StaticEmptyNode, before?: StaticEmptyNode) {
     if (node.parentNode !== target) {
       this.removeNode(node);
@@ -132,6 +123,7 @@ export class StaticNodeFactory implements NodeFactory<StaticNodeTypeMapping> {
   relocateChildNodes(target: StaticParentNode, parent: StaticParentNode) {
     if (target === parent) return;
     const childNodes = parent.childNodes.slice();
+    // TODO children arrays could be just concatenated
     for (let child of childNodes)
       this.relocateNode(target, child);
     parent.childNodes.length = 0;
@@ -164,12 +156,6 @@ export class StaticNodeFactory implements NodeFactory<StaticNodeTypeMapping> {
     }
   }
 
-  __setNodeIndex(node: StaticEmptyNode, nodeIndex: number) {
-    node.parentIndex = nodeIndex;
-  }
-  __setElementIndex(el: StaticElement, elementIndex: number) {
-    el.parentElementIndex = elementIndex;
-  }
   __setParent(node: StaticEmptyNode, parent: StaticParentNode) {
     // @ts-ignore
     node.parentNode = node.parentElement = parent;
