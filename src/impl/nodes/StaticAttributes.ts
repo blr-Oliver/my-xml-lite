@@ -1,14 +1,14 @@
-import {Attr, Element, NamedNodeMap} from '../../decl/xml-lite-decl';
+import {Attr, NamedNodeMap} from '../../decl/xml-lite-decl';
 import {NamespacedAttribute} from '../tokens';
 import {StaticAttr} from './StaticAttr';
+import {StaticElement} from './StaticElement';
 
 export class StaticAttributes implements NamedNodeMap {
   readonly #attrs: Attr[];
   readonly #map: { [name: string]: Attr };
   readonly [index: number]: Attr;
 
-  // TODO keep ownerElement reference
-  constructor(attributes: NamespacedAttribute[], ownerElement: Element | null) {
+  constructor(attributes: NamespacedAttribute[], ownerElement: StaticElement | null) {
     const length = attributes.length;
     this.#attrs = new Array(length);
     this.#map = {};

@@ -36,8 +36,7 @@ export interface NodeFactory<T extends NodeTypeMapping = NodeTypeMapping> {
   createComment(parent: T['ParentNode'], data: string): T['Comment'];
   createDocument(childNodes: T['Node'][], children: T['Element'][]): T['Document'];
   createDoctype(parent: T['Document'], name: string, publicId: string | undefined, systemId: string | undefined): T['DocumentType'];
-  createAttributes(token: TagToken): T['NamedNodeMap'];
-  combineAttributes(attributes: T['NamedNodeMap'], token: TagToken): T['NamedNodeMap'];
+  combineAttributes(element: T['Element'], token: TagToken): T['NamedNodeMap'];
   createTokenList(value: string): T['DOMTokenList'];
 
   appendNode(parent: T['ParentNode'], node: T['Node']): void;

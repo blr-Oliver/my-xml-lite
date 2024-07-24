@@ -46,16 +46,14 @@ export class StaticNodeFactory implements NodeFactory<StaticNodeTypeMapping> {
   createDoctype(parent: StaticDocument, name: string, publicId: string | undefined, systemId: string | undefined): StaticDocumentType {
     return new StaticDocumentType(parent, name, publicId || '', systemId || '');
   }
-  createAttributes(token: TagToken): StaticAttributes {
-    return new StaticAttributes(token.attributes, null);
-  }
-  combineAttributes(attributes: StaticAttributes, token: TagToken): StaticAttributes {
+  combineAttributes(element: StaticElement, token: TagToken): StaticAttributes {
+    const attributes = element.attributes;
     const otherAttributes = token.attributes;
     const len = otherAttributes.length;
     for (let i = 0; i < len; ++i) {
       const attrToken = otherAttributes[i];
       if (!attributes.getNamedItem(attrToken.name))
-        attributes.addAttributeNode(new StaticAttr(attrToken, null));
+        attributes.addAttributeNode(new StaticAttr(attrToken, element));
     }
     return attributes;
   }

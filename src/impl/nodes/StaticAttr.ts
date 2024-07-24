@@ -1,5 +1,6 @@
 import {Attr, Document, Element} from '../../decl/xml-lite-decl';
 import {NamespacedAttribute} from '../tokens';
+import {StaticElement} from './StaticElement';
 
 export class StaticAttr implements Attr {
   readonly localName: string;
@@ -10,7 +11,7 @@ export class StaticAttr implements Attr {
   readonly value: string | null;
 
   // TODO bind to attribute list, not to element
-  constructor(attr: NamespacedAttribute, ownerElement: Element | null) {
+  constructor(attr: NamespacedAttribute, ownerElement: StaticElement | null) {
     this.name = attr.name;
     this.namespaceURI = attr.namespaceURI ? attr.namespaceURI! : null;
     this.prefix = attr.prefix ? attr.prefix! : null;

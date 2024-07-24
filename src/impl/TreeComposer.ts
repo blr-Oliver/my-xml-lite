@@ -1509,7 +1509,7 @@ export class TreeComposer implements TokenSink {
       case 'html':
         this.error('unexpected-html-start-tag');
         if (!this.openCounts['template'])
-          this.nodeFactory.combineAttributes(this.openElements[0].attributes, token);
+          this.nodeFactory.combineAttributes(this.openElements[0], token);
         break;
       case 'base':
       case 'basefont':
@@ -1526,7 +1526,7 @@ export class TreeComposer implements TokenSink {
         this.error('unexpected-body-start-tag');
         if (this.openElements.length > 1 && this.openElements[1].tagName === 'body' && !this.openCounts['template']) {
           this.framesetOk = false;
-          this.nodeFactory.combineAttributes(this.openElements[1].attributes, token);
+          this.nodeFactory.combineAttributes(this.openElements[1], token);
         }
         break;
       case 'frameset':
