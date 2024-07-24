@@ -15,12 +15,12 @@ export interface NodeTypeMapping {
 }
 
 export interface NodeFactory<T extends NodeTypeMapping = NodeTypeMapping> {
-  createElement(parent: T['ParentNode'], token: TagToken, namespaceURI: string | null, childNodes: T['Node'][], children: T['Element'][]): T['Element'];
+  createElement(parent: T['ParentNode'], token: TagToken, namespaceURI: string | null): T['Element'];
   createText(parent: T['ParentNode'], data: string): T['Text'];
   createCData(parent: T['ParentNode'], data: string): T['CDATASection'];
   createProcessingInstruction(parent: T['ParentNode'], target: string, data: string): T['ProcessingInstruction'];
   createComment(parent: T['ParentNode'], data: string): T['Comment'];
-  createDocument(childNodes: T['Node'][], children: T['Element'][]): T['Document'];
+  createDocument(): T['Document'];
   createDoctype(parent: T['Document'], name: string, publicId: string | undefined, systemId: string | undefined): T['DocumentType'];
   combineAttributes(element: T['Element'], token: TagToken): T['NamedNodeMap'];
 

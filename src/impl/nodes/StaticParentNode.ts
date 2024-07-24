@@ -5,12 +5,9 @@ import {StaticEmptyNode} from './StaticEmptyNode';
 export class StaticParentNode extends StaticEmptyNode implements ParentNode {
   readonly children: StaticElement[];
 
-  constructor(nodeType: NodeType,
-              parentNode: StaticParentNode | null,
-              childNodes: StaticEmptyNode[],
-              children?: StaticElement[]) {
-    super(nodeType, parentNode, childNodes);
-    this.children = children || childNodes.filter(node => node.nodeType === NodeType.ELEMENT_NODE) as StaticElement[];
+  constructor(nodeType: NodeType, parentNode: StaticParentNode | null) {
+    super(nodeType, parentNode);
+    this.children = [];
   }
 
   get nodeValue(): string | null {

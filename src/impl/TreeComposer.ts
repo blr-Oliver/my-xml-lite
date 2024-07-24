@@ -100,7 +100,7 @@ export class TreeComposer implements TokenSink {
     this.formattingElements.length = 0;
     this.formattingArk = {};
     this.formattingZones.length = 0;
-    this.document = this.nodeFactory.createDocument([], []);
+    this.document = this.nodeFactory.createDocument();
     if (!(this.contextElement = contextElement)) {
       this.tokenizer.state = 'data';
       this.setInsertionMode('initial');
@@ -358,7 +358,7 @@ export class TreeComposer implements TokenSink {
   }
 
   createElementNS(token: TagToken, namespace: string | null, parent: ParentNode): Element {
-    const element = this.nodeFactory.createElement(parent, token, namespace, [], []);
+    const element = this.nodeFactory.createElement(parent, token, namespace);
     this.validateNsAttributes(element);
     return element;
   }

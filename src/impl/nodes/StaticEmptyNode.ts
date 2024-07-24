@@ -3,8 +3,6 @@ import {StaticDocument} from './StaticDocument';
 import {StaticElement} from './StaticElement';
 import {StaticParentNode} from './StaticParentNode';
 
-const EMPTY_LIST: StaticEmptyNode[] = [] as const;
-
 export abstract class StaticEmptyNode {
   readonly ownerDocument: StaticDocument | null;
   readonly nodeType: NodeType;
@@ -14,14 +12,12 @@ export abstract class StaticEmptyNode {
 
   parentIndex: number;
 
-  protected constructor(nodeType: NodeType,
-                        parentNode: StaticParentNode | null,
-                        childNodes: StaticEmptyNode[] = EMPTY_LIST) {
+  protected constructor(nodeType: NodeType, parentNode: StaticParentNode | null) {
     this.ownerDocument = parentNode ? parentNode.ownerDocument || (parentNode as StaticDocument) : null;
     this.nodeType = nodeType;
     this.parentNode = parentNode;
     this.parentElement = parentNode && parentNode.nodeType === NodeType.ELEMENT_NODE ? parentNode as StaticElement : null;
-    this.childNodes = childNodes;
+    this.childNodes = [];
     this.parentIndex = parentNode ? parentNode.childNodes.length : -1;
   }
   get nodeValue(): string | null {
