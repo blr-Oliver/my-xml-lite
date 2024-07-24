@@ -11,6 +11,7 @@
   ["html start", "<html b a=\"a\"><body><html c a=\"b\"></body></html>", "<html b a=\"a\" c><head></head><body></body></html>", ["unexpected-html-start-tag"]],
   ["body start", "<html><body b a=\"a\"><body c a=\"b\"></body></html>", "<html><head></head><body b a=\"a\" c></body></html>", ["unexpected-body-start-tag"]],
   ["head void elements", "<html><body><base><basefont><bgsound><link><meta></body></html>", "<html><head></head><body><base/><basefont/><bgsound/><link/><meta/></body></html>", []],
+  ["empty non-void element", "<html><body><div/></body></html>", "<html><head></head><body><div></div></body></html>", ["non-void-html-element-start-tag-with-trailing-solidus", "abrupt-end-of-content"]],
   [
     "text elements",
     "<html><body><noframes>&#x41;<tag></noframes><script>&#x41;<tag></script><style>&#x41;<tag></style><title>&#x41;<tag></title><textarea>&#x41;<tag></textarea><iframe>&#x41;<tag></iframe><noembed>&#x41;<tag></noembed></body></html>",

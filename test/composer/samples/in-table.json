@@ -36,5 +36,6 @@
   ["any end tag", "<table></div></table>", "<table></table>", ["unexpected-content-in-table", "orphan-end-tag"]],
   ["misnested known end tag", "<div><table></div></table>", "<div><table></table></div>", ["unexpected-content-in-table", "orphan-end-tag", "abrupt-end-of-document"]],
   ["misnested unknown end tag", "<tag><table></tag></table>", "<tag><table></table></tag>", ["unexpected-content-in-table", "orphan-end-tag-inside-special-element", "abrupt-end-of-document"]],
-  ["separated whitespace", "<table> <div>  </div>   </table>", "<div>  </div><table>    </table>", ["unexpected-content-in-table", "unexpected-content-in-table"]]
+  ["separated whitespace", "<table> <div>  </div>   </table>", "<div>  </div><table>    </table>", ["unexpected-content-in-table", "unexpected-content-in-table"]],
+  ["foreign template element (pseudo-scope)", "<table><svg><template><desc></table>", "<svg><template><desc></desc></template></svg><table></table>", ["unexpected-content-in-table", "unmatched-end-tag-in-foreign-content"]]
 ]

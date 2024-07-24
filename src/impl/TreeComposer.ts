@@ -2,8 +2,8 @@ import {TokenSink} from '../decl/ParserEnvironment';
 import {Attr, CharacterData, Document, Element, isDocument, isElement, Node, ParentNode} from '../decl/xml-lite-decl';
 import {InsertionMode} from './insertion-mode';
 import {NodeFactory} from './NodeFactory';
-import {Tokenizer} from './Tokenizer';
 import {State} from './states';
+import {Tokenizer} from './Tokenizer';
 import {CharactersToken, CommentToken, DoctypeToken, NamespacedAttribute, TagToken, Token} from './tokens';
 
 const IMPLICITLY_CLOSABLE = {
@@ -312,18 +312,18 @@ export class TreeComposer implements TokenSink {
     }
   }
 
-  protected insertDoctype(doctypeToken: DoctypeToken) {
+  insertDoctype(doctypeToken: DoctypeToken) {
     const documentType = this.nodeFactory.createDoctype(this.document, doctypeToken.name ?? 'html', doctypeToken.publicId, doctypeToken.systemId);
     this.nodeFactory.appendNode(this.document, documentType);
   }
 
-  protected insertComment(token: CommentToken, override?: ParentNode) {
+  insertComment(token: CommentToken, override?: ParentNode) {
     const location = this.getInsertionLocation(override);
     const node = this.nodeFactory.createComment(location.parent, token.data);
     this.insertNodeAtLocation(node, location);
   }
 
-  protected insertCharacters(token: CharactersToken) {
+  insertCharacters(token: CharactersToken) {
     const location = this.getInsertionLocation();
     if (!isDocument(location.parent)) {
       let node: CharacterData;
@@ -367,7 +367,7 @@ export class TreeComposer implements TokenSink {
     return element;
   }
 
-  protected validateNsAttributes(element: Element) {
+  validateNsAttributes(element: Element) {
     if (element.hasAttribute('xmlns')) {
       const attr = element.getAttributeNode('xmlns')!;
       if (attr.namespaceURI === NS_XMLNS && attr.localName === 'xmlns' && attr.value !== element.namespaceURI)
@@ -525,13 +525,18 @@ export class TreeComposer implements TokenSink {
     this.tokenizer.env.errors.push(error || 'error');
   }
 
-  forceCloseElement(name: string, error: string = 'element-closed-before-children', namespace = NS_HTML) {
+  forceCloseElement(name: string) {
     this.generateImpliedEndTags(name);
-    if (this.current.tagName !== name || this.current.namespaceURI !== namespace) {
-      this.error(error);
+    if (this.current.tagName !== name || this.current.namespaceURI !== NS_HTML) {
+      this.error('element-closed-before-children');
       this.popUntilName(name);
     } else
       this.popCurrentElement();
+  }
+
+  closeAnyHangingParagraph() {
+    if (this.hasElementInButtonScope('p'))
+      this.forceCloseElement('p');
   }
 
   clearFormattingUpToMarker() {
@@ -604,7 +609,8 @@ export class TreeComposer implements TokenSink {
     const attrList: Attr[] = Array(attrCount);
     for (let i = 0; i < attrCount; ++i)
       attrList[i] = attributes.item(i)!;
-    attrList.sort((a, b) => a.name > b.name ? 1 : a.name < b.name ? -1 : 0);
+    // there should not be duplicate attributes
+    attrList.sort((a, b) => a.name > b.name ? 1 : -1);
     const attrKeys: string[] = Array(attrCount);
     for (let i = 0; i < attrCount; ++i) {
       const attr = attrList[i];
@@ -698,13 +704,19 @@ export class TreeComposer implements TokenSink {
 
   isListScopeFence(element: Element): boolean {
     if (this.isScopeFence(element)) return true;
-    if (element.namespaceURI !== NS_HTML) return false;
+    // looks like next line can never happen for 'ol' or 'ul'
+    // if (element.namespaceURI !== NS_HTML) return false;
     return element.tagName === 'ol' || element.tagName === 'ul';
   }
 
   isButtonScopeFence(element: Element): boolean {
     if (this.isScopeFence(element)) return true;
-    if (element.namespaceURI !== NS_HTML) return false;
+    // apparently, this method is used only for checking 'p' element inside a button
+    // button CAN appear as element in non-HTML namespace
+    // however, for paragraph to appear inside such a button there must be a HTML integration point or MathML integration point
+    // which all of either type are scope fences
+    // so, next line can never hit for 'button'
+    // if (element.namespaceURI !== NS_HTML) return false;
     return element.tagName === 'button';
   }
 
@@ -721,7 +733,10 @@ export class TreeComposer implements TokenSink {
   }
 
   isSelectScopeFence(element: Element): boolean {
-    if (element.namespaceURI !== NS_HTML) return true;
+    // this method is called from within 'in select' insertion mode
+    // but any foreign-installing elements are forbidden in this mode
+    // so next line never hits
+    // if (element.namespaceURI !== NS_HTML) return true;
     return element.tagName !== 'optgroup' && element.tagName !== 'option';
   }
 
@@ -1554,8 +1569,7 @@ export class TreeComposer implements TokenSink {
       case 'section':
       case 'summary':
       case 'ul':
-        if (this.hasElementInButtonScope('p'))
-          this.forceCloseElement('p');
+        this.closeAnyHangingParagraph();
         this.createAndInsertHTMLElement(token);
         break;
       case 'h1':
@@ -1564,8 +1578,7 @@ export class TreeComposer implements TokenSink {
       case 'h4':
       case 'h5':
       case 'h6':
-        if (this.hasElementInButtonScope('p'))
-          this.forceCloseElement('p');
+        this.closeAnyHangingParagraph();
         if (this.current.namespaceURI === NS_HTML) {
           switch (this.current.tagName) {
             case 'h1':
@@ -1584,8 +1597,7 @@ export class TreeComposer implements TokenSink {
         if (this.formElement && !this.openCounts['template']) {
           this.error('nested-form');
         } else {
-          if (this.hasElementInButtonScope('p'))
-            this.forceCloseElement('p');
+          this.closeAnyHangingParagraph();
           const element = this.createAndInsertHTMLElement(token);
           if (!this.openCounts['template'])
             this.formElement = element;
@@ -1597,8 +1609,7 @@ export class TreeComposer implements TokenSink {
       case 'dd':
         return this.inBodyStartItemTag(token, 'dd', 'dt');
       case 'plaintext':
-        if (this.hasElementInButtonScope('p'))
-          this.forceCloseElement('p');
+        this.closeAnyHangingParagraph();
         this.createAndInsertHTMLElement(token);
         this.tokenizer.state = 'plaintext';
         break;
@@ -1648,8 +1659,7 @@ export class TreeComposer implements TokenSink {
         this.framesetOk = false;
         break;
       case 'table':
-        if (this.hasElementInButtonScope('p'))
-          this.forceCloseElement('p');
+        this.closeAnyHangingParagraph();
         this.createAndInsertHTMLElement(token);
         this.framesetOk = false;
         return 'inTable';
@@ -1678,8 +1688,7 @@ export class TreeComposer implements TokenSink {
         this.createAndInsertEmptyHTMLElement(token);
         break;
       case 'hr':
-        if (this.hasElementInButtonScope('p'))
-          this.forceCloseElement('p');
+        this.closeAnyHangingParagraph();
         this.createAndInsertEmptyHTMLElement(token);
         this.framesetOk = false;
         break;
@@ -1687,8 +1696,7 @@ export class TreeComposer implements TokenSink {
         this.framesetOk = false;
         return this.startTextMode('rcdata', token);
       case 'xmp':
-        if (this.hasElementInButtonScope('p'))
-          this.forceCloseElement('p');
+        this.closeAnyHangingParagraph();
         this.reconstructFormattingElements();
       case 'iframe': // ok no break
         this.framesetOk = false;
@@ -1784,11 +1792,13 @@ export class TreeComposer implements TokenSink {
       case 'blockquote':
       case 'button':
       case 'center':
+      case 'dd': // this should be handled slightly differently, but generateImpliedEndTags anyway uses exclusion
       case 'details':
       case 'dialog':
       case 'dir':
       case 'div':
       case 'dl':
+      case 'dt': // this should be handled slightly differently, but generateImpliedEndTags anyway uses exclusion
       case 'fieldset':
       case 'figcaption':
       case 'figure':
@@ -1823,13 +1833,6 @@ export class TreeComposer implements TokenSink {
       case 'li':
         if (this.hasElementInListScope('li'))
           this.forceCloseElement('li');
-        else
-          this.error('orphan-end-tag');
-        break;
-      case 'dd':
-      case 'dt':
-        if (this.hasElementInScope(token.name))
-          this.forceCloseElement(token.name);
         else
           this.error('orphan-end-tag');
         break;
@@ -1950,8 +1953,7 @@ export class TreeComposer implements TokenSink {
         break;
       }
     }
-    if (this.hasElementInButtonScope('p'))
-      this.forceCloseElement('p');
+    this.closeAnyHangingParagraph();
     this.createAndInsertHTMLElement(token);
     return this.insertionMode;
   }
@@ -2221,7 +2223,7 @@ export class TreeComposer implements TokenSink {
     this.popWhileMatches(this.notATableContext);
   }
 
-  protected notATableContext(name: string, element: Element): boolean {
+  notATableContext(name: string, element: Element): boolean {
     if (element.namespaceURI !== NS_HTML) return true;
     switch (name) {
       case 'table':
@@ -2259,7 +2261,7 @@ export class TreeComposer implements TokenSink {
     }
   }
 
-  protected mergePendingCharacters(): CharactersToken {
+  mergePendingCharacters(): CharactersToken {
     const len = this.pendingTableCharacters.length;
     if (len === 1)
       return this.pendingTableCharacters[0];
@@ -2485,7 +2487,7 @@ export class TreeComposer implements TokenSink {
     return this.insertionMode;
   }
 
-  protected inTableBodyEndTableBody(token: TagToken) {
+  inTableBodyEndTableBody(token: TagToken) {
     if (this.hasMatchInScope(el => this.isTableBodyElement(el), el => this.isTableScopeFence(el))) {
       this.clearStackToTBodyContext();
       this.popCurrentElement();
@@ -2500,7 +2502,7 @@ export class TreeComposer implements TokenSink {
     this.popWhileMatches(this.notATBodyContext);
   }
 
-  protected notATBodyContext(name: string, element: Element): boolean {
+  notATBodyContext(name: string, element: Element): boolean {
     if (element.namespaceURI !== NS_HTML) return true;
     switch (name) {
       case 'tbody':
@@ -2514,7 +2516,7 @@ export class TreeComposer implements TokenSink {
     }
   }
 
-  protected isTableBodyElement(element: Element): boolean {
+  isTableBodyElement(element: Element): boolean {
     if (element.namespaceURI !== NS_HTML) return false;
     switch (element.tagName) {
       case 'tbody':
@@ -2592,7 +2594,7 @@ export class TreeComposer implements TokenSink {
     return this.insertionMode;
   }
 
-  protected inRowEndRow(token: TagToken, reprocess: boolean) {
+  inRowEndRow(token: TagToken, reprocess: boolean) {
     if (this.hasElementInTableScope('tr')) {
       this.clearStackToRowContext();
       this.popCurrentElement();
@@ -2607,7 +2609,7 @@ export class TreeComposer implements TokenSink {
     this.popWhileMatches(this.notARowContext);
   }
 
-  protected notARowContext(name: string, element: Element): boolean {
+  notARowContext(name: string, element: Element): boolean {
     if (element.namespaceURI !== NS_HTML) return true;
     switch (name) {
       case 'tr':
@@ -2787,7 +2789,7 @@ export class TreeComposer implements TokenSink {
     return this.insertionMode;
   }
 
-  protected closeSelect(token: TagToken, reprocess: boolean, errorIfMissing: boolean) {
+  closeSelect(token: TagToken, reprocess: boolean, errorIfMissing: boolean) {
     if (this.hasElementInSelectScope('select')) {
       this.popUntilName('select');
       this.resetInsertionMode();
@@ -2916,7 +2918,7 @@ export class TreeComposer implements TokenSink {
     }
   }
 
-  protected updateTemplateModeAndReprocess(mode: InsertionMode, token: Token): InsertionMode {
+  updateTemplateModeAndReprocess(mode: InsertionMode, token: Token): InsertionMode {
     this.templateInsertionModes.pop();
     this.templateInsertionModes.push(mode);
     return this.reprocessIn(mode, token);
@@ -3090,7 +3092,7 @@ export class TreeComposer implements TokenSink {
     return this.insertionMode;
   }
 
-  private afterAfterBodyCharacters(token: CharactersToken) {
+  afterAfterBodyCharacters(token: CharactersToken) {
     if (token.whitespaceOnly)
       return this.inBody(token);
     return this.afterAfterBodyDefault(token);
