@@ -49,7 +49,6 @@ type FormattingZone = {
   formattingArk: FormattingArk;
 }
 
-// TODO refine cross-calls where needed
 // TODO analyze all namespace checks for necessity
 export class TreeComposer implements TokenSink {
   nodeFactory: NodeFactory;
@@ -1205,7 +1204,7 @@ export class TreeComposer implements TokenSink {
   beforeHeadStartTag(token: TagToken) {
     switch (token.name) {
       case 'html':
-        return this.inBody(token);
+        return this.inBodyStartTagHtml(token);
       case 'head':
         this.headElement = this.createAndInsertHTMLElement(token);
         return 'inHead';
@@ -1268,7 +1267,7 @@ export class TreeComposer implements TokenSink {
   inHeadStartTag(token: TagToken): InsertionMode {
     switch (token.name) {
       case 'html':
-        return this.inBody(token);
+        return this.inBodyStartTagHtml(token);
       case 'base':
       case 'basefont':
       case 'bgsound':
@@ -1344,14 +1343,18 @@ export class TreeComposer implements TokenSink {
   inHeadNoscriptStartTag(token: TagToken): InsertionMode {
     switch (token.name) {
       case 'html':
-        return this.inBody(token);
+        return this.inBodyStartTagHtml(token);
       case 'basefont':
       case 'bgsound':
       case 'link':
       case 'meta':
+        // return this.inHead(token);
+        this.createAndInsertEmptyHTMLElement(token);
+        return this.insertionMode;
       case 'noframes':
       case 'style':
-        return this.inHead(token);
+        // return this.inHead(token);
+        return this.startTextMode('rawtext', token);
       case 'head':
       case 'noscript':
         this.error('unexpected-start-tag-in-head-noscript');
@@ -1422,7 +1425,7 @@ export class TreeComposer implements TokenSink {
         this.error('unexpected-start-tag');
         break;
       case 'html':
-        return this.inBody(token);
+        return this.inBodyStartTagHtml(token);
       case 'body':
         this.createAndInsertHTMLElement(token);
         this.framesetOk = false;
@@ -1484,17 +1487,9 @@ export class TreeComposer implements TokenSink {
         this.error('unexpected-doctype');
         break;
       case 'characters':
-        this.reconstructFormattingElements();
-        this.insertCharacters(token as CharactersToken);
-        this.framesetOk &&= (token as CharactersToken).whitespaceOnly;
-        break;
+        return this.inBodyCharacters(token as CharactersToken);
       case 'eof':
-        if (this.templateInsertionModes.length) return this.inTemplate(token);
-        else {
-          if (this.hasExplicitlyClosableOnStack())
-            this.error('abrupt-end-of-document');
-          return this.stopParsing();
-        }
+        return this.inBodyEof(token);
       case 'startTag':
         return this.inBodyStartTag(token as TagToken);
       case 'endTag':
@@ -1503,25 +1498,39 @@ export class TreeComposer implements TokenSink {
     return this.insertionMode;
   }
 
+  inBodyCharacters(token: CharactersToken): InsertionMode {
+    this.reconstructFormattingElements();
+    this.insertCharacters(token);
+    this.framesetOk &&= token.whitespaceOnly;
+    return this.insertionMode;
+  }
+
   inBodyStartTag(token: TagToken): InsertionMode {
     let element: Element;
     switch (token.name) {
       case 'html':
-        this.error('unexpected-html-start-tag');
-        if (!this.openCounts['template'])
-          this.nodeFactory.combineAttributes(this.openElements[0], token);
-        break;
+        return this.inBodyStartTagHtml(token);
       case 'base':
       case 'basefont':
       case 'bgsound':
       case 'link':
       case 'meta':
+        // return this.inHead(token);
+        this.createAndInsertEmptyHTMLElement(token);
+        break;
       case 'noframes':
-      case 'script':
       case 'style':
+        // return this.inHead(token);
+        return this.startTextMode('rawtext', token);
+      case 'script':
+        // return this.inHead(token);
+        return this.startTextMode('scriptData', token);
       case 'template':
+        // return this.inHead(token);
+        return this.startTemplate(token);
       case 'title':
-        return this.inHead(token);
+        // return this.inHead(token);
+        return this.startTextMode('rcdata', token);
       case 'body':
         this.error('unexpected-body-start-tag');
         if (this.openElements.length > 1 && this.openElements[1].tagName === 'body' && !this.openCounts['template']) {
@@ -1888,6 +1897,15 @@ export class TreeComposer implements TokenSink {
     return this.insertionMode;
   }
 
+  inBodyEof(token: Token) {
+    if (this.templateInsertionModes.length) return this.inTemplateEof(token);
+    else {
+      if (this.hasExplicitlyClosableOnStack())
+        this.error('abrupt-end-of-document');
+      return this.stopParsing();
+    }
+  }
+
   isHeaderLevelElement(element: Element) {
     if (element.namespaceURI !== NS_HTML) return false;
     switch (element.tagName) {
@@ -1955,6 +1973,13 @@ export class TreeComposer implements TokenSink {
     }
     this.closeAnyHangingParagraph();
     this.createAndInsertHTMLElement(token);
+    return this.insertionMode;
+  }
+
+  inBodyStartTagHtml(token: TagToken): InsertionMode {
+    this.error('unexpected-html-start-tag');
+    if (!this.openCounts['template'])
+      this.nodeFactory.combineAttributes(this.openElements[0], token);
     return this.insertionMode;
   }
 
@@ -2106,7 +2131,7 @@ export class TreeComposer implements TokenSink {
       case 'endTag':
         return this.inTableEndTag(token as TagToken);
       case 'eof':
-        return this.inBody(token);
+        return this.inBodyEof(token);
     }
     return this.insertionMode;
   }
@@ -2162,8 +2187,11 @@ export class TreeComposer implements TokenSink {
         }
         break;
       case 'style':
+        // return this.inHead(token);
+        return this.startTextMode('rawtext', token);
       case 'script':
-        return this.inHead(token);
+        // return this.inHead(token);
+        return this.startTextMode('scriptData', token);
       case 'template':
         return this.startTemplate(token);
       case 'input':
@@ -2288,7 +2316,7 @@ export class TreeComposer implements TokenSink {
       case 'endTag':
         return this.inCaptionEndTag(token as TagToken);
       default:
-        return this.inCaptionDefault(token);
+        return this.inBody(token);
     }
   }
 
@@ -2305,7 +2333,7 @@ export class TreeComposer implements TokenSink {
       case 'tr':
         return this.inCaptionEnd(token, true);
       default:
-        return this.inCaptionDefault(token);
+        return this.inBodyStartTag(token);
     }
   }
 
@@ -2328,15 +2356,10 @@ export class TreeComposer implements TokenSink {
         this.error('unexpected-end-tag-in-caption');
         break;
       default:
-        return this.inCaptionDefault(token);
+        return this.inBodyEndTag(token);
     }
     return this.insertionMode;
   }
-
-  inCaptionDefault(token: Token): InsertionMode {
-    return this.inBody(token);
-  }
-
   inCaptionEnd(token: TagToken, reprocess: boolean): InsertionMode {
     if (this.hasElementInTableScope('caption')) {
       this.generateImpliedEndTags();
@@ -2363,7 +2386,7 @@ export class TreeComposer implements TokenSink {
       case 'characters':
         return this.inColumnGroupCharacters(token as CharactersToken);
       case 'eof':
-        return this.inBody(token);
+        return this.inBodyEof(token);
       case 'startTag':
         return this.inColumnGroupStartTag(token as TagToken);
       case 'endTag':
@@ -2385,7 +2408,7 @@ export class TreeComposer implements TokenSink {
   inColumnGroupStartTag(token: TagToken): InsertionMode {
     switch (token.name) {
       case 'html':
-        return this.inBody(token);
+        return this.inBodyStartTagHtml(token);
       case 'col':
         this.createAndInsertEmptyHTMLElement(token);
         break;
@@ -2645,7 +2668,7 @@ export class TreeComposer implements TokenSink {
       case 'tr':
         return this.closeTheCell(token);
       default:
-        return this.inBody(token);
+        return this.inBodyStartTag(token);
     }
   }
 
@@ -2683,7 +2706,7 @@ export class TreeComposer implements TokenSink {
         this.error('unexpected-end-tag-in-cell');
         break;
       default:
-        return this.inBody(token);
+        return this.inBodyEndTag(token);
     }
     return this.insertionMode;
   }
@@ -2716,7 +2739,7 @@ export class TreeComposer implements TokenSink {
       case 'endTag':
         return this.inSelectEndTag(token as TagToken);
       case 'eof':
-        return this.inBody(token);
+        return this.inBodyEof(token);
       default:
         this.error('unexpected-content-in-select');
     }
@@ -2726,7 +2749,7 @@ export class TreeComposer implements TokenSink {
   inSelectStartTag(token: TagToken): InsertionMode {
     switch (token.name) {
       case 'html':
-        return this.inBody(token);
+        return this.inBodyStartTagHtml(token);
       case 'option':
         if (this.current.tagName === 'option') this.popCurrentElement();
         this.createAndInsertHTMLElement(token);
@@ -2750,7 +2773,8 @@ export class TreeComposer implements TokenSink {
         this.error('input-inside-select');
         return this.closeSelect(token, true, false);
       case 'script':
-        return this.inHead(token);
+        // return this.inHead(token);
+        return this.startTextMode('scriptData', token);
       case 'template':
         return this.startTemplate(token);
       default:
@@ -2855,25 +2879,35 @@ export class TreeComposer implements TokenSink {
   inTemplate(token: Token): InsertionMode {
     switch (token.type) {
       case 'characters':
+        return this.inBodyCharacters(token as CharactersToken);
       case 'comment':
+        // return this.inBody(token);
+        this.insertComment(token as CommentToken);
+        break;
       case 'doctype':
-        return this.inBody(token);
+        // return this.inBody(token);
+        this.error('unexpected-doctype');
+        break;
       case 'eof':
-        if (this.openCounts['template']) {
-          this.error('abrupt-end-of-template');
-          this.popUntilName('template');
-          this.clearFormattingUpToMarker();
-          this.templateInsertionModes.pop();
-          this.resetInsertionMode();
-          return this.process(token);
-        } else
-          return this.stopParsing();
+        return this.inTemplateEof(token);
       case 'startTag':
         return this.inTemplateStartTag(token as TagToken);
       case 'endTag':
         return this.inTemplateEndTag(token as TagToken);
     }
     return this.insertionMode;
+  }
+
+  inTemplateEof(token: Token) {
+    if (this.openCounts['template']) {
+      this.error('abrupt-end-of-template');
+      this.popUntilName('template');
+      this.clearFormattingUpToMarker();
+      this.templateInsertionModes.pop();
+      this.resetInsertionMode();
+      return this.process(token);
+    } else
+      return this.stopParsing();
   }
 
   inTemplateStartTag(token: TagToken): InsertionMode {
@@ -2883,11 +2917,19 @@ export class TreeComposer implements TokenSink {
       case 'bgsound':
       case 'link':
       case 'meta':
+        // return this.inHead(token);
+        this.createAndInsertEmptyHTMLElement(token);
+        return this.insertionMode;
       case 'noframes':
-      case 'script':
       case 'style':
+        // return this.inHead(token);
+        return this.startTextMode('rawtext', token);
+      case 'script':
+        // return this.inHead(token);
+        return this.startTextMode('scriptData', token);
       case 'title':
-        return this.inHead(token);
+        // return this.inHead(token);
+        return this.startTextMode('rcdata', token);
       case 'template':
         return this.startTemplate(token);
       case 'caption':
@@ -2951,7 +2993,7 @@ export class TreeComposer implements TokenSink {
   inFramesetStartTag(token: TagToken): InsertionMode {
     switch (token.name) {
       case 'html':
-        return this.inBody(token);
+        return this.inBodyStartTagHtml(token);
       case 'frameset':
         this.createAndInsertHTMLElement(token);
         break;
@@ -2959,7 +3001,8 @@ export class TreeComposer implements TokenSink {
         this.createAndInsertEmptyHTMLElement(token);
         break;
       case 'noframes':
-        return this.inHead(token);
+        // return this.inHead(token);
+        return this.startTextMode('rawtext', token);
       default:
         this.error('unexpected-content-in-frameset');
     }
@@ -3002,13 +3045,13 @@ export class TreeComposer implements TokenSink {
 
   afterBodyCharacters(token: CharactersToken): InsertionMode {
     if (token.whitespaceOnly)
-      return this.inBody(token);
+      return this.inBodyCharacters(token);
     return this.afterBodyDefault(token);
   }
 
   afterBodyStartTag(token: TagToken): InsertionMode {
     if (token.name === 'html')
-      return this.inBody(token);
+      return this.inBodyStartTagHtml(token);
     return this.afterBodyDefault(token);
   }
 
@@ -3053,9 +3096,10 @@ export class TreeComposer implements TokenSink {
   afterFramesetStartTag(token: TagToken): InsertionMode {
     switch (token.name) {
       case 'html':
-        return this.inBody(token);
+        return this.inBodyStartTagHtml(token);
       case 'noframes':
-        return this.inHead(token);
+        // return this.inHead(token);
+        return this.startTextMode('rawtext', token);
       default:
         this.error('unexpected-content-after-frameset');
     }
@@ -3094,13 +3138,13 @@ export class TreeComposer implements TokenSink {
 
   afterAfterBodyCharacters(token: CharactersToken) {
     if (token.whitespaceOnly)
-      return this.inBody(token);
+      return this.inBodyCharacters(token);
     return this.afterAfterBodyDefault(token);
   }
 
   afterAfterBodyStartTag(token: TagToken): InsertionMode {
     if (token.name === 'html')
-      return this.inBody(token);
+      return this.inBodyStartTagHtml(token);
     return this.afterAfterBodyDefault(token);
   }
 
@@ -3118,7 +3162,7 @@ export class TreeComposer implements TokenSink {
         this.error('unexpected-doctype');
         break;
       case 'characters':
-        return this.inBody(token);
+        return this.inBodyCharacters(token as CharactersToken);
       case 'eof':
         return this.stopParsing();
       case 'startTag':
@@ -3132,9 +3176,10 @@ export class TreeComposer implements TokenSink {
   afterAfterFramesetStartTag(token: TagToken): InsertionMode {
     switch (token.name) {
       case 'html':
-        return this.inBody(token);
+        return this.inBodyStartTagHtml(token);
       case 'noframes':
-        return this.inHead(token);
+        // return this.inHead(token);
+        return this.startTextMode('rawtext', token);
       default:
         this.error('content-after-html');
     }
