@@ -319,7 +319,7 @@ export class TreeComposer implements TokenSink {
   insertComment(token: CommentToken, override?: ParentNode) {
     const location = this.getInsertionLocation(override);
     const node = this.nodeFactory.createComment(location.parent, token.data);
-    this.insertNodeAtLocation(node, location);
+    this.insertNodeAtLocation(node, location, false);
   }
 
   insertCharacters(token: CharactersToken) {
@@ -332,11 +332,8 @@ export class TreeComposer implements TokenSink {
           break;
         case 'cdata':
           node = this.nodeFactory.createCData(location.parent, token.data);
-          break;
-        default:
-          throw new Error('!');
       }
-      this.insertNodeAtLocation(node, location);
+      this.insertNodeAtLocation(node, location, false);
     }
   }
 
@@ -361,7 +358,7 @@ export class TreeComposer implements TokenSink {
   }
 
   createElementNS(token: TagToken, namespace: string | null, parent: ParentNode): Element {
-    const element = this.nodeFactory.createElement(parent, token, namespace, null, [], []);
+    const element = this.nodeFactory.createElement(parent, token, namespace, [], []);
     this.validateNsAttributes(element);
     return element;
   }
@@ -411,13 +408,13 @@ export class TreeComposer implements TokenSink {
     return result;
   }
 
-  insertNodeAtLocation(node: Node, location: InsertionLocation) {
+  insertNodeAtLocation(node: Node, location: InsertionLocation, isElementHint?: boolean) {
     const {parent, before} = location;
-    // TODO is it whenever a case when insertion is not possible?
     if (!before) {
-      this.nodeFactory.appendNode(parent, node);
-      if (isElement(node))
-        this.nodeFactory.appendElement(parent, node);
+      if (isElementHint ?? isElement(node))
+        this.nodeFactory.appendElement(parent, node as Element);
+      else
+        this.nodeFactory.appendNode(parent, node);
     } else {
       if (!this.fosterTables.has(before))
         this.fosterTables.set(before, []);
@@ -433,7 +430,7 @@ export class TreeComposer implements TokenSink {
     token.selfClosed = popImmediately;
     let element = this.createElementNS(token, namespace, location.parent);
     if (!onlyAddToStack)
-      this.insertNodeAtLocation(element, location);
+      this.insertNodeAtLocation(element, location, true);
     if (!popImmediately)
       this.pushOpenElement(element);
     return element;
@@ -2099,7 +2096,6 @@ export class TreeComposer implements TokenSink {
         const newFormatting = this.createElementNS(formattingToken, NS_HTML, furthestBlock);
         this.nodeFactory.relocateChildNodes(newFormatting, furthestBlock);
         this.nodeFactory.appendElement(furthestBlock, newFormatting);
-        this.nodeFactory.appendNode(furthestBlock, newFormatting);
         this.removeFormattingElement(formattingElement);
         const key = this.computeFormattingElementKey(formattingElement);
         this.formattingArk[key].push(newFormatting);

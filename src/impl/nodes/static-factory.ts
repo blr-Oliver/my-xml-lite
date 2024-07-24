@@ -9,14 +9,12 @@ import {StaticDocumentType} from './StaticDocumentType';
 import {StaticElement} from './StaticElement';
 import {StaticEmptyNode} from './StaticEmptyNode';
 import {StaticParentNode} from './StaticParentNode';
-import {StaticTokenList} from './StaticTokenList';
 
 export interface StaticNodeTypeMapping extends NodeTypeMapping {
   CDATASection: StaticDataNode;
   Comment: StaticDataNode;
   Document: StaticDocument;
   DocumentType: StaticDocumentType;
-  DOMTokenList: StaticTokenList;
   Element: StaticElement;
   NamedNodeMap: StaticAttributes;
   Node: StaticEmptyNode;
@@ -25,7 +23,7 @@ export interface StaticNodeTypeMapping extends NodeTypeMapping {
 }
 
 export class StaticNodeFactory implements NodeFactory<StaticNodeTypeMapping> {
-  createElement(parent: StaticParentNode, token: TagToken, namespaceURI: string | null, attributes: StaticAttributes | null, childNodes: StaticEmptyNode[], children: StaticElement[]): StaticElement {
+  createElement(parent: StaticParentNode, token: TagToken, namespaceURI: string | null, childNodes: StaticEmptyNode[], children: StaticElement[]): StaticElement {
     return new StaticElement(token, namespaceURI, parent, childNodes, children);
   }
   createText(parent: StaticParentNode, data: string): StaticDataNode {
@@ -57,16 +55,49 @@ export class StaticNodeFactory implements NodeFactory<StaticNodeTypeMapping> {
     }
     return attributes;
   }
-  createTokenList(value: string): StaticTokenList {
-    return new StaticTokenList(value);
-  }
 
   appendNode(parent: StaticParentNode, node: StaticEmptyNode) {
-    parent.childNodes.push(node)
+    parent.childNodes.push(node);
   }
+
   appendElement(parent: StaticParentNode, element: StaticElement) {
+    parent.childNodes.push(element);
     parent.children.push(element);
   }
+
+  insertElement(before: StaticEmptyNode, element: StaticElement): number {
+    const target = before.parentNode!;
+    const nodeIndex = this.insertNode(before, element);
+    let elementIndex: number;
+    if (isElement(before))
+      elementIndex = (before as StaticElement).parentElementIndex;
+    else {
+      elementIndex = nodeIndex;
+      while (elementIndex > 0) {
+        if (isElement(target.childNodes[elementIndex])) {
+          elementIndex = (target.childNodes[elementIndex] as StaticElement).parentElementIndex;
+          break;
+        }
+        --elementIndex;
+      }
+    }
+    target.children.splice(elementIndex, 0, element);
+    const childrenCount = target.children.length;
+    for (let i = elementIndex; i < childrenCount; ++i)
+      target.children[i].parentElementIndex = i;
+    return elementIndex;
+  }
+
+  insertNode(before: StaticEmptyNode, node: StaticEmptyNode): number {
+    const target = before.parentNode!;
+    let beforeIndex = before.parentIndex;
+    target.childNodes.splice(beforeIndex, 0, node);
+    const nodeCount = target.childNodes.length;
+    for (let i = beforeIndex; i < nodeCount; ++i)
+      target.childNodes[i].parentIndex = i;
+    return beforeIndex;
+  }
+
   setNestedNodes(parent: StaticParentNode, childNodes: StaticEmptyNode[], children: StaticElement[]) {
     //@ts-ignore
     parent.childNodes = childNodes;
@@ -75,45 +106,29 @@ export class StaticNodeFactory implements NodeFactory<StaticNodeTypeMapping> {
     childNodes.forEach(this.__setNodeIndex, this);
     children.forEach(this.__setElementIndex, this);
   }
+
   relocateNode(target: StaticParentNode, node: StaticEmptyNode, before?: StaticEmptyNode) {
     if (node.parentNode !== target) {
       this.removeNode(node);
       this.__setParent(node, target);
     }
     if (before) {
-      let beforeIndex = before.parentIndex;
-      target.childNodes.splice(beforeIndex, 0, node);
-      for (let i = beforeIndex; i < target.childNodes.length; ++i)
-        target.childNodes[i].parentIndex = i;
-      if (isElement(node)) {
-        const element = node as StaticElement;
-        let beforeElementIndex: number;
-        if (isElement(before))
-          beforeElementIndex = (before as StaticElement).parentElementIndex;
-        else {
-          beforeElementIndex = beforeIndex;
-          while (beforeElementIndex > 0) {
-            if (isElement(target.childNodes[beforeElementIndex])) {
-              beforeElementIndex = (target.childNodes[beforeElementIndex] as StaticElement).parentElementIndex;
-              break;
-            }
-            --beforeElementIndex;
-          }
-        }
-        target.children.splice(beforeElementIndex, 0, element);
-        for (let i = beforeElementIndex; i < target.children.length; ++i)
-          target.children[i].parentElementIndex = i;
-      }
+      if (isElement(node))
+        this.insertElement(before, node as StaticElement);
+      else
+        this.insertNode(before, node);
     } else {
       node.parentIndex = target.childNodes.length;
-      this.appendNode(target, node);
       if (isElement(node)) {
         const element = node as StaticElement;
         element.parentElementIndex = target.children.length;
         this.appendElement(target, element);
+      } else {
+        this.appendNode(target, node);
       }
     }
   }
+
   relocateChildNodes(target: StaticParentNode, parent: StaticParentNode) {
     if (target === parent) return;
     const childNodes = parent.childNodes.slice();
@@ -122,6 +137,7 @@ export class StaticNodeFactory implements NodeFactory<StaticNodeTypeMapping> {
     parent.childNodes.length = 0;
     parent.children.length = 0;
   }
+
   removeNode(node: StaticEmptyNode) {
     if (!node.parentNode) return;
     const parent = node.parentNode!;

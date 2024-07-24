@@ -10,7 +10,6 @@ export class StaticAttr implements Attr {
   readonly prefix: string | null;
   readonly value: string | null;
 
-  // TODO bind to attribute list, not to element
   constructor(attr: NamespacedAttribute, ownerElement: StaticElement | null) {
     this.name = attr.name;
     this.namespaceURI = attr.namespaceURI ? attr.namespaceURI! : null;
