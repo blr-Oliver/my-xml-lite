@@ -98,6 +98,27 @@
       "element-closed-before-children", "orphan-end-tag", "abrupt-end-of-content"
     ]
   ],
+  ["nested anchor", "<a a><div><a b></a>", "<a a></a><div><a a></a><a b></a></div>", ["nested-anchor", "element-closed-before-children", "abrupt-end-of-content"]],
+  ["nested anchor over scope fence", "<a a><math><mo><a b></a></mo></math>", "<a a><math><mo><a b></a></mo></math></a>", ["nested-anchor", "formatting-element-out-of-scope"]],
+  [
+    "nested anchor + 9 nested between",
+    "<a a><hr a/><div a><hr b/><div b><hr c/><div c><hr d/><div d><hr e/><div e><hr f/><div f><hr g/><div g><hr h/><div h><hr i/><div i><hr j/><a b><hr k/></div></div></div></div></div></div></div></div></div></div>",
+    "<a a><hr a/></a><div a><a a><hr b/></a><div b><a a><hr c/></a><div c><a a><hr d/></a><div d><a a><hr e/></a><div e><a a><hr f/></a><div f><a a><hr g/></a><div g><a a><hr h/></a><div h><a a><hr i/><div i><hr j/><a b><hr k/></a></div></a></div></div></div></div></div></div></div></div>",
+    [
+      "nested-anchor", "element-closed-before-children", "element-closed-before-children", "element-closed-before-children",
+      "element-closed-before-children", "element-closed-before-children", "element-closed-before-children", "element-closed-before-children",
+      "element-closed-before-children", "element-closed-before-children", "element-closed-before-children", "orphan-end-tag"
+    ]
+  ],
+  ["AAA with same name", "<b><hr a/><div><hr b/><b a><hr c/></div><hr d/></b>A", "<b><hr a/><div><hr b/><b a><hr c/></b></div><hr d/>A</b>", ["element-closed-before-children", "formatting-element-already-closed", "abrupt-end-of-content"]],
+  ["nobr single start", "<b><object><p><i><div><nobr></div></object></b>", "<b><object><p><i></i></p><div><i><nobr></nobr></i></div></object></b>", ["element-closed-before-children", "element-closed-before-children"]],
+  ["nobr nested over scope fence", "<nobr><object><p><i><div><nobr></div></object></nobr>", "<nobr><object><p><i></i></p><div><i><nobr></nobr></i></div></object></nobr>", ["element-closed-before-children", "element-closed-before-children"]],
+  [
+    "nobr nested",
+    "<a><object><nobr a><p><i><div></div><u><s><em><div><nobr b></div></object></a>",
+    "<a><object><nobr a><p><i></i></p><div></div><i><u><s><em></em></s></u></i></nobr><u><s><em><div><nobr a></nobr><nobr b></nobr></div></em></s></u></object></a>",
+    ["element-closed-before-children", "nested-nobr", "element-closed-before-children", "element-closed-before-children", "element-closed-before-children"]
+  ],
   ["example 1", "A<em>B<address>C</em>D</address>E", "A<em>B</em><address><em>C</em>D</address>E", ["element-closed-before-children"]],
   ["example 2", "<p>1<b>2<i>3</b>4</i>5</p>", "<p>1<b>2<i>3</i></b><i>4</i>5</p>", ["element-closed-before-children"]],
   ["example 3", "<b>1<p>2</b>3</p>", "<b>1</b><p><b>2</b>3</p>", ["element-closed-before-children"]],

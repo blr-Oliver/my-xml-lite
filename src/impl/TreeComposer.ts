@@ -1871,13 +1871,15 @@ export class TreeComposer implements TokenSink {
   }
 
   inBodyStartTagAnchor(token: TagToken): InsertionMode {
-    let activeAnchor = this.formattingList.findLatestForName('a')?.element;
-    if (activeAnchor) {
+    let activeFormatting = this.formattingList.findLatestForName('a');
+    if (activeFormatting) {
+      const activeAnchor = activeFormatting.element;
       this.error('nested-anchor');
       this.adoptionAgency(token);
-      // TODO is it correct to remove same formattingNode?
-      const node = this.formattingList.findForElement(activeAnchor);
-      if (node) this.formattingList.remove(node);
+      if (activeFormatting.fastKey) { // the formatting node was not removed
+        this.formattingList.remove(activeFormatting);
+        this.removeFromStack(activeAnchor);
+      }
       this.removeFromStack(activeAnchor);
     }
     this.reconstructFormattingElements();
@@ -1980,13 +1982,14 @@ export class TreeComposer implements TokenSink {
         }
         this.updateInsertionLocation(commonAncestor);
         this.nodeFactory.relocateNode(this.insertParent, lastNode, this.insertBefore);
-        const newFormatting = this.createElementNS(formattingElement.token, NS_HTML, furthestBlock);
-        this.nodeFactory.relocateChildNodes(newFormatting, furthestBlock);
-        this.nodeFactory.appendElement(furthestBlock, newFormatting);
+        const newFormattingElement = this.createElementNS(formattingElement.token, NS_HTML, furthestBlock);
+        this.nodeFactory.relocateChildNodes(newFormattingElement, furthestBlock);
+        this.nodeFactory.appendElement(furthestBlock, newFormattingElement);
         this.formattingList.remove(formattingElement);
-        this.formattingList.insertAfter(newFormatting, formattingElement.token, bookmark);
+        this.formattingList.insertAfter(newFormattingElement, formattingElement.token, bookmark);
+        // remove from stack and re-insert its copy back - no need to update openCounts
         this.openElements.splice(this.openElements.indexOf(formattingElement.element), 1);
-        this.openElements.splice(this.openElements.indexOf(furthestBlock) + 1, 0, newFormatting);
+        this.openElements.splice(this.openElements.indexOf(furthestBlock) + 1, 0, newFormattingElement);
       }
   }
 
