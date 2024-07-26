@@ -6,42 +6,12 @@ import {State} from './states';
 import {Tokenizer} from './Tokenizer';
 import {CharactersToken, CommentToken, DoctypeToken, NamespacedAttribute, TagToken, Token} from './tokens';
 
-const IMPLICITLY_CLOSABLE = {
-  'dd': true,
-  'dt': true,
-  'li': true,
-  'optgroup': true,
-  'option': true,
-  'p': true,
-  'rb': true,
-  'rp': true,
-  'rt': true,
-  'rtc': true
-};
-
-const IMPLICITLY_THOROUGHLY_CLOSABLE = {
-  ...IMPLICITLY_CLOSABLE,
-  'caption': true,
-  'colgroup': true,
-  'tbody': true,
-  'td': true,
-  'tfoot': true,
-  'th': true,
-  'thead': true,
-  'tr': true
-};
-
 export const NS_HTML = 'http://www.w3.org/1999/xhtml';
 export const NS_MATHML = 'http://www.w3.org/1998/Math/MathML';
 export const NS_SVG = 'http://www.w3.org/2000/svg';
 export const NS_XLINK = 'http://www.w3.org/1999/xlink';
 export const NS_XML = 'http://www.w3.org/XML/1998/namespace';
 export const NS_XMLNS = 'http://www.w3.org/2000/xmlns/';
-
-type InsertionLocation = {
-  parent: ParentNode,
-  before?: Element // this can only be a table
-}
 
 type FormattingArk = { [formattingKey: string]: Element[] };
 type FormattingZone = {
@@ -74,6 +44,9 @@ export class TreeComposer implements TokenSink {
   formattingElements: Element[] = [];
   formattingArk: FormattingArk = {};
   formattingZones: FormattingZone[] = [];
+
+  insertParent!: ParentNode;
+  insertBefore?: Node;
 
   constructor(nodeFactory: NodeFactory) {
     this.nodeFactory = nodeFactory;
@@ -315,34 +288,81 @@ export class TreeComposer implements TokenSink {
   }
 
   insertComment(token: CommentToken, override?: ParentNode) {
-    const location = this.getInsertionLocation(override);
-    const node = this.nodeFactory.createComment(location.parent, token.data);
-    this.insertNodeAtLocation(node, location, false);
+    this.updateInsertionLocation(override);
+    this.insertNodeAtCurrentLocation(this.nodeFactory.createComment(this.insertParent, token.data), false);
   }
 
   insertCharacters(token: CharactersToken) {
-    const location = this.getInsertionLocation();
-    if (!isDocument(location.parent)) {
+    this.updateInsertionLocation();
+    if (!isDocument(this.insertParent)) {
       let node: CharacterData;
       switch (token.type) {
         case 'characters':
-          node = this.nodeFactory.createText(location.parent, token.data);
+          node = this.nodeFactory.createText(this.insertParent, token.data);
           break;
         case 'cdata':
-          node = this.nodeFactory.createCData(location.parent, token.data);
+          node = this.nodeFactory.createCData(this.insertParent, token.data);
       }
-      this.insertNodeAtLocation(node, location, false);
+      this.insertNodeAtCurrentLocation(node, false);
     }
   }
 
-  generateImpliedEndTagsFromSet(closable: { [tagName: string]: any }, exclude?: string) {
-    this.popWhileMatches((name, el) => name !== exclude && (name in closable) && el.namespaceURI === NS_HTML);
-  }
   generateImpliedEndTags(exclude?: string) {
-    return this.generateImpliedEndTagsFromSet(IMPLICITLY_CLOSABLE, exclude);
+    const stack = this.openElements;
+    for (let i = stack.length - 1; i >= 0; --i) {
+      const element = stack[i];
+      if (element.namespaceURI !== NS_HTML) return;
+      const tagName = element.tagName;
+      if (tagName === exclude) return;
+      switch (tagName) {
+        case 'dd':
+        case 'dt':
+        case 'li':
+        case 'optgroup':
+        case 'option':
+        case 'p':
+        case 'rb':
+        case 'rp':
+        case 'rt':
+        case 'rtc':
+          this.popCurrentElement();
+          continue;
+        default:
+          return;
+      }
+    }
   }
+
   generateImpliedEndTagsThoroughly() {
-    return this.generateImpliedEndTagsFromSet(IMPLICITLY_THOROUGHLY_CLOSABLE);
+    const stack = this.openElements;
+    for (let i = stack.length - 1; i >= 0; --i) {
+      const element = stack[i];
+      if (element.namespaceURI !== NS_HTML) return;
+      switch (element.tagName) {
+        case 'caption':
+        case 'colgroup':
+        case 'dd':
+        case 'dt':
+        case 'li':
+        case 'optgroup':
+        case 'option':
+        case 'p':
+        case 'rb':
+        case 'rp':
+        case 'rt':
+        case 'rtc':
+        case 'tbody':
+        case 'td':
+        case 'tfoot':
+        case 'th':
+        case 'thead':
+        case 'tr':
+          this.popCurrentElement();
+          continue;
+        default:
+          return;
+      }
+    }
   }
 
   forceElementAndState(element: string, state: InsertionMode, token: Token): InsertionMode {
@@ -375,11 +395,9 @@ export class TreeComposer implements TokenSink {
   }
 
   /** a-ka "appropriate place for inserting a node" */
-  getInsertionLocation(override?: ParentNode): InsertionLocation {
-    const target: ParentNode = override || this.current || this.document;
-    const result: InsertionLocation = {
-      parent: target
-    };
+  updateInsertionLocation(override?: ParentNode): void {
+    const target: ParentNode = this.insertParent = override || this.current || this.document;
+    this.insertBefore = undefined;
     if (this.fosterParentingEnabled) {
       if (isElement(target)) {
         switch (target.tagName) {
@@ -391,45 +409,43 @@ export class TreeComposer implements TokenSink {
             let lastTemplateIndex = this.openElements.findLastIndex(el => el.tagName === 'template' && el.namespaceURI === NS_HTML);
             let lastTableIndex = this.openElements.findLastIndex(el => el.tagName === 'table' && el.namespaceURI === NS_HTML);
             if (lastTemplateIndex >= 0 && (lastTableIndex < 0 || lastTemplateIndex > lastTableIndex)) {
-              result.parent = this.openElements[lastTemplateIndex];
+              this.insertParent = this.openElements[lastTemplateIndex];
             } else if (lastTableIndex < 0) {
-              result.parent = this.openElements[0];
+              this.insertParent = this.openElements[0];
             } else {
-              result.parent = (result.before = this.openElements[lastTableIndex]).parentNode!;
+              this.insertParent = (this.insertBefore = this.openElements[lastTableIndex]).parentNode!;
             }
         }
       }
     }
-    if (isElement(result.parent) && result.parent.tagName === 'template' && result.parent.namespaceURI === NS_HTML) {
+    if (isElement(this.insertParent) && this.insertParent.tagName === 'template' && this.insertParent.namespaceURI === NS_HTML) {
       // TODO use template contents
     }
-    return result;
   }
 
-  insertNodeAtLocation(node: Node, location: InsertionLocation, isElementHint?: boolean) {
-    const {parent, before} = location;
-    if (!before) {
+  insertNodeAtCurrentLocation(node: Node, isElementHint?: boolean) {
+    if (!this.insertBefore) {
       if (isElementHint ?? isElement(node))
-        this.nodeFactory.appendElement(parent, node as Element);
+        this.nodeFactory.appendElement(this.insertParent, node as Element);
       else
-        this.nodeFactory.appendNode(parent, node);
+        this.nodeFactory.appendNode(this.insertParent, node);
     } else {
       if (isElementHint ?? isElement(node))
-        this.nodeFactory.insertElement(before, node as Element);
+        this.nodeFactory.insertElement(this.insertBefore, node as Element);
       else
-        this.nodeFactory.insertNode(before, node);
+        this.nodeFactory.insertNode(this.insertBefore, node);
     }
   }
 
   /** a-ka "insert a foreign element" */
   createAndInsertElementNS(token: TagToken, namespace: string | null, popImmediately: boolean, onlyAddToStack: boolean = false): Element {
-    let location = this.getInsertionLocation();
+    this.updateInsertionLocation();
     if (!popImmediately && token.selfClosed)
       this.error('non-void-html-element-start-tag-with-trailing-solidus');
     token.selfClosed = popImmediately;
-    let element = this.createElementNS(token, namespace, location.parent);
+    let element = this.createElementNS(token, namespace, this.insertParent);
     if (!onlyAddToStack)
-      this.insertNodeAtLocation(element, location, true);
+      this.insertNodeAtCurrentLocation(element, true);
     if (!popImmediately)
       this.pushOpenElement(element);
     return element;
@@ -454,19 +470,13 @@ export class TreeComposer implements TokenSink {
   }
 
   popWhileMatches(test: (name: string, element: Element) => boolean) {
-    let i = this.openElements.length;
-    if (i) {
-      let element!: Element;
-      for (--i; i >= 0; --i) {
-        element = this.openElements[i];
-        const name = element.tagName;
-        if (test(name, element)) {
-          this.openElements.pop();
-          this.openCounts[name]--;
-          // TODO sync all add/remove with stack
-        } else
-          break;
-      }
+    const stack = this.openElements;
+    for (let i = stack.length - 1; i >= 0; --i) {
+      const element = stack[i];
+      const name = element.tagName;
+      if (test(name, element))
+        this.popCurrentElement();
+      else break;
     }
   }
 
@@ -2057,8 +2067,8 @@ export class TreeComposer implements TokenSink {
           this.nodeFactory.relocateNode(node, lastNode);
           lastNode = node;
         }
-        const insertionLocation = this.getInsertionLocation(commonAncestor);
-        this.nodeFactory.relocateNode(insertionLocation.parent, lastNode, insertionLocation.before);
+        this.updateInsertionLocation(commonAncestor);
+        this.nodeFactory.relocateNode(this.insertParent, lastNode, this.insertBefore);
         const formattingToken = this.getOriginalToken(formattingElement);
         const newFormatting = this.createElementNS(formattingToken, NS_HTML, furthestBlock);
         this.nodeFactory.relocateChildNodes(newFormatting, furthestBlock);
