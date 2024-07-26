@@ -12,7 +12,7 @@
   ["AAA already closed", "<p><b>A<div></b>B", "<p><b>A</b></p><div>B</div>", ["element-closed-before-children", "formatting-element-already-closed", "abrupt-end-of-content"]],
   ["AAA started outside scope", "<b><math><mo></b>A", "<b><math><mo>A</mo></math></b>", ["unmatched-end-tag-in-foreign-content", "formatting-element-out-of-scope", "unmatched-end-tag-in-foreign-content", "abrupt-end-of-content"]],
   [
-    "AAA F-special",
+    "AAA F-special-f",
     "<b><hr a/><div><hr b/><i><hr c/></b>A",
     "<b><hr a/></b><div><b><hr b/><i><hr c/></i></b><i>A</i></div>",
     ["element-closed-before-children", "element-closed-before-children", "abrupt-end-of-content"]

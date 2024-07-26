@@ -1,4 +1,5 @@
-import {Attr, CharacterData, Document, Element, isDocument, isElement, Node, ParentNode} from '../decl/xml-lite-decl';
+import {CharacterData, Document, Element, isDocument, isElement, Node, ParentNode} from '../decl/xml-lite-decl';
+import {FormattingList} from './FormattingList';
 import {InsertionMode} from './interfaces/insertion-mode';
 import {NodeFactory} from './interfaces/NodeFactory';
 import {TokenSink} from './interfaces/ParserEnvironment';
@@ -12,12 +13,6 @@ export const NS_SVG = 'http://www.w3.org/2000/svg';
 export const NS_XLINK = 'http://www.w3.org/1999/xlink';
 export const NS_XML = 'http://www.w3.org/XML/1998/namespace';
 export const NS_XMLNS = 'http://www.w3.org/2000/xmlns/';
-
-type FormattingArk = { [formattingKey: string]: Element[] };
-type FormattingZone = {
-  formattingElements: Element[];
-  formattingArk: FormattingArk;
-}
 
 // TODO analyze all namespace checks for necessity
 export class TreeComposer implements TokenSink {
@@ -41,9 +36,8 @@ export class TreeComposer implements TokenSink {
   fosterParentingEnabled: boolean = false;
 
   framesetOk: boolean = true;
-  formattingElements: Element[] = [];
-  formattingArk: FormattingArk = {};
-  formattingZones: FormattingZone[] = [];
+
+  formattingList: FormattingList = new FormattingList();
 
   insertParent!: ParentNode;
   insertBefore?: Node;
@@ -68,9 +62,7 @@ export class TreeComposer implements TokenSink {
     this.pendingTableCharacters.length = 0;
     this.fosterParentingEnabled = false;
     this.framesetOk = true;
-    this.formattingElements.length = 0;
-    this.formattingArk = {};
-    this.formattingZones.length = 0;
+    this.formattingList.reset();
     this.document = this.nodeFactory.createDocument();
     if (!(this.contextElement = contextElement)) {
       this.tokenizer.state = 'data';
@@ -544,96 +536,42 @@ export class TreeComposer implements TokenSink {
       this.forceCloseElement('p');
   }
 
-  clearFormattingUpToMarker() {
-    let zone = this.formattingZones.pop();
-    this.formattingElements = zone?.formattingElements || [];
-    this.formattingArk = zone?.formattingArk || {};
+  clearFormattingUpToMarker() { // TODO
+    this.formattingList.clearToMarker();
   }
 
-  insertFormattingMarker() {
-    this.formattingZones.push({
-      formattingElements: this.formattingElements,
-      formattingArk: this.formattingArk
-    });
-    this.formattingElements = [];
-    this.formattingArk = {};
+  insertFormattingMarker() { // TODO
+    this.formattingList.addMarker();
   }
 
-  pushFormattingElement(element: Element) {
-    const key = this.computeFormattingElementKey(element);
-    let previous = this.formattingArk[key];
-    if (previous) {
-      if (previous.length === 3) {
-        const index = this.formattingElements.indexOf(previous[0]);
-        this.formattingElements.splice(index, 1);
-        previous.shift();
-      }
-    } else
-      previous = this.formattingArk[key] = [];
-    previous.push(element);
-    this.formattingElements.push(element);
+  pushFormattingElement(element: Element, token: TagToken) { // TODO
+    this.formattingList.add(element, token);
   }
 
-  reconstructFormattingElements() {
-    const len = this.formattingElements.length;
-    let index = this.formattingElements.findLastIndex(el => this.openElements.indexOf(el) !== -1);
-    while (++index < len) {
-      const element = this.formattingElements[index];
-      const token = this.getOriginalToken(element);
-      const replacement = this.createAndInsertHTMLElement(token);
-      this.formattingElements[index] = replacement;
-      const key = this.computeFormattingElementKey(element);
-      const arkElements = this.formattingArk[key]!;
-      const arkIndex = arkElements.indexOf(element);
-      arkElements[arkIndex] = replacement;
+  reconstructFormattingElements() { // TODO
+    let node = this.formattingList.tail;
+    while (node) {
+      if (this.openElements.indexOf(node.element) !== -1) break;
+      node = node.previous;
+    }
+    node = node ? node.next : this.formattingList.head;
+    while (node) {
+      node.element = this.createAndInsertHTMLElement(node.token);
+      node = node.next;
     }
   }
 
-  isInFormattingList(element: Element): boolean {
-    return this.formattingElements.indexOf(element) !== -1;
+  isInFormattingList(element: Element): boolean { // TODO
+    return this.formattingList.contains(element);
   }
 
-  getLastFormattingElementForName(name: string): Element | undefined {
-    return this.formattingElements.findLast(el => el.tagName === name);
+  getLastFormattingElementForName(name: string): Element | undefined { // TODO
+    return this.formattingList.findLatestForName(name)?.element;
   }
 
-  removeFormattingElement(element: Element, index: number = -1) {
-    const listIndex = index === -1 ? this.formattingElements.indexOf(element) : index;
-    if (listIndex !== -1) {
-      this.formattingElements.splice(listIndex, 1);
-      const key = this.computeFormattingElementKey(element);
-      const arkElements = this.formattingArk[key]!;
-      const arkIndex = arkElements.indexOf(element);
-      arkElements.splice(arkIndex, 1);
-    }
-  }
-
-  computeFormattingElementKey(element: Element): string {
-    const attributes = element.attributes;
-    const attrCount = attributes.length;
-    const attrList: Attr[] = Array(attrCount);
-    for (let i = 0; i < attrCount; ++i)
-      attrList[i] = attributes.item(i)!;
-    // there should not be duplicate attributes
-    attrList.sort((a, b) => a.name > b.name ? 1 : -1);
-    const attrKeys: string[] = Array(attrCount);
-    for (let i = 0; i < attrCount; ++i) {
-      const attr = attrList[i];
-      attrKeys[i] = `${attr.name}\r${attr.value === null ? '\u0000' : attr.value}`;
-    }
-    return `${element.tagName}\r${attrKeys.join('\r')}`;
-  }
-
-  getOriginalToken(element: Element): TagToken {
-    return {
-      type: 'startTag',
-      name: element.tagName,
-      selfClosed: element.selfClosed,
-      attributes: [...element.attributes].map((attr: Attr) => ({
-        name: attr.name,
-        value: attr.value
-      }))
-    };
+  removeFormattingElement(element: Element, index: number = -1) { // TODO
+    const node = this.formattingList.findForElement(element);
+    if (node) this.formattingList.remove(node);
   }
 
   hasMatchInScope(test: (el: Element) => boolean, fenceTest: (el: Element) => boolean) {
@@ -1622,7 +1560,7 @@ export class TreeComposer implements TokenSink {
       case 'tt':
       case 'u':
         this.reconstructFormattingElements();
-        this.pushFormattingElement(this.createAndInsertHTMLElement(token));
+        this.pushFormattingElement(this.createAndInsertHTMLElement(token), token);
         break;
       case 'nobr':
         this.reconstructFormattingElements();
@@ -1631,7 +1569,7 @@ export class TreeComposer implements TokenSink {
           this.adoptionAgency(token);
           this.reconstructFormattingElements();
         }
-        this.pushFormattingElement(this.createAndInsertHTMLElement(token));
+        this.pushFormattingElement(this.createAndInsertHTMLElement(token), token);
         break;
       case 'applet':
       case 'marquee':
@@ -1967,7 +1905,7 @@ export class TreeComposer implements TokenSink {
     }
     this.reconstructFormattingElements();
     const element = this.createAndInsertHTMLElement(token);
-    this.pushFormattingElement(element);
+    this.pushFormattingElement(element, token);
     return this.insertionMode;
   }
 
@@ -2001,27 +1939,26 @@ export class TreeComposer implements TokenSink {
   }
 
   adoptionAgency(token: TagToken) {
-    // FIXME optimize this
+    // more optimization?
     const subject = token.name;
     if (subject === this.current.tagName && this.current.namespaceURI == NS_HTML && !this.isInFormattingList(this.current))
       this.popCurrentElement();
     else
       for (let outer = 0; outer < 8; ++outer) {
-        let bookmarkIndex = this.formattingElements.findLastIndex(el => el.tagName === subject);
-        if (bookmarkIndex === -1)
+        let formattingElement = this.formattingList.findLatestForName(subject);
+        if (!formattingElement)
           return this.inBodyEndTagDefault(token);
-        let formattingElement = this.formattingElements[bookmarkIndex];
-        let formattingPosition = this.openElements.indexOf(formattingElement);
+        let formattingPosition = this.openElements.indexOf(formattingElement.element);
         if (formattingPosition === -1) {
           this.error('formatting-element-already-closed');
-          this.removeFormattingElement(formattingElement);
+          this.formattingList.remove(formattingElement);
           return;
         }
-        if (!this.isElementInScope(formattingElement)) {
+        if (!this.isElementInScope(formattingElement.element)) {
           this.error('formatting-element-out-of-scope');
           return;
         }
-        if (formattingElement !== this.current) {
+        if (formattingElement.element !== this.current) {
           this.error('element-closed-before-children');
         }
         let furthestPosition = formattingPosition;
@@ -2035,58 +1972,46 @@ export class TreeComposer implements TokenSink {
         if (!furthestBlock) {
           while (this.openElements.length > formattingPosition)
             this.popCurrentElement();
-          this.removeFormattingElement(formattingElement);
+          this.formattingList.remove(formattingElement);
           return;
         }
         const commonAncestor = this.openElements[formattingPosition - 1];
-        let bookmarkElement: Element | undefined = this.formattingElements[bookmarkIndex - 1];
+        let bookmark = formattingElement.previous;
         let node = furthestBlock, lastNode = furthestBlock;
         let inner = 0;
         while (true) {
           ++inner;
           node = this.openElements[--furthestPosition];
-          if (node === formattingElement) break;
-          let nodeIndex = this.formattingElements.indexOf(node);
-          if (nodeIndex !== -1 && inner > 3) {
-            this.removeFormattingElement(node, nodeIndex);
-            nodeIndex = -1;
+          if (node === formattingElement.element) break;
+          // TODO is it possible to shorten search by using better starting point?
+          let nodeFormattingElement = this.formattingList.findForElement(node);
+          if (nodeFormattingElement && inner > 3) {
+            this.formattingList.remove(nodeFormattingElement);
+            nodeFormattingElement = undefined;
           }
-          if (nodeIndex === -1) {
+          if (!nodeFormattingElement) {
             this.removeFromStack(node);
             continue;
           }
-          const nodeToken = this.getOriginalToken(node);
-          const replacement = this.createElementNS(nodeToken, NS_HTML, commonAncestor);
-          const key = this.computeFormattingElementKey(node);
-          this.formattingElements[nodeIndex] = replacement;
-          replaceElement(this.formattingArk[key]!, node, replacement);
+          const replacement = this.createElementNS(nodeFormattingElement.token, NS_HTML, commonAncestor);
+          nodeFormattingElement.element = replacement;
           this.openElements[furthestPosition] = replacement;
           node = replacement;
           if (lastNode === furthestBlock)
-            bookmarkElement = node;
+            bookmark = nodeFormattingElement;
           this.nodeFactory.relocateNode(node, lastNode);
           lastNode = node;
         }
         this.updateInsertionLocation(commonAncestor);
         this.nodeFactory.relocateNode(this.insertParent, lastNode, this.insertBefore);
-        const formattingToken = this.getOriginalToken(formattingElement);
-        const newFormatting = this.createElementNS(formattingToken, NS_HTML, furthestBlock);
+        const newFormatting = this.createElementNS(formattingElement.token, NS_HTML, furthestBlock);
         this.nodeFactory.relocateChildNodes(newFormatting, furthestBlock);
         this.nodeFactory.appendElement(furthestBlock, newFormatting);
-        this.removeFormattingElement(formattingElement);
-        const key = this.computeFormattingElementKey(formattingElement);
-        this.formattingArk[key].push(newFormatting);
-        // inserting AFTER the bookmark element
-        // if it happens to be none, insert at the start
-        this.formattingElements.splice(this.formattingElements.indexOf(bookmarkElement) + 1, 0, newFormatting);
-        this.openElements.splice(this.openElements.indexOf(formattingElement), 1);
+        this.formattingList.remove(formattingElement);
+        this.formattingList.insertAfter(newFormatting, formattingElement.token, bookmark);
+        this.openElements.splice(this.openElements.indexOf(formattingElement.element), 1);
         this.openElements.splice(this.openElements.indexOf(furthestBlock) + 1, 0, newFormatting);
       }
-
-    function replaceElement(list: Element[], element: Element, replacement: Element) {
-      const index = list.indexOf(element);
-      list[index] = replacement;
-    }
   }
 
   inTable(token: Token): InsertionMode {

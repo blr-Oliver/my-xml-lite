@@ -1,27 +1,13 @@
-/*
-getLastFormattingElementForName
-get by index
-get index for element
-replace at index
-insert after specific element
-remove specific element
-remove at index
-clear zone
-add zone
-check if contains element
-get original token
-reset
-*/
-import {Element} from '../decl/xml-lite-decl';
+import {Attr, Element} from '../decl/xml-lite-decl';
 import {TagToken} from './interfaces/tokens';
 
 export interface FormattingElement {
   element: Element;
   token: TagToken;
-  fastKey: string;
-  slowKey?: string;
   previous?: FormattingElement;
   next?: FormattingElement;
+  fastKey: string;
+  slowKey?: string;
 }
 
 type OptimisticFastStats = {
@@ -54,7 +40,19 @@ export class FormattingList {
   }
 
   private buildSlowKey(element: Element): string {
-    return '';// TODO
+    const attributes = element.attributes;
+    const attrCount = attributes.length;
+    const attrList: Attr[] = Array(attrCount);
+    for (let i = 0; i < attrCount; ++i)
+      attrList[i] = attributes.item(i)!;
+    // there should not be duplicate attributes
+    attrList.sort((a, b) => a.name > b.name ? 1 : -1);
+    const attrKeys: string[] = Array(attrCount);
+    for (let i = 0; i < attrCount; ++i) {
+      const attr = attrList[i];
+      attrKeys[i] = `${attr.name}\r${attr.value === null ? '\u0000' : attr.value}`;
+    }
+    return `${element.tagName}\r${attrKeys.join('\r')}`;
   }
 
   private switchToPessimistic(fastKey: string, stats: OptimisticFastStats) {
@@ -75,11 +73,33 @@ export class FormattingList {
     });
   }
 
+  findLatestForName(name: string): FormattingElement | undefined {
+    for (let node = this.tail; node; node = node.previous)
+      if (node.element.tagName === name) return node;
+  }
+
+  findForElement(element: Element): FormattingElement | undefined {
+    for (let node = this.head; node; node = node.next)
+      if (node.element === element) return node;
+  }
+
+  contains(element: Element): boolean {
+    return !!this.findForElement(element);
+  }
+
   add(element: Element, token: TagToken): FormattingElement {
+    return this.addWithChecks(element, token, (a, b, c, d) => this.doAdd(a, b, c, d));
+  }
+
+  insertAfter(element: Element, token: TagToken, after?: FormattingElement): FormattingElement {
+    return this.addWithChecks(element, token, (element, token, fastKey, slowKey) => this.doInsertAfter(element, token, after, fastKey, slowKey));
+  }
+
+  private addWithChecks(element: Element, token: TagToken, doAdd: (element: Element, token: TagToken, fastKey: string, slowKey: string | undefined) => FormattingElement) {
     const fastKey = this.buildFastKey(element);
     const stats = this.fastMap.get(fastKey);
     if (!stats) {
-      const node = this.doAdd(element, token, fastKey, undefined);
+      const node = doAdd(element, token, fastKey, undefined);
       this.fastMap.set(fastKey, {
         count: 1,
         pessimistic: false,
@@ -88,7 +108,7 @@ export class FormattingList {
       return node;
     } else if (!stats.pessimistic) {
       if (stats.count < 3) {
-        const node = this.doAdd(element, token, fastKey, undefined);
+        const node = doAdd(element, token, fastKey, undefined);
         stats.nodes.push(node);
         stats.count++;
         return node;
@@ -98,12 +118,12 @@ export class FormattingList {
     const slowKey = this.buildSlowKey(element);
     const slowList = this.slowMap.get(slowKey);
     if (!slowList) {
-      const node = this.doAdd(element, token, fastKey, slowKey);
+      const node = doAdd(element, token, fastKey, slowKey);
       stats.count++;
       this.slowMap.set(slowKey, [node]);
       return node;
     } else if (slowList.length < 3) {
-      const node = this.doAdd(element, token, fastKey, slowKey);
+      const node = doAdd(element, token, fastKey, slowKey);
       stats.count++;
       slowList.push(node);
       return node;
@@ -111,7 +131,7 @@ export class FormattingList {
       // its length must be 3 now
       this.doRemove(slowList[0]);
       slowList.copyWithin(0, 1);
-      return slowList[2] = this.doAdd(element, token, fastKey, slowKey);
+      return slowList[2] = doAdd(element, token, fastKey, slowKey);
     }
   }
 
@@ -120,25 +140,32 @@ export class FormattingList {
       return this.head = this.tail = {
         element,
         token,
-        fastKey,
-        slowKey,
         previous: undefined,
-        next: undefined
+        next: undefined,
+        fastKey,
+        slowKey
       };
     } else {
       return this.tail = this.tail.next = {
         element,
         token,
-        fastKey,
-        slowKey,
         previous: this.tail,
-        next: undefined
+        next: undefined,
+        fastKey,
+        slowKey
       };
     }
   }
 
   remove(formattingElement: FormattingElement): void {
-    this.fastMap.get(formattingElement.fastKey)!.count--;
+    if (!formattingElement.fastKey) return;
+    const fastStats = this.fastMap.get(formattingElement.fastKey)!;
+    fastStats.count--;
+    if (!fastStats.pessimistic) {
+      const index = fastStats.nodes.indexOf(formattingElement);
+      if (index !== -1)
+        fastStats.nodes.splice(index, 1);
+    }
     const slowKey = formattingElement.slowKey;
     if (slowKey) {
       const slowList = this.slowMap.get(slowKey)!;
@@ -150,6 +177,7 @@ export class FormattingList {
         slowList.splice(1, 1);
     }
     this.doRemove(formattingElement);
+    formattingElement.fastKey = '';
   }
 
   private doRemove(formattingElement: FormattingElement) {
@@ -163,24 +191,18 @@ export class FormattingList {
       this.tail = formattingElement.previous;
   }
 
-  /*
-  insertAfter(element: Element, token: TagToken, after: FormattingElement): FormattingElement {
+  private doInsertAfter(element: Element, token: TagToken, after: FormattingElement | undefined, fastKey: string, slowKey: string | undefined) {
     if (after) {
       if (after.next)
-        return after.next = after.next.previous = {element, token, previous: after, next: after.next};
+        return after.next = after.next.previous = {element, token, previous: after, next: after.next, fastKey, slowKey};
       else
-        return this.tail = after.next = {element, token, previous: after, next: undefined};
+        return this.tail = after.next = {element, token, previous: after, next: undefined, fastKey, slowKey};
     } else {
       if (this.head)
-        return this.head = this.head.previous = {element, token, previous: undefined, next: this.head};
+        return this.head = this.head.previous = {element, token, previous: undefined, next: this.head, fastKey, slowKey};
       else
-        return this.head = this.tail = {element, token, previous: undefined, next: undefined};
+        return this.head = this.tail = {element, token, previous: undefined, next: undefined, fastKey, slowKey};
     }
-  }
-   */
-
-  private doInsertAfter(element: Element, token: TagToken, after: FormattingElement, fastKey: string, slowKey: string | undefined) {
-
   }
 
   addMarker() {
