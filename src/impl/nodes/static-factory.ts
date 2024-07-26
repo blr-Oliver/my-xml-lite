@@ -122,12 +122,27 @@ export class StaticNodeFactory implements NodeFactory<StaticNodeTypeMapping> {
 
   relocateChildNodes(target: StaticParentNode, parent: StaticParentNode) {
     if (target === parent) return;
-    const childNodes = parent.childNodes.slice();
-    // TODO children arrays could be just concatenated
-    for (let child of childNodes)
-      this.relocateNode(target, child);
-    parent.childNodes.length = 0;
-    parent.children.length = 0;
+    const srcNodes = parent.childNodes;
+    const srcNodeCount = srcNodes.length;
+    if (!srcNodeCount) return;
+    const destNodes = target.childNodes;
+    const destNodeCount = destNodes.length;
+    destNodes.length += srcNodeCount;
+    for (let i = 0, j = destNodeCount; i < srcNodeCount; ++i, ++j) {
+      const node = destNodes[j] = srcNodes[i];
+      node.parentIndex = j;
+      this.__setParent(node, target);
+    }
+    srcNodes.length = 0;
+    const srcChildren = parent.children;
+    const srcElementCount = srcChildren.length;
+    if (!srcElementCount) return;
+    const destChildren = target.children;
+    const destElementCount = destChildren.length;
+    destChildren.length += srcElementCount;
+    for (let i = 0, j = destElementCount; i < srcElementCount; ++i, ++j)
+      (destChildren[j] = srcChildren[i]).parentElementIndex = j;
+    srcChildren.length = 0;
   }
 
   removeNode(node: StaticEmptyNode) {
