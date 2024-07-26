@@ -50,8 +50,10 @@ export class StaticNodeFactory implements NodeFactory<StaticNodeTypeMapping> {
     const len = otherAttributes.length;
     for (let i = 0; i < len; ++i) {
       const attrToken = otherAttributes[i];
-      if (!attributes.getNamedItem(attrToken.name))
+      if (!attributes.getNamedItem(attrToken.name)) {
         attributes.addAttributeNode(new StaticAttr(attrToken, element));
+        element.attributeNames.push(attrToken.name);
+      }
     }
     return attributes;
   }
