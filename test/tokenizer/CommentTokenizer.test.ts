@@ -1,11 +1,11 @@
 import {stringToArray} from '../../src/common/code-sequences';
 import {DirectCharacterSource} from '../../src/common/stream-source';
 import {HTML_SPECIAL} from '../../src/decl/known-named-refs';
-import {ParserEnvironment} from '../../src/decl/ParserEnvironment';
 import {buildIndex} from '../../src/impl/build-index';
 import {FixedSizeStringBuilder} from '../../src/impl/FixedSizeStringBuilder';
+import {ParserEnvironment} from '../../src/impl/interfaces/ParserEnvironment';
+import {CharactersToken, CommentToken, EOF_TOKEN, Token} from '../../src/impl/interfaces/tokens';
 import {Tokenizer} from '../../src/impl/Tokenizer';
-import {CharactersToken, CommentToken, EOF_TOKEN, Token} from '../../src/impl/tokens';
 import {default as rawTests} from './samples/comment.json';
 
 type TestCase = [string/*name*/, string/*input*/, string/*comment data*/, string[]/*errors*/];

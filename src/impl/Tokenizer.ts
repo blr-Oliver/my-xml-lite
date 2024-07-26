@@ -14,9 +14,9 @@ import {
 import {CodePoints} from '../common/code-points';
 import {stringToArray} from '../common/code-sequences';
 import {PrefixNode} from '../decl/entity-ref-index';
-import {ParserEnvironment} from '../decl/ParserEnvironment';
-import {State} from './states';
-import {Attribute, CDataToken, CharactersToken, CommentToken, DoctypeToken, EOF_TOKEN, TagToken, Token} from './tokens';
+import {ParserEnvironment} from './interfaces/ParserEnvironment';
+import {State} from './interfaces/states';
+import {Attribute, CDataToken, CharactersToken, CommentToken, DoctypeToken, EOF_TOKEN, TagToken, Token} from './interfaces/tokens';
 import {NS_HTML, TreeComposer} from './TreeComposer';
 
 const SCRIPT: number[] = [0x73, 0x63, 0x72, 0x69, 0x70, 0x74];

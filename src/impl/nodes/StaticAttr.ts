@@ -1,5 +1,5 @@
 import {Attr, Document, Element} from '../../decl/xml-lite-decl';
-import {NamespacedAttribute} from '../tokens';
+import {NamespacedAttribute} from '../interfaces/tokens';
 import {StaticElement} from './StaticElement';
 
 export class StaticAttr implements Attr {

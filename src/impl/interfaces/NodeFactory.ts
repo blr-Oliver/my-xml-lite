@@ -1,4 +1,4 @@
-import {CDATASection, Comment, Document, DocumentType, Element, NamedNodeMap, Node, ParentNode, ProcessingInstruction, Text} from '../decl/xml-lite-decl';
+import {CDATASection, Comment, Document, DocumentType, Element, NamedNodeMap, Node, ParentNode, ProcessingInstruction, Text} from '../../decl/xml-lite-decl';
 import {TagToken} from './tokens';
 
 export interface NodeTypeMapping {

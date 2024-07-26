@@ -1,10 +1,10 @@
-import {TokenSink} from '../decl/ParserEnvironment';
 import {Attr, CharacterData, Document, Element, isDocument, isElement, Node, ParentNode} from '../decl/xml-lite-decl';
-import {InsertionMode} from './insertion-mode';
-import {NodeFactory} from './NodeFactory';
-import {State} from './states';
+import {InsertionMode} from './interfaces/insertion-mode';
+import {NodeFactory} from './interfaces/NodeFactory';
+import {TokenSink} from './interfaces/ParserEnvironment';
+import {State} from './interfaces/states';
+import {CharactersToken, CommentToken, DoctypeToken, NamespacedAttribute, TagToken, Token} from './interfaces/tokens';
 import {Tokenizer} from './Tokenizer';
-import {CharactersToken, CommentToken, DoctypeToken, NamespacedAttribute, TagToken, Token} from './tokens';
 
 export const NS_HTML = 'http://www.w3.org/1999/xhtml';
 export const NS_MATHML = 'http://www.w3.org/1998/Math/MathML';

@@ -1,12 +1,12 @@
 import {stringToArray} from '../../src/common/code-sequences';
 import {DirectCharacterSource} from '../../src/common/stream-source';
 import {HTML_SPECIAL} from '../../src/decl/known-named-refs';
-import {ParserEnvironment} from '../../src/decl/ParserEnvironment';
 import {buildIndex} from '../../src/impl/build-index';
 import {FixedSizeStringBuilder} from '../../src/impl/FixedSizeStringBuilder';
-import {State} from '../../src/impl/states';
+import {ParserEnvironment} from '../../src/impl/interfaces/ParserEnvironment';
+import {State} from '../../src/impl/interfaces/states';
+import {CharactersToken, CommentToken, EOF_TOKEN, TagToken, Token} from '../../src/impl/interfaces/tokens';
 import {Tokenizer} from '../../src/impl/Tokenizer';
-import {CharactersToken, CommentToken, EOF_TOKEN, TagToken, Token} from '../../src/impl/tokens';
 import {default as rawTests} from './samples/tags.json';
 
 type AttributeData = [string, string | null];

@@ -1,5 +1,5 @@
 import {Attr, Element, NodeType} from '../../decl/xml-lite-decl';
-import {TagToken} from '../tokens';
+import {TagToken} from '../interfaces/tokens';
 import {StaticAttributes} from './StaticAttributes';
 import {StaticDocument} from './StaticDocument';
 import {StaticParentNode} from './StaticParentNode';

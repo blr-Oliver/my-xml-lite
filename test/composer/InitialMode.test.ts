@@ -1,6 +1,6 @@
-import {InsertionMode} from '../../src/impl/insertion-mode';
+import {InsertionMode} from '../../src/impl/interfaces/insertion-mode';
+import {Token} from '../../src/impl/interfaces/tokens';
 import {StaticNodeFactory} from '../../src/impl/nodes/static-factory';
-import {Token} from '../../src/impl/tokens';
 import {TreeComposer} from '../../src/impl/TreeComposer';
 import {trackProperty} from '../util/property-tracker';
 import {DefaultRawTestCore, DefaultSuite, DefaultTestCase} from './abstract-suite';

@@ -1,5 +1,5 @@
 import {Attr, NamedNodeMap} from '../../decl/xml-lite-decl';
-import {NamespacedAttribute} from '../tokens';
+import {NamespacedAttribute} from '../interfaces/tokens';
 import {StaticAttr} from './StaticAttr';
 import {StaticElement} from './StaticElement';
 
