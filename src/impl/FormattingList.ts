@@ -83,15 +83,11 @@ export class FormattingList {
       if (node.element === element) return node;
   }
 
-  contains(element: Element): boolean {
-    return !!this.findForElement(element);
-  }
-
   add(element: Element, token: TagToken): FormattingElement {
     return this.addWithChecks(element, token, (a, b, c, d) => this.doAdd(a, b, c, d));
   }
 
-  insertAfter(element: Element, token: TagToken, after?: FormattingElement): FormattingElement {
+  insertAfter(element: Element, token: TagToken, after: FormattingElement | undefined): FormattingElement {
     return this.addWithChecks(element, token, (element, token, fastKey, slowKey) => this.doInsertAfter(element, token, after, fastKey, slowKey));
   }
 

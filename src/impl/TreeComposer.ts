@@ -494,7 +494,7 @@ export class TreeComposer implements TokenSink {
   }
 
   startTemplate(token: TagToken): InsertionMode {
-    this.insertFormattingMarker();
+    this.formattingList.addMarker();
     this.framesetOk = false;
     this.templateInsertionModes.push('inTemplate');
     this.createAndInsertHTMLElement(token);
@@ -510,7 +510,7 @@ export class TreeComposer implements TokenSink {
         this.popUntilName('template');
       } else
         this.popCurrentElement();
-      this.clearFormattingUpToMarker();
+      this.formattingList.clearToMarker();
       this.templateInsertionModes.pop();
       this.resetInsertionMode();
     } else
@@ -536,19 +536,7 @@ export class TreeComposer implements TokenSink {
       this.forceCloseElement('p');
   }
 
-  clearFormattingUpToMarker() { // TODO
-    this.formattingList.clearToMarker();
-  }
-
-  insertFormattingMarker() { // TODO
-    this.formattingList.addMarker();
-  }
-
-  pushFormattingElement(element: Element, token: TagToken) { // TODO
-    this.formattingList.add(element, token);
-  }
-
-  reconstructFormattingElements() { // TODO
+  reconstructFormattingElements() {
     let node = this.formattingList.tail;
     while (node) {
       if (this.openElements.indexOf(node.element) !== -1) break;
@@ -559,19 +547,6 @@ export class TreeComposer implements TokenSink {
       node.element = this.createAndInsertHTMLElement(node.token);
       node = node.next;
     }
-  }
-
-  isInFormattingList(element: Element): boolean { // TODO
-    return this.formattingList.contains(element);
-  }
-
-  getLastFormattingElementForName(name: string): Element | undefined { // TODO
-    return this.formattingList.findLatestForName(name)?.element;
-  }
-
-  removeFormattingElement(element: Element, index: number = -1) { // TODO
-    const node = this.formattingList.findForElement(element);
-    if (node) this.formattingList.remove(node);
   }
 
   hasMatchInScope(test: (el: Element) => boolean, fenceTest: (el: Element) => boolean) {
@@ -1560,7 +1535,7 @@ export class TreeComposer implements TokenSink {
       case 'tt':
       case 'u':
         this.reconstructFormattingElements();
-        this.pushFormattingElement(this.createAndInsertHTMLElement(token), token);
+        this.formattingList.add(this.createAndInsertHTMLElement(token), token);
         break;
       case 'nobr':
         this.reconstructFormattingElements();
@@ -1569,14 +1544,14 @@ export class TreeComposer implements TokenSink {
           this.adoptionAgency(token);
           this.reconstructFormattingElements();
         }
-        this.pushFormattingElement(this.createAndInsertHTMLElement(token), token);
+        this.formattingList.add(this.createAndInsertHTMLElement(token), token);
         break;
       case 'applet':
       case 'marquee':
       case 'object':
         this.reconstructFormattingElements();
         this.createAndInsertHTMLElement(token);
-        this.insertFormattingMarker();
+        this.formattingList.addMarker();
         this.framesetOk = false;
         break;
       case 'table':
@@ -1795,7 +1770,7 @@ export class TreeComposer implements TokenSink {
       case 'object':
         if (this.hasElementInScope(token.name)) {
           this.forceCloseElement(token.name);
-          this.clearFormattingUpToMarker();
+          this.formattingList.clearToMarker();
         } else
           this.error('orphan-end-tag');
         break;
@@ -1896,16 +1871,17 @@ export class TreeComposer implements TokenSink {
   }
 
   inBodyStartTagAnchor(token: TagToken): InsertionMode {
-    let activeAnchor = this.getLastFormattingElementForName('a');
+    let activeAnchor = this.formattingList.findLatestForName('a')?.element;
     if (activeAnchor) {
       this.error('nested-anchor');
       this.adoptionAgency(token);
-      this.removeFormattingElement(activeAnchor);
+      // TODO is it correct to remove same formattingNode?
+      const node = this.formattingList.findForElement(activeAnchor);
+      if (node) this.formattingList.remove(node);
       this.removeFromStack(activeAnchor);
     }
     this.reconstructFormattingElements();
-    const element = this.createAndInsertHTMLElement(token);
-    this.pushFormattingElement(element, token);
+    this.formattingList.add(this.createAndInsertHTMLElement(token), token);
     return this.insertionMode;
   }
 
@@ -1941,7 +1917,7 @@ export class TreeComposer implements TokenSink {
   adoptionAgency(token: TagToken) {
     // more optimization?
     const subject = token.name;
-    if (subject === this.current.tagName && this.current.namespaceURI == NS_HTML && !this.isInFormattingList(this.current))
+    if (subject === this.current.tagName && this.current.namespaceURI == NS_HTML && !this.formattingList.findForElement(this.current))
       this.popCurrentElement();
     else
       for (let outer = 0; outer < 8; ++outer) {
@@ -2055,7 +2031,7 @@ export class TreeComposer implements TokenSink {
     switch (token.name) {
       case 'caption':
         this.clearStackToTableContext();
-        this.insertFormattingMarker();
+        this.formattingList.addMarker();
         this.createAndInsertHTMLElement(token);
         return 'inCaption';
       case 'colgroup':
@@ -2266,7 +2242,7 @@ export class TreeComposer implements TokenSink {
         this.popUntilName('caption');
       } else
         this.popCurrentElement();
-      this.clearFormattingUpToMarker();
+      this.formattingList.clearToMarker();
       return reprocess ? this.reprocessIn('inTable', token) : 'inTable';
     } else
       this.error();
@@ -2466,7 +2442,7 @@ export class TreeComposer implements TokenSink {
       case 'td':
         this.clearStackToRowContext();
         this.createAndInsertHTMLElement(token);
-        this.insertFormattingMarker();
+        this.formattingList.addMarker();
         return 'inCell';
       case 'caption':
       case 'col':
@@ -2582,7 +2558,7 @@ export class TreeComposer implements TokenSink {
             this.popUntilName(tagName);
           } else
             this.popCurrentElement();
-          this.clearFormattingUpToMarker();
+          this.formattingList.clearToMarker();
           return 'inRow';
         } else
           this.error('wrong-cell-end-tag');
@@ -2617,7 +2593,7 @@ export class TreeComposer implements TokenSink {
       this.popWhileMatches((name, el) => name !== 'td' && name !== 'th' || el.namespaceURI !== NS_HTML);
     }
     this.popCurrentElement();
-    this.clearFormattingUpToMarker();
+    this.formattingList.clearToMarker();
     return this.reprocessIn('inRow', token);
   }
 
@@ -2800,7 +2776,7 @@ export class TreeComposer implements TokenSink {
     if (this.openCounts['template']) {
       this.error('abrupt-end-of-template');
       this.popUntilName('template');
-      this.clearFormattingUpToMarker();
+      this.formattingList.clearToMarker();
       this.templateInsertionModes.pop();
       this.resetInsertionMode();
       return this.process(token);
