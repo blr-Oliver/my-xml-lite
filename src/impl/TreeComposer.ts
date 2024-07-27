@@ -1,4 +1,4 @@
-import {CharacterData, Document, Element, isDocument, isElement, Node, ParentNode} from '../decl/xml-lite-decl';
+import {CharacterData, Document, Element, Node, NodeType, ParentNode} from '../decl/xml-lite-decl';
 import {FormattingList} from './FormattingList';
 import {InsertionMode} from './interfaces/insertion-mode';
 import {NodeFactory} from './interfaces/NodeFactory';
@@ -14,7 +14,6 @@ export const NS_XLINK = 'http://www.w3.org/1999/xlink';
 export const NS_XML = 'http://www.w3.org/XML/1998/namespace';
 export const NS_XMLNS = 'http://www.w3.org/2000/xmlns/';
 
-// TODO analyze all namespace checks for necessity
 export class TreeComposer implements TokenSink {
   nodeFactory: NodeFactory;
 
@@ -286,7 +285,7 @@ export class TreeComposer implements TokenSink {
 
   insertCharacters(token: CharactersToken) {
     this.updateInsertionLocation();
-    if (!isDocument(this.insertParent)) {
+    if (this.insertParent.nodeType !== NodeType.DOCUMENT_NODE) {
       let node: CharacterData;
       switch (token.type) {
         case 'characters':
@@ -395,26 +394,24 @@ export class TreeComposer implements TokenSink {
     const target: ParentNode = this.insertParent = override || this.current || this.document;
     this.insertBefore = undefined;
     if (this.fosterParentingEnabled) {
-      if (isElement(target)) {
-        switch (target.tagName) {
-          case 'table':
-          case 'tbody':
-          case 'tfoot':
-          case 'thead':
-          case 'tr':
-            let lastTemplateIndex = this.openElements.findLastIndex(el => el.tagName === 'template' && el.namespaceURI === NS_HTML);
-            let lastTableIndex = this.openElements.findLastIndex(el => el.tagName === 'table' && el.namespaceURI === NS_HTML);
-            if (lastTemplateIndex >= 0 && (lastTableIndex < 0 || lastTemplateIndex > lastTableIndex)) {
-              this.insertParent = this.openElements[lastTemplateIndex];
-            } else if (lastTableIndex < 0) {
-              this.insertParent = this.openElements[0];
-            } else {
-              this.insertParent = (this.insertBefore = this.openElements[lastTableIndex]).parentNode!;
-            }
-        }
+      switch ((target as Element).tagName) {
+        case 'table':
+        case 'tbody':
+        case 'tfoot':
+        case 'thead':
+        case 'tr':
+          let lastTemplateIndex = this.openElements.findLastIndex(el => el.tagName === 'template' && el.namespaceURI === NS_HTML);
+          let lastTableIndex = this.openElements.findLastIndex(el => el.tagName === 'table' && el.namespaceURI === NS_HTML);
+          if (lastTemplateIndex >= 0 && (lastTableIndex < 0 || lastTemplateIndex > lastTableIndex)) {
+            this.insertParent = this.openElements[lastTemplateIndex];
+          } else if (lastTableIndex < 0) {
+            this.insertParent = this.openElements[0];
+          } else {
+            this.insertParent = (this.insertBefore = this.openElements[lastTableIndex]).parentNode!;
+          }
       }
     }
-    if (isElement(this.insertParent) && this.insertParent.tagName === 'template' && this.insertParent.namespaceURI === NS_HTML) {
+    if ((this.insertParent as Element).tagName === 'template' && (this.insertParent as Element).namespaceURI === NS_HTML) {
       // TODO use template contents
     }
   }

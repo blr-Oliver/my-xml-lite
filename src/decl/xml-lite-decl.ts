@@ -1,4 +1,4 @@
-export enum NodeType {
+export const enum NodeType {
   ELEMENT_NODE = 1,
   TEXT_NODE = 3,
   CDATA_SECTION_NODE = 4,
