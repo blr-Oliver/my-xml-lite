@@ -1,6 +1,6 @@
 [
   ["empty", "<!DOCTYPE html><frameset></frameset>", "<!DOCTYPE html><html><head></head><frameset></frameset></html>", []],
-  ["unclosed", "<!DOCTYPE html><frameset>", "<!DOCTYPE html><html><head></head><frameset></frameset></html>", ["abrupt-end-of-frameset"]],
+  ["unclosed (EOF)", "<!DOCTYPE html><frameset>", "<!DOCTYPE html><html><head></head><frameset></frameset></html>", ["abrupt-end-of-frameset"]],
   ["whitespace", "<!DOCTYPE html><frameset> \t\n\f</frameset>", "<!DOCTYPE html><html><head></head><frameset> \t\n\f</frameset></html>", []],
   ["text", "<!DOCTYPE html><frameset>A</frameset>", "<!DOCTYPE html><html><head></head><frameset></frameset></html>", ["unexpected-non-whitespace-character"]],
   ["space + text", "<!DOCTYPE html><frameset> \t\n\fA</frameset>", "<!DOCTYPE html><html><head></head><frameset> \t\n\f</frameset></html>", ["unexpected-non-whitespace-character"]],

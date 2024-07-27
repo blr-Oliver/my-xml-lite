@@ -16,5 +16,13 @@
   ["nested other", "<table><thead><tr a=\"1\"></tr><tfoot><tr a=\"2\"></tr></thead></table>", "<table><thead><tr a=\"1\"></tr></thead><tfoot><tr a=\"2\"></tr></tfoot></table>", ["wrong-table-body-end-tag"]],
   ["mismatched end tag", "<table><tbody></thead><tr></tr></table>", "<table><tbody><tr></tr></tbody></table>", ["wrong-table-body-end-tag"]],
   ["template", "<table><tbody><template></template><tr></tr></tbody></table>", "<table><tbody><template></template><tr></tr></tbody></table>", []],
-  ["template end", "<table><tbody></template><tr></tr></tbody></table>", "<table><tbody><tr></tr></tbody></table>", ["orphan-end-tag"]]
+  ["template end", "<table><tbody></template><tr></tr></tbody></table>", "<table><tbody><tr></tr></tbody></table>", ["orphan-end-tag"]],
+  [
+    "unclosed with extra tags", "<table><tbody><div a><hr a/></div><div b><hr b/></table>", "<div a><hr a/></div><div b><hr b/></div><table><tbody></tbody></table>",
+    ["unexpected-content-in-table", "unexpected-content-in-table", "unexpected-content-in-table", "unexpected-content-in-table", "unexpected-content-in-table"]
+  ],
+  [
+    "unclosed with foreign content", "<table><tbody><svg a><g a/></svg><svg b><g b/></table>", "<svg a><g a/></svg><svg b><g b/></svg><table><tbody></tbody></table>",
+    ["unexpected-content-in-table", "unexpected-content-in-table", "unmatched-end-tag-in-foreign-content"]
+  ]
 ]

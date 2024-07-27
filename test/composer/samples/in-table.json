@@ -37,5 +37,14 @@
   ["misnested known end tag", "<div><table></div></table>", "<div><table></table></div>", ["unexpected-content-in-table", "orphan-end-tag", "abrupt-end-of-document"]],
   ["misnested unknown end tag", "<tag><table></tag></table>", "<tag><table></table></tag>", ["unexpected-content-in-table", "orphan-end-tag-inside-special-element", "abrupt-end-of-document"]],
   ["separated whitespace", "<table> <div>  </div>   </table>", "<div>  </div><table>    </table>", ["unexpected-content-in-table", "unexpected-content-in-table"]],
-  ["foreign template element (pseudo-scope)", "<table><svg><template><desc></table>", "<svg><template><desc></desc></template></svg><table></table>", ["unexpected-content-in-table", "unmatched-end-tag-in-foreign-content"]]
+  ["foreign template element (pseudo-scope)", "<table><svg><template><desc></table>", "<svg><template><desc></desc></template></svg><table></table>", ["unexpected-content-in-table", "unmatched-end-tag-in-foreign-content"]],
+  [
+    "tbody after forbidden content", "<table><div a><hr a/></div><div b><hr b/><tbody></table>", "<div a><hr a/></div><div b><hr b/></div><table><tbody></tbody></table>",
+    ["unexpected-content-in-table", "unexpected-content-in-table", "unexpected-content-in-table", "unexpected-content-in-table", "unexpected-content-in-table"]
+  ],
+  [
+    "tbody after forbidden foreign content", "<table><svg a><g a/></svg><svg b><g b/><tbody></table>", "<svg a><g a/></svg><svg b><g b/><tbody></tbody></svg><table></table>",
+    ["unexpected-content-in-table", "unexpected-content-in-table", "unmatched-end-tag-in-foreign-content"]
+  ],
+  ["tbody in HTML integration point", "<table><svg><desc><tbody></table>", "<svg><desc></desc></svg><table><tbody></tbody></table>", ["unexpected-content-in-table"]]
 ]

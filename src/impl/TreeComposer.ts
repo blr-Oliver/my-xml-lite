@@ -648,7 +648,7 @@ export class TreeComposer implements TokenSink {
   isTableScopeFence(element: Element): boolean {
     if (element.namespaceURI !== NS_HTML) return false;
     switch (element.tagName) {
-      case 'html':
+      case 'html': // fragment case
       case 'table':
       case 'template':
         return true;
@@ -1482,17 +1482,9 @@ export class TreeComposer implements TokenSink {
       case 'h5':
       case 'h6':
         this.closeAnyHangingParagraph();
-        if (this.current.namespaceURI === NS_HTML) {
-          switch (this.current.tagName) {
-            case 'h1':
-            case 'h2':
-            case 'h3':
-            case 'h4':
-            case 'h5':
-            case 'h6':
-              this.error('immediately-nested-heading-start-tag');
-              this.popCurrentElement();
-          }
+        if (this.isHeadingElement(this.current)) {
+          this.error('immediately-nested-heading-start-tag');
+          this.popCurrentElement();
         }
         this.createAndInsertHTMLElement(token);
         break;
@@ -1682,12 +1674,12 @@ export class TreeComposer implements TokenSink {
         return this.endTemplate();
       case 'body':
       case 'html':
-        if (this.openCounts['body']) {
+        if (this.hasElementInScope('body')) {
           if (this.hasExplicitlyClosableOnStack())
             this.error('abrupt-end-of-content');
           return token.name === 'body' ? 'afterBody' : this.reprocessIn('afterBody', token);
         }
-        this.error();
+        this.error('orphan-end-tag');
         break;
       case 'address':
       case 'article':
@@ -1745,11 +1737,11 @@ export class TreeComposer implements TokenSink {
       case 'h4':
       case 'h5':
       case 'h6':
-        if (this.hasMatchInScope(el => this.isHeaderLevelElement(el), el => this.isScopeFence(el))) {
+        if (this.hasMatchInScope(this.isHeadingElement, this.isScopeFence)) {
           this.generateImpliedEndTags();
-          if (this.current.namespaceURI !== NS_HTML || this.current.tagName !== token.name) {
-            this.error('mismatched-heading-end-tag');
-            this.popWhileMatches((name, el) => !this.isHeaderLevelElement(el));
+          if (this.current.tagName !== token.name || this.current.namespaceURI !== NS_HTML) {
+            this.error('incorrectly-closed-heading-element');
+            this.popWhileMatches((name, el) => !this.isHeadingElement(el));
             this.popCurrentElement();
           } else
             this.popCurrentElement();
@@ -1800,7 +1792,7 @@ export class TreeComposer implements TokenSink {
     }
   }
 
-  isHeaderLevelElement(element: Element) {
+  isHeadingElement(element: Element) {
     if (element.namespaceURI !== NS_HTML) return false;
     switch (element.tagName) {
       case 'h1':
@@ -2069,7 +2061,7 @@ export class TreeComposer implements TokenSink {
           this.resetInsertionMode();
           return this.process(token);
         }
-        break;
+        break; // fragment case
       case 'style':
         // return this.inHead(token);
         return this.startTextMode('rawtext', token);
@@ -2106,8 +2098,8 @@ export class TreeComposer implements TokenSink {
         if (this.hasElementInTableScope('table')) {
           this.popUntilName('table');
           this.resetInsertionMode();
-        } else {
-          this.error();
+        } else { // fragment case
+          this.error('orphan-end-tag');
         }
         break;
       case 'body':
@@ -2211,7 +2203,7 @@ export class TreeComposer implements TokenSink {
       case 'th':
       case 'thead':
       case 'tr':
-        return this.inCaptionEnd(token, true);
+        return this.inCaptionEnd(token, true, 'unexpected-start-tag');
       default:
         return this.inBodyStartTag(token);
     }
@@ -2220,9 +2212,9 @@ export class TreeComposer implements TokenSink {
   inCaptionEndTag(token: TagToken): InsertionMode {
     switch (token.name) {
       case 'caption':
-        return this.inCaptionEnd(token, false);
+        return this.inCaptionEnd(token, false, 'orphan-end-tag');
       case 'table':
-        return this.inCaptionEnd(token, true);
+        return this.inCaptionEnd(token, true, 'orphan-end-tag');
       case 'body':
       case 'col':
       case 'colgroup':
@@ -2241,14 +2233,15 @@ export class TreeComposer implements TokenSink {
     return this.insertionMode;
   }
 
-  inCaptionEnd(token: TagToken, reprocess: boolean): InsertionMode {
+  inCaptionEnd(token: TagToken, reprocess: boolean, error: string): InsertionMode {
     if (this.hasElementInTableScope('caption')) {
       this.forceCloseElement('caption');
       this.formattingList.clearToMarker();
       return reprocess ? this.reprocessIn('inTable', token) : 'inTable';
-    } else
-      this.error();
-    return this.insertionMode;
+    } else { // fragment case
+      this.error(error);
+      return this.insertionMode;
+    }
   }
 
   inColumnGroup(token: Token): InsertionMode {
@@ -2349,7 +2342,7 @@ export class TreeComposer implements TokenSink {
       case 'tbody':
       case 'tfoot':
       case 'thead':
-        return this.inTableBodyEndTableBody(token);
+        return this.inTableBodyEndTableBody(token, 'unexpected-start-tag');
       default:
         return this.inTable(token);
     }
@@ -2369,7 +2362,7 @@ export class TreeComposer implements TokenSink {
           break;
         }
       case 'table':
-        return this.inTableBodyEndTableBody(token);
+        return this.inTableBodyEndTableBody(token, 'orphan-end-tag');
       case 'body':
       case 'caption':
       case 'col':
@@ -2386,13 +2379,13 @@ export class TreeComposer implements TokenSink {
     return this.insertionMode;
   }
 
-  inTableBodyEndTableBody(token: TagToken) {
-    if (this.hasMatchInScope(el => this.isTableBodyElement(el), el => this.isTableScopeFence(el))) {
+  inTableBodyEndTableBody(token: TagToken, error: string) {
+    if (this.hasMatchInScope(this.isTableBodyElement, this.isTableScopeFence)) {
       this.popWhileMatches(this.notATBodyContext);
       this.popCurrentElement();
       return this.reprocessIn('inTable', token);
-    } else {
-      this.error();
+    } else { // fragment case
+      this.error(error);
       return this.insertionMode;
     }
   }
@@ -2449,7 +2442,14 @@ export class TreeComposer implements TokenSink {
       case 'tfoot':
       case 'thead':
       case 'tr':
-        return this.inRowEndRow(token, true);
+        if (this.hasElementInTableScope('tr')) {
+          this.popWhileMatches(this.notARowContext);
+          this.popCurrentElement();
+          return this.reprocessIn('inTableBody', token);
+        } else { // fragment case
+          this.error('unexpected-start-tag');
+          return this.insertionMode;
+        }
       default:
         return this.inTable(token);
     }
@@ -2458,9 +2458,21 @@ export class TreeComposer implements TokenSink {
   inRowEndTag(token: TagToken): InsertionMode {
     switch (token.name) {
       case 'tr':
-        return this.inRowEndRow(token, false);
+        if (this.hasElementInTableScope('tr')) {
+          this.popWhileMatches(this.notARowContext);
+          this.popCurrentElement();
+          return 'inTableBody';
+        } else // fragment case
+          this.error('orphan-end-tag');
+        break;
       case 'table':
-        return this.inRowEndRow(token, true);
+        if (this.hasElementInTableScope('tr')) {
+          this.popWhileMatches(this.notARowContext);
+          this.popCurrentElement();
+          return this.reprocessIn('inTableBody', token);
+        } else // fragment case
+          this.error('unexpected-end-tag');
+        break;
       case 'tbody':
       case 'tfoot':
       case 'thead':
@@ -2470,9 +2482,8 @@ export class TreeComposer implements TokenSink {
             this.popCurrentElement();
             return this.reprocessIn('inTableBody', token);
           }
-        } else {
-          this.error('wrong-table-body-end-tag');
-        }
+        } else
+          this.error('unexpected-end-tag');
         break;
       case 'body':
       case 'caption':
@@ -2487,17 +2498,6 @@ export class TreeComposer implements TokenSink {
         return this.inTable(token);
     }
     return this.insertionMode;
-  }
-
-  inRowEndRow(token: TagToken, reprocess: boolean) {
-    if (this.hasElementInTableScope('tr')) {
-      this.popWhileMatches(this.notARowContext);
-      this.popCurrentElement();
-      return reprocess ? this.reprocessIn('inTableBody', token) : 'inTableBody';
-    } else {
-      this.error();
-      return this.insertionMode;
-    }
   }
 
   notARowContext(name: string, element: Element): boolean {
@@ -2534,7 +2534,7 @@ export class TreeComposer implements TokenSink {
       case 'th':
       case 'thead':
       case 'tr':
-        return this.closeTheCell(token);
+        return this.closeCell(token);
       default:
         return this.inBodyStartTag(token);
     }
@@ -2570,7 +2570,7 @@ export class TreeComposer implements TokenSink {
       case 'thead':
       case 'tr':
         if (this.hasElementInTableScope(tagName))
-          return this.closeTheCell(token);
+          return this.closeCell(token);
         this.error('unexpected-end-tag-in-cell');
         break;
       default:
@@ -2579,11 +2579,11 @@ export class TreeComposer implements TokenSink {
     return this.insertionMode;
   }
 
-  closeTheCell(token: Token): InsertionMode {
+  closeCell(token: Token): InsertionMode {
     this.generateImpliedEndTags();
     const currentTagName = this.current.tagName;
-    if (currentTagName !== 'td' && currentTagName !== 'th') {
-      this.error();
+    if (currentTagName !== 'td' && currentTagName !== 'th' || this.current.namespaceURI !== NS_HTML) {
+      this.error('abrupt-end-of-cell');
       this.popWhileMatches((name, el) => name !== 'td' && name !== 'th' || el.namespaceURI !== NS_HTML);
     }
     this.popCurrentElement();
@@ -2608,8 +2608,8 @@ export class TreeComposer implements TokenSink {
         return this.inSelectEndTag(token as TagToken);
       case 'eof':
         return this.inBodyEof(token);
-      // CDATA is impossible here
-      // default: this.error('unexpected-content-in-select');
+        // CDATA is impossible here
+        // default: this.error('unexpected-content-in-select');
     }
     return this.insertionMode;
   }
@@ -2687,7 +2687,7 @@ export class TreeComposer implements TokenSink {
       this.resetInsertionMode();
       if (reprocess)
         return this.process(token);
-    } else if (errorIfMissing)
+    } else if (errorIfMissing) // fragment case
       this.error('orphan-end-tag');
     return this.insertionMode;
   }
@@ -2774,7 +2774,7 @@ export class TreeComposer implements TokenSink {
       this.templateInsertionModes.pop();
       this.resetInsertionMode();
       return this.process(token);
-    } else
+    } else // fragment case
       return this.stopParsing();
   }
 
@@ -2847,7 +2847,7 @@ export class TreeComposer implements TokenSink {
         this.insertCharacters(token as CharactersToken);
         break;
       case 'eof':
-        if (this.openElements.length !== 1 || this.openElements[0].tagName !== 'html')
+        if (this.openElements.length !== 1 || this.openElements[0].tagName !== 'html') // fragment case
           this.error('abrupt-end-of-frameset');
         return this.stopParsing();
       case 'startTag':
@@ -2879,7 +2879,7 @@ export class TreeComposer implements TokenSink {
 
   inFramesetEndTag(token: TagToken): InsertionMode {
     if (token.name === 'frameset') {
-      if (this.openElements.length === 1 && this.openElements[0].tagName === 'html') {
+      if (this.openElements.length === 1 && this.openElements[0].tagName === 'html') { // fragment case
         this.error('orphan-end-tag');
       } else {
         this.popCurrentElement();
