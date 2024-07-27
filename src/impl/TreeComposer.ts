@@ -281,7 +281,7 @@ export class TreeComposer implements TokenSink {
 
   insertComment(token: CommentToken, override?: ParentNode) {
     this.updateInsertionLocation(override);
-    this.insertNodeAtCurrentLocation(this.nodeFactory.createComment(this.insertParent, token.data), false);
+    this.insertNodeAtCurrentLocation(this.nodeFactory.createComment(this.insertParent, token.data));
   }
 
   insertCharacters(token: CharactersToken) {
@@ -295,15 +295,18 @@ export class TreeComposer implements TokenSink {
         case 'cdata':
           node = this.nodeFactory.createCData(this.insertParent, token.data);
       }
-      this.insertNodeAtCurrentLocation(node, false);
+      this.insertNodeAtCurrentLocation(node);
     }
   }
 
   generateImpliedEndTags(exclude?: string) {
     const stack = this.openElements;
-    for (let i = stack.length - 1; i >= 0; --i) {
-      const element = stack[i];
-      if (element.namespaceURI !== NS_HTML) return;
+    let i = stack.length;
+    while (true) {
+      const element = stack[--i];
+      // for every case when this method is called there should be some HTML element in the scope
+      // and this method never proceeds beyond that element, so any foreign element is impossible here
+      // if (element.namespaceURI !== NS_HTML) return;
       const tagName = element.tagName;
       if (tagName === exclude) return;
       switch (tagName) {
@@ -327,8 +330,9 @@ export class TreeComposer implements TokenSink {
 
   generateImpliedEndTagsThoroughly() {
     const stack = this.openElements;
-    for (let i = stack.length - 1; i >= 0; --i) {
-      const element = stack[i];
+    let i = stack.length;
+    while (true) {
+      const element = stack[--i];
       if (element.namespaceURI !== NS_HTML) return;
       switch (element.tagName) {
         case 'caption':
@@ -415,29 +419,32 @@ export class TreeComposer implements TokenSink {
     }
   }
 
-  insertNodeAtCurrentLocation(node: Node, isElementHint?: boolean) {
-    if (!this.insertBefore) {
-      if (isElementHint ?? isElement(node))
-        this.nodeFactory.appendElement(this.insertParent, node as Element);
-      else
-        this.nodeFactory.appendNode(this.insertParent, node);
-    } else {
-      if (isElementHint ?? isElement(node))
-        this.nodeFactory.insertElement(this.insertBefore, node as Element);
-      else
-        this.nodeFactory.insertNode(this.insertBefore, node);
-    }
+  insertNodeAtCurrentLocation(node: Node) {
+    if (!this.insertBefore)
+      this.nodeFactory.appendNode(this.insertParent, node);
+    else
+      this.nodeFactory.insertNode(this.insertBefore, node);
+  }
+
+  insertElementAtCurrentLocation(element: Element) {
+    if (!this.insertBefore)
+      this.nodeFactory.appendElement(this.insertParent, element);
+    else
+      this.nodeFactory.insertElement(this.insertBefore, element);
   }
 
   /** a-ka "insert a foreign element" */
-  createAndInsertElementNS(token: TagToken, namespace: string | null, popImmediately: boolean, onlyAddToStack: boolean = false): Element {
+  createAndInsertElementNS(token: TagToken, namespace: string | null, popImmediately: boolean
+                           // adding the element only to stack can only happen for shadow root hosts, so skip it for now
+                           //, onlyAddToStack: boolean = false
+  ): Element {
     this.updateInsertionLocation();
     if (!popImmediately && token.selfClosed)
       this.error('non-void-html-element-start-tag-with-trailing-solidus');
     token.selfClosed = popImmediately;
     let element = this.createElementNS(token, namespace, this.insertParent);
-    if (!onlyAddToStack)
-      this.insertNodeAtCurrentLocation(element, true);
+    //if (!onlyAddToStack)
+    this.insertElementAtCurrentLocation(element);
     if (!popImmediately)
       this.pushOpenElement(element);
     return element;
@@ -611,8 +618,8 @@ export class TreeComposer implements TokenSink {
         break;
       case NS_SVG:
         switch (element.tagName) {
-          case 'foreignObject':
           case 'desc':
+          case 'foreignObject':
           case 'title':
             return true;
         }
@@ -1641,13 +1648,13 @@ export class TreeComposer implements TokenSink {
         this.reconstructFormattingElements();
         this.adjustMathMLAttributes(token);
         this.adjustForeignAttributes(token);
-        this.createAndInsertElementNS(token, NS_MATHML, token.selfClosed, false);
+        this.createAndInsertElementNS(token, NS_MATHML, token.selfClosed);
         break;
       case 'svg':
         this.reconstructFormattingElements();
         this.adjustSvgAttributes(token);
         this.adjustForeignAttributes(token);
-        this.createAndInsertElementNS(token, NS_SVG, token.selfClosed, false);
+        this.createAndInsertElementNS(token, NS_SVG, token.selfClosed);
         break;
       case 'caption':
       case 'col':
@@ -2033,27 +2040,27 @@ export class TreeComposer implements TokenSink {
   inTableStartTag(token: TagToken): InsertionMode {
     switch (token.name) {
       case 'caption':
-        this.clearStackToTableContext();
+        this.popWhileMatches(this.notATableContext);
         this.formattingList.addMarker();
         this.createAndInsertHTMLElement(token);
         return 'inCaption';
       case 'colgroup':
-        this.clearStackToTableContext();
+        this.popWhileMatches(this.notATableContext);
         this.createAndInsertHTMLElement(token);
         return 'inColumnGroup';
       case 'col':
-        this.clearStackToTableContext();
+        this.popWhileMatches(this.notATableContext);
         return this.forceElementAndState('colgroup', 'inColumnGroup', token);
       case 'tbody':
       case 'tfoot':
       case 'thead':
-        this.clearStackToTableContext();
+        this.popWhileMatches(this.notATableContext);
         this.createAndInsertHTMLElement(token);
         return 'inTableBody';
       case 'td':
       case 'th':
       case 'tr':
-        this.clearStackToTableContext();
+        this.popWhileMatches(this.notATableContext);
         return this.forceElementAndState('tbody', 'inTableBody', token);
       case 'table':
         this.error('table-in-table');
@@ -2122,10 +2129,6 @@ export class TreeComposer implements TokenSink {
         return this.inTableDefault(token);
     }
     return this.insertionMode;
-  }
-
-  clearStackToTableContext() {
-    this.popWhileMatches(this.notATableContext);
   }
 
   notATableContext(name: string, element: Element): boolean {
@@ -2336,13 +2339,13 @@ export class TreeComposer implements TokenSink {
   inTableBodyStartTag(token: TagToken): InsertionMode {
     switch (token.name) {
       case 'tr':
-        this.clearStackToTBodyContext();
+        this.popWhileMatches(this.notATBodyContext);
         this.createAndInsertHTMLElement(token);
         return 'inRow';
       case 'th':
       case 'td':
         this.error('table-cell-in-table-body');
-        this.clearStackToTBodyContext();
+        this.popWhileMatches(this.notATBodyContext);
         return this.forceElementAndState('tr', 'inRow', token);
       case 'caption':
       case 'col':
@@ -2362,7 +2365,7 @@ export class TreeComposer implements TokenSink {
       case 'tfoot':
       case 'thead':
         if (this.hasElementInTableScope(token.name)) {
-          this.clearStackToTBodyContext();
+          this.popWhileMatches(this.notATBodyContext);
           this.popCurrentElement();
           return 'inTable';
         } else {
@@ -2389,17 +2392,13 @@ export class TreeComposer implements TokenSink {
 
   inTableBodyEndTableBody(token: TagToken) {
     if (this.hasMatchInScope(el => this.isTableBodyElement(el), el => this.isTableScopeFence(el))) {
-      this.clearStackToTBodyContext();
+      this.popWhileMatches(this.notATBodyContext);
       this.popCurrentElement();
       return this.reprocessIn('inTable', token);
     } else {
       this.error();
       return this.insertionMode;
     }
-  }
-
-  clearStackToTBodyContext() {
-    this.popWhileMatches(this.notATBodyContext);
   }
 
   notATBodyContext(name: string, element: Element): boolean {
@@ -2443,7 +2442,7 @@ export class TreeComposer implements TokenSink {
     switch (token.name) {
       case 'th':
       case 'td':
-        this.clearStackToRowContext();
+        this.popWhileMatches(this.notARowContext);
         this.createAndInsertHTMLElement(token);
         this.formattingList.addMarker();
         return 'inCell';
@@ -2471,7 +2470,7 @@ export class TreeComposer implements TokenSink {
       case 'thead':
         if (this.hasElementInTableScope(token.name)) {
           if (this.hasElementInTableScope('tr')) {
-            this.clearStackToRowContext();
+            this.popWhileMatches(this.notARowContext);
             this.popCurrentElement();
             return this.reprocessIn('inTableBody', token);
           }
@@ -2496,17 +2495,13 @@ export class TreeComposer implements TokenSink {
 
   inRowEndRow(token: TagToken, reprocess: boolean) {
     if (this.hasElementInTableScope('tr')) {
-      this.clearStackToRowContext();
+      this.popWhileMatches(this.notARowContext);
       this.popCurrentElement();
       return reprocess ? this.reprocessIn('inTableBody', token) : 'inTableBody';
     } else {
       this.error();
       return this.insertionMode;
     }
-  }
-
-  clearStackToRowContext() {
-    this.popWhileMatches(this.notARowContext);
   }
 
   notARowContext(name: string, element: Element): boolean {
