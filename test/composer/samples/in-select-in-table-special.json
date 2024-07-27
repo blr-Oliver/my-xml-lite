@@ -37,6 +37,21 @@
     ]
   ],
   [
+    "caption start", "<select>A<caption>B</select>", "<select>A</select><table><caption>B</caption></table>",
+    [
+      "unexpected-content-in-table",
+      "table-content-in-select-in-table",
+      "orphan-end-tag-inside-special-element"
+    ]
+  ],
+  [
+    "caption end", "<select>A</caption>B</select>", "<select>AB</select><table></table>",
+    [
+      "unexpected-content-in-table",
+      "table-content-in-select-in-table"
+    ]
+  ],
+  [
     "table start in td",
     "<tbody><tr><td>A<select>B<table>C</select>D</td></tr></tbody>",
     "<table><tbody><tr><td>A<select>B</select>CD<table></table></td></tr></tbody></table>",

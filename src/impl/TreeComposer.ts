@@ -194,7 +194,7 @@ export class TreeComposer implements TokenSink {
           return 'inSelect';
         case 'td':
         case 'th':
-          return i === 0 ? 'inBody' : 'inCell';
+          return i === 0 ? /* fragment case */ 'inBody' : 'inCell';
         case 'tr':
           return 'inRow';
         case 'tbody':
@@ -213,11 +213,11 @@ export class TreeComposer implements TokenSink {
           return 'inHead';
         case 'body':
           return 'inBody';
-        case 'frameset':
+        case 'frameset': // fragment case
           return 'inFrameset';
         case 'html':
-          return this.headElement ? 'afterHead' : 'beforeHead';
-        default:
+          return this.headElement ? 'afterHead' : /* fragment case */'beforeHead';
+        default: // fragment case
           if (i === 0) return 'inBody';
       }
     }
@@ -2240,14 +2240,10 @@ export class TreeComposer implements TokenSink {
     }
     return this.insertionMode;
   }
+
   inCaptionEnd(token: TagToken, reprocess: boolean): InsertionMode {
     if (this.hasElementInTableScope('caption')) {
-      this.generateImpliedEndTags();
-      if (this.current.tagName !== 'caption') {
-        this.error();
-        this.popUntilName('caption');
-      } else
-        this.popCurrentElement();
+      this.forceCloseElement('caption');
       this.formattingList.clearToMarker();
       return reprocess ? this.reprocessIn('inTable', token) : 'inTable';
     } else
@@ -2271,8 +2267,8 @@ export class TreeComposer implements TokenSink {
         return this.inColumnGroupStartTag(token as TagToken);
       case 'endTag':
         return this.inColumnGroupEndTag(token as TagToken);
-      default:
-        return this.inColumnGroupDefault(token);
+        // CDATA is impossible here
+        // default: return this.inColumnGroupDefault(token);
     }
     return this.insertionMode;
   }
@@ -2612,8 +2608,8 @@ export class TreeComposer implements TokenSink {
         return this.inSelectEndTag(token as TagToken);
       case 'eof':
         return this.inBodyEof(token);
-      default:
-        this.error('unexpected-content-in-select');
+      // CDATA is impossible here
+      // default: this.error('unexpected-content-in-select');
     }
     return this.insertionMode;
   }

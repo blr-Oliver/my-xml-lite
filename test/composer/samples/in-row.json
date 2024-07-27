@@ -14,5 +14,7 @@
   ["tr fully nested", "<table><tbody><tr><td>A</td><tr><td>B</td></tr><td>C</td></tr></tbody></table>", "<table><tbody><tr><td>A</td></tr><tr><td>B</td></tr><tr><td>C</td></tr></tbody></table>", ["table-cell-in-table-body"]],
   ["end table early", "<table><tbody><tr><td>A</td></table>", "<table><tbody><tr><td>A</td></tr></tbody></table>", []],
   ["end tbody early", "<table><tbody><tr><td>A</td></tbody></table>", "<table><tbody><tr><td>A</td></tr></tbody></table>", []],
-  ["end thead", "<table><tbody><tr><td>A</td></thead></table>", "<table><tbody><tr><td>A</td></tr></tbody></table>", ["wrong-table-body-end-tag"]]
+  ["end thead", "<table><tbody><tr><td>A</td></thead></table>", "<table><tbody><tr><td>A</td></tr></tbody></table>", ["wrong-table-body-end-tag"]],
+  ["template", "<table><tbody><tr><template></template><td></td></tr></tbody></table>", "<table><tbody><tr><template></template><td></td></tr></tbody></table>", []],
+  ["template end", "<table><tbody><tr></template><th></th></tr></tbody></table>", "<table><tbody><tr><th></th></tr></tbody></table>", ["orphan-end-tag"]]
 ]

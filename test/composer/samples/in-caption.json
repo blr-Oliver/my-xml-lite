@@ -7,6 +7,7 @@
   ["unclosed empty", "<table><caption></table>", "<table><caption></caption></table>", []],
   ["unclosed text", "<table><caption>A </table>", "<table><caption>A </caption></table>", []],
   ["unclosed markup", "<table><caption><div>A</div></table>", "<table><caption><div>A</div></caption></table>", []],
+  ["closed early", "<table><caption><div>A</caption></table>", "<table><caption><div>A</div></caption></table>", ["element-closed-before-children"]],
   ["caption", "<table><caption>A<caption>B</table>", "<table><caption>A</caption><caption>B</caption></table>", []],
   ["colgroup", "<table><caption>A<colgroup></table>", "<table><caption>A</caption><colgroup></colgroup></table>", []],
   ["col", "<table><caption>A<col></table>", "<table><caption>A</caption><colgroup><col/></colgroup></table>", []],
@@ -16,8 +17,11 @@
   ["tr", "<table><caption>A<tr></table>", "<table><caption>A</caption><tbody><tr></tr></tbody></table>", []],
   ["td", "<table><caption>A<td></table>", "<table><caption>A</caption><tbody><tr><td></td></tr></tbody></table>", ["table-cell-in-table-body"]],
   ["th", "<table><caption>A<th></table>", "<table><caption>A</caption><tbody><tr><th></th></tr></tbody></table>", ["table-cell-in-table-body"]],
-  ["end html", "<table><caption>A</html></table>", "<table><caption>A</caption></table>", ["unexpected-end-tag-in-caption"]],
-  ["end tbody", "<table><caption>A</tbody></table>", "<table><caption>A</caption></table>", ["unexpected-end-tag-in-caption"]],
-  ["known end tag", "<table><caption>A</div></table>", "<table><caption>A</caption></table>", ["orphan-end-tag"]],
-  ["any end tag", "<table><caption>A</tag></table>", "<table><caption>A</caption></table>", ["orphan-end-tag-inside-special-element"]]
+  ["end body", "<table><caption>A</body>B</table>", "<table><caption>AB</caption></table>", ["unexpected-end-tag-in-caption"]],
+  ["end html", "<table><caption>A</html>B</table>", "<table><caption>AB</caption></table>", ["unexpected-end-tag-in-caption"]],
+  ["end tbody", "<table><caption>A</tbody>B</table>", "<table><caption>AB</caption></table>", ["unexpected-end-tag-in-caption"]],
+  ["known end tag", "<table><caption>A</div>B</table>", "<table><caption>AB</caption></table>", ["orphan-end-tag"]],
+  ["any end tag", "<table><caption>A</tag>B</table>", "<table><caption>AB</caption></table>", ["orphan-end-tag-inside-special-element"]],
+  ["template", "<table><caption>A<template>B</template>C</caption></table>", "<table><caption>A<template>B</template>C</caption></table>", []],
+  ["template end", "<table><caption>A</template>B</caption></table>", "<table><caption>AB</caption></table>", ["orphan-end-tag"]]
 ]

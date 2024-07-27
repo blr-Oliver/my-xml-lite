@@ -35,5 +35,6 @@
   ["any start tag", "<template>A<tag>B</template>", "<template>A<tag>B</tag></template>", ["abrupt-end-of-template"], ["+inTemplate", "-inTemplate", "+inBody", "-inBody"]],
   ["any end tag", "<template>A</tag>B</template>", "<template>AB</template>", ["unexpected-end-tag-in-template"], ["+inTemplate", "-inTemplate"]],
   ["closing foreign element", "<template>A<math>B<mo>C</template>", "<template>A<math>B<mo>C</mo></math></template>", ["unmatched-end-tag-in-foreign-content", "abrupt-end-of-template"], ["+inTemplate", "-inTemplate", "+inBody", "-inBody"]],
-  ["EOF", "<template><br/>", "<template><br/></template>", ["abrupt-end-of-template"], ["+inTemplate", "-inTemplate", "+inBody", "-inBody"]]
+  ["EOF", "<template><br/>", "<template><br/></template>", ["abrupt-end-of-template"], ["+inTemplate", "-inTemplate", "+inBody", "-inBody"]],
+  ["reset to select via template", "<template><select><template></template></select></template>", "<template><select><template></template></select></template>", [], ["+inTemplate", "-inTemplate", "+inBody", "+inTemplate", "-inTemplate", "-inBody"]]
 ]

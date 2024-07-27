@@ -11,5 +11,8 @@
   ["col start tag", "<table><colgroup><col></colgroup></table>", "<table><colgroup><col/></colgroup></table>", []],
   ["col self-closed", "<table><colgroup><col/></colgroup></table>", "<table><colgroup><col/></colgroup></table>", []],
   ["col empty", "<table><colgroup><col></col></colgroup></table>", "<table><colgroup><col/></colgroup></table>", ["void-html-element-end-tag"]],
-  ["col end tag", "<table><colgroup></col></colgroup></table>", "<table><colgroup></colgroup></table>", ["void-html-element-end-tag"]]
+  ["col end tag", "<table><colgroup></col></colgroup></table>", "<table><colgroup></colgroup></table>", ["void-html-element-end-tag"]],
+  ["template", "<table><colgroup><template></template><col/></colgroup></table>", "<table><colgroup><template></template><col/></colgroup></table>", []],
+  ["template end", "<table><colgroup></template><col/></colgroup></table>", "<table><colgroup><col/></colgroup></table>", ["orphan-end-tag"]],
+  ["EOF", "<table><colgroup><col/>", "<table><colgroup><col/></colgroup></table>", ["abrupt-end-of-document"]]
 ]
