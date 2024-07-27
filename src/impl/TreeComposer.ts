@@ -566,11 +566,11 @@ export class TreeComposer implements TokenSink {
   }
 
   isElementInScope(element: Element) {
-    return this.hasMatchInScope(el => el === element, el => this.isScopeFence(el));
+    return this.hasMatchInScope(el => el === element, this.isScopeFence);
   }
 
   hasElementInScope(name: string, namespace: string = NS_HTML): boolean {
-    return this.hasMatchInScope(el => el.tagName === name && el.namespaceURI === namespace, el => this.isScopeFence(el));
+    return this.hasMatchInScope(el => el.tagName === name && el.namespaceURI === namespace, this.isScopeFence);
   }
 
   hasElementInListScope(name: string, namespace: string = NS_HTML): boolean {
@@ -3131,7 +3131,7 @@ export class TreeComposer implements TokenSink {
 
   inForeignContentHtmlSpecificTag(token: TagToken) {
     this.error('html-specific-tag-in-foreign-content');
-    this.popWhileMatches((n, e) => !this.canContainHtml(n, e));
+    this.popWhileMatches((n, e) => this.allowsOnlyForeignContent(n, e));
     return this.process(token);
   }
 
@@ -3170,8 +3170,8 @@ export class TreeComposer implements TokenSink {
     }
     return this.insertionMode;
   }
-  // TODO this should be static (or inlined)
-  canContainHtml(name: string, element: Element): boolean {
-    return element.namespaceURI === NS_HTML || this.isMathMLIntegrationPoint(element) || this.isHTMLIntegrationPoint(element);
+
+  allowsOnlyForeignContent(name: string, element: Element): boolean {
+    return element.namespaceURI !== NS_HTML && !this.isMathMLIntegrationPoint(element) && !this.isHTMLIntegrationPoint(element);
   }
 }
