@@ -470,7 +470,7 @@ export class TreeComposer implements TokenSink {
 
   popWhileMatches(test: (name: string, element: Element) => boolean) {
     const stack = this.openElements;
-    for (let i = stack.length - 1; i >= 0; --i) {
+    for (let i = stack.length - 1; ; --i) {
       const element = stack[i];
       const name = element.tagName;
       if (test(name, element))
@@ -479,9 +479,13 @@ export class TreeComposer implements TokenSink {
     }
   }
 
-  popUntilName(name: string, namespace: string = NS_HTML) {
-    this.popWhileMatches((n, el) => n !== name || el.namespaceURI !== namespace);
-    this.popCurrentElement();
+  popUntilNameHtml(name: string) {
+    const stack = this.openElements;
+    for (let i = stack.length - 1; ; --i) {
+      const element = stack[i];
+      this.popCurrentElement();
+      if (name === element.tagName && element.namespaceURI === NS_HTML) break;
+    }
   }
 
   removeFromStack(element: Element) {
@@ -514,7 +518,7 @@ export class TreeComposer implements TokenSink {
       let current = this.current;
       if (current.tagName !== 'template' || current.namespaceURI !== NS_HTML) {
         this.error('abrupt-end-of-template');
-        this.popUntilName('template');
+        this.popUntilNameHtml('template');
       } else
         this.popCurrentElement();
       this.formattingList.clearToMarker();
@@ -533,7 +537,7 @@ export class TreeComposer implements TokenSink {
     this.generateImpliedEndTags(name);
     if (this.current.tagName !== name || this.current.namespaceURI !== NS_HTML) {
       this.error('element-closed-before-children');
-      this.popUntilName(name);
+      this.popUntilNameHtml(name);
     } else
       this.popCurrentElement();
   }
@@ -565,28 +569,42 @@ export class TreeComposer implements TokenSink {
     return false;
   }
 
+  hasNamedHtmlMatchInScope(name: string, fenceTest: (el: Element) => boolean) {
+    for (let i = this.openElements.length - 1; i >= 0; --i) {
+      const node = this.openElements[i];
+      if (node.tagName === name && node.namespaceURI === NS_HTML) return true;
+      if (fenceTest(node)) break;
+    }
+    return false;
+  }
+
   isElementInScope(element: Element) {
-    return this.hasMatchInScope(el => el === element, this.isScopeFence);
+    for (let i = this.openElements.length - 1; ; --i) {
+      const node = this.openElements[i];
+      if (node === element) return true;
+      if (this.isScopeFence(node)) break;
+    }
+    return false;
   }
 
-  hasElementInScope(name: string, namespace: string = NS_HTML): boolean {
-    return this.hasMatchInScope(el => el.tagName === name && el.namespaceURI === namespace, this.isScopeFence);
+  hasElementInScope(name: string): boolean {
+    return this.hasNamedHtmlMatchInScope(name, this.isScopeFence);
   }
 
-  hasElementInListScope(name: string, namespace: string = NS_HTML): boolean {
-    return this.hasMatchInScope(el => el.tagName === name && el.namespaceURI === namespace, el => this.isListScopeFence(el));
+  hasElementInListScope(name: string): boolean {
+    return this.hasNamedHtmlMatchInScope(name, el => this.isListScopeFence(el));
   }
 
-  hasElementInButtonScope(name: string, namespace: string = NS_HTML): boolean {
-    return this.hasMatchInScope(el => el.tagName === name && el.namespaceURI === namespace, el => this.isButtonScopeFence(el));
+  hasElementInButtonScope(name: string): boolean {
+    return this.hasNamedHtmlMatchInScope(name, el => this.isButtonScopeFence(el));
   }
 
-  hasElementInTableScope(name: string, namespace: string = NS_HTML): boolean {
-    return this.hasMatchInScope(el => el.tagName === name && el.namespaceURI === namespace, el => this.isTableScopeFence(el));
+  hasElementInTableScope(name: string): boolean {
+    return this.hasNamedHtmlMatchInScope(name, this.isTableScopeFence);
   }
 
-  hasElementInSelectScope(name: string, namespace: string = NS_HTML): boolean {
-    return this.hasMatchInScope(el => el.tagName === name && el.namespaceURI === namespace, el => this.isSelectScopeFence(el));
+  hasElementInSelectScope(name: string): boolean {
+    return this.hasNamedHtmlMatchInScope(name, this.isSelectScopeFence);
   }
 
   isScopeFence(element: Element): boolean {
@@ -1513,7 +1531,7 @@ export class TreeComposer implements TokenSink {
           this.error('nested-button');
           // https://github.com/whatwg/html/issues/10476
           // this.generateImpliedEndTags();
-          this.popUntilName('button');
+          this.popUntilNameHtml('button');
         }
         this.reconstructFormattingElements();
         this.createAndInsertHTMLElement(token);
@@ -2057,7 +2075,7 @@ export class TreeComposer implements TokenSink {
       case 'table':
         this.error('table-in-table');
         if (this.hasElementInTableScope('table')) {
-          this.popUntilName('table');
+          this.popUntilNameHtml('table');
           this.resetInsertionMode();
           return this.process(token);
         }
@@ -2096,7 +2114,7 @@ export class TreeComposer implements TokenSink {
     switch (token.name) {
       case 'table':
         if (this.hasElementInTableScope('table')) {
-          this.popUntilName('table');
+          this.popUntilNameHtml('table');
           this.resetInsertionMode();
         } else { // fragment case
           this.error('orphan-end-tag');
@@ -2549,7 +2567,7 @@ export class TreeComposer implements TokenSink {
           this.generateImpliedEndTags();
           if (this.current.tagName !== tagName) {
             this.error('abrupt-end-of-cell');
-            this.popUntilName(tagName);
+            this.popUntilNameHtml(tagName);
           } else
             this.popCurrentElement();
           this.formattingList.clearToMarker();
@@ -2683,7 +2701,7 @@ export class TreeComposer implements TokenSink {
 
   closeSelect(token: TagToken, reprocess: boolean, errorIfMissing: boolean) {
     if (this.hasElementInSelectScope('select')) {
-      this.popUntilName('select');
+      this.popUntilNameHtml('select');
       this.resetInsertionMode();
       if (reprocess)
         return this.process(token);
@@ -2714,7 +2732,7 @@ export class TreeComposer implements TokenSink {
       case 'td':
       case 'th':
         this.error('table-content-in-select-in-table');
-        this.popUntilName('select');
+        this.popUntilNameHtml('select');
         this.resetInsertionMode();
         return this.process(token);
       default:
@@ -2734,7 +2752,7 @@ export class TreeComposer implements TokenSink {
       case 'th':
         this.error('table-content-in-select-in-table');
         if (this.hasElementInTableScope(token.name)) {
-          this.popUntilName('select');
+          this.popUntilNameHtml('select');
           this.resetInsertionMode();
           return this.process(token);
         } else
@@ -2769,7 +2787,7 @@ export class TreeComposer implements TokenSink {
   inTemplateEof(token: Token) {
     if (this.openCounts['template']) {
       this.error('abrupt-end-of-template');
-      this.popUntilName('template');
+      this.popUntilNameHtml('template');
       this.formattingList.clearToMarker();
       this.templateInsertionModes.pop();
       this.resetInsertionMode();
