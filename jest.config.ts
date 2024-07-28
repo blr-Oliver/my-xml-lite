@@ -9,7 +9,7 @@ const config: Config.InitialOptions = {
   // automock: false,
 
   // Stop running tests after `n` failures
-  // bail: 0,
+  bail: 20,
 
   // The directory where Jest should store its cached dependency information
   // cacheDirectory: "C:\\Users\\Vasily Liaskovsky\\AppData\\Local\\Temp\\jest",
@@ -54,6 +54,8 @@ const config: Config.InitialOptions = {
   // Make calling deprecated APIs throw helpful error messages
   // errorOnDeprecated: false,
 
+  extensionsToTreatAsEsm: ['.ts'], // critical for ESM
+
   // The default configuration for fake timers
   // fakeTimers: {
   //   "enableGlobally": false
@@ -93,7 +95,9 @@ const config: Config.InitialOptions = {
   // ],
 
   // A map from regular expressions to module names or to arrays of module names that allow to stub out resources with a single module
-  // moduleNameMapper: {},
+  moduleNameMapper: {
+    '^(\\.{1,2}/.*)\\.js$': '$1'
+  },
 
   // An array of regexp pattern strings, matched against all module paths before considered 'visible' to the module loader
   // modulePathIgnorePatterns: [],
@@ -105,7 +109,7 @@ const config: Config.InitialOptions = {
   // notifyMode: "failure-change",
 
   // A preset that is used as a base for Jest's configuration
-  // preset: undefined,
+  // preset: 'ts-jest',
 
   // Run tests from one or more projects
   // projects: undefined,
@@ -179,7 +183,11 @@ const config: Config.InitialOptions = {
 
   // A map from regular expressions to paths to transformers
   transform: {
-    '^.+\\.tsx?$': 'ts-jest'
+    '^.+\\.tsx?$': [
+      'ts-jest', {
+        useESM: true // critical for ESM
+      }
+    ]
   },
 
   // An array of regexp pattern strings that are matched against all source file paths, matched files will skip transformation
@@ -192,7 +200,7 @@ const config: Config.InitialOptions = {
   // unmockedModulePathPatterns: undefined,
 
   // Indicates whether each individual test should be reported during the run
-  verbose: true
+  verbose: false
 
   // An array of regexp patterns that are matched against all source file paths before re-running tests in watch mode
   // watchPathIgnorePatterns: [],

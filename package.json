@@ -2,12 +2,14 @@
   "name": "my-xml-lite",
   "version": "0.1.0",
   "description": "Minimal ArrayBuffer-based UTF-8/UTF-16 DOM XML/HTML parser with weak validation",
+  "type": "module",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "scripts": {
     "build": "tsc",
-    "test": "jest",
-    "coverage": "jest --coverage",
+    "--test": "'--experimental-vm-modules flag is critical for ESM'",
+    "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js",
+    "coverage": "node --experimental-vm-modules node_modules/jest/bin/jest.js --coverage",
     "debug": "node --inspect=9230 dist/debug.js"
   },
   "keywords": [
