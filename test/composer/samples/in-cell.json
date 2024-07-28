@@ -19,5 +19,10 @@
   ["td nested", "<table><tbody><tr><td>A<td>B</td>C</td></tr></tbody></table>", "C<table><tbody><tr><td>A</td><td>B</td></tr></tbody></table>", ["text-in-table", "unexpected-end-tag-in-row"]],
   ["td end after th in SVG namespace", "<table><tbody><tr><td>A<svg>B<th>C</td></tr></tbody></table>", "<table><tbody><tr><td>A<svg>B<th>C</th></svg></td></tr></tbody></table>", ["unmatched-end-tag-in-foreign-content", "abrupt-end-of-cell"]],
   ["tr end after th in SVG namespace", "<table><tbody><tr><td>A<svg>B<th>C</tr></tbody></table>", "<table><tbody><tr><td>A<svg>B<th>C</th></svg></td></tr></tbody></table>", ["unmatched-end-tag-in-foreign-content", "abrupt-end-of-cell"]],
-  ["wrong table body end tag", "<table><tbody><tr><td>A</td><td>B</thead></td><td>C</td></table>", "<table><tbody><tr><td>A</td><td>B</td><td>C</td></tr></tbody></table>", ["unexpected-end-tag-in-cell"]]
+  ["wrong table body end tag", "<table><tbody><tr><td>A</td><td>B</thead></td><td>C</td></table>", "<table><tbody><tr><td>A</td><td>B</td><td>C</td></tr></tbody></table>", ["unexpected-end-tag-in-cell"]],
+  ["body end", "<table><thead><tr><td>A</body></td><td>B</td></tr></thead></table>", "<table><thead><tr><td>A</td><td>B</td></tr></thead></table>", ["unexpected-end-tag-in-cell"]],
+  ["caption end", "<table><thead><tr><td>A</caption></td><td>B</td></tr></thead></table>", "<table><thead><tr><td>A</td><td>B</td></tr></thead></table>", ["unexpected-end-tag-in-cell"]],
+  ["col end", "<table><thead><tr><td>A</col></td><td>B</td></tr></thead></table>", "<table><thead><tr><td>A</td><td>B</td></tr></thead></table>", ["unexpected-end-tag-in-cell"]],
+  ["colgroup end", "<table><thead><tr><td>A</colgroup></td><td>B</td></tr></thead></table>", "<table><thead><tr><td>A</td><td>B</td></tr></thead></table>", ["unexpected-end-tag-in-cell"]],
+  ["html end", "<table><thead><tr><td>A</html></td><td>B</td></tr></thead></table>", "<table><thead><tr><td>A</td><td>B</td></tr></thead></table>", ["unexpected-end-tag-in-cell"]]
 ]

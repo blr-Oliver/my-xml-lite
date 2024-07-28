@@ -24,5 +24,13 @@
   [
     "unclosed with foreign content", "<table><tbody><svg a><g a/></svg><svg b><g b/></table>", "<svg a><g a/></svg><svg b><g b/></svg><table><tbody></tbody></table>",
     ["unexpected-content-in-table", "unexpected-content-in-table", "unmatched-end-tag-in-foreign-content"]
-  ]
+  ],
+  ["body end", "<table><tbody></body><tr></tr></tbody></table>", "<table><tbody><tr></tr></tbody></table>", ["unexpected-end-tag-in-table-body"]],
+  ["caption end", "<table><tbody></caption><tr></tr></tbody></table>", "<table><tbody><tr></tr></tbody></table>", ["unexpected-end-tag-in-table-body"]],
+  ["col end", "<table><tbody></col><tr></tr></tbody></table>", "<table><tbody><tr></tr></tbody></table>", ["unexpected-end-tag-in-table-body"]],
+  ["colgroup end", "<table><tbody></colgroup><tr></tr></tbody></table>", "<table><tbody><tr></tr></tbody></table>", ["unexpected-end-tag-in-table-body"]],
+  ["html end", "<table><tbody></html><tr></tr></tbody></table>", "<table><tbody><tr></tr></tbody></table>", ["unexpected-end-tag-in-table-body"]],
+  ["td end", "<table><tbody></td><tr></tr></tbody></table>", "<table><tbody><tr></tr></tbody></table>", ["unexpected-end-tag-in-table-body"]],
+  ["th end", "<table><tbody></th><tr></tr></tbody></table>", "<table><tbody><tr></tr></tbody></table>", ["unexpected-end-tag-in-table-body"]],
+  ["tr end", "<table><tbody></tr><tr></tr></tbody></table>", "<table><tbody><tr></tr></tbody></table>", ["unexpected-end-tag-in-table-body"]]
 ]
