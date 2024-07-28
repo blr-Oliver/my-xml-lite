@@ -7,7 +7,7 @@
   ["NUL", "<html><body>\u0000</body></html>", "<html><head></head><body></body></html>", ["unexpected-null-character"]],
   ["text", "<html><body>A</body></html>", "<html><head></head><body>A</body></html>", []],
   ["space + text + space", "<html><body> \t\nA \t\f</body></html>", "<html><head></head><body> \t\nA \t\f</body></html>", []],
-  ["CDATA", "<html><body><![CDATA[A]]></body></html>", "<html><head></head><body><!--[CDATA[A]]--></body></html>", ["incorrectly-opened-comment"]],
+  ["CDATA", "<html><body><![CDATA[A]]></body></html>", "<html><head></head><body><!--[CDATA[A]]--></body></html>", ["cdata-in-html-content", "incorrectly-opened-comment"]],
   ["html start", "<html b a=\"a\"><body><html c a=\"b\"></body></html>", "<html b a=\"a\" c><head></head><body></body></html>", ["unexpected-html-start-tag"]],
   ["body start", "<html><body b a=\"a\"><body c a=\"b\"></body></html>", "<html><head></head><body b a=\"a\" c></body></html>", ["unexpected-body-start-tag"]],
   ["head void elements", "<html><body><base><basefont><bgsound><link><meta></body></html>", "<html><head></head><body><base/><basefont/><bgsound/><link/><meta/></body></html>", []],

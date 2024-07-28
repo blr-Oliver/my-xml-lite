@@ -5,7 +5,7 @@
   ["space + doctype", "<!DOCTYPE html> \n\f\t<!DOCTYPE html>", "<!DOCTYPE html><html><head></head><body></body></html>", ["unexpected-doctype"]],
   ["NUL", "<!DOCTYPE html>\u0000", "<!DOCTYPE html><html><head></head><body></body></html>", ["unexpected-null-character"]],
   ["text", "<!DOCTYPE html>A", "<!DOCTYPE html><html><head></head><body>A</body></html>", []],
-  ["CDATA", "<!DOCTYPE html><![CDATA[A]]>", "<!DOCTYPE html><!--[CDATA[A]]--><html><head></head><body></body></html>", ["incorrectly-opened-comment"]],
+  ["CDATA", "<!DOCTYPE html><![CDATA[A]]>", "<!DOCTYPE html><!--[CDATA[A]]--><html><head></head><body></body></html>", ["cdata-in-html-content", "incorrectly-opened-comment"]],
   ["html start", "<!DOCTYPE html><html a>", "<!DOCTYPE html><html a><head></head><body></body></html>", []],
   ["head end", "<!DOCTYPE html></head>", "<!DOCTYPE html><html><head></head><body></body></html>", []],
   ["body end", "<!DOCTYPE html></body>", "<!DOCTYPE html><html><head></head><body></body></html>", []],

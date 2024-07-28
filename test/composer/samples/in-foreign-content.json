@@ -132,13 +132,13 @@
     "math:annotation-xml[encoding='text/html']>tag",
     "<math><![CDATA[A]]>\u0000<annotation-xml encoding=\"text/HTML\"><![CDATA[B]]>\u0000<tag xmlns=\"http://www.w3.org/1999/xhtml\"><![CDATA[C]]>\u0000</tag></annotation-xml></math>",
     "<html><head></head><body><math><![CDATA[A]]>\uFFFD<annotation-xml encoding=\"text/HTML\"><![CDATA[B]]><tag xmlns=\"http://www.w3.org/1999/xhtml\"><!--[CDATA[C]]--></tag></annotation-xml></math></body></html>",
-    ["unexpected-null-character", "unexpected-null-character", "incorrectly-opened-comment", "unexpected-null-character"]
+    ["unexpected-null-character", "unexpected-null-character", "cdata-in-html-content", "incorrectly-opened-comment", "unexpected-null-character"]
   ],
   [
     "math:annotation-xml[encoding='application/xhtml+xml']>tag",
     "<math><![CDATA[A]]>\u0000<annotation-xml encoding=\"application/xhtml+xml\"><![CDATA[B]]>\u0000<tag xmlns=\"http://www.w3.org/1999/xhtml\"><![CDATA[C]]>\u0000</tag></annotation-xml></math>",
     "<html><head></head><body><math><![CDATA[A]]>\uFFFD<annotation-xml encoding=\"application/xhtml+xml\"><![CDATA[B]]><tag xmlns=\"http://www.w3.org/1999/xhtml\"><!--[CDATA[C]]--></tag></annotation-xml></math></body></html>",
-    ["unexpected-null-character", "unexpected-null-character", "incorrectly-opened-comment", "unexpected-null-character"]
+    ["unexpected-null-character", "unexpected-null-character", "cdata-in-html-content", "incorrectly-opened-comment", "unexpected-null-character"]
   ],
   [
     "math:annotation-xml[encoding='text/javascript']>svg",

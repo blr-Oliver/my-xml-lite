@@ -1145,8 +1145,12 @@ export class Tokenizer implements ITokenizer {
       case 0x64: // d
         return this.matchSequence(code, DOCTYPE, true, 'doctype', 'markupDeclarationFail');
       case CodePoints.OPEN_SQUARE_BRACKET:
-        if (this.composer && this.composer.adjustedCurrentNode && this.composer.adjustedCurrentNode.namespaceURI !== NS_HTML)
-          return this.matchSequence(code, CDATA, false, 'cdataSectionStart', 'markupDeclarationFail');
+        if (this.composer) {
+          const adjustedNode = this.composer.adjustedCurrentNode;
+          if (adjustedNode && adjustedNode.namespaceURI !== NS_HTML)
+            return this.matchSequence(code, CDATA, false, 'cdataSectionStart', 'markupDeclarationFail');
+        }
+        this.error('cdata-in-html-content');
       default:
         return this.callState('markupDeclarationFail', code);
     }

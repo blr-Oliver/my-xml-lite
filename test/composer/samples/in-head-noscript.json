@@ -7,7 +7,7 @@
   ["text", "<head><noscript><!--A-->B<!--C--></noscript></head>", "<html><head><noscript><!--A--></noscript></head><body>B<!--C--></body></html>", ["inappropriate-content-in-head-noscript", "orphan-end-tag-inside-special-element", "orphan-end-tag-inside-special-element"]],
   ["char ref", "<head><noscript>&#x41;</noscript></head>", "<html><head><noscript></noscript></head><body>A</body></html>", ["inappropriate-content-in-head-noscript", "orphan-end-tag-inside-special-element", "orphan-end-tag-inside-special-element"]],
   ["NUL", "<head><noscript><!--A-->\u0000<!--B--></noscript></head>", "<html><head><noscript><!--A--><!--B--></noscript></head><body></body></html>", ["unexpected-null-character"]],
-  ["CDATA", "<head><noscript><![CDATA[A]]></noscript></head>", "<html><head><noscript><!--[CDATA[A]]--></noscript></head><body></body></html>", ["incorrectly-opened-comment"]],
+  ["CDATA", "<head><noscript><![CDATA[A]]></noscript></head>", "<html><head><noscript><!--[CDATA[A]]--></noscript></head><body></body></html>", ["cdata-in-html-content", "incorrectly-opened-comment"]],
   ["html start", "<html b a=\"a\"><head><noscript><html c a=\"a\"></noscript></head>", "<html b a=\"a\" c><head><noscript></noscript></head><body></body></html>", ["unexpected-html-start-tag"]],
   ["base start", "<head><noscript><!--A--><base><!--B--></noscript></head>", "<html><head><noscript><!--A--></noscript><base/><!--B--></head><body></body></html>", ["inappropriate-content-in-head-noscript", "unexpected-end-tag-in-head"]],
   ["basefont start", "<head><noscript><basefont></noscript></head>", "<html><head><noscript><basefont/></noscript></head><body></body></html>", []],

@@ -4,7 +4,7 @@
   ["doctype", "<head></head><!DOCTYPE html>", "<html><head></head><body></body></html>", ["unexpected-doctype"]],
   ["text", "<head></head>A", "<html><head></head><body>A</body></html>", []],
   ["NUL", "<head></head>\u0000", "<html><head></head><body></body></html>", ["unexpected-null-character"]],
-  ["CDATA", "<head></head><![CDATA[A]]>", "<html><head></head><!--[CDATA[A]]--><body></body></html>", ["incorrectly-opened-comment"]],
+  ["CDATA", "<head></head><![CDATA[A]]>", "<html><head></head><!--[CDATA[A]]--><body></body></html>", ["cdata-in-html-content", "incorrectly-opened-comment"]],
   ["html start", "<html a=\"a\" b><head></head><html a=\"b\" c>", "<html a=\"a\" b c><head></head><body></body></html>", ["unexpected-html-start-tag"]],
   ["body start", "<head></head><body a>", "<html><head></head><body a></body></html>", []],
   ["frameset start", "<head></head><frameset a>", "<html><head></head><frameset a></frameset></html>", ["abrupt-end-of-frameset"]],
