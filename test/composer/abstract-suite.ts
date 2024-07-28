@@ -41,16 +41,6 @@ export abstract class AbstractSuite<R, T extends TestCase, C extends TreeCompose
     this.tokenizer.composer = this.composer;
 
     this.composer.reset();
-    /*
-    this.composer.templateInsertionModes = [];
-    this.composer.openElements = [];
-    this.composer.openCounts = {};
-    this.composer.fosterTables = new Map<any, any>();
-    this.composer.formattingElements = [];
-    this.composer.formattingArk = {};
-    this.composer.formattingZones = [];
-    this.composer.pendingTableCharacters = [];
-    */
 
     this.tokenizer.env = {
       buffer: new FixedSizeStringBuilder(1000),
@@ -164,15 +154,5 @@ export class ExcerptSuite<R extends DefaultRawTest = DefaultRawTest, T extends D
     result.errors.unshift(...this.prefixErrors);
     result.errors.push(...this.suffixErrors);
     return result;
-  }
-}
-
-export class BodyContentSuite extends ExcerptSuite {
-  constructor(testCases: DefaultRawTest[]) {
-    super(testCases, {
-      prefixOutput: '<html><head></head><body>',
-      suffixOutput: '</body></html>',
-      prefixErrors: ['missing-doctype']
-    });
   }
 }

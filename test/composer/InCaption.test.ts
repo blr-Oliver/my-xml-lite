@@ -1,7 +1,11 @@
-import {BodyContentSuite, DefaultRawTest} from './abstract-suite';
+import {DefaultRawTest, ExcerptSuite} from './abstract-suite';
 import {default as rawTests} from './samples/in-caption.json';
 
-const suite = new BodyContentSuite(rawTests as DefaultRawTest[]);
+const suite = new ExcerptSuite(rawTests as DefaultRawTest[], {
+  prefixInput: '<!DOCTYPE html>',
+  prefixOutput: '<!DOCTYPE html><html><head></head><body>',
+  suffixOutput: '</body></html>'
+});
 
 beforeAll(() => suite.beforeAll());
 beforeEach(() => suite.beforeEach());
