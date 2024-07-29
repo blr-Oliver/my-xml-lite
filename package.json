@@ -6,8 +6,9 @@
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "scripts": {
-    "build": "tsc",
-    "--test": "'--experimental-vm-modules flag is critical for ESM'",
+    "build": "tsc --project tsconfig.src.json",
+    "build-test": "tsc",
+    "--test": "--experimental-vm-modules flag is critical for ESM",
     "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js",
     "coverage": "node --experimental-vm-modules node_modules/jest/bin/jest.js --coverage",
     "debug": "node --inspect=9230 dist/debug.js"
