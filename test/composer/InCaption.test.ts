@@ -1,7 +1,6 @@
-import {DefaultRawTest, ExcerptSuite} from './abstract-suite.js';
-import {inCaptionParams} from './samples/excerpts';
+import {DefaultRawTest, DefaultSuite} from './abstract-suite.js';
 import {inCaption} from './samples/index.js';
 
-const suite = new ExcerptSuite('In caption mode', inCaption as DefaultRawTest[], inCaptionParams);
+const suite = new DefaultSuite('In caption mode', inCaption as DefaultRawTest[]);
 
 describe(suite.name, () => suite.createSuite());

@@ -1,6 +1,5 @@
 import {NS_XLINK, NS_XML, NS_XMLNS} from '../../src/impl/TreeComposer.js';
-import {DefaultRawTest, DefaultTestCase, ExcerptSuite} from './abstract-suite.js';
-import {foreignAttributesParams} from './samples/excerpts';
+import {DefaultRawTest, DefaultSuite, DefaultTestCase} from './abstract-suite.js';
 import {foreignAttributes} from './samples/index.js';
 
 const NS_BY_PREFIX: { [prefix: string]: string } = {
@@ -9,9 +8,9 @@ const NS_BY_PREFIX: { [prefix: string]: string } = {
   'xmlns': NS_XMLNS
 }
 
-class ForeignAttributesTest extends ExcerptSuite {
+class ForeignAttributesTest extends DefaultSuite {
   constructor(tests: DefaultRawTest[]) {
-    super('Adjusting foreign attributes', tests, foreignAttributesParams);
+    super('Adjusting foreign attributes', tests);
   }
 
   runChecks(test: DefaultTestCase) {

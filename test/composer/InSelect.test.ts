@@ -1,7 +1,6 @@
-import {DefaultRawTest, ExcerptSuite} from './abstract-suite.js';
-import {inSelectParams} from './samples/excerpts';
+import {DefaultRawTest, DefaultSuite} from './abstract-suite.js';
 import {inSelect} from './samples/index.js';
 
-const suite = new ExcerptSuite('In select mode', inSelect as DefaultRawTest[] as DefaultRawTest[], inSelectParams);
+const suite = new DefaultSuite('In select mode', inSelect as DefaultRawTest[] as DefaultRawTest[]);
 
 describe(suite.name, () => suite.createSuite());

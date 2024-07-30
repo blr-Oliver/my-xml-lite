@@ -1,7 +1,6 @@
-import {DefaultRawTest, ExcerptSuite} from './abstract-suite.js';
-import {doctypeOnly} from './samples/excerpts';
+import {DefaultRawTest, DefaultSuite} from './abstract-suite.js';
 import {inForeignContent} from './samples/index.js';
 
-const suite = new ExcerptSuite('In foreign content', inForeignContent as DefaultRawTest[], doctypeOnly);
+const suite = new DefaultSuite('In foreign content', inForeignContent as DefaultRawTest[]);
 
 describe(suite.name, () => suite.createSuite());

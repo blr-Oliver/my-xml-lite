@@ -1,7 +1,6 @@
-import {DefaultRawTest, ExcerptSuite} from './abstract-suite.js';
-import {inTableParams} from './samples/excerpts';
+import {DefaultRawTest, DefaultSuite} from './abstract-suite.js';
 import {inTable} from './samples/index.js';
 
-const suite = new ExcerptSuite('In table mode', inTable as DefaultRawTest[], inTableParams);
+const suite = new DefaultSuite('In table mode', inTable as DefaultRawTest[]);
 
 describe(suite.name, () => suite.createSuite());

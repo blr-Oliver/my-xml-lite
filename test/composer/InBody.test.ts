@@ -1,7 +1,6 @@
-import {DefaultRawTest, ExcerptSuite} from './abstract-suite.js';
-import {doctypeOnly} from './samples/excerpts';
+import {DefaultRawTest, DefaultSuite} from './abstract-suite.js';
 import {inBody} from './samples/index.js';
 
-const suite = new ExcerptSuite('In body mode', inBody as DefaultRawTest[], doctypeOnly);
+const suite = new DefaultSuite('In body mode', inBody as DefaultRawTest[]);
 
 describe(suite.name, () => suite.createSuite());

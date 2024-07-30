@@ -1,7 +1,6 @@
-import {DefaultRawTest, ExcerptSuite} from './abstract-suite.js';
-import {inSelectInTableTdParams} from './samples/excerpts';
+import {DefaultRawTest, DefaultSuite} from './abstract-suite.js';
 import {inSelectInTd} from './samples/index.js';
 
-const suite = new ExcerptSuite('In select in table mode (inside td)', inSelectInTd as DefaultRawTest[], inSelectInTableTdParams);
+const suite = new DefaultSuite('In select in table mode (inside td)', inSelectInTd as DefaultRawTest[]);
 
 describe(suite.name, () => suite.createSuite());

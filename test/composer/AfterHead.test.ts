@@ -1,7 +1,6 @@
-import {DefaultRawTest, ExcerptSuite} from './abstract-suite.js';
-import {doctypeOnly} from './samples/excerpts';
+import {DefaultRawTest, DefaultSuite} from './abstract-suite.js';
 import {afterHead} from './samples/index.js';
 
-const suite = new ExcerptSuite('After head mode', afterHead as DefaultRawTest[], doctypeOnly);
+const suite = new DefaultSuite('After head mode', afterHead as DefaultRawTest[]);
 
 describe(suite.name, () => suite.createSuite());
