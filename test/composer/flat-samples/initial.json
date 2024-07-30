@@ -1,0 +1,13 @@
+[
+  ["space", " \n\f\t", "", [], []],
+  ["comment", "<!--A-->", "<!--A-->", [], []],
+  ["comment + comment", "<!--A--><!--B-->", "<!--A--><!--B-->", [], []],
+  ["comment + space + comment", "<!--A--> \n\f\t<!--B-->", "<!--A--><!--B-->", [], []],
+  ["doctype", "<!DOCTYPE html>", "<!DOCTYPE html>", [], ["beforeHtml"]],
+  ["space + doctype", " \n\f\t<!DOCTYPE html>", "<!DOCTYPE html>", [], ["beforeHtml"]],
+  ["comment + doctype", "<!--A--><!DOCTYPE html>", "<!--A--><!DOCTYPE html>", [], ["beforeHtml"]],
+  ["NUL", "\u0000", "", ["unexpected-null-character"], []],
+  ["character", "A", "<html><head></head><body>A</body></html>", ["missing-doctype"], ["beforeHtml", "beforeHead", "inHead", "afterHead", "inBody"]],
+  ["CDATA", "<![CDATA[A]]>", "<!--[CDATA[A]]-->", ["cdata-in-html-content", "incorrectly-opened-comment"], []],
+  ["any tag", "<tag>", "<html><head></head><body><tag></tag></body></html>", ["missing-doctype"], ["beforeHtml", "beforeHead", "inHead", "afterHead", "inBody"]]
+]

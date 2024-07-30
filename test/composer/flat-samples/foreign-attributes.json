@@ -1,0 +1,13 @@
+[
+  ["xlink:actuate", "<!DOCTYPE html><svg id=\"test\" xlink:actuate=\"test\"/>", "<!DOCTYPE html><html><head></head><body><svg id=\"test\" xlink:actuate=\"test\"/></body></html>", []],
+  ["xlink:arcrole", "<!DOCTYPE html><svg id=\"test\" xlink:arcrole=\"test\"/>", "<!DOCTYPE html><html><head></head><body><svg id=\"test\" xlink:arcrole=\"test\"/></body></html>", []],
+  ["xlink:href", "<!DOCTYPE html><svg id=\"test\" xlink:href=\"test\"/>", "<!DOCTYPE html><html><head></head><body><svg id=\"test\" xlink:href=\"test\"/></body></html>", []],
+  ["xlink:role", "<!DOCTYPE html><svg id=\"test\" xlink:role=\"test\"/>", "<!DOCTYPE html><html><head></head><body><svg id=\"test\" xlink:role=\"test\"/></body></html>", []],
+  ["xlink:show", "<!DOCTYPE html><svg id=\"test\" xlink:show=\"test\"/>", "<!DOCTYPE html><html><head></head><body><svg id=\"test\" xlink:show=\"test\"/></body></html>", []],
+  ["xlink:title", "<!DOCTYPE html><svg id=\"test\" xlink:title=\"test\"/>", "<!DOCTYPE html><html><head></head><body><svg id=\"test\" xlink:title=\"test\"/></body></html>", []],
+  ["xlink:type", "<!DOCTYPE html><svg id=\"test\" xlink:type=\"test\"/>", "<!DOCTYPE html><html><head></head><body><svg id=\"test\" xlink:type=\"test\"/></body></html>", []],
+  ["xml:lang", "<!DOCTYPE html><svg id=\"test\" xml:lang=\"test\"/>", "<!DOCTYPE html><html><head></head><body><svg id=\"test\" xml:lang=\"test\"/></body></html>", []],
+  ["xml:space", "<!DOCTYPE html><svg id=\"test\" xml:space=\"test\"/>", "<!DOCTYPE html><html><head></head><body><svg id=\"test\" xml:space=\"test\"/></body></html>", []],
+  ["xmlns", "<!DOCTYPE html><svg id=\"test\" xmlns=\"test\"/>", "<!DOCTYPE html><html><head></head><body><svg id=\"test\" xmlns=\"test\"/></body></html>", ["mismatched-xmlns-attribute"]],
+  ["xmlns:xlink", "<!DOCTYPE html><svg id=\"test\" xmlns:xlink=\"test\"/>", "<!DOCTYPE html><html><head></head><body><svg id=\"test\" xmlns:xlink=\"test\"/></body></html>", ["invalid-xlink-namespace"]]
+]

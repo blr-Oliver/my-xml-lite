@@ -1,0 +1,17 @@
+[
+  ["space", "<!DOCTYPE html><frameset></frameset></html> \t\n\f", "<!DOCTYPE html><html><head></head><frameset></frameset> \t\n\f</html>", []],
+  ["text", "<!DOCTYPE html><frameset></frameset></html>A", "<!DOCTYPE html><html><head></head><frameset></frameset></html>", ["unexpected-non-whitespace-character"]],
+  ["space + text", "<!DOCTYPE html><frameset></frameset></html> \t\n\fA", "<!DOCTYPE html><html><head></head><frameset></frameset> \t\n\f</html>", ["unexpected-non-whitespace-character"]],
+  ["comment", "<!DOCTYPE html><frameset></frameset></html><!--A-->", "<!DOCTYPE html><html><head></head><frameset></frameset></html><!--A-->", []],
+  ["CDATA", "<!DOCTYPE html><frameset></frameset></html><![CDATA[A]]>", "<!DOCTYPE html><html><head></head><frameset></frameset></html><!--[CDATA[A]]-->", ["cdata-in-html-content", "incorrectly-opened-comment"]],
+  ["doctype (repeated)", "<!DOCTYPE html><frameset></frameset></html><!DOCTYPE html>", "<!DOCTYPE html><html><head></head><frameset></frameset></html>", ["unexpected-doctype"]],
+  ["doctype (first time)", "<frameset></frameset></html><!DOCTYPE html>", "<html><head></head><frameset></frameset></html>", ["missing-doctype", "unexpected-doctype"]],
+  ["noframes start", "<!DOCTYPE html><frameset></frameset></html><noframes>&#x42;</html>", "<!DOCTYPE html><html><head></head><frameset></frameset><noframes>&#x42;</html></noframes></html>", ["abrupt-end-of-text"]],
+  ["noframes end", "<!DOCTYPE html><frameset></frameset></html></noframes>", "<!DOCTYPE html><html><head></head><frameset></frameset></html>", ["content-after-html"]],
+  ["noframes start", "<!DOCTYPE html><frameset></frameset></html><noframes>&#x42;</html></noframes>", "<!DOCTYPE html><html><head></head><frameset></frameset><noframes>&#x42;</html></noframes></html>", []],
+  ["html start", "<!DOCTYPE html><html a=\"1\" c=\"1\"><frameset></frameset></html><html b=\"2\" c=\"2\">", "<!DOCTYPE html><html a=\"1\" c=\"1\" b=\"2\"><head></head><frameset></frameset></html>", ["unexpected-html-start-tag"]],
+  ["html end", "<!DOCTYPE html><frameset></frameset></html></html>", "<!DOCTYPE html><html><head></head><frameset></frameset></html>", ["content-after-html"]],
+  ["any start tag", "<!DOCTYPE html><frameset></frameset></html><tag>", "<!DOCTYPE html><html><head></head><frameset></frameset></html>", ["content-after-html"]],
+  ["any end tag", "<!DOCTYPE html><frameset></frameset></html></tag>", "<!DOCTYPE html><html><head></head><frameset></frameset></html>", ["content-after-html"]],
+  ["any proper element", "<!DOCTYPE html><frameset></frameset></html><tag></tag>", "<!DOCTYPE html><html><head></head><frameset></frameset></html>", ["content-after-html", "content-after-html"]]
+]
