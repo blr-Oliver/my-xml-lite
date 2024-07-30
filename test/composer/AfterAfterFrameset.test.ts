@@ -1,8 +1,6 @@
 import {DefaultRawTest, DefaultSuite} from './abstract-suite.js';
 import {afterAfterFrameset} from './samples/index.js';
 
-const suite = new DefaultSuite(afterAfterFrameset as DefaultRawTest[]);
+const suite = new DefaultSuite('After after frameset mode', afterAfterFrameset as DefaultRawTest[]);
 
-beforeAll(() => suite.beforeAll());
-beforeEach(() => suite.beforeEach());
-describe('After after frameset mode', () => suite.createSuite());
+describe(suite.name, () => suite.createSuite());

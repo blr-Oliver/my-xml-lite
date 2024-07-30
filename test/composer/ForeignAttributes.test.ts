@@ -11,7 +11,7 @@ const NS_BY_PREFIX: { [prefix: string]: string } = {
 
 class ForeignAttributesTest extends ExcerptSuite {
   constructor(tests: DefaultRawTest[]) {
-    super(tests, foreignAttributesParams);
+    super('Adjusting foreign attributes', tests, foreignAttributesParams);
   }
 
   runChecks(test: DefaultTestCase) {
@@ -40,6 +40,4 @@ class ForeignAttributesTest extends ExcerptSuite {
 
 const suite = new ForeignAttributesTest(foreignAttributes as DefaultRawTest[]);
 
-beforeAll(() => suite.beforeAll());
-beforeEach(() => suite.beforeEach());
-describe('Adjusting foreign attributes', () => suite.createSuite());
+describe(suite.name, () => suite.createSuite());

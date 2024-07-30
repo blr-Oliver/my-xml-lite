@@ -16,7 +16,7 @@ class InitialModeSuite extends DefaultSuite<ModeTrackingRawTest, ModeTrackingTes
   modes!: InsertionMode[];
 
   constructor(testCases: ModeTrackingRawTest[]) {
-    super(testCases);
+    super('Initial mode', testCases);
   }
 
   createComposer(): TreeComposer {
@@ -59,6 +59,4 @@ class InitialModeSuite extends DefaultSuite<ModeTrackingRawTest, ModeTrackingTes
 
 const suite = new InitialModeSuite(initial as ModeTrackingRawTest[]);
 
-beforeAll(() => suite.beforeAll());
-beforeEach(() => suite.beforeEach());
-describe('Initial mode', () => suite.createSuite());
+describe(suite.name, () => suite.createSuite());

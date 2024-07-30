@@ -3,8 +3,6 @@ import {inSelectInTableTdParams} from './samples/excerpts';
 import {inSelectCommon, inSelectInTd} from './samples/index.js';
 
 const tdTests = (inSelectCommon as DefaultRawTest[]).concat(inSelectInTd as DefaultRawTest[]);
-const tdSuite = new ExcerptSuite(tdTests, inSelectInTableTdParams);
+const suite = new ExcerptSuite('In select in table mode (inside td)', tdTests, inSelectInTableTdParams);
 
-beforeAll(() => tdSuite.beforeAll());
-beforeEach(() => tdSuite.beforeEach());
-describe('In select in table mode (inside td)', () => tdSuite.createSuite());
+describe(suite.name, () => suite.createSuite());

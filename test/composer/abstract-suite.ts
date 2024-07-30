@@ -13,15 +13,23 @@ export interface TestCase {
   name: string;
 }
 
+export interface SuiteParams {
+  fileName?: string;
+}
+
 export abstract class AbstractSuite<R, T extends TestCase, C extends TreeComposer> {
   testCases: R[];
   errorList: string[];
   tokenizer!: Tokenizer;
   composer!: C;
   preparedTests!: T[];
+  params?: SuiteParams;
+  readonly name: string;
 
-  protected constructor(testCases: R[]) {
+  protected constructor(name: string, testCases: R[], params?: SuiteParams) {
+    this.name = name;
     this.testCases = testCases;
+    this.params = params;
     this.errorList = [];
   }
 
@@ -65,6 +73,9 @@ export abstract class AbstractSuite<R, T extends TestCase, C extends TreeCompose
   abstract runTest(test: T): void;
 
   createSuite() {
+    beforeAll(() => this.beforeAll());
+    beforeEach(() => this.beforeEach());
+
     this.prepareTests();
     for (let test of this.preparedTests) {
       this.createTest(test);
@@ -86,8 +97,8 @@ export type DefaultRawTestCore = [string/*name*/, string/*input*/, string/*outpu
 export type DefaultRawTest = [...DefaultRawTestCore, ...any[]];
 
 export class DefaultSuite<R = DefaultRawTest, T extends DefaultTestCase = DefaultTestCase, C extends TreeComposer = TreeComposer> extends AbstractSuite<R, T, C> {
-  constructor(testCases: R[]) {
-    super(testCases);
+  constructor(name: string, testCases: R[]) {
+    super(name, testCases);
   }
 
   createComposer(): C {
@@ -143,8 +154,8 @@ export class ExcerptSuite<R extends DefaultRawTest = DefaultRawTest, T extends D
   prefixErrors: string[];
   suffixErrors: string[];
 
-  constructor(testCases: R[], excerpt: ExcerptParams) {
-    super(testCases);
+  constructor(name: string, testCases: R[], excerpt: ExcerptParams) {
+    super(name, testCases);
     this.prefixInput = excerpt.prefixInput || '';
     this.suffixInput = excerpt.suffixInput || '';
     this.prefixOutput = excerpt.prefixOutput || '';

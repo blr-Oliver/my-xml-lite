@@ -1,8 +1,6 @@
 import {DefaultRawTest, DefaultSuite} from './abstract-suite.js';
 import {afterBody} from './samples/index.js';
 
-const suite = new DefaultSuite(afterBody as DefaultRawTest[]);
+const suite = new DefaultSuite('After body mode', afterBody as DefaultRawTest[]);
 
-beforeAll(() => suite.beforeAll());
-beforeEach(() => suite.beforeEach());
-describe('After body mode', () => suite.createSuite());
+describe(suite.name, () => suite.createSuite());

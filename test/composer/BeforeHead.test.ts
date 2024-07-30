@@ -1,8 +1,6 @@
 import {DefaultRawTest, DefaultSuite} from './abstract-suite.js';
 import {beforeHead} from './samples/index.js';
 
-const suite = new DefaultSuite(beforeHead as DefaultRawTest[]);
+const suite = new DefaultSuite('Before head mode', beforeHead as DefaultRawTest[]);
 
-beforeAll(() => suite.beforeAll());
-beforeEach(() => suite.beforeEach());
-describe('Before head mode', () => suite.createSuite());
+describe(suite.name, () => suite.createSuite());

@@ -14,7 +14,7 @@ class InTemplateSuite extends ExcerptSuite<TemplateRawTest, TemplateTestCase> {
   templateModeChanges: InsertionModeChange[] = [];
 
   constructor(rawTests: TemplateRawTest[]) {
-    super(rawTests, inTemplateParams);
+    super('In template mode', rawTests, inTemplateParams);
   }
 
   configure() {
@@ -50,6 +50,4 @@ class InTemplateSuite extends ExcerptSuite<TemplateRawTest, TemplateTestCase> {
 
 const suite = new InTemplateSuite(inTemplate as TemplateRawTest[]);
 
-beforeAll(() => suite.beforeAll());
-beforeEach(() => suite.beforeEach());
-describe('In template mode', () => suite.createSuite());
+describe(suite.name, () => suite.createSuite());
