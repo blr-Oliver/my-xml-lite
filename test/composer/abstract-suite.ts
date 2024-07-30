@@ -18,6 +18,7 @@ export abstract class AbstractSuite<R, T extends TestCase, C extends TreeCompose
   errorList: string[];
   tokenizer!: Tokenizer;
   composer!: C;
+  preparedTests!: T[];
 
   protected constructor(testCases: R[]) {
     this.testCases = testCases;
@@ -34,6 +35,10 @@ export abstract class AbstractSuite<R, T extends TestCase, C extends TreeCompose
 
   createTokenizer(): Tokenizer {
     return new Tokenizer(buildIndex(HTML_SPECIAL));
+  }
+
+  prepareTests() {
+    this.preparedTests = this.testCases.map(rawTest => this.prepareTest(rawTest));
   }
 
   configure() {
@@ -60,8 +65,9 @@ export abstract class AbstractSuite<R, T extends TestCase, C extends TreeCompose
   abstract runTest(test: T): void;
 
   createSuite() {
-    for (let test of this.testCases) {
-      this.createTest(this.prepareTest(test));
+    this.prepareTests();
+    for (let test of this.preparedTests) {
+      this.createTest(test);
     }
   }
 
