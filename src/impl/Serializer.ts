@@ -36,11 +36,12 @@ function serializeInChunks(node: Node, chunks: string[] = []): string[] {
 
 function serializeElement(node: Element, chunks: string[]) {
   chunks.push('<');
-  chunks.push(node.tagName);
+  const tagName = node.namespaceURI === NS_HTML ? node.tagName.toLowerCase() : node.tagName;
+  chunks.push(tagName);
   for (let attr of node.attributes) {
     chunks.push(' ');
     chunks.push(attr.name);
-    if (attr.value !== null) {
+    if (attr.value) {
       chunks.push('="');
       chunks.push(escapeAttribute(attr.value));
       chunks.push('"');
@@ -54,7 +55,7 @@ function serializeElement(node: Element, chunks: string[]) {
     chunks.push('>');
     serializeContents(node, chunks);
     chunks.push('</');
-    chunks.push(node.tagName);
+    chunks.push(tagName);
     chunks.push('>');
   }
 }
