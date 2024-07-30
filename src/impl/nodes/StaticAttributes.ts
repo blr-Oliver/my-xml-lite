@@ -4,11 +4,11 @@ import {StaticAttr} from './StaticAttr.js';
 import {StaticElement} from './StaticElement.js';
 
 export class StaticAttributes implements NamedNodeMap {
-  readonly #attrs: Attr[];
-  readonly #map: { [name: string]: Attr };
-  readonly [index: number]: Attr;
+  readonly #attrs: StaticAttr[];
+  readonly #map: { [name: string]: StaticAttr };
+  readonly [index: number]: StaticAttr;
 
-  constructor(attributes: NamespacedAttribute[], ownerElement: StaticElement | null) {
+  constructor(attributes: NamespacedAttribute[], ownerElement: StaticElement) {
     const length = attributes.length;
     this.#attrs = new Array(length);
     this.#map = {};
@@ -17,7 +17,7 @@ export class StaticAttributes implements NamedNodeMap {
     }
   }
 
-  addAttributeNode(attr: Attr, i: number = this.length) {
+  addAttributeNode(attr: StaticAttr, i: number = this.length) {
     (this as any)[i] = this.#attrs[i] = attr;
     this.#map[attr.name] = attr;
     if (!(attr.name in this))

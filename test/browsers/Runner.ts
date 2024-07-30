@@ -30,17 +30,6 @@ import {
   inTemplate
 } from '../composer/samples/index.js';
 
-interface DOMParser {
-  parseFromString(string: string, type: 'text/html'): Document;
-}
-
-declare var DOMParser: {
-  prototype: DOMParser;
-  new(): DOMParser;
-};
-
-declare var globalThis: any;
-
 type ParsedCase = [string, string, string];
 
 const samples: { [suite: string]: DefaultRawTestCore[] } = {
@@ -90,7 +79,7 @@ export class Runner {
         const name = testCase[0];
         const input = testCase[1];
         const document = this.parser.parseFromString(input, 'text/html');
-        const output = serialize(document);
+        const output = serialize(document as unknown as Document);
         parsed.push([name, input, output]);
       }
       data[suiteName] = parsed;
@@ -99,4 +88,4 @@ export class Runner {
   }
 }
 
-globalThis['Runner'] = Runner;
+(globalThis as any)['Runner'] = Runner;

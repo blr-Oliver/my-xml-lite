@@ -8,7 +8,7 @@ export const enum NodeType {
   DOCUMENT_TYPE_NODE = 10,
   DOCUMENT_FRAGMENT_NODE = 11
 }
-
+// TODO match declared types with actual DOM declarations
 export type NodeListOf<T extends Node> = ArrayLike<T> & {
   entries(): IterableIterator<[number, T]>;
   keys(): IterableIterator<number>;
@@ -52,7 +52,7 @@ export interface Element extends ParentNode {
   readonly prefix: string | null;
   readonly localName: string;
   readonly tagName: string;
-  readonly selfClosed: boolean;
+  readonly selfClosed?: boolean;
   getAttribute(qName: string): string | null;
   getAttributeNS(prefix: string | null, localName: string): string | null;
   getAttributeNames(): string[];
@@ -110,7 +110,7 @@ export interface Attr {
   readonly name: string;
   readonly namespaceURI: string | null;
   readonly ownerDocument: Document;
-  readonly ownerElement: Element;
+  readonly ownerElement: Element | null;
   readonly prefix: string | null;
   readonly value: string | null;
 }

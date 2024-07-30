@@ -14,10 +14,9 @@ class InTemplateSuite extends ExcerptSuite<TemplateRawTest, TemplateTestCase> {
 
   constructor(rawTests: TemplateRawTest[]) {
     super(rawTests, {
-      prefixInput: '<html><head></head><body>',
-      prefixOutput: '<html><head></head><body>',
-      suffixOutput: '</body></html>',
-      prefixErrors: ['missing-doctype']
+      prefixInput: '<!DOCTYPE html><html><head></head><body>',
+      prefixOutput: '<!DOCTYPE html><html><head></head><body>',
+      suffixOutput: '</body></html>'
     });
   }
 
