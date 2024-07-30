@@ -2,6 +2,17 @@ import {Document} from '../../src/decl/xml-lite-decl.js';
 import {serialize} from '../../src/impl/Serializer.js';
 import {DefaultRawTestCore} from '../composer/abstract-suite.js';
 
+interface DOMParser {
+  parseFromString(string: string, type: 'text/html'): Document;
+}
+
+declare var DOMParser: {
+  prototype: DOMParser;
+  new(): DOMParser;
+};
+
+declare function fetch(input: string): Promise<{ json(): Promise<any> }>;
+
 type ParsedCase = [string, string, string];
 type SampleCollection = { [suite: string]: DefaultRawTestCore[] };
 
