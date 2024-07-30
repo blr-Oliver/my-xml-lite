@@ -1,12 +1,8 @@
 import {DefaultRawTest, ExcerptSuite} from './abstract-suite.js';
+import {formattingParams} from './samples/excerpts';
 import {formatting} from './samples/index.js';
 
-const suite = new ExcerptSuite(formatting as DefaultRawTest[], {
-  prefixInput: '<!DOCTYPE html><body>',
-  suffixInput: '</body>',
-  prefixOutput: '<!DOCTYPE html><html><head></head><body>',
-  suffixOutput: '</body></html>'
-});
+const suite = new ExcerptSuite(formatting as DefaultRawTest[], formattingParams);
 
 beforeAll(() => suite.beforeAll());
 beforeEach(() => suite.beforeEach());

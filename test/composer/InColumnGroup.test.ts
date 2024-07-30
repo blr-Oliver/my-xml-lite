@@ -1,11 +1,8 @@
 import {DefaultRawTest, ExcerptSuite} from './abstract-suite.js';
+import {inColumnGroupParams} from './samples/excerpts';
 import {inColumnGroup} from './samples/index.js';
 
-const suite = new ExcerptSuite(inColumnGroup as DefaultRawTest[], {
-  prefixInput: '<!DOCTYPE html>',
-  prefixOutput: '<!DOCTYPE html><html><head></head><body>',
-  suffixOutput: '</body></html>'
-});
+const suite = new ExcerptSuite(inColumnGroup as DefaultRawTest[], inColumnGroupParams);
 
 beforeAll(() => suite.beforeAll());
 beforeEach(() => suite.beforeEach());

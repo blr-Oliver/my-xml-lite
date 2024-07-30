@@ -1,12 +1,8 @@
 import {DefaultRawTest, ExcerptSuite} from './abstract-suite.js';
+import {inSelectInTableSpecialParams} from './samples/excerpts';
 import {inSelectInTableSpecial} from './samples/index.js';
 
-const suite = new ExcerptSuite(inSelectInTableSpecial as DefaultRawTest[], {
-  prefixInput: '<!DOCTYPE html><table>',
-  suffixInput: '</table>',
-  prefixOutput: '<!DOCTYPE html><html><head></head><body>',
-  suffixOutput: '</body></html>'
-});
+const suite = new ExcerptSuite(inSelectInTableSpecial as DefaultRawTest[], inSelectInTableSpecialParams);
 
 beforeAll(() => suite.beforeAll());
 beforeEach(() => suite.beforeEach());

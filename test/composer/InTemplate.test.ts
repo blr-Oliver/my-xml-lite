@@ -1,5 +1,6 @@
 import {InsertionMode} from '../../src/impl/interfaces/insertion-mode.js';
 import {DefaultRawTestCore, DefaultTestCase, ExcerptSuite} from './abstract-suite.js';
+import {inTemplateParams} from './samples/excerpts';
 import {inTemplate} from './samples/index.js';
 
 type InsertionModeChange = `${'+' | '-'}${InsertionMode}`;
@@ -13,11 +14,7 @@ class InTemplateSuite extends ExcerptSuite<TemplateRawTest, TemplateTestCase> {
   templateModeChanges: InsertionModeChange[] = [];
 
   constructor(rawTests: TemplateRawTest[]) {
-    super(rawTests, {
-      prefixInput: '<!DOCTYPE html><html><head></head><body>',
-      prefixOutput: '<!DOCTYPE html><html><head></head><body>',
-      suffixOutput: '</body></html>'
-    });
+    super(rawTests, inTemplateParams);
   }
 
   configure() {

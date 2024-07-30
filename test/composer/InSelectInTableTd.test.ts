@@ -1,13 +1,9 @@
 import {DefaultRawTest, ExcerptSuite} from './abstract-suite.js';
+import {inSelectInTableTdParams} from './samples/excerpts';
 import {inSelectCommon, inSelectInTd} from './samples/index.js';
 
 const tdTests = (inSelectCommon as DefaultRawTest[]).concat(inSelectInTd as DefaultRawTest[]);
-const tdSuite = new ExcerptSuite(tdTests, {
-  prefixInput: '<!DOCTYPE html><table><tbody><tr><td>',
-  suffixInput: '</td></tr></tbody></table>',
-  prefixOutput: '<!DOCTYPE html><html><head></head><body><table><tbody><tr><td>',
-  suffixOutput: '</td></tr></tbody></table></body></html>'
-});
+const tdSuite = new ExcerptSuite(tdTests, inSelectInTableTdParams);
 
 beforeAll(() => tdSuite.beforeAll());
 beforeEach(() => tdSuite.beforeEach());
