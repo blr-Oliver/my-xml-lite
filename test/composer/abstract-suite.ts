@@ -13,23 +13,17 @@ export interface TestCase {
   name: string;
 }
 
-export interface SuiteParams {
-  fileName?: string;
-}
-
 export abstract class AbstractSuite<R, T extends TestCase, C extends TreeComposer> {
   testCases: R[];
   errorList: string[];
   tokenizer!: Tokenizer;
   composer!: C;
   preparedTests!: T[];
-  params?: SuiteParams;
   readonly name: string;
 
-  protected constructor(name: string, testCases: R[], params?: SuiteParams) {
+  protected constructor(name: string, testCases: R[]) {
     this.name = name;
     this.testCases = testCases;
-    this.params = params;
     this.errorList = [];
   }
 
@@ -147,21 +141,23 @@ export type ExcerptParams = {
 }
 
 export class ExcerptSuite<R extends DefaultRawTest = DefaultRawTest, T extends DefaultTestCase = DefaultTestCase, C extends TreeComposer = TreeComposer> extends DefaultSuite<R, T, C> {
-  prefixInput: string;
-  suffixInput: string;
-  prefixOutput: string;
-  suffixOutput: string;
-  prefixErrors: string[];
-  suffixErrors: string[];
+  prefixInput: string = '';
+  suffixInput: string = '';
+  prefixOutput: string = '';
+  suffixOutput: string = '';
+  prefixErrors: string[] = [];
+  suffixErrors: string[] = [];
 
   constructor(name: string, testCases: R[], excerpt: ExcerptParams) {
     super(name, testCases);
+    /*
     this.prefixInput = excerpt.prefixInput || '';
     this.suffixInput = excerpt.suffixInput || '';
     this.prefixOutput = excerpt.prefixOutput || '';
     this.suffixOutput = excerpt.suffixOutput || '';
     this.prefixErrors = excerpt.prefixErrors || [];
     this.suffixErrors = excerpt.suffixErrors || [];
+     */
   }
 
   prepareTest(rawTest: R): T {

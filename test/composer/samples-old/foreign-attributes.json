@@ -1,0 +1,13 @@
+[
+  ["xlink:actuate", "<svg id=\"test\" xlink:actuate=\"test\"/>", "<svg id=\"test\" xlink:actuate=\"test\"/>", []],
+  ["xlink:arcrole", "<svg id=\"test\" xlink:arcrole=\"test\"/>", "<svg id=\"test\" xlink:arcrole=\"test\"/>", []],
+  ["xlink:href", "<svg id=\"test\" xlink:href=\"test\"/>", "<svg id=\"test\" xlink:href=\"test\"/>", []],
+  ["xlink:role", "<svg id=\"test\" xlink:role=\"test\"/>", "<svg id=\"test\" xlink:role=\"test\"/>", []],
+  ["xlink:show", "<svg id=\"test\" xlink:show=\"test\"/>", "<svg id=\"test\" xlink:show=\"test\"/>", []],
+  ["xlink:title", "<svg id=\"test\" xlink:title=\"test\"/>", "<svg id=\"test\" xlink:title=\"test\"/>", []],
+  ["xlink:type", "<svg id=\"test\" xlink:type=\"test\"/>", "<svg id=\"test\" xlink:type=\"test\"/>", []],
+  ["xml:lang", "<svg id=\"test\" xml:lang=\"test\"/>", "<svg id=\"test\" xml:lang=\"test\"/>", []],
+  ["xml:space", "<svg id=\"test\" xml:space=\"test\"/>", "<svg id=\"test\" xml:space=\"test\"/>", []],
+  ["xmlns", "<svg id=\"test\" xmlns=\"test\"/>", "<svg id=\"test\" xmlns=\"test\"/>", ["mismatched-xmlns-attribute"]],
+  ["xmlns:xlink", "<svg id=\"test\" xmlns:xlink=\"test\"/>", "<svg id=\"test\" xmlns:xlink=\"test\"/>", ["invalid-xlink-namespace"]]
+]

@@ -18,7 +18,6 @@ export {default as inHead} from './in-head.json';
 export {default as inHeadNoscript} from './in-head-noscript.json';
 export {default as inRow} from './in-row.json';
 export {default as inSelect} from './in-select.json';
-export {default as inSelectCommon} from './in-select-common.json';
 export {default as inSelectInTable} from './in-select-in-table.json';
 export {default as inSelectInTableSpecial} from './in-select-in-table-special.json';
 export {default as inSelectInTd} from './in-select-in-td.json';

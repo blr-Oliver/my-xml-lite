@@ -9,7 +9,7 @@ import {initial} from './samples/index.js';
 type ModeTrackingRawTest = [...DefaultRawTestCore, InsertionMode[]/*modes*/];
 
 interface ModeTrackingTestCase extends DefaultTestCase {
-  modes: string[];
+  modes: InsertionMode[];
 }
 
 class InitialModeSuite extends DefaultSuite<ModeTrackingRawTest, ModeTrackingTestCase> {

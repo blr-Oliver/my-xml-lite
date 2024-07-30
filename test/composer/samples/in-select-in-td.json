@@ -1,32 +1,36 @@
 [
-  [
-    "select nested", "<select>A<select>B</select>C</select>", "<select>A</select>BC",
-    [
-      "select-start-tag-in-select",
-      "orphan-end-tag-inside-special-element",
-      "orphan-end-tag-inside-special-element"
-    ]
-  ],
-  [
-    "input", "<select>A<input></select>", "<select>A</select><input/>",
-    [
-      "input-inside-select",
-      "orphan-end-tag-inside-special-element"
-    ]
-  ],
-  [
-    "keygen", "<select>A<keygen></select>", "<select>A</select><keygen/>",
-    [
-      "input-inside-select",
-      "orphan-end-tag-inside-special-element"
-    ]
-  ],
-  [
-    "textarea", "<select>A<textarea></select>", "<select>A</select><textarea>&lt;/select>&lt;/td>&lt;/tr>&lt;/tbody>&lt;/table></textarea>",
-    [
-      "input-inside-select",
-      "abrupt-end-of-text",
-      "abrupt-end-of-document"
-    ]
-  ]
+  ["empty", "<!DOCTYPE html><table><tbody><tr><td><select></select></td></tr></tbody></table>", "<!DOCTYPE html><html><head></head><body><table><tbody><tr><td><select></select></td></tr></tbody></table></body></html>", []],
+  ["comment", "<!DOCTYPE html><table><tbody><tr><td><select><!--A--></select></td></tr></tbody></table>", "<!DOCTYPE html><html><head></head><body><table><tbody><tr><td><select><!--A--></select></td></tr></tbody></table></body></html>", []],
+  ["doctype", "<!DOCTYPE html><table><tbody><tr><td><select><!DOCTYPE html></select></td></tr></tbody></table>", "<!DOCTYPE html><html><head></head><body><table><tbody><tr><td><select></select></td></tr></tbody></table></body></html>", ["unexpected-doctype"]],
+  ["space", "<!DOCTYPE html><table><tbody><tr><td><select> \n\t\f</select></td></tr></tbody></table>", "<!DOCTYPE html><html><head></head><body><table><tbody><tr><td><select> \n\t\f</select></td></tr></tbody></table></body></html>", []],
+  ["NUL", "<!DOCTYPE html><table><tbody><tr><td><select>\u0000</select></td></tr></tbody></table>", "<!DOCTYPE html><html><head></head><body><table><tbody><tr><td><select></select></td></tr></tbody></table></body></html>", ["unexpected-null-character"]],
+  ["text", "<!DOCTYPE html><table><tbody><tr><td><select>A</select></td></tr></tbody></table>", "<!DOCTYPE html><html><head></head><body><table><tbody><tr><td><select>A</select></td></tr></tbody></table></body></html>", []],
+  ["html start", "<!DOCTYPE html><table><tbody><tr><td><select>A<html></select></td></tr></tbody></table>", "<!DOCTYPE html><html><head></head><body><table><tbody><tr><td><select>A</select></td></tr></tbody></table></body></html>", ["unexpected-html-start-tag"]],
+  ["select start", "<!DOCTYPE html><table><tbody><tr><td><select>A<select></td></tr></tbody></table>", "<!DOCTYPE html><html><head></head><body><table><tbody><tr><td><select>A</select></td></tr></tbody></table></body></html>", ["select-start-tag-in-select"]],
+  ["option empty", "<!DOCTYPE html><table><tbody><tr><td><select><option></option></select></td></tr></tbody></table>", "<!DOCTYPE html><html><head></head><body><table><tbody><tr><td><select><option></option></select></td></tr></tbody></table></body></html>", []],
+  ["option text", "<!DOCTYPE html><table><tbody><tr><td><select><option>A</option></select></td></tr></tbody></table>", "<!DOCTYPE html><html><head></head><body><table><tbody><tr><td><select><option>A</option></select></td></tr></tbody></table></body></html>", []],
+  ["option end", "<!DOCTYPE html><table><tbody><tr><td><select></option></select></td></tr></tbody></table>", "<!DOCTYPE html><html><head></head><body><table><tbody><tr><td><select></select></td></tr></tbody></table></body></html>", ["orphan-end-tag-inside-special-element"]],
+  ["option unclosed", "<!DOCTYPE html><table><tbody><tr><td><select><option>A</select></td></tr></tbody></table>", "<!DOCTYPE html><html><head></head><body><table><tbody><tr><td><select><option>A</option></select></td></tr></tbody></table></body></html>", []],
+  ["option pair unclosed", "<!DOCTYPE html><table><tbody><tr><td><select><option>A<option>B</select></td></tr></tbody></table>", "<!DOCTYPE html><html><head></head><body><table><tbody><tr><td><select><option>A</option><option>B</option></select></td></tr></tbody></table></body></html>", []],
+  ["option pair nested", "<!DOCTYPE html><table><tbody><tr><td><select><option>A<option>B</option>C</option></select></td></tr></tbody></table>", "<!DOCTYPE html><html><head></head><body><table><tbody><tr><td><select><option>A</option><option>B</option>C</select></td></tr></tbody></table></body></html>", ["orphan-end-tag-inside-special-element"]],
+  ["optgroup empty", "<!DOCTYPE html><table><tbody><tr><td><select><optgroup></optgroup></select></td></tr></tbody></table>", "<!DOCTYPE html><html><head></head><body><table><tbody><tr><td><select><optgroup></optgroup></select></td></tr></tbody></table></body></html>", []],
+  ["optgroup end", "<!DOCTYPE html><table><tbody><tr><td><select></optgroup></select></td></tr></tbody></table>", "<!DOCTYPE html><html><head></head><body><table><tbody><tr><td><select></select></td></tr></tbody></table></body></html>", ["orphan-end-tag-inside-special-element"]],
+  ["optgroup unclosed", "<!DOCTYPE html><table><tbody><tr><td><select><optgroup>A</select></td></tr></tbody></table>", "<!DOCTYPE html><html><head></head><body><table><tbody><tr><td><select><optgroup>A</optgroup></select></td></tr></tbody></table></body></html>", []],
+  ["optgroup pair unclosed", "<!DOCTYPE html><table><tbody><tr><td><select><optgroup>A<optgroup>B</select></td></tr></tbody></table>", "<!DOCTYPE html><html><head></head><body><table><tbody><tr><td><select><optgroup>A</optgroup><optgroup>B</optgroup></select></td></tr></tbody></table></body></html>", []],
+  ["optgroup pair nested", "<!DOCTYPE html><table><tbody><tr><td><select><optgroup>A<optgroup>B</optgroup>C</optgroup></select></td></tr></tbody></table>", "<!DOCTYPE html><html><head></head><body><table><tbody><tr><td><select><optgroup>A</optgroup><optgroup>B</optgroup>C</select></td></tr></tbody></table></body></html>", ["orphan-end-tag-inside-special-element"]],
+  ["optgroup start in option", "<!DOCTYPE html><table><tbody><tr><td><select><optgroup>A<option>B<optgroup>C</optgroup>D</optgroup></select></td></tr></tbody></table>", "<!DOCTYPE html><html><head></head><body><table><tbody><tr><td><select><optgroup>A<option>B</option></optgroup><optgroup>C</optgroup>D</select></td></tr></tbody></table></body></html>", ["orphan-end-tag-inside-special-element"]],
+  ["optgroup end in option", "<!DOCTYPE html><table><tbody><tr><td><select><optgroup>A<option>B</optgroup></select></td></tr></tbody></table>", "<!DOCTYPE html><html><head></head><body><table><tbody><tr><td><select><optgroup>A<option>B</option></optgroup></select></td></tr></tbody></table></body></html>", []],
+  ["script", "<!DOCTYPE html><table><tbody><tr><td><select><script>&#x41;<tag></script></select></td></tr></tbody></table>", "<!DOCTYPE html><html><head></head><body><table><tbody><tr><td><select><script>&#x41;<tag></script></select></td></tr></tbody></table></body></html>", []],
+  ["hr", "<!DOCTYPE html><table><tbody><tr><td><select><hr></select></td></tr></tbody></table>", "<!DOCTYPE html><html><head></head><body><table><tbody><tr><td><select><hr/></select></td></tr></tbody></table></body></html>", []],
+  ["hr in option", "<!DOCTYPE html><table><tbody><tr><td><select><option>A<hr>B</option>C</select></td></tr></tbody></table>", "<!DOCTYPE html><html><head></head><body><table><tbody><tr><td><select><option>A</option><hr/>BC</select></td></tr></tbody></table></body></html>", ["orphan-end-tag-inside-special-element"]],
+  ["hr in optgroup", "<!DOCTYPE html><table><tbody><tr><td><select><optgroup>A<hr>B</optgroup>C</select></td></tr></tbody></table>", "<!DOCTYPE html><html><head></head><body><table><tbody><tr><td><select><optgroup>A</optgroup><hr/>BC</select></td></tr></tbody></table></body></html>", ["orphan-end-tag-inside-special-element"]],
+  ["hr in option in optgroup", "<!DOCTYPE html><table><tbody><tr><td><select><optgroup>A<option>B<hr>C</option>D</optgroup>E</select></td></tr></tbody></table>", "<!DOCTYPE html><html><head></head><body><table><tbody><tr><td><select><optgroup>A<option>B</option></optgroup><hr/>CDE</select></td></tr></tbody></table></body></html>", ["orphan-end-tag-inside-special-element", "orphan-end-tag-inside-special-element"]],
+  ["div start", "<!DOCTYPE html><table><tbody><tr><td><select>A<div>B</select></td></tr></tbody></table>", "<!DOCTYPE html><html><head></head><body><table><tbody><tr><td><select>AB</select></td></tr></tbody></table></body></html>", ["unexpected-content-in-select"]],
+  ["div end", "<!DOCTYPE html><table><tbody><tr><td><select>A</div>B</select></td></tr></tbody></table>", "<!DOCTYPE html><html><head></head><body><table><tbody><tr><td><select>AB</select></td></tr></tbody></table></body></html>", ["unexpected-content-in-select"]],
+  ["template", "<!DOCTYPE html><table><tbody><tr><td><select><template></template></select></td></tr></tbody></table>", "<!DOCTYPE html><html><head></head><body><table><tbody><tr><td><select><template></template></select></td></tr></tbody></table></body></html>", []],
+  ["template end", "<!DOCTYPE html><table><tbody><tr><td><select></template></select></td></tr></tbody></table>", "<!DOCTYPE html><html><head></head><body><table><tbody><tr><td><select></select></td></tr></tbody></table></body></html>", ["orphan-end-tag"]],
+  ["select nested", "<!DOCTYPE html><table><tbody><tr><td><select>A<select>B</select>C</select></td></tr></tbody></table>", "<!DOCTYPE html><html><head></head><body><table><tbody><tr><td><select>A</select>BC</td></tr></tbody></table></body></html>", ["select-start-tag-in-select", "orphan-end-tag-inside-special-element", "orphan-end-tag-inside-special-element"]],
+  ["input", "<!DOCTYPE html><table><tbody><tr><td><select>A<input></select></td></tr></tbody></table>", "<!DOCTYPE html><html><head></head><body><table><tbody><tr><td><select>A</select><input/></td></tr></tbody></table></body></html>", ["input-inside-select", "orphan-end-tag-inside-special-element"]],
+  ["keygen", "<!DOCTYPE html><table><tbody><tr><td><select>A<keygen></select></td></tr></tbody></table>", "<!DOCTYPE html><html><head></head><body><table><tbody><tr><td><select>A</select><keygen/></td></tr></tbody></table></body></html>", ["input-inside-select", "orphan-end-tag-inside-special-element"]],
+  ["textarea", "<!DOCTYPE html><table><tbody><tr><td><select>A<textarea></select></td></tr></tbody></table>", "<!DOCTYPE html><html><head></head><body><table><tbody><tr><td><select>A</select><textarea>&lt;/select>&lt;/td>&lt;/tr>&lt;/tbody>&lt;/table></textarea></td></tr></tbody></table></body></html>", ["input-inside-select", "abrupt-end-of-text", "abrupt-end-of-document"]]
 ]

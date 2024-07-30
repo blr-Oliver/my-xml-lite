@@ -4,10 +4,10 @@ import {inTemplateParams} from './samples/excerpts';
 import {inTemplate} from './samples/index.js';
 
 type InsertionModeChange = `${'+' | '-'}${InsertionMode}`;
-type TemplateRawTest = [...DefaultRawTestCore, InsertionModeChange[]?];
+type TemplateRawTest = [...DefaultRawTestCore, InsertionModeChange[]];
 
 interface TemplateTestCase extends DefaultTestCase {
-  templateModeChanges?: InsertionModeChange[];
+  templateModeChanges: InsertionModeChange[];
 }
 
 class InTemplateSuite extends ExcerptSuite<TemplateRawTest, TemplateTestCase> {
@@ -32,7 +32,7 @@ class InTemplateSuite extends ExcerptSuite<TemplateRawTest, TemplateTestCase> {
 
   prepareTest(rawTest: TemplateRawTest): TemplateTestCase {
     const result = super.prepareTest(rawTest);
-    if (rawTest[4]) result.templateModeChanges = rawTest[4];
+    result.templateModeChanges = rawTest[4];
     return result;
   }
 
@@ -43,8 +43,7 @@ class InTemplateSuite extends ExcerptSuite<TemplateRawTest, TemplateTestCase> {
 
   runChecks(test: TemplateTestCase) {
     super.runChecks(test);
-    if (test.templateModeChanges)
-      expect(this.templateModeChanges).toStrictEqual(test.templateModeChanges);
+    expect(this.templateModeChanges).toStrictEqual(test.templateModeChanges);
   }
 }
 
