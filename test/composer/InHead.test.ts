@@ -1,7 +1,7 @@
 import {DefaultRawTest, ExcerptSuite} from './abstract-suite';
-import {default as rawTests} from './samples/in-head.json';
+import {inHead} from './samples';
 
-const suite = new ExcerptSuite(rawTests as DefaultRawTest[], {
+const suite = new ExcerptSuite(inHead as DefaultRawTest[], {
   prefixInput: '<!DOCTYPE html>',
   prefixOutput: '<!DOCTYPE html>'
 });

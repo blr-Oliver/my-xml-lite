@@ -1,14 +1,12 @@
 import {DefaultRawTest, ExcerptSuite} from './abstract-suite';
-import {default as commonTests} from './samples/in-select-common.json';
-import {default as inTdTests} from './samples/in-select-in-td.json';
+import {inSelectCommon, inSelectInTd} from './samples';
 
-const tdTests = (commonTests as DefaultRawTest[]).concat(inTdTests as DefaultRawTest[]);
+const tdTests = (inSelectCommon as DefaultRawTest[]).concat(inSelectInTd as DefaultRawTest[]);
 const tdSuite = new ExcerptSuite(tdTests, {
-  prefixInput: '<table><tbody><tr><td>',
+  prefixInput: '<!DOCTYPE html><table><tbody><tr><td>',
   suffixInput: '</td></tr></tbody></table>',
-  prefixOutput: '<html><head></head><body><table><tbody><tr><td>',
-  suffixOutput: '</td></tr></tbody></table></body></html>',
-  prefixErrors: ['missing-doctype']
+  prefixOutput: '<!DOCTYPE html><html><head></head><body><table><tbody><tr><td>',
+  suffixOutput: '</td></tr></tbody></table></body></html>'
 });
 
 beforeAll(() => tdSuite.beforeAll());

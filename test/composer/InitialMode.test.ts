@@ -4,7 +4,7 @@ import {StaticNodeFactory} from '../../src/impl/nodes/static-factory';
 import {TreeComposer} from '../../src/impl/TreeComposer';
 import {trackProperty} from '../util/property-tracker';
 import {DefaultRawTestCore, DefaultSuite, DefaultTestCase} from './abstract-suite';
-import {default as rawTests} from './samples/initial.json';
+import {initial} from './samples';
 
 type ModeTrackingRawTest = [...DefaultRawTestCore, InsertionMode[]/*modes*/];
 
@@ -57,7 +57,7 @@ class InitialModeSuite extends DefaultSuite<ModeTrackingRawTest, ModeTrackingTes
   }
 }
 
-const suite = new InitialModeSuite(rawTests as ModeTrackingRawTest[]);
+const suite = new InitialModeSuite(initial as ModeTrackingRawTest[]);
 
 beforeAll(() => suite.beforeAll());
 beforeEach(() => suite.beforeEach());

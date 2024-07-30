@@ -1,7 +1,7 @@
 import {DefaultRawTest, ExcerptSuite} from './abstract-suite';
-import {default as rawTests} from './samples/in-foreign-content.json';
+import {inForeignContent} from './samples';
 
-const suite = new ExcerptSuite(rawTests as DefaultRawTest[], {
+const suite = new ExcerptSuite(inForeignContent as DefaultRawTest[], {
   prefixInput: '<!DOCTYPE html>',
   prefixOutput: '<!DOCTYPE html>'
 });

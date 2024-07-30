@@ -1,6 +1,6 @@
 import {InsertionMode} from '../../src/impl/interfaces/insertion-mode';
 import {DefaultRawTestCore, DefaultTestCase, ExcerptSuite} from './abstract-suite';
-import {default as rawTests} from './samples/in-template.json';
+import {inTemplate} from './samples';
 
 type InsertionModeChange = `${'+' | '-'}${InsertionMode}`;
 type TemplateRawTest = [...DefaultRawTestCore, InsertionModeChange[]?];
@@ -52,7 +52,7 @@ class InTemplateSuite extends ExcerptSuite<TemplateRawTest, TemplateTestCase> {
   }
 }
 
-const suite = new InTemplateSuite(rawTests as TemplateRawTest[]);
+const suite = new InTemplateSuite(inTemplate as TemplateRawTest[]);
 
 beforeAll(() => suite.beforeAll());
 beforeEach(() => suite.beforeEach());

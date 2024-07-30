@@ -1,12 +1,11 @@
 import {DefaultRawTest, ExcerptSuite} from './abstract-suite';
-import {default as rawTests} from './samples/in-select-in-table-special.json';
+import {inSelectInTableSpecial} from './samples';
 
-const suite = new ExcerptSuite(rawTests as DefaultRawTest[], {
-  prefixInput: '<table>',
+const suite = new ExcerptSuite(inSelectInTableSpecial as DefaultRawTest[], {
+  prefixInput: '<!DOCTYPE html><table>',
   suffixInput: '</table>',
-  prefixOutput: '<html><head></head><body>',
-  suffixOutput: '</body></html>',
-  prefixErrors: ['missing-doctype']
+  prefixOutput: '<!DOCTYPE html><html><head></head><body>',
+  suffixOutput: '</body></html>'
 });
 
 beforeAll(() => suite.beforeAll());

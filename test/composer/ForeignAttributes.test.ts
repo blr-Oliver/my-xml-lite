@@ -1,6 +1,6 @@
 import {NS_XLINK, NS_XML, NS_XMLNS} from '../../src/impl/TreeComposer';
 import {DefaultRawTest, DefaultTestCase, ExcerptSuite} from './abstract-suite';
-import {default as rawTests} from './samples/foreign-attributes.json';
+import {foreignAttributes} from './samples';
 
 const NS_BY_PREFIX: { [prefix: string]: string } = {
   'xlink': NS_XLINK,
@@ -41,7 +41,7 @@ class ForeignAttributesTest extends ExcerptSuite {
   }
 }
 
-const suite = new ForeignAttributesTest(rawTests as DefaultRawTest[]);
+const suite = new ForeignAttributesTest(foreignAttributes as DefaultRawTest[]);
 
 beforeAll(() => suite.beforeAll());
 beforeEach(() => suite.beforeEach());

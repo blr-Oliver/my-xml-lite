@@ -1,7 +1,7 @@
 import {DefaultRawTest, DefaultSuite} from './abstract-suite';
-import {default as rawTests} from './samples/in-frameset.json';
+import {inFrameset} from './samples';
 
-const suite = new DefaultSuite(rawTests as DefaultRawTest[]);
+const suite = new DefaultSuite(inFrameset as DefaultRawTest[]);
 
 beforeAll(() => suite.beforeAll());
 beforeEach(() => suite.beforeEach());

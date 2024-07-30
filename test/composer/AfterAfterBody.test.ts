@@ -1,7 +1,7 @@
 import {DefaultRawTest, DefaultSuite} from './abstract-suite';
-import {default as rawTests} from './samples/after-after-body.json';
+import {afterAfterBody} from './samples';
 
-const suite = new DefaultSuite(rawTests as DefaultRawTest[]);
+const suite = new DefaultSuite(afterAfterBody as DefaultRawTest[]);
 
 beforeAll(() => suite.beforeAll());
 beforeEach(() => suite.beforeEach());
