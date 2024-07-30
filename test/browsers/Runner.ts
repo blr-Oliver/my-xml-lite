@@ -1,79 +1,68 @@
 import {Document} from '../../src/decl/xml-lite-decl.js';
 import {serialize} from '../../src/impl/Serializer.js';
 import {DefaultRawTestCore} from '../composer/abstract-suite.js';
-import {
-  afterAfterBody,
-  afterAfterFrameset,
-  afterBody,
-  afterFrameset,
-  afterHead,
-  beforeHead,
-  beforeHtml,
-  foreignAttributes,
-  formatting,
-  inBody,
-  inCaption,
-  inCell,
-  inColumnGroup,
-  inForeignContent,
-  inFrameset,
-  inHead,
-  inHeadNoscript,
-  inRow,
-  inSelect,
-  inSelectCommon,
-  inSelectInTable,
-  inSelectInTableSpecial,
-  inSelectInTd,
-  inTable,
-  inTableBody,
-  inTemplate
-} from '../composer/samples/index.js';
 
 type ParsedCase = [string, string, string];
+type SampleCollection = { [suite: string]: DefaultRawTestCore[] };
 
-const samples: { [suite: string]: DefaultRawTestCore[] } = {
-  // initial has special handling
-  afterAfterBody: afterAfterBody as DefaultRawTestCore[],
-  afterAfterFrameset: afterAfterFrameset as DefaultRawTestCore[],
-  afterBody: afterBody as DefaultRawTestCore[],
-  afterFrameset: afterFrameset as DefaultRawTestCore[],
-  afterHead: afterHead as DefaultRawTestCore[],
-  beforeHead: beforeHead as DefaultRawTestCore[],
-  beforeHtml: beforeHtml as DefaultRawTestCore[],
-  foreignAttributes: foreignAttributes as DefaultRawTestCore[],
-  formatting: formatting as DefaultRawTestCore[],
-  inBody: inBody as DefaultRawTestCore[],
-  inCaption: inCaption as DefaultRawTestCore[],
-  inCell: inCell as DefaultRawTestCore[],
-  inColumnGroup: inColumnGroup as DefaultRawTestCore[],
-  inForeignContent: inForeignContent as DefaultRawTestCore[],
-  inFrameset: inFrameset as DefaultRawTestCore[],
-  inHead: inHead as DefaultRawTestCore[],
-  inHeadNoscript: inHeadNoscript as DefaultRawTestCore[],
-  inRow: inRow as DefaultRawTestCore[],
-  inSelect: inSelect as DefaultRawTestCore[],
-  inSelectCommon: inSelectCommon as DefaultRawTestCore[],
-  inSelectInTable: inSelectInTable as DefaultRawTestCore[],
-  inSelectInTableSpecial: inSelectInTableSpecial as DefaultRawTestCore[],
-  inSelectInTd: inSelectInTd as DefaultRawTestCore[],
-  inTable: inTable as DefaultRawTestCore[],
-  inTableBody: inTableBody as DefaultRawTestCore[],
-  inTemplate: inTemplate as DefaultRawTestCore[]
-};
+const sampleRoot = 'test/composer/samples';
+const sampleNames = [
+  'after-after-body',
+  'after-after-frameset',
+  'after-body',
+  'after-frameset',
+  'after-head',
+  'before-head',
+  'before-html',
+  'foreign-attributes',
+  'formatting',
+  'in-body',
+  'in-caption',
+  'in-cell',
+  'in-column-group',
+  'in-foreign-content',
+  'in-frameset',
+  'in-head-noscript',
+  'in-head',
+  'in-row',
+  'in-select-common',
+  'in-select-in-table-special',
+  'in-select-in-table',
+  'in-select-in-td',
+  'in-select',
+  'in-table-body',
+  'in-table',
+  'in-template'
+];
+
+async function loadSampleFile(name: string): Promise<DefaultRawTestCore[]> {
+  return fetch(`${sampleRoot}/${name}.json`)
+      .then(response => response.json());
+}
+
+async function loadAllSamples(sampleNames: string[]): Promise<SampleCollection> {
+  const data = await Promise.all(sampleNames.map(name => loadSampleFile(name)));
+  const result: SampleCollection = {};
+  for (let i = 0; i < sampleNames.length; ++i) {
+    result[sampleNames[i]] = data[i];
+  }
+  return result;
+}
 
 export class Runner {
   parser: DOMParser;
+  samples: SampleCollection;
   data!: { [suite: string]: ParsedCase[] };
 
-  constructor() {
+  constructor(samples: SampleCollection) {
     this.parser = new DOMParser();
+    this.samples = samples;
   }
 
   run() {
     const data: { [suite: string]: ParsedCase[] } = {};
-    for (let suiteName in samples) {
-      const suite = samples[suiteName] as DefaultRawTestCore[];
+    for (let suiteName in this.samples) {
+      const suite = this.samples[suiteName];
       const parsed: ParsedCase[] = [];
       for (let testCase of suite) {
         const name = testCase[0];
@@ -88,4 +77,11 @@ export class Runner {
   }
 }
 
+let samples = await loadAllSamples(sampleNames);
+let runner = new Runner(samples);
+let runResult = runner.run();
+
+(globalThis as any)['runResult'] = runResult;
+(globalThis as any)['sampleNames'] = sampleNames;
 (globalThis as any)['Runner'] = Runner;
+(globalThis as any)['loadAllSamples'] = loadAllSamples;

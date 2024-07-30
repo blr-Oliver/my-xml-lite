@@ -739,7 +739,7 @@
     [
       "AAA 8 nested + bookmark check",
       "<b><hr a/><i><hr b/><u><hr c/><em><hr d/><s><hr e/><div><hr f/><div><hr g/><div><hr h/><div><hr i/><div><hr j/><div><hr k/><div><hr l/><div><hr m/><tt><hr n/><strike><hr o/><code><hr p/></b><hr q/></div></div></div></div></div></div></div></div></div>A",
-      "<html><head></head><body><b><hr a></hr><i><hr b></hr><u><hr c></hr><em><hr d></hr><s><hr e></hr></s></em></u></i></b><u><em><s><div><b><hr f></hr></b><div><b><hr g></hr></b><div><b><hr h></hr></b><div><b><hr i></hr></b><div><b><hr j></hr></b><div><b><hr k></hr></b><div><b><hr l></hr></b><div><b><hr m></hr><tt><hr n></hr><strike><hr o></hr><code><hr p></hr><hr q></hr></code></strike></tt></b></div></div></div></div></div></div></div></div><b><tt><strike><code>A</code></strike></tt></b></s></em></u></body></html>"
+      "<html><head></head><body><b><hr a></hr><i><hr b></hr><u><hr c></hr><em><hr d></hr><s><hr e></hr></s></em></u></i></b><u><em><s><div><b><hr f></hr></b><div><b><hr g></hr></b><div><b><hr h></hr></b><div><b><hr i></hr></b><div><b><hr j></hr></b><div><b><hr k></hr></b><div><b><hr l></hr></b><div><b><hr m></hr><tt><hr n></hr><strike><hr o></hr><code><hr p></hr><hr q></hr></code></strike></tt></b></div></div></div></div></div></div></div></div><tt><strike><code>A</code></strike></tt></s></em></u></body></html>"
     ],
     [
       "nested anchor",
@@ -1884,37 +1884,37 @@
     [
       "math:mi",
       "<math><![CDATA[A]]>B\u0000C<mi><![CDATA[D]]>E\u0000F<div xmlns=\"http://www.w3.org/1999/xhtml\"></div>G</mi></math>",
-      "<html><head></head><body><math>AB�C<mi><!--[CDATA[D]]-->EF<div xmlns=\"http://www.w3.org/1999/xhtml\"></div>G</mi></math></body></html>"
+      "<html><head></head><body><math>AB�C<mi>DEF<div xmlns=\"http://www.w3.org/1999/xhtml\"></div>G</mi></math></body></html>"
     ],
     [
       "math:mo",
       "<math><![CDATA[A]]>B\u0000C<mo><![CDATA[D]]>E\u0000F<div xmlns=\"http://www.w3.org/1999/xhtml\"></div>G</mo></math>",
-      "<html><head></head><body><math>AB�C<mo><!--[CDATA[D]]-->EF<div xmlns=\"http://www.w3.org/1999/xhtml\"></div>G</mo></math></body></html>"
+      "<html><head></head><body><math>AB�C<mo>DEF<div xmlns=\"http://www.w3.org/1999/xhtml\"></div>G</mo></math></body></html>"
     ],
     [
       "math:mn",
       "<math><![CDATA[A]]>B\u0000C<mn><![CDATA[D]]>E\u0000F<div xmlns=\"http://www.w3.org/1999/xhtml\"></div>G</mn></math>",
-      "<html><head></head><body><math>AB�C<mn><!--[CDATA[D]]-->EF<div xmlns=\"http://www.w3.org/1999/xhtml\"></div>G</mn></math></body></html>"
+      "<html><head></head><body><math>AB�C<mn>DEF<div xmlns=\"http://www.w3.org/1999/xhtml\"></div>G</mn></math></body></html>"
     ],
     [
       "math:ms",
       "<math><![CDATA[A]]>B\u0000C<ms><![CDATA[D]]>E\u0000F<div xmlns=\"http://www.w3.org/1999/xhtml\"></div>G</ms></math>",
-      "<html><head></head><body><math>AB�C<ms><!--[CDATA[D]]-->EF<div xmlns=\"http://www.w3.org/1999/xhtml\"></div>G</ms></math></body></html>"
+      "<html><head></head><body><math>AB�C<ms>DEF<div xmlns=\"http://www.w3.org/1999/xhtml\"></div>G</ms></math></body></html>"
     ],
     [
       "math:mtext",
       "<math><![CDATA[A]]>B\u0000C<mtext><![CDATA[D]]>E\u0000F<div xmlns=\"http://www.w3.org/1999/xhtml\"></div>G</mtext></math>",
-      "<html><head></head><body><math>AB�C<mtext><!--[CDATA[D]]-->EF<div xmlns=\"http://www.w3.org/1999/xhtml\"></div>G</mtext></math></body></html>"
+      "<html><head></head><body><math>AB�C<mtext>DEF<div xmlns=\"http://www.w3.org/1999/xhtml\"></div>G</mtext></math></body></html>"
     ],
     [
       "math:mtext>mglyph",
       "<math><![CDATA[A]]>B\u0000C<mtext><![CDATA[D]]>E\u0000F<mglyph xmlns=\"http://www.w3.org/1998/Math/MathML\"></mglyph>G</mtext></math>",
-      "<html><head></head><body><math>AB�C<mtext><!--[CDATA[D]]-->EF<mglyph xmlns=\"http://www.w3.org/1998/Math/MathML\"></mglyph>G</mtext></math></body></html>"
+      "<html><head></head><body><math>AB�C<mtext>DEF<mglyph xmlns=\"http://www.w3.org/1998/Math/MathML\"></mglyph>G</mtext></math></body></html>"
     ],
     [
       "math:mtext>malignmark",
       "<math><![CDATA[A]]>B\u0000C<mtext><![CDATA[D]]>E\u0000F<malignmark xmlns=\"http://www.w3.org/1998/Math/MathML\"/>G</mtext></math>",
-      "<html><head></head><body><math>AB�C<mtext><!--[CDATA[D]]-->EF<malignmark xmlns=\"http://www.w3.org/1998/Math/MathML\"></malignmark>G</mtext></math></body></html>"
+      "<html><head></head><body><math>AB�C<mtext>DEF<malignmark xmlns=\"http://www.w3.org/1998/Math/MathML\"></malignmark>G</mtext></math></body></html>"
     ],
     [
       "math:annotation-xml>svg",
@@ -1929,22 +1929,22 @@
     [
       "math:annotation-xml[encoding='text/html']>svg",
       "<math><![CDATA[A]]>\u0000<annotation-xml encoding=\"text/html\"><![CDATA[B]]>\u0000<svg xmlns=\"http://www.w3.org/2000/svg\"><![CDATA[C]]>\u0000</svg></annotation-xml></math>",
-      "<html><head></head><body><math>A�<annotation-xml encoding=\"text/html\"><!--[CDATA[B]]--><svg xmlns=\"http://www.w3.org/2000/svg\">C�</svg></annotation-xml></math></body></html>"
+      "<html><head></head><body><math>A�<annotation-xml encoding=\"text/html\">B<svg xmlns=\"http://www.w3.org/2000/svg\">C�</svg></annotation-xml></math></body></html>"
     ],
     [
       "math:annotation-xml[encoding='text/html']>math",
       "<math><![CDATA[A]]>\u0000<annotation-xml encoding=\"TEXT/html\"><![CDATA[B]]>\u0000<math xmlns=\"http://www.w3.org/1998/Math/MathML\"><![CDATA[C]]>\u0000</math></annotation-xml></math>",
-      "<html><head></head><body><math>A�<annotation-xml encoding=\"TEXT/html\"><!--[CDATA[B]]--><math xmlns=\"http://www.w3.org/1998/Math/MathML\">C�</math></annotation-xml></math></body></html>"
+      "<html><head></head><body><math>A�<annotation-xml encoding=\"TEXT/html\">B<math xmlns=\"http://www.w3.org/1998/Math/MathML\">C�</math></annotation-xml></math></body></html>"
     ],
     [
       "math:annotation-xml[encoding='text/html']>tag",
       "<math><![CDATA[A]]>\u0000<annotation-xml encoding=\"text/HTML\"><![CDATA[B]]>\u0000<tag xmlns=\"http://www.w3.org/1999/xhtml\"><![CDATA[C]]>\u0000</tag></annotation-xml></math>",
-      "<html><head></head><body><math>A�<annotation-xml encoding=\"text/HTML\"><!--[CDATA[B]]--><tag xmlns=\"http://www.w3.org/1999/xhtml\"><!--[CDATA[C]]--></tag></annotation-xml></math></body></html>"
+      "<html><head></head><body><math>A�<annotation-xml encoding=\"text/HTML\">B<tag xmlns=\"http://www.w3.org/1999/xhtml\"><!--[CDATA[C]]--></tag></annotation-xml></math></body></html>"
     ],
     [
       "math:annotation-xml[encoding='application/xhtml+xml']>tag",
       "<math><![CDATA[A]]>\u0000<annotation-xml encoding=\"application/xhtml+xml\"><![CDATA[B]]>\u0000<tag xmlns=\"http://www.w3.org/1999/xhtml\"><![CDATA[C]]>\u0000</tag></annotation-xml></math>",
-      "<html><head></head><body><math>A�<annotation-xml encoding=\"application/xhtml+xml\"><!--[CDATA[B]]--><tag xmlns=\"http://www.w3.org/1999/xhtml\"><!--[CDATA[C]]--></tag></annotation-xml></math></body></html>"
+      "<html><head></head><body><math>A�<annotation-xml encoding=\"application/xhtml+xml\">B<tag xmlns=\"http://www.w3.org/1999/xhtml\"><!--[CDATA[C]]--></tag></annotation-xml></math></body></html>"
     ],
     [
       "math:annotation-xml[encoding='text/javascript']>svg",
@@ -1959,17 +1959,17 @@
     [
       "svg:desc",
       "<svg><![CDATA[A]]>B\u0000C<desc><![CDATA[D]]>E\u0000F<div xmlns=\"http://www.w3.org/1999/xhtml\"></div>G</desc></svg>",
-      "<html><head></head><body><svg>AB�C<desc><!--[CDATA[D]]-->EF<div xmlns=\"http://www.w3.org/1999/xhtml\"></div>G</desc></svg></body></html>"
+      "<html><head></head><body><svg>AB�C<desc>DEF<div xmlns=\"http://www.w3.org/1999/xhtml\"></div>G</desc></svg></body></html>"
     ],
     [
       "svg:foreignObject",
       "<svg><![CDATA[A]]>B\u0000C<foreignObject><![CDATA[D]]>E\u0000F<div xmlns=\"http://www.w3.org/1999/xhtml\"></div>G</foreignObject></svg>",
-      "<html><head></head><body><svg>AB�C<foreignObject><!--[CDATA[D]]-->EF<div xmlns=\"http://www.w3.org/1999/xhtml\"></div>G</foreignObject></svg></body></html>"
+      "<html><head></head><body><svg>AB�C<foreignObject>DEF<div xmlns=\"http://www.w3.org/1999/xhtml\"></div>G</foreignObject></svg></body></html>"
     ],
     [
       "svg:title",
       "<svg><![CDATA[A]]>B\u0000C<title><![CDATA[D]]>E\u0000F<div xmlns=\"http://www.w3.org/1999/xhtml\"></div>G</title></svg>",
-      "<html><head></head><body><svg>AB�C<title><!--[CDATA[D]]-->EF<div xmlns=\"http://www.w3.org/1999/xhtml\"></div>G</title></svg></body></html>"
+      "<html><head></head><body><svg>AB�C<title>DEF<div xmlns=\"http://www.w3.org/1999/xhtml\"></div>G</title></svg></body></html>"
     ],
     [
       "svg CS tags",
@@ -2044,7 +2044,7 @@
     [
       "br end wrapped",
       "<svg><g><desc><math><mi><mglyph><mfrac></br></mfrac></mglyph></mi></math></desc></g></svg>",
-      "<html><head></head><body><svg><g><desc><math><mi><mglyph><mfrac></mfrac></mglyph><br></br></mi></math></desc></g></svg></body></html>"
+      "<html><head></head><body><svg><g><desc><math><mi><mglyph><mfrac></mfrac></mglyph></mi></math></desc></g></svg><br></br></body></html>"
     ],
     [
       "p end",
@@ -2059,7 +2059,7 @@
     [
       "p end wrapped",
       "<svg><g><desc><math><mi><mglyph><mfrac></p></mfrac></mglyph></mi></math></desc></g></svg>",
-      "<html><head></head><body><svg><g><desc><math><mi><mglyph><mfrac></mfrac></mglyph><p></p></mi></math></desc></g></svg></body></html>"
+      "<html><head></head><body><svg><g><desc><math><mi><mglyph><mfrac></mfrac></mglyph></mi></math></desc></g></svg><p></p></body></html>"
     ],
     [
       "MathML special check",
@@ -2853,7 +2853,7 @@
     [
       "keygen",
       "<select>A<keygen></select>",
-      "<html><head></head><body><select>A</select><keygen></keygen></body></html>"
+      "<html><head></head><body><select>A</select></body></html>"
     ],
     [
       "textarea",
@@ -2875,7 +2875,7 @@
     [
       "keygen",
       "<select>A<keygen></select>",
-      "<html><head></head><body><select>A</select><keygen></keygen></body></html>"
+      "<html><head></head><body><select>A</select></body></html>"
     ],
     [
       "textarea",
@@ -2897,7 +2897,7 @@
     [
       "keygen",
       "<select>A<keygen></select>",
-      "<html><head></head><body><select>A</select><keygen></keygen></body></html>"
+      "<html><head></head><body><select>A</select></body></html>"
     ],
     [
       "textarea",
