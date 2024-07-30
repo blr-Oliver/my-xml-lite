@@ -1,5 +1,5 @@
-import {DefaultRawTest, ExcerptSuite} from './abstract-suite';
-import {inSelectCommon, inSelectInTd} from './samples';
+import {DefaultRawTest, ExcerptSuite} from './abstract-suite.js';
+import {inSelectCommon, inSelectInTd} from './samples/index.js';
 
 const tdTests = (inSelectCommon as DefaultRawTest[]).concat(inSelectInTd as DefaultRawTest[]);
 const tdSuite = new ExcerptSuite(tdTests, {

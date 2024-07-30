@@ -11,7 +11,9 @@
     "--test": "--experimental-vm-modules flag is critical for ESM",
     "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js",
     "coverage": "node --experimental-vm-modules node_modules/jest/bin/jest.js --coverage",
-    "debug": "node --inspect=9230 dist/debug.js"
+    "copy-browser-index": "copy test\\index.html dist",
+    "start-browser-server": "http-server -c-1 -p8082 ./dist",
+    "browsers": "npm run build-test && npm run copy-browser-index && npm run start-browser-server"
   },
   "keywords": [
     "DOM",
@@ -30,10 +32,11 @@
   "devDependencies": {
     "@types/jest": "^29.5.12",
     "@types/node": "^20.11.28",
+    "braces": ">=3.0.3",
+    "http-server": "^14.1.1",
     "jest": "^29.7.0",
     "ts-jest": "^29.1.2",
     "tsx": "^4.7.1",
-    "typescript": "^5.4.2",
-    "braces": ">=3.0.3"
+    "typescript": "^5.4.2"
   }
 }

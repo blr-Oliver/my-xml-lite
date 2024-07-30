@@ -1,4 +1,4 @@
-import {DOMTokenList} from '../../decl/xml-lite-decl';
+import {DOMTokenList} from '../../decl/xml-lite-decl.js';
 
 export class StaticTokenList implements DOMTokenList {
   readonly value: string;

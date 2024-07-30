@@ -1,5 +1,5 @@
-import {Document, Element, NodeType} from '../../decl/xml-lite-decl';
-import {StaticParentNode} from './StaticParentNode';
+import {Document, Element, NodeType} from '../../decl/xml-lite-decl.js';
+import {StaticParentNode} from './StaticParentNode.js';
 
 export class StaticDocument extends StaticParentNode implements Document {
   declare readonly ownerDocument: null;

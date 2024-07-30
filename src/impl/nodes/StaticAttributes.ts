@@ -1,7 +1,7 @@
-import {Attr, NamedNodeMap} from '../../decl/xml-lite-decl';
-import {NamespacedAttribute} from '../interfaces/tokens';
-import {StaticAttr} from './StaticAttr';
-import {StaticElement} from './StaticElement';
+import {Attr, NamedNodeMap} from '../../decl/xml-lite-decl.js';
+import {NamespacedAttribute} from '../interfaces/tokens.js';
+import {StaticAttr} from './StaticAttr.js';
+import {StaticElement} from './StaticElement.js';
 
 export class StaticAttributes implements NamedNodeMap {
   readonly #attrs: Attr[];

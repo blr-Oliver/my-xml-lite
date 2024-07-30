@@ -1,14 +1,14 @@
-import {isElement, NodeType, ProcessingInstruction} from '../../decl/xml-lite-decl';
-import {NodeFactory, NodeTypeMapping} from '../interfaces/NodeFactory';
-import {TagToken} from '../interfaces/tokens';
-import {StaticAttr} from './StaticAttr';
-import {StaticAttributes} from './StaticAttributes';
-import {StaticDataNode} from './StaticDataNode';
-import {StaticDocument} from './StaticDocument';
-import {StaticDocumentType} from './StaticDocumentType';
-import {StaticElement} from './StaticElement';
-import {StaticEmptyNode} from './StaticEmptyNode';
-import {StaticParentNode} from './StaticParentNode';
+import {isElement, NodeType, ProcessingInstruction} from '../../decl/xml-lite-decl.js';
+import {NodeFactory, NodeTypeMapping} from '../interfaces/NodeFactory.js';
+import {TagToken} from '../interfaces/tokens.js';
+import {StaticAttr} from './StaticAttr.js';
+import {StaticAttributes} from './StaticAttributes.js';
+import {StaticDataNode} from './StaticDataNode.js';
+import {StaticDocument} from './StaticDocument.js';
+import {StaticDocumentType} from './StaticDocumentType.js';
+import {StaticElement} from './StaticElement.js';
+import {StaticEmptyNode} from './StaticEmptyNode.js';
+import {StaticParentNode} from './StaticParentNode.js';
 
 export interface StaticNodeTypeMapping extends NodeTypeMapping {
   CDATASection: StaticDataNode;

@@ -1,5 +1,5 @@
-import {Attr, Element} from '../decl/xml-lite-decl';
-import {TagToken} from './interfaces/tokens';
+import {Attr, Element} from '../decl/xml-lite-decl.js';
+import {TagToken} from './interfaces/tokens.js';
 
 export interface FormattingElement {
   element: Element;

@@ -1,6 +1,6 @@
-import {StringSource} from '../../common/stream-source';
-import {StringBuilder} from '../../decl/StringBuilder';
-import {Token} from './tokens';
+import {StringSource} from '../../common/stream-source.js';
+import {StringBuilder} from '../../decl/StringBuilder.js';
+import {Token} from './tokens.js';
 
 export interface ParserEnvironment {
   readonly input: StringSource;

@@ -1,5 +1,5 @@
-import {DefaultRawTest, ExcerptSuite} from './abstract-suite';
-import {inColumnGroup} from './samples';
+import {DefaultRawTest, ExcerptSuite} from './abstract-suite.js';
+import {inColumnGroup} from './samples/index.js';
 
 const suite = new ExcerptSuite(inColumnGroup as DefaultRawTest[], {
   prefixInput: '<!DOCTYPE html>',

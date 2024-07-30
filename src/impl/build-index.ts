@@ -1,6 +1,6 @@
-import {stringToArray} from '../common/code-sequences';
-import {PrefixNode} from '../decl/entity-ref-index';
-import {EntityMapping} from '../decl/known-named-refs';
+import {stringToArray} from '../common/code-sequences.js';
+import {PrefixNode} from '../decl/entity-ref-index.js';
+import {EntityMapping} from '../decl/known-named-refs.js';
 
 type DecodedEntity<T> = {
   name: number[];

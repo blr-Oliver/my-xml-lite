@@ -1,5 +1,5 @@
-import {ReconsumableCharacterSource} from '../common/stream-source';
-import {StringBuilder} from './StringBuilder';
+import {ReconsumableCharacterSource} from '../common/stream-source.js';
+import {StringBuilder} from './StringBuilder.js';
 
 export namespace Tokenizer {
   export enum TokenType {

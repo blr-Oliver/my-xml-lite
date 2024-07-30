@@ -1,5 +1,5 @@
-import {isAsciiAlpha, isDigit} from './code-checks';
-import {CodePoints} from './code-points';
+import {isAsciiAlpha, isDigit} from './code-checks.js';
+import {CodePoints} from './code-points.js';
 
 function isCommonNameStartChar(code: number) {
   return isAsciiAlpha(code) ||

@@ -1,5 +1,5 @@
-import {DefaultRawTest, ExcerptSuite} from './abstract-suite';
-import {inTableBody} from './samples';
+import {DefaultRawTest, ExcerptSuite} from './abstract-suite.js';
+import {inTableBody} from './samples/index.js';
 
 const suite = new ExcerptSuite(inTableBody as DefaultRawTest[], {
   prefixInput: '<!DOCTYPE html>',

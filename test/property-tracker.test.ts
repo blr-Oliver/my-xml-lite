@@ -1,4 +1,4 @@
-import {trackProperty} from './util/property-tracker';
+import {trackProperty} from './util/property-tracker.js';
 
 const target = {x: 0};
 const changes = trackProperty(target, 'x');

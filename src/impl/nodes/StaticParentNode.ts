@@ -1,6 +1,6 @@
-import {Element, Node, NodeListOf, NodeType, ParentNode} from '../../decl/xml-lite-decl';
-import {StaticElement} from './StaticElement';
-import {StaticEmptyNode} from './StaticEmptyNode';
+import {Element, Node, NodeListOf, NodeType, ParentNode} from '../../decl/xml-lite-decl.js';
+import {StaticElement} from './StaticElement.js';
+import {StaticEmptyNode} from './StaticEmptyNode.js';
 
 export class StaticParentNode extends StaticEmptyNode implements ParentNode {
   readonly children: StaticElement[];

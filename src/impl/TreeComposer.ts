@@ -1,11 +1,11 @@
-import {CharacterData, Document, Element, Node, NodeType, ParentNode} from '../decl/xml-lite-decl';
-import {FormattingList} from './FormattingList';
-import {InsertionMode} from './interfaces/insertion-mode';
-import {NodeFactory} from './interfaces/NodeFactory';
-import {TokenSink} from './interfaces/ParserEnvironment';
-import {State} from './interfaces/states';
-import {CharactersToken, CommentToken, DoctypeToken, NamespacedAttribute, TagToken, Token} from './interfaces/tokens';
-import {Tokenizer} from './Tokenizer';
+import {CharacterData, Document, Element, Node, NodeType, ParentNode} from '../decl/xml-lite-decl.js';
+import {FormattingList} from './FormattingList.js';
+import {InsertionMode} from './interfaces/insertion-mode.js';
+import {NodeFactory} from './interfaces/NodeFactory.js';
+import {TokenSink} from './interfaces/ParserEnvironment.js';
+import {State} from './interfaces/states.js';
+import {CharactersToken, CommentToken, DoctypeToken, NamespacedAttribute, TagToken, Token} from './interfaces/tokens.js';
+import {Tokenizer} from './Tokenizer.js';
 
 export const NS_HTML = 'http://www.w3.org/1999/xhtml';
 export const NS_MATHML = 'http://www.w3.org/1998/Math/MathML';

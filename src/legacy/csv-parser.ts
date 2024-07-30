@@ -1,4 +1,4 @@
-import {ReconsumableCharacterSource} from '../common/stream-source';
+import {ReconsumableCharacterSource} from '../common/stream-source.js';
 
 export interface CsvDocument {
   header?: string[];

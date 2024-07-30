@@ -1,9 +1,9 @@
-import {Attr, Element, NodeType} from '../../decl/xml-lite-decl';
-import {TagToken} from '../interfaces/tokens';
-import {StaticAttributes} from './StaticAttributes';
-import {StaticDocument} from './StaticDocument';
-import {StaticParentNode} from './StaticParentNode';
-import {StaticTokenList} from './StaticTokenList';
+import {Attr, Element, NodeType} from '../../decl/xml-lite-decl.js';
+import {TagToken} from '../interfaces/tokens.js';
+import {StaticAttributes} from './StaticAttributes.js';
+import {StaticDocument} from './StaticDocument.js';
+import {StaticParentNode} from './StaticParentNode.js';
+import {StaticTokenList} from './StaticTokenList.js';
 
 export class StaticElement extends StaticParentNode implements Element {
   declare readonly ownerDocument: StaticDocument;

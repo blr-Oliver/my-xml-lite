@@ -1,6 +1,6 @@
-import {Attr, Document, Element} from '../../decl/xml-lite-decl';
-import {NamespacedAttribute} from '../interfaces/tokens';
-import {StaticElement} from './StaticElement';
+import {Attr, Document, Element} from '../../decl/xml-lite-decl.js';
+import {NamespacedAttribute} from '../interfaces/tokens.js';
+import {StaticElement} from './StaticElement.js';
 
 export class StaticAttr implements Attr {
   readonly localName: string;

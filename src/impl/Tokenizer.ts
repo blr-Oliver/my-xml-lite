@@ -10,14 +10,14 @@ import {
   isSpace,
   isSurrogate,
   isUpperHexDigit
-} from '../common/code-checks';
-import {CodePoints} from '../common/code-points';
-import {stringToArray} from '../common/code-sequences';
-import {PrefixNode} from '../decl/entity-ref-index';
-import {ParserEnvironment} from './interfaces/ParserEnvironment';
-import {State} from './interfaces/states';
-import {Attribute, CDataToken, CharactersToken, CommentToken, DoctypeToken, EOF_TOKEN, TagToken, Token} from './interfaces/tokens';
-import {NS_HTML, TreeComposer} from './TreeComposer';
+} from '../common/code-checks.js';
+import {CodePoints} from '../common/code-points.js';
+import {stringToArray} from '../common/code-sequences.js';
+import {PrefixNode} from '../decl/entity-ref-index.js';
+import {ParserEnvironment} from './interfaces/ParserEnvironment.js';
+import {State} from './interfaces/states.js';
+import {Attribute, CDataToken, CharactersToken, CommentToken, DoctypeToken, EOF_TOKEN, TagToken, Token} from './interfaces/tokens.js';
+import {NS_HTML, TreeComposer} from './TreeComposer.js';
 
 const SCRIPT: number[] = [0x73, 0x63, 0x72, 0x69, 0x70, 0x74];
 const TWO_HYPHENS: number[] = [CodePoints.HYPHEN, CodePoints.HYPHEN];

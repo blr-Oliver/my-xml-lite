@@ -1,14 +1,14 @@
-import {CodePoints} from '../../src/common/code-points';
-import {stringToArray} from '../../src/common/code-sequences';
-import {DirectCharacterSource} from '../../src/common/stream-source';
-import {PrefixNode} from '../../src/decl/entity-ref-index';
-import {HTML_SPECIAL} from '../../src/decl/known-named-refs';
-import {buildIndex} from '../../src/impl/build-index';
-import {FixedSizeStringBuilder} from '../../src/impl/FixedSizeStringBuilder';
-import {ParserEnvironment} from '../../src/impl/interfaces/ParserEnvironment';
-import {State} from '../../src/impl/interfaces/states';
-import {EOF_TOKEN, Token} from '../../src/impl/interfaces/tokens';
-import {Tokenizer} from '../../src/impl/Tokenizer';
+import {CodePoints} from '../../src/common/code-points.js';
+import {stringToArray} from '../../src/common/code-sequences.js';
+import {DirectCharacterSource} from '../../src/common/stream-source.js';
+import {PrefixNode} from '../../src/decl/entity-ref-index.js';
+import {HTML_SPECIAL} from '../../src/decl/known-named-refs.js';
+import {buildIndex} from '../../src/impl/build-index.js';
+import {FixedSizeStringBuilder} from '../../src/impl/FixedSizeStringBuilder.js';
+import {ParserEnvironment} from '../../src/impl/interfaces/ParserEnvironment.js';
+import {State} from '../../src/impl/interfaces/states.js';
+import {EOF_TOKEN, Token} from '../../src/impl/interfaces/tokens.js';
+import {Tokenizer} from '../../src/impl/Tokenizer.js';
 import {default as rawTests} from './samples/char-ref.json';
 
 type TestCase = [string/*name*/, string/*input*/, string/*output*/, string[]/*errors*/, boolean? /*in attribute*/];

@@ -1,4 +1,4 @@
-import {StringBuilder} from '../decl/StringBuilder';
+import {StringBuilder} from '../decl/StringBuilder.js';
 
 export class ChainingStringBuilder implements StringBuilder {
   readonly host: StringBuilder;

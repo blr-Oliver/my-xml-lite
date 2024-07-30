@@ -1,7 +1,7 @@
-import {Node, NodeType} from '../../decl/xml-lite-decl';
-import {StaticDocument} from './StaticDocument';
-import {StaticElement} from './StaticElement';
-import {StaticParentNode} from './StaticParentNode';
+import {Node, NodeType} from '../../decl/xml-lite-decl.js';
+import {StaticDocument} from './StaticDocument.js';
+import {StaticElement} from './StaticElement.js';
+import {StaticParentNode} from './StaticParentNode.js';
 
 export abstract class StaticEmptyNode {
   readonly ownerDocument: StaticDocument | null;

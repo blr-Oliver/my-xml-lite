@@ -1,13 +1,13 @@
-import {stringToArray} from '../../src/common/code-sequences';
-import {DirectCharacterSource} from '../../src/common/stream-source';
-import {HTML_SPECIAL} from '../../src/decl/known-named-refs';
-import {buildIndex} from '../../src/impl/build-index';
-import {FixedSizeStringBuilder} from '../../src/impl/FixedSizeStringBuilder';
-import {ParserEnvironment} from '../../src/impl/interfaces/ParserEnvironment';
-import {StaticNodeFactory} from '../../src/impl/nodes/static-factory';
-import {serialize} from '../../src/impl/Serializer';
-import {Tokenizer} from '../../src/impl/Tokenizer';
-import {TreeComposer} from '../../src/impl/TreeComposer';
+import {stringToArray} from '../../src/common/code-sequences.js';
+import {DirectCharacterSource} from '../../src/common/stream-source.js';
+import {HTML_SPECIAL} from '../../src/decl/known-named-refs.js';
+import {buildIndex} from '../../src/impl/build-index.js';
+import {FixedSizeStringBuilder} from '../../src/impl/FixedSizeStringBuilder.js';
+import {ParserEnvironment} from '../../src/impl/interfaces/ParserEnvironment.js';
+import {StaticNodeFactory} from '../../src/impl/nodes/static-factory.js';
+import {serialize} from '../../src/impl/Serializer.js';
+import {Tokenizer} from '../../src/impl/Tokenizer.js';
+import {TreeComposer} from '../../src/impl/TreeComposer.js';
 
 export interface TestCase {
   name: string;

@@ -1,5 +1,5 @@
-import {DefaultRawTest, DefaultSuite} from './abstract-suite';
-import {inFrameset} from './samples';
+import {DefaultRawTest, DefaultSuite} from './abstract-suite.js';
+import {inFrameset} from './samples/index.js';
 
 const suite = new DefaultSuite(inFrameset as DefaultRawTest[]);
 

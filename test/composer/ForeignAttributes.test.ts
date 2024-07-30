@@ -1,6 +1,6 @@
-import {NS_XLINK, NS_XML, NS_XMLNS} from '../../src/impl/TreeComposer';
-import {DefaultRawTest, DefaultTestCase, ExcerptSuite} from './abstract-suite';
-import {foreignAttributes} from './samples';
+import {NS_XLINK, NS_XML, NS_XMLNS} from '../../src/impl/TreeComposer.js';
+import {DefaultRawTest, DefaultTestCase, ExcerptSuite} from './abstract-suite.js';
+import {foreignAttributes} from './samples/index.js';
 
 const NS_BY_PREFIX: { [prefix: string]: string } = {
   'xlink': NS_XLINK,

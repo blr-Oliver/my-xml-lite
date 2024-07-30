@@ -1,12 +1,12 @@
-import {stringToArray} from '../../src/common/code-sequences';
-import {DirectCharacterSource} from '../../src/common/stream-source';
-import {HTML_SPECIAL} from '../../src/decl/known-named-refs';
-import {buildIndex} from '../../src/impl/build-index';
-import {FixedSizeStringBuilder} from '../../src/impl/FixedSizeStringBuilder';
-import {ParserEnvironment} from '../../src/impl/interfaces/ParserEnvironment';
-import {State} from '../../src/impl/interfaces/states';
-import {CharactersToken, EOF_TOKEN, TagToken, Token} from '../../src/impl/interfaces/tokens';
-import {Tokenizer} from '../../src/impl/Tokenizer';
+import {stringToArray} from '../../src/common/code-sequences.js';
+import {DirectCharacterSource} from '../../src/common/stream-source.js';
+import {HTML_SPECIAL} from '../../src/decl/known-named-refs.js';
+import {buildIndex} from '../../src/impl/build-index.js';
+import {FixedSizeStringBuilder} from '../../src/impl/FixedSizeStringBuilder.js';
+import {ParserEnvironment} from '../../src/impl/interfaces/ParserEnvironment.js';
+import {State} from '../../src/impl/interfaces/states.js';
+import {CharactersToken, EOF_TOKEN, TagToken, Token} from '../../src/impl/interfaces/tokens.js';
+import {Tokenizer} from '../../src/impl/Tokenizer.js';
 import {default as rawTests} from './samples/script-data.json';
 
 type TestCase = [string/*name*/, string/*input*/, string/*comment data*/, string[]/*errors*/, boolean/*completed*/];

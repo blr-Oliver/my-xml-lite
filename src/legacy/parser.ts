@@ -1,9 +1,9 @@
-import {isSpace} from '../common/code-checks';
-import {CodePoints} from '../common/code-points';
-import {CD_END, CD_START, CMT_END, CMT_START, PI_END, PI_START, stringToArray} from '../common/code-sequences';
-import {StringSource} from '../common/stream-source';
-import {isNameChar, isNameStartChar} from '../common/xml-code-checks';
-import {Declaration, Document, Element, Node, NodeContainer, NodeType, Text, ValueNode} from '../common/xml-node';
+import {isSpace} from '../common/code-checks.js';
+import {CodePoints} from '../common/code-points.js';
+import {CD_END, CD_START, CMT_END, CMT_START, PI_END, PI_START, stringToArray} from '../common/code-sequences.js';
+import {StringSource} from '../common/stream-source.js';
+import {isNameChar, isNameStartChar} from '../common/xml-code-checks.js';
+import {Declaration, Document, Element, Node, NodeContainer, NodeType, Text, ValueNode} from '../common/xml-node.js';
 
 const ALWAYS_EMPTY: { [tag: string]: boolean } = {
   br: true,

@@ -1,6 +1,6 @@
-import {InsertionMode} from '../../src/impl/interfaces/insertion-mode';
-import {DefaultRawTestCore, DefaultTestCase, ExcerptSuite} from './abstract-suite';
-import {inTemplate} from './samples';
+import {InsertionMode} from '../../src/impl/interfaces/insertion-mode.js';
+import {DefaultRawTestCore, DefaultTestCase, ExcerptSuite} from './abstract-suite.js';
+import {inTemplate} from './samples/index.js';
 
 type InsertionModeChange = `${'+' | '-'}${InsertionMode}`;
 type TemplateRawTest = [...DefaultRawTestCore, InsertionModeChange[]?];

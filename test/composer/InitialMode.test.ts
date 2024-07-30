@@ -1,10 +1,10 @@
-import {InsertionMode} from '../../src/impl/interfaces/insertion-mode';
-import {Token} from '../../src/impl/interfaces/tokens';
-import {StaticNodeFactory} from '../../src/impl/nodes/static-factory';
-import {TreeComposer} from '../../src/impl/TreeComposer';
-import {trackProperty} from '../util/property-tracker';
-import {DefaultRawTestCore, DefaultSuite, DefaultTestCase} from './abstract-suite';
-import {initial} from './samples';
+import {InsertionMode} from '../../src/impl/interfaces/insertion-mode.js';
+import {Token} from '../../src/impl/interfaces/tokens.js';
+import {StaticNodeFactory} from '../../src/impl/nodes/static-factory.js';
+import {TreeComposer} from '../../src/impl/TreeComposer.js';
+import {trackProperty} from '../util/property-tracker.js';
+import {DefaultRawTestCore, DefaultSuite, DefaultTestCase} from './abstract-suite.js';
+import {initial} from './samples/index.js';
 
 type ModeTrackingRawTest = [...DefaultRawTestCore, InsertionMode[]/*modes*/];
 

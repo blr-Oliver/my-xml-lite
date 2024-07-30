@@ -1,4 +1,4 @@
-import {CodePoints} from '../common/code-points';
+import {CodePoints} from '../common/code-points.js';
 
 export type EntityMapping<T> = {
   [entity: string]: T;

@@ -1,5 +1,5 @@
-import {DefaultRawTest, DefaultSuite} from './abstract-suite';
-import {beforeHead} from './samples';
+import {DefaultRawTest, DefaultSuite} from './abstract-suite.js';
+import {beforeHead} from './samples/index.js';
 
 const suite = new DefaultSuite(beforeHead as DefaultRawTest[]);
 
