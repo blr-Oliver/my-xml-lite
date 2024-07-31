@@ -1,17 +1,27 @@
-interface Node {
-  readonly baseURI: string;
+export const enum NodeType {
+  ELEMENT_NODE = 1,
+  ATTRIBUTE_NODE = 2,
+  TEXT_NODE = 3,
+  CDATA_SECTION_NODE = 4,
+  PROCESSING_INSTRUCTION_NODE = 7,
+  COMMENT_NODE = 8,
+  DOCUMENT_NODE = 9,
+  DOCUMENT_TYPE_NODE = 10,
+  DOCUMENT_FRAGMENT_NODE = 11
+}
+
+export interface Node {
+  readonly ownerDocument: Document | null;
   readonly childNodes: NodeListOf<ChildNode>;
   readonly firstChild: ChildNode | null;
-  readonly isConnected: boolean;
   readonly lastChild: ChildNode | null;
+  readonly previousSibling: ChildNode | null;
   readonly nextSibling: ChildNode | null;
   readonly nodeName: string;
-  readonly nodeType: number;
+  readonly nodeType: NodeType;
   readonly nodeValue: string | null;
-  readonly ownerDocument: Document | null;
-  readonly parentElement: HTMLElement | null;
+  readonly parentElement: Element | null;
   readonly parentNode: ParentNode | null;
-  readonly previousSibling: ChildNode | null;
   // textContent: string | null;
   // compareDocumentPosition(other: Node): number;
   // contains(other: Node | null): boolean;
@@ -22,157 +32,100 @@ interface Node {
   // lookupPrefix(namespace: string | null): string | null;
 }
 
-interface ChildNode extends Node {
+export interface ChildNode extends Node {
 }
 
-interface ParentNode extends Node {
+export interface ParentNode extends Node {
   readonly childElementCount: number;
   readonly children: HTMLCollection;
   readonly firstElementChild: Element | null;
   readonly lastElementChild: Element | null;
-  // querySelector<E extends Element = Element>(selectors: string): E | null;
-  // querySelectorAll<E extends Element = Element>(selectors: string): NodeListOf<E>;
+  // querySelector(selectors: string): E | null;
+  // querySelectorAll(selectors: string): NodeListOf<Element>;
 }
 
-interface Element extends Node, ChildNode, NonDocumentTypeChildNode, ParentNode {
-  readonly attributes: NamedNodeMap;
-  readonly classList: DOMTokenList;
-  readonly className: string;
-  readonly id: string;
-  readonly innerHTML: string;
-  readonly localName: string;
-  readonly namespaceURI: string | null;
-  readonly outerHTML: string;
+export interface Element extends Node, ChildNode, NonDocumentTypeChildNode, ParentNode {
   readonly ownerDocument: Document;
+  readonly attributes: NamedNodeMap;
+  readonly id: string;
+  readonly className: string;
+  readonly classList: DOMTokenList;
+  readonly namespaceURI: string | null;
   readonly prefix: string | null;
+  readonly localName: string;
   readonly tagName: string;
-  // closest<E extends Element = Element>(selectors: string): E | null;
+  // closest(selectors: string): Element | null;
   getAttribute(qualifiedName: string): string | null;
   getAttributeNS(namespace: string | null, localName: string): string | null;
   getAttributeNames(): string[];
   getAttributeNode(qualifiedName: string): Attr | null;
   getAttributeNodeNS(namespace: string | null, localName: string): Attr | null;
-  // getElementsByClassName(classNames: string): HTMLCollectionOf<Element>;
-  // getElementsByTagName(qualifiedName: string): HTMLCollectionOf<Element>;
-  // getElementsByTagNameNS(namespace: string | null, localName: string): HTMLCollectionOf<Element>;
+  // getElementsByClassName(classNames: string): HTMLCollection;
+  // getElementsByTagName(qualifiedName: string): HTMLCollection;
+  // getElementsByTagNameNS(namespace: string | null, localName: string): HTMLCollection;
   hasAttribute(qualifiedName: string): boolean;
   hasAttributeNS(namespace: string | null, localName: string): boolean;
   hasAttributes(): boolean;
   // matches(selectors: string): boolean;
 }
 
-interface Document extends Node, NonElementParentNode, ParentNode {
-  readonly body: HTMLElement;
-  readonly doctype: DocumentType | null;
-  readonly documentElement: HTMLElement;
-  readonly head: HTMLElement;
+export interface Document extends Node, NonElementParentNode, ParentNode {
   readonly ownerDocument: null;
-  readonly title: string;
+  readonly body: Element;
+  readonly doctype: DocumentType | null;
+  readonly documentElement: Element;
+  readonly head: Element;
+  // readonly title: string;
   // createNodeIterator(root: Node, whatToShow?: number, filter?: NodeFilter | null): NodeIterator;
   // createTreeWalker(root: Node, whatToShow?: number, filter?: NodeFilter | null): TreeWalker;
   // getElementById(elementId: string): HTMLElement | null;
-  // getElementsByClassName(classNames: string): HTMLCollectionOf<Element>;
-  // getElementsByName(elementName: string): NodeListOf<HTMLElement>;
-  // getElementsByTagName(qualifiedName: string): HTMLCollectionOf<Element>;
-  // getElementsByTagNameNS(namespace: string | null, localName: string): HTMLCollectionOf<Element>;
+  // getElementsByClassName(classNames: string): HTMLCollection;
+  // getElementsByName(elementName: string): NodeListOf<Element>;
+  // getElementsByTagName(qualifiedName: string): HTMLCollection;
+  // getElementsByTagNameNS(namespace: string | null, localName: string): HTMLCollection;
 }
 
-interface HTMLElement extends Element {
-  readonly innerText: string;
-  readonly outerText: string;
-}
-
-interface DocumentType extends Node, ChildNode {
-  readonly name: string;
+export interface CharacterData extends Node, ChildNode, NonDocumentTypeChildNode {
   readonly ownerDocument: Document;
+  readonly data: string;
+  readonly length: number;
+}
+
+export interface Text extends CharacterData {
+}
+
+export interface CDATASection extends Text {
+}
+
+export interface Comment extends CharacterData {
+}
+
+export interface ProcessingInstruction extends CharacterData {
+  readonly target: string;
+}
+
+export interface DocumentType extends Node {
+  readonly ownerDocument: Document;
+  readonly name: string;
   readonly publicId: string;
   readonly systemId: string;
 }
 
-interface CharacterData extends Node, ChildNode, NonDocumentTypeChildNode {
-  readonly data: string;
-  readonly length: number;
-  readonly ownerDocument: Document;
-}
-
-interface Text extends CharacterData {
-}
-
-interface CDATASection extends Text {
-}
-
-interface Comment extends CharacterData {
-}
-
-interface ProcessingInstruction extends CharacterData {
-  readonly ownerDocument: Document;
-  readonly target: string;
-}
-
-interface DocumentFragment extends Node, NonElementParentNode, ParentNode {
+export interface DocumentFragment extends Node, NonElementParentNode, ParentNode {
   readonly ownerDocument: Document;
   // getElementById(elementId: string): HTMLElement | null;
 }
 
-interface NonElementParentNode {
+export interface NonElementParentNode {
   // getElementById(elementId: string): Element | null;
 }
 
-interface NonDocumentTypeChildNode {
+export interface NonDocumentTypeChildNode {
   readonly nextElementSibling: Element | null;
   readonly previousElementSibling: Element | null;
 }
 
-interface Attr extends Node {
-  readonly localName: string;
-  readonly name: string;
-  readonly namespaceURI: string | null;
-  readonly ownerDocument: Document;
-  readonly ownerElement: Element | null;
-  readonly prefix: string | null;
-  readonly value: string;
-}
-
-interface NodeList {
-  readonly length: number;
-  item(index: number): Node | null;
-  forEach(callback: (value: Node, key: number, parent: NodeList) => void, thisArg?: any): void;
-  readonly [index: number]: Node;
-  [Symbol.iterator](): IterableIterator<Node>;
-  entries(): IterableIterator<[number, Node]>;
-  keys(): IterableIterator<number>;
-  values(): IterableIterator<Node>;
-}
-
-interface NodeListOf<TNode extends Node> extends NodeList {
-  item(index: number): TNode;
-  forEach(callback: (value: TNode, key: number, parent: NodeListOf<TNode>) => void, thisArg?: any): void;
-  readonly [index: number]: TNode;
-  [Symbol.iterator](): IterableIterator<TNode>;
-  entries(): IterableIterator<[number, TNode]>;
-  keys(): IterableIterator<number>;
-  values(): IterableIterator<TNode>;
-}
-
-interface HTMLCollectionBase {
-  readonly length: number;
-  item(index: number): Element | null;
-  readonly [index: number]: Element;
-  [Symbol.iterator](): IterableIterator<Element>;
-}
-
-interface HTMLCollection extends HTMLCollectionBase {
-  namedItem(name: string): Element | null;
-}
-
-interface HTMLCollectionOf<T extends Element> extends HTMLCollectionBase {
-  item(index: number): T | null;
-  namedItem(name: string): T | null;
-  readonly [index: number]: T;
-  [Symbol.iterator](): IterableIterator<T>;
-}
-
-interface DOMTokenList {
+export interface DOMTokenList {
   readonly length: number;
   readonly value: string;
   toString(): string;
@@ -186,7 +139,36 @@ interface DOMTokenList {
   values(): IterableIterator<string>;
 }
 
-interface NamedNodeMap {
+export interface Attr extends Node {
+  readonly ownerDocument: Document;
+  readonly ownerElement: Element | null;
+  readonly localName: string;
+  readonly name: string;
+  readonly namespaceURI: string | null;
+  readonly prefix: string | null;
+  readonly value: string | null;
+}
+
+export interface NodeListOf<TNode extends Node> {
+  readonly length: number;
+  item(index: number): TNode | null;
+  forEach(callback: (value: TNode, key: number, parent: NodeListOf<TNode>) => void, thisArg?: any): void;
+  readonly [index: number]: TNode;
+  [Symbol.iterator](): IterableIterator<TNode>;
+  entries(): IterableIterator<[number, TNode]>;
+  keys(): IterableIterator<number>;
+  values(): IterableIterator<TNode>;
+}
+
+export interface HTMLCollection {
+  readonly length: number;
+  item(index: number): Element | null;
+  namedItem(name: string): Element | null;
+  readonly [index: number]: Element;
+  [Symbol.iterator](): IterableIterator<Element>;
+}
+
+export interface NamedNodeMap {
   readonly length: number;
   getNamedItem(qualifiedName: string): Attr | null;
   getNamedItemNS(namespace: string | null, localName: string): Attr | null;
@@ -195,11 +177,11 @@ interface NamedNodeMap {
   [Symbol.iterator](): IterableIterator<Attr>;
 }
 
-interface NodeFilter {
+export interface NodeFilter {
   acceptNode(node: Node): number;
 }
 
-interface NodeIterator {
+export interface NodeIterator {
   readonly filter: NodeFilter | null;
   readonly pointerBeforeReferenceNode: boolean;
   readonly referenceNode: Node;
@@ -209,7 +191,7 @@ interface NodeIterator {
   previousNode(): Node | null;
 }
 
-interface TreeWalker {
+export interface TreeWalker {
   currentNode: Node;
   readonly filter: NodeFilter | null;
   readonly root: Node;
