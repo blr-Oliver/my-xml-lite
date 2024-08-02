@@ -21,5 +21,5 @@
   ["frameset after head template", "<!DOCTYPE html><head><template></template></head><frameset></frameset>", "<!DOCTYPE html><html><head><template></template></head><frameset></frameset></html>", []],
   ["frameset after implicit body element", "<!DOCTYPE html><div></div><frameset></frameset>", "<!DOCTYPE html><html><head></head><frameset></frameset></html>", ["frameset-in-body"]],
   ["frameset inside template", "<!DOCTYPE html><head><template><frameset></frameset></template></head>", "<!DOCTYPE html><html><head><template></template></head><body></body></html>", ["frameset-in-body", "orphan-end-tag-inside-special-element"]],
-  ["CDATA", "<!DOCTYPE html><frameset><![CDATA[A]]></frameset>", "<!DOCTYPE html><html><head></head><frameset><!--[CDATA[A]]--></frameset></html>", ["cdata-in-html-content", "incorrectly-opened-comment"]]
+  ["CDATA", "<!DOCTYPE html><frameset><![CDATA[A]]></frameset>", "<!DOCTYPE html><html><head></head><frameset><!--[CDATA[A]]--></frameset></html>", ["cdata-in-html-content"]]
 ]

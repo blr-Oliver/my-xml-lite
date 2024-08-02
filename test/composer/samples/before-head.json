@@ -4,7 +4,7 @@
   ["doctype", "<!DOCTYPE html><html a><!DOCTYPE html>", "<!DOCTYPE html><html a><head></head><body></body></html>", ["unexpected-doctype"]],
   ["NUL", "<!DOCTYPE html><html a>\u0000", "<!DOCTYPE html><html a><head></head><body></body></html>", ["unexpected-null-character"]],
   ["text", "<!DOCTYPE html><html a>A", "<!DOCTYPE html><html a><head></head><body>A</body></html>", []],
-  ["CDATA", "<!DOCTYPE html><html a><![CDATA[A]]>", "<!DOCTYPE html><html a><!--[CDATA[A]]--><head></head><body></body></html>", ["cdata-in-html-content", "incorrectly-opened-comment"]],
+  ["CDATA", "<!DOCTYPE html><html a><![CDATA[A]]>", "<!DOCTYPE html><html a><!--[CDATA[A]]--><head></head><body></body></html>", ["cdata-in-html-content"]],
   ["html start", "<!DOCTYPE html><html a=\"a\" b><html a=\"b\" c>", "<!DOCTYPE html><html a=\"a\" b c><head></head><body></body></html>", ["unexpected-html-start-tag"]],
   ["head start", "<!DOCTYPE html><html a><head b>", "<!DOCTYPE html><html a><head b></head><body></body></html>", []],
   ["head end", "<!DOCTYPE html><html a></head>", "<!DOCTYPE html><html a><head></head><body></body></html>", []],

@@ -7,7 +7,7 @@
   ["NUL", "<!DOCTYPE html><html><body>\u0000</body></html>", "<!DOCTYPE html><html><head></head><body></body></html>", ["unexpected-null-character"]],
   ["text", "<!DOCTYPE html><html><body>A</body></html>", "<!DOCTYPE html><html><head></head><body>A</body></html>", []],
   ["space + text + space", "<!DOCTYPE html><html><body> \t\nA \t\f</body></html>", "<!DOCTYPE html><html><head></head><body> \t\nA \t\f</body></html>", []],
-  ["CDATA", "<!DOCTYPE html><html><body><![CDATA[A]]></body></html>", "<!DOCTYPE html><html><head></head><body><!--[CDATA[A]]--></body></html>", ["cdata-in-html-content", "incorrectly-opened-comment"]],
+  ["CDATA", "<!DOCTYPE html><html><body><![CDATA[A]]></body></html>", "<!DOCTYPE html><html><head></head><body><!--[CDATA[A]]--></body></html>", ["cdata-in-html-content"]],
   ["html start", "<!DOCTYPE html><html b a=\"a\"><body><html c a=\"b\"></body></html>", "<!DOCTYPE html><html b a=\"a\" c><head></head><body></body></html>", ["unexpected-html-start-tag"]],
   ["body start", "<!DOCTYPE html><html><body b a=\"a\"><body c a=\"b\"></body></html>", "<!DOCTYPE html><html><head></head><body b a=\"a\" c></body></html>", ["unexpected-body-start-tag"]],
   ["head void elements", "<!DOCTYPE html><html><body><base><basefont><bgsound><link><meta></body></html>", "<!DOCTYPE html><html><head></head><body><base/><basefont/><bgsound/><link/><meta/></body></html>", []],

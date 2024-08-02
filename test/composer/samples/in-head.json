@@ -6,7 +6,7 @@
   ["space", "<!DOCTYPE html><head> \t\n\f</head>", "<!DOCTYPE html><html><head> \t\n\f</head><body></body></html>", []],
   ["text", "<!DOCTYPE html><head>A</head>", "<!DOCTYPE html><html><head></head><body>A</body></html>", ["orphan-end-tag-inside-special-element"]],
   ["NUL", "<!DOCTYPE html><head>\u0000</head>", "<!DOCTYPE html><html><head></head><body></body></html>", ["unexpected-null-character"]],
-  ["CDATA", "<!DOCTYPE html><head><![CDATA[A]]></head>", "<!DOCTYPE html><html><head><!--[CDATA[A]]--></head><body></body></html>", ["cdata-in-html-content", "incorrectly-opened-comment"]],
+  ["CDATA", "<!DOCTYPE html><head><![CDATA[A]]></head>", "<!DOCTYPE html><html><head><!--[CDATA[A]]--></head><body></body></html>", ["cdata-in-html-content"]],
   ["html start", "<!DOCTYPE html><html a=\"a\" b><head><html a=\"b\" c></head>", "<!DOCTYPE html><html a=\"a\" b c><head></head><body></body></html>", ["unexpected-html-start-tag"]],
   ["base start", "<!DOCTYPE html><head><base></head>", "<!DOCTYPE html><html><head><base/></head><body></body></html>", []],
   ["basefont start", "<!DOCTYPE html><head><basefont></head>", "<!DOCTYPE html><html><head><basefont/></head><body></body></html>", []],

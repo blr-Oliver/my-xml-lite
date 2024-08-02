@@ -3,7 +3,7 @@
   ["text", "<!DOCTYPE html><frameset></frameset></html>A", "<!DOCTYPE html><html><head></head><frameset></frameset></html>", ["unexpected-non-whitespace-character"]],
   ["space + text", "<!DOCTYPE html><frameset></frameset></html> \t\n\fA", "<!DOCTYPE html><html><head></head><frameset></frameset> \t\n\f</html>", ["unexpected-non-whitespace-character"]],
   ["comment", "<!DOCTYPE html><frameset></frameset></html><!--A-->", "<!DOCTYPE html><html><head></head><frameset></frameset></html><!--A-->", []],
-  ["CDATA", "<!DOCTYPE html><frameset></frameset></html><![CDATA[A]]>", "<!DOCTYPE html><html><head></head><frameset></frameset></html><!--[CDATA[A]]-->", ["cdata-in-html-content", "incorrectly-opened-comment"]],
+  ["CDATA", "<!DOCTYPE html><frameset></frameset></html><![CDATA[A]]>", "<!DOCTYPE html><html><head></head><frameset></frameset></html><!--[CDATA[A]]-->", ["cdata-in-html-content"]],
   ["doctype (repeated)", "<!DOCTYPE html><frameset></frameset></html><!DOCTYPE html>", "<!DOCTYPE html><html><head></head><frameset></frameset></html>", ["unexpected-doctype"]],
   ["doctype (first time)", "<frameset></frameset></html><!DOCTYPE html>", "<html><head></head><frameset></frameset></html>", ["missing-doctype", "unexpected-doctype"]],
   ["noframes start", "<!DOCTYPE html><frameset></frameset></html><noframes>&#x42;</html>", "<!DOCTYPE html><html><head></head><frameset></frameset><noframes>&#x42;</html></noframes></html>", ["abrupt-end-of-text"]],

@@ -647,7 +647,6 @@ export class Tokenizer implements ITokenizer {
     }
   }
 
-
   attributeValueDoubleQuoted(code: number): State {
     return this.attributeValueQuoted(code, CodePoints.DOUBLE_QUOTE);
   }
@@ -758,8 +757,14 @@ export class Tokenizer implements ITokenizer {
 
   // -----CDATA states-----
   cdataSectionStart(code: number): State {
-    this.env.buffer.position = this.sequenceBufferOffset;
-    return this.callState('cdataSection', code);
+    const adjustedNode = this.composer.adjustedCurrentNode;
+    if (adjustedNode && adjustedNode.namespaceURI !== NS_HTML) {
+      this.env.buffer.position = this.sequenceBufferOffset;
+      return this.callState('cdataSection', code);
+    }
+    this.startNewComment();
+    this.error('cdata-in-html-content');
+    return this.bogusComment(code);
   }
 
   cdataSection(code: number): State {
@@ -1145,12 +1150,7 @@ export class Tokenizer implements ITokenizer {
       case 0x64: // d
         return this.matchSequence(code, DOCTYPE, true, 'doctype', 'markupDeclarationFail');
       case CodePoints.OPEN_SQUARE_BRACKET:
-        if (this.composer) {
-          const adjustedNode = this.composer.adjustedCurrentNode;
-          if (adjustedNode && adjustedNode.namespaceURI !== NS_HTML)
-            return this.matchSequence(code, CDATA, false, 'cdataSectionStart', 'markupDeclarationFail');
-        }
-        this.error('cdata-in-html-content');
+        return this.matchSequence(code, CDATA, false, 'cdataSectionStart', 'markupDeclarationFail');
       default:
         return this.callState('markupDeclarationFail', code);
     }
