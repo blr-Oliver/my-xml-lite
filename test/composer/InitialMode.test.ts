@@ -48,10 +48,6 @@ class InitialModeSuite extends DefaultSuite<ModeTrackingRawTest, ModeTrackingTes
     return result;
   }
 
-  runTest(test: ModeTrackingTestCase) {
-    super.runTest(test);
-  }
-
   runChecks(test: ModeTrackingTestCase) {
     super.runChecks(test);
     expect(this.modes).toStrictEqual(test.modes);

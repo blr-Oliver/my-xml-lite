@@ -1,8 +1,7 @@
-import {stringToArray} from '../../src/common/code-sequences.js';
-import {DirectCharacterSource} from '../../src/common/stream-source.js';
 import {ChildNode, Document, Element, Node, NodeType, NonDocumentTypeChildNode, ParentNode} from '../../src/decl/dom-like.js';
 import {HTML_SPECIAL} from '../../src/decl/known-named-refs.js';
 import {buildIndex} from '../../src/impl/build-index.js';
+import {StringCharacterSource} from '../../src/impl/input/StringCharacterSource.js';
 import {ErrorHandler} from '../../src/impl/interfaces/error-tracker.js';
 import {serialize} from '../../src/impl/Serializer.js';
 import {SimpleNodeFactory} from '../../src/impl/simple-tree/SimpleNodeFactory.js';
@@ -20,12 +19,14 @@ export abstract class AbstractSuite<R, T extends TestCase, C extends TreeCompose
   composer!: C;
   preparedTests!: T[];
   errorHandler!: ErrorHandler;
+  input: StringCharacterSource;
   readonly name: string;
 
   protected constructor(name: string, testCases: R[]) {
     this.name = name;
     this.testCases = testCases;
     this.errorList = [];
+    this.input = new StringCharacterSource('');
   }
 
   beforeAll() {
@@ -48,6 +49,7 @@ export abstract class AbstractSuite<R, T extends TestCase, C extends TreeCompose
   configure() {
     this.composer.tokenizer = this.tokenizer;
     this.tokenizer.composer = this.composer;
+    this.tokenizer.input = this.input;
     this.composer.reset();
   }
 
@@ -99,12 +101,8 @@ export class DefaultSuite<R = DefaultRawTest, T extends DefaultTestCase = Defaul
     return {name, input, output, errors} as T;
   }
 
-  createSource(input: string) {
-    return new DirectCharacterSource(new Int32Array(stringToArray(input)));
-  }
-
   processInput(test: T) {
-    this.tokenizer.input = this.createSource(test.input);
+    this.input.source = test.input;
     this.tokenizer.proceed();
   }
 
