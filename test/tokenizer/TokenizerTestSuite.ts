@@ -2,7 +2,6 @@ import {stringToArray} from '../../src/common/code-sequences.js';
 import {DirectCharacterSource} from '../../src/common/stream-source.js';
 import {HTML_SPECIAL} from '../../src/decl/known-named-refs.js';
 import {buildIndex} from '../../src/impl/build-index.js';
-import {FixedSizeStringBuilder} from '../../src/impl/FixedSizeStringBuilder.js';
 import {ErrorTracker} from '../../src/impl/interfaces/error-tracker.js';
 import {ParserEnvironment} from '../../src/impl/interfaces/ParserEnvironment.js';
 import {State} from '../../src/impl/interfaces/states.js';
@@ -16,7 +15,7 @@ export abstract class TokenizerTestSuite<T/*test case*/> implements ErrorTracker
   errorList: string[] = [];
   lastState!: State;
 
-  constructor(name: string) {
+  protected constructor(name: string) {
     this.name = name;
   }
 
@@ -41,7 +40,7 @@ export abstract class TokenizerTestSuite<T/*test case*/> implements ErrorTracker
   beforeTest() {
     this.parser.state = 'data';
     this.parser.active = true;
-    this.parser.env.buffer.clear();
+    this.parser.buffer.clear();
     this.tokenList.length = 0;
     this.errorList.length = 0;
   }
@@ -65,7 +64,6 @@ export abstract class TokenizerTestSuite<T/*test case*/> implements ErrorTracker
       const tokenList = this.tokenList;
       const parser = this.parser = this.createTokenizer();
       parser.env = {
-        buffer: new FixedSizeStringBuilder(1000),
         tokens: {
           accept(token: Token) {
             tokenList.push(token);

@@ -1,8 +1,6 @@
-import {StringBuilder} from '../../decl/StringBuilder.js';
 import {Token} from './tokens.js';
 
 export interface ParserEnvironment {
-  readonly buffer: StringBuilder;
   tokens?: TokenSink;
 }
 

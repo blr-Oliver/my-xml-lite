@@ -2,7 +2,6 @@ import {stringToArray} from '../../src/common/code-sequences.js';
 import {DirectCharacterSource} from '../../src/common/stream-source.js';
 import {HTML_SPECIAL} from '../../src/decl/known-named-refs.js';
 import {buildIndex} from '../../src/impl/build-index.js';
-import {FixedSizeStringBuilder} from '../../src/impl/FixedSizeStringBuilder.js';
 import {ErrorTracker} from '../../src/impl/interfaces/error-tracker.js';
 import {ParserEnvironment} from '../../src/impl/interfaces/ParserEnvironment.js';
 import {State} from '../../src/impl/interfaces/states.js';
@@ -34,7 +33,6 @@ function suite() {
 
     parser = new MockCompositeTokenizer(buildIndex(HTML_SPECIAL), errorTracker);
     parser.env = {
-      buffer: new FixedSizeStringBuilder(1000),
       tokens: {
         accept(token: Token) {
           tokenList.push(token);
@@ -48,7 +46,7 @@ function suite() {
   beforeEach(() => {
     parser.state = 'data';
     parser.active = true;
-    parser.env.buffer.clear();
+    parser.buffer.clear();
     tokenList.length = 0;
     errorList.length = 0;
   });

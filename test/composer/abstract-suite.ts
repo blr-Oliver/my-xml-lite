@@ -3,7 +3,6 @@ import {DirectCharacterSource} from '../../src/common/stream-source.js';
 import {ChildNode, Document, Element, Node, NodeType, NonDocumentTypeChildNode, ParentNode} from '../../src/decl/dom-like.js';
 import {HTML_SPECIAL} from '../../src/decl/known-named-refs.js';
 import {buildIndex} from '../../src/impl/build-index.js';
-import {FixedSizeStringBuilder} from '../../src/impl/FixedSizeStringBuilder.js';
 import {ErrorTracker} from '../../src/impl/interfaces/error-tracker.js';
 import {ParserEnvironment} from '../../src/impl/interfaces/ParserEnvironment.js';
 import {serialize} from '../../src/impl/Serializer.js';
@@ -57,14 +56,13 @@ export abstract class AbstractSuite<R, T extends TestCase, C extends TreeCompose
     this.composer.reset();
 
     this.tokenizer.env = {
-      buffer: new FixedSizeStringBuilder(1000),
       tokens: this.composer
     } as unknown as ParserEnvironment;
   }
 
   beforeEach() {
     this.tokenizer.active = true;
-    this.tokenizer.env.buffer.clear();
+    this.tokenizer.buffer.clear();
     this.errorList.length = 0;
     this.composer.reset();
   }

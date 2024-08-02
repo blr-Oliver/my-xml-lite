@@ -15,6 +15,8 @@ import {CodePoints} from '../common/code-points.js';
 import {stringToArray} from '../common/code-sequences.js';
 import {CharacterSource} from '../common/stream-source.js';
 import {PrefixNode} from '../decl/entity-ref-index.js';
+import {StringBuilder} from '../decl/StringBuilder.js';
+import {FixedSizeStringBuilder} from './FixedSizeStringBuilder.js';
 import {ErrorTracker, ignoring} from './interfaces/error-tracker.js';
 import {ParserEnvironment} from './interfaces/ParserEnvironment.js';
 import {State} from './interfaces/states.js';
@@ -35,19 +37,10 @@ const CHAR_REF_REPLACEMENT: number[] = [
   0x02DC, 0x2122, 0x0161, 0x203A, 0x0153, 0x0000, 0x017E, 0x0178
 ];
 
-interface ITokenizer {
-  readonly env: ParserEnvironment;
-  readonly state: State;
-  readonly active: boolean;
-  lastOpenTag?: string;
-  composer?: TreeComposer;
-  proceed(): void;
-}
-
 export type WhitespaceMode = 'ignoreLeading' | 'emitLeading' | 'mixed' | 'whitespaceOnly';
 
 // TODO add reset method
-export class Tokenizer implements ITokenizer {
+export class Tokenizer {
   env!: ParserEnvironment;
   state: State = 'data';
   active: boolean = true;
@@ -82,12 +75,14 @@ export class Tokenizer implements ITokenizer {
   composer!: TreeComposer;
 
   input!: CharacterSource;
+  buffer!: StringBuilder;
   errorTracker: ErrorTracker;
 
   // TODO add input to constructor
   constructor(refsIndex: PrefixNode<number[]>, errorTracker: ErrorTracker = ignoring) {
     this.refsIndex = refsIndex;
     this.errorTracker = errorTracker;
+    this.buffer = new FixedSizeStringBuilder(2048);
   }
 
   proceed() {
@@ -144,7 +139,7 @@ export class Tokenizer implements ITokenizer {
   }
 
   emitAccumulatedCharacters() {
-    const buffer = this.env.buffer;
+    const buffer = this.buffer;
     if (buffer.position) {
       this.emit({
         type: 'characters',
@@ -158,14 +153,14 @@ export class Tokenizer implements ITokenizer {
   emitCData() {
     this.emit({
       type: 'cdata',
-      data: this.env.buffer.takeString(),
+      data: this.buffer.takeString(),
       whitespaceOnly: this.hasWhitespaceOnly
     } as CDataToken);
     this.hasWhitespaceOnly = true;
   }
 
   emitCurrentComment() {
-    this.currentComment.data = this.env.buffer.takeString();
+    this.currentComment.data = this.buffer.takeString();
     this.emit(this.currentComment);
     // @ts-ignore
     this.currentComment = undefined;
@@ -230,7 +225,7 @@ export class Tokenizer implements ITokenizer {
   }
   appendWhitespace(code: number) {
     if (this.whitespaceMode !== 'ignoreLeading' || !this.hasWhitespaceOnly)
-      this.env.buffer.append(code);
+      this.buffer.append(code);
   }
   appendNonWhitespace(code: number) {
     switch (this.whitespaceMode) {
@@ -250,7 +245,7 @@ export class Tokenizer implements ITokenizer {
         this.error('unexpected-non-whitespace-character');
         return;
     }
-    this.env.buffer.append(code);
+    this.buffer.append(code);
   }
 
   /**
@@ -267,7 +262,7 @@ export class Tokenizer implements ITokenizer {
    */
   matchSequence(code: number, seq: readonly number[], caseInsensitive: boolean, positiveState: State, negativeState: State): State {
     this.state = 'sequence';
-    this.sequenceBufferOffset = this.env.buffer.position;
+    this.sequenceBufferOffset = this.buffer.position;
     this.sequenceData = seq;
     this.sequenceIndex = 0;
     this.sequencePositiveState = positiveState;
@@ -281,7 +276,7 @@ export class Tokenizer implements ITokenizer {
 
   sequenceCaseSensitive(code: number): State {
     const seqData = this.sequenceData;
-    const buffer = this.env.buffer;
+    const buffer = this.buffer;
     const len = this.sequenceData.length;
     while (this.sequenceIndex < len) {
       if (code === CodePoints.EOC) return 'sequence';
@@ -295,7 +290,7 @@ export class Tokenizer implements ITokenizer {
 
   sequenceCaseInsensitive(code: number): State {
     const seqData = this.sequenceData;
-    const buffer = this.env.buffer;
+    const buffer = this.buffer;
     const len = this.sequenceData.length;
     while (this.sequenceIndex < len) {
       if (code === CodePoints.EOC) return 'sequence';
@@ -369,7 +364,7 @@ export class Tokenizer implements ITokenizer {
   }
 
   textDataEndTagOpen(code: number, tagNameState: State, textState: State): State {
-    const buffer = this.env.buffer;
+    const buffer = this.buffer;
     if (isAsciiAlpha(code)) {
       this.textEndMark = buffer.position;
       buffer.append(CodePoints.LT); // TODO check if this should belong to characters
@@ -403,7 +398,7 @@ export class Tokenizer implements ITokenizer {
   }
 
   createTextDataEndTag(tag: string): void {
-    const buffer = this.env.buffer;
+    const buffer = this.buffer;
     buffer.position = this.textEndMark;
     this.emitAccumulatedCharacters();
     this.startNewTag(tag);
@@ -457,7 +452,7 @@ export class Tokenizer implements ITokenizer {
 
   // -----tag states-----
   tagOpen(code: number): State {
-    const buffer = this.env.buffer;
+    const buffer = this.buffer;
     switch (code) {
       case CodePoints.EXCLAMATION:
         return 'markupDeclarationOpen';
@@ -511,7 +506,7 @@ export class Tokenizer implements ITokenizer {
   }
 
   tagName(code: number): State {
-    const buffer = this.env.buffer;
+    const buffer = this.buffer;
     while (true) {
       switch (code) {
         case CodePoints.TAB:
@@ -557,7 +552,7 @@ export class Tokenizer implements ITokenizer {
         case CodePoints.EQ:
           this.error('unexpected-equals-sign-before-attribute-name');
           this.startNewAttribute();
-          this.env.buffer.append(code);
+          this.buffer.append(code);
           return 'attributeName';
         default:
           this.startNewAttribute();
@@ -567,7 +562,7 @@ export class Tokenizer implements ITokenizer {
   }
 
   attributeName(code: number): State {
-    const buffer = this.env.buffer;
+    const buffer = this.buffer;
     while (true) {
       switch (code) {
         case CodePoints.EQ:
@@ -664,7 +659,7 @@ export class Tokenizer implements ITokenizer {
   }
 
   attributeValueQuoted(code: number, terminator: number): State {
-    const buffer = this.env.buffer;
+    const buffer = this.buffer;
     while (true) {
       switch (code) {
         case terminator:
@@ -689,7 +684,7 @@ export class Tokenizer implements ITokenizer {
   }
 
   attributeValueUnquoted(code: number): State {
-    const buffer = this.env.buffer;
+    const buffer = this.buffer;
     while (true) {
       switch (code) {
         case CodePoints.TAB:
@@ -767,7 +762,7 @@ export class Tokenizer implements ITokenizer {
   cdataSectionStart(code: number): State {
     const adjustedNode = this.composer.adjustedCurrentNode;
     if (adjustedNode && adjustedNode.namespaceURI !== NS_HTML) {
-      this.env.buffer.position = this.sequenceBufferOffset;
+      this.buffer.position = this.sequenceBufferOffset;
       return this.callState('cdataSection', code);
     }
     this.startNewComment();
@@ -823,7 +818,7 @@ export class Tokenizer implements ITokenizer {
 
   // -----character reference states-----
   characterReference(code: number): State {
-    const buffer = this.env.buffer;
+    const buffer = this.buffer;
     this.referenceStartMark = buffer.position;
     if (this.inAttribute) buffer.append(CodePoints.AMPERSAND);
     else this.appendNonWhitespace(CodePoints.AMPERSAND);
@@ -840,7 +835,7 @@ export class Tokenizer implements ITokenizer {
   numericCharacterReference(code: number): State {
     this.charCode = 0;
     if (code === CodePoints.X_CAPITAL || code === CodePoints.X_REGULAR) {
-      if (this.inAttribute) this.env.buffer.append(code);
+      if (this.inAttribute) this.buffer.append(code);
       else this.appendNonWhitespace(code);
       return 'hexadecimalCharacterReferenceStart';
     } else
@@ -848,7 +843,7 @@ export class Tokenizer implements ITokenizer {
   }
 
   numericCharacterReferenceEnd(): void {
-    const buffer = this.env.buffer;
+    const buffer = this.buffer;
     let charCode = this.charCode;
     if (charCode === 0) {
       this.error('null-character-reference');
@@ -871,7 +866,7 @@ export class Tokenizer implements ITokenizer {
   }
 
   namedCharacterReference(code: number): State {
-    const buffer = this.env.buffer;
+    const buffer = this.buffer;
     let node = this.refsIndex, next: PrefixNode<number[]>;
     let lastMatch = 0x00;
     while (node.children && (next = node.children[code])) {
@@ -947,7 +942,7 @@ export class Tokenizer implements ITokenizer {
   }
 
   ambiguousAmpersand(code: number): State {
-    const buffer = this.env.buffer;
+    const buffer = this.buffer;
     while (true) {
       if (code === CodePoints.SEMICOLON) {
         this.error('unknown-named-character-reference');
@@ -965,7 +960,7 @@ export class Tokenizer implements ITokenizer {
 
   // -----comment states-----
   commentStart(code: number): State {
-    this.env.buffer.position = this.sequenceBufferOffset;
+    this.buffer.position = this.sequenceBufferOffset;
     this.startNewComment();
     switch (code) {
       case CodePoints.HYPHEN:
@@ -992,13 +987,13 @@ export class Tokenizer implements ITokenizer {
         this.emitCurrentComment();
         return this.eof();
       default:
-        this.env.buffer.append(CodePoints.HYPHEN);
+        this.buffer.append(CodePoints.HYPHEN);
         return this.callState('comment', code);
     }
   }
 
   comment(code: number): State {
-    const buffer = this.env.buffer;
+    const buffer = this.buffer;
     while (true) {
       switch (code) {
         case CodePoints.LT:
@@ -1021,7 +1016,7 @@ export class Tokenizer implements ITokenizer {
   }
 
   commentLessThanSign(code: number): State {
-    const buffer = this.env.buffer;
+    const buffer = this.buffer;
     while (true) {
       switch (code) {
         case CodePoints.EXCLAMATION:
@@ -1068,13 +1063,13 @@ export class Tokenizer implements ITokenizer {
         this.emitCurrentComment();
         return this.eof();
       default:
-        this.env.buffer.append(CodePoints.HYPHEN);
+        this.buffer.append(CodePoints.HYPHEN);
         return this.callState('comment', code);
     }
   }
 
   commentEnd(code: number): State {
-    const buffer = this.env.buffer;
+    const buffer = this.buffer;
     while (true) {
       switch (code) {
         case CodePoints.GT:
@@ -1099,7 +1094,7 @@ export class Tokenizer implements ITokenizer {
   }
 
   commentEndBang(code: number): State {
-    const buffer = this.env.buffer;
+    const buffer = this.buffer;
     const data = buffer.buffer;
     let position: number;
     switch (code) {
@@ -1130,7 +1125,7 @@ export class Tokenizer implements ITokenizer {
   }
 
   bogusComment(code: number): State {
-    const buffer = this.env.buffer;
+    const buffer = this.buffer;
     while (true) {
       switch (code) {
         case CodePoints.GT:
@@ -1172,7 +1167,7 @@ export class Tokenizer implements ITokenizer {
 
   // -----doctype states-----
   doctype(code: number): State {
-    this.env.buffer.position = this.sequenceBufferOffset;
+    this.buffer.position = this.sequenceBufferOffset;
     this.emitAccumulatedCharacters();
     this.startNewDoctype();
     switch (code) {
@@ -1191,7 +1186,7 @@ export class Tokenizer implements ITokenizer {
   }
 
   beforeDoctypeName(code: number): State {
-    const buffer = this.env.buffer;
+    const buffer = this.buffer;
     while (true) {
       switch (code) {
         case CodePoints.TAB:
@@ -1219,7 +1214,7 @@ export class Tokenizer implements ITokenizer {
   }
 
   doctypeName(code: number): State {
-    const buffer = this.env.buffer;
+    const buffer = this.buffer;
     while (true) {
       switch (code) {
         case CodePoints.TAB:
@@ -1273,14 +1268,14 @@ export class Tokenizer implements ITokenizer {
   }
 
   afterDoctypeNameFailedSequence(code: number): State {
-    this.env.buffer.position = this.sequenceBufferOffset;
+    this.buffer.position = this.sequenceBufferOffset;
     this.currentDoctype.forceQuirks = true;
     this.error('invalid-character-sequence-after-doctype-name');
     return this.callState('bogusDoctype', code);
   }
 
   afterDoctypePublicKeyword(code: number): State {
-    this.env.buffer.position = this.sequenceBufferOffset;
+    this.buffer.position = this.sequenceBufferOffset;
     switch (code) {
       case CodePoints.TAB:
       case CodePoints.LF:
@@ -1344,7 +1339,7 @@ export class Tokenizer implements ITokenizer {
   }
 
   doctypePublicIdentifierQuoted(code: number, terminator: number): State {
-    const buffer = this.env.buffer;
+    const buffer = this.buffer;
     while (true) {
       switch (code) {
         case terminator:
@@ -1421,7 +1416,7 @@ export class Tokenizer implements ITokenizer {
   }
 
   afterDoctypeSystemKeyword(code: number): State {
-    this.env.buffer.position = this.sequenceBufferOffset;
+    this.buffer.position = this.sequenceBufferOffset;
     switch (code) {
       case CodePoints.TAB:
       case CodePoints.LF:
@@ -1484,7 +1479,7 @@ export class Tokenizer implements ITokenizer {
   }
 
   doctypeSystemIdentifierQuoted(code: number, terminator: number): State {
-    const buffer = this.env.buffer;
+    const buffer = this.buffer;
     while (true) {
       switch (code) {
         case terminator:

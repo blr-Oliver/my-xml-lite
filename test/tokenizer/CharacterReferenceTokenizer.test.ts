@@ -3,7 +3,6 @@ import {stringToArray} from '../../src/common/code-sequences.js';
 import {DirectCharacterSource} from '../../src/common/stream-source.js';
 import {HTML_SPECIAL} from '../../src/decl/known-named-refs.js';
 import {buildIndex} from '../../src/impl/build-index.js';
-import {FixedSizeStringBuilder} from '../../src/impl/FixedSizeStringBuilder.js';
 import {ErrorTracker} from '../../src/impl/interfaces/error-tracker.js';
 import {ParserEnvironment} from '../../src/impl/interfaces/ParserEnvironment.js';
 import {State} from '../../src/impl/interfaces/states.js';
@@ -33,7 +32,7 @@ function suite() {
           case CodePoints.AMPERSAND:
             return super.attributeValueUnquoted(code);
           default:
-            this.env.buffer.append(code);
+            this.buffer.append(code);
             return 'attributeValueUnquoted';
         }
       }
@@ -48,7 +47,6 @@ function suite() {
 
     parser = new MockCompositeTokenizer(buildIndex(HTML_SPECIAL), errorTracker);
     parser.env = {
-      buffer: new FixedSizeStringBuilder(1000),
       tokens: {
         accept(token: Token) {
           tokenList.push(token);
@@ -61,8 +59,8 @@ function suite() {
   beforeEach(() => {
     parser.referenceStartMark = 0;
     parser.active = true;
-    parser.env.buffer.clear();
-    parser.env.buffer.append(CodePoints.X_REGULAR);
+    parser.buffer.clear();
+    parser.buffer.append(CodePoints.X_REGULAR);
     tokenList.length = 0;
     errorList.length = 0;
   });
@@ -100,7 +98,7 @@ function suite() {
       expect(tokenList[0]).toBe(EOF_TOKEN);
       expect(lastState).toStrictEqual(expectedLastState);
       expect(parser.referenceStartMark).toStrictEqual(1);
-      const buffer = parser.env.buffer;
+      const buffer = parser.buffer;
       expect(buffer.buffer[0]).toStrictEqual(CodePoints.X_REGULAR);
       expect(buffer.takeString(1)).toStrictEqual(expectedData);
       expect(errorList).toStrictEqual(expectedErrors);
