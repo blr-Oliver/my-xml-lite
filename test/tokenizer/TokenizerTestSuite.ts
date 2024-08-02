@@ -3,10 +3,10 @@ import {DirectCharacterSource} from '../../src/common/stream-source.js';
 import {HTML_SPECIAL} from '../../src/decl/known-named-refs.js';
 import {buildIndex} from '../../src/impl/build-index.js';
 import {ErrorTracker} from '../../src/impl/interfaces/error-tracker.js';
-import {ParserEnvironment} from '../../src/impl/interfaces/ParserEnvironment.js';
 import {State} from '../../src/impl/interfaces/states.js';
 import {Token} from '../../src/impl/interfaces/tokens.js';
 import {Tokenizer} from '../../src/impl/Tokenizer.js';
+import {TokenListSink} from './TokenListSink.js';
 
 export abstract class TokenizerTestSuite<T/*test case*/> implements ErrorTracker {
   name!: string;
@@ -61,15 +61,8 @@ export abstract class TokenizerTestSuite<T/*test case*/> implements ErrorTracker
 
   makeSuite() {
     beforeAll(() => {
-      const tokenList = this.tokenList;
       const parser = this.parser = this.createTokenizer();
-      parser.env = {
-        tokens: {
-          accept(token: Token) {
-            tokenList.push(token);
-          }
-        }
-      } as any as ParserEnvironment;
+      parser.composer = new TokenListSink(this.tokenList);
       parser.tokenQueue = [];
     });
 

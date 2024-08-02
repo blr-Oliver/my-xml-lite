@@ -3,10 +3,10 @@ import {DirectCharacterSource} from '../../src/common/stream-source.js';
 import {HTML_SPECIAL} from '../../src/decl/known-named-refs.js';
 import {buildIndex} from '../../src/impl/build-index.js';
 import {ErrorTracker} from '../../src/impl/interfaces/error-tracker.js';
-import {ParserEnvironment} from '../../src/impl/interfaces/ParserEnvironment.js';
 import {CharactersToken, CommentToken, EOF_TOKEN, Token} from '../../src/impl/interfaces/tokens.js';
 import {Tokenizer} from '../../src/impl/Tokenizer.js';
 import {default as rawTests} from './samples/comment.json';
+import {TokenListSink} from './TokenListSink.js';
 
 type TestCase = [string/*name*/, string/*input*/, string/*comment data*/, string[]/*errors*/];
 const testCases = rawTests as TestCase[];
@@ -21,13 +21,7 @@ function suite() {
       error: error => errorList.push(error)
     }
     parser = new Tokenizer(buildIndex(HTML_SPECIAL), errorTracker);
-    parser.env = {
-      tokens: {
-        accept(token: Token) {
-          tokenList.push(token);
-        }
-      }
-    } as any as ParserEnvironment;
+    parser.composer = new TokenListSink(tokenList);
     parser.tokenQueue = [];
   });
 

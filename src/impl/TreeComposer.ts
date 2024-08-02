@@ -3,10 +3,9 @@ import {FormattingList} from './FormattingList.js';
 import {ErrorTracker, ignoring} from './interfaces/error-tracker.js';
 import {InsertionMode} from './interfaces/insertion-mode.js';
 import {NodeFactory} from './interfaces/NodeFactory.js';
-import {TokenSink} from './interfaces/ParserEnvironment.js';
 import {State} from './interfaces/states.js';
 import {CharactersToken, CommentToken, DoctypeToken, NamespacedAttribute, TagToken, Token} from './interfaces/tokens.js';
-import {Tokenizer} from './Tokenizer.js';
+import {ComposerIntegration, Tokenizer} from './Tokenizer.js';
 
 export const NS_HTML = 'http://www.w3.org/1999/xhtml';
 export const NS_MATHML = 'http://www.w3.org/1998/Math/MathML';
@@ -15,7 +14,7 @@ export const NS_XLINK = 'http://www.w3.org/1999/xlink';
 export const NS_XML = 'http://www.w3.org/XML/1998/namespace';
 export const NS_XMLNS = 'http://www.w3.org/2000/xmlns/';
 
-export class TreeComposer implements TokenSink {
+export class TreeComposer implements ComposerIntegration {
   nodeFactory: NodeFactory;
 
   tokenizer!: Tokenizer;

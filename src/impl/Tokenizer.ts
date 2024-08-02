@@ -14,14 +14,14 @@ import {
 import {CodePoints} from '../common/code-points.js';
 import {stringToArray} from '../common/code-sequences.js';
 import {CharacterSource} from '../common/stream-source.js';
+import {Element} from '../decl/dom-like.js';
 import {PrefixNode} from '../decl/entity-ref-index.js';
 import {StringBuilder} from '../decl/StringBuilder.js';
 import {FixedSizeStringBuilder} from './FixedSizeStringBuilder.js';
 import {ErrorTracker, ignoring} from './interfaces/error-tracker.js';
-import {ParserEnvironment} from './interfaces/ParserEnvironment.js';
 import {State} from './interfaces/states.js';
 import {Attribute, CDataToken, CharactersToken, CommentToken, DoctypeToken, EOF_TOKEN, TagToken, Token} from './interfaces/tokens.js';
-import {NS_HTML, TreeComposer} from './TreeComposer.js';
+import {NS_HTML} from './TreeComposer.js';
 
 const SCRIPT: number[] = [0x73, 0x63, 0x72, 0x69, 0x70, 0x74];
 const TWO_HYPHENS: number[] = [CodePoints.HYPHEN, CodePoints.HYPHEN];
@@ -39,9 +39,14 @@ const CHAR_REF_REPLACEMENT: number[] = [
 
 export type WhitespaceMode = 'ignoreLeading' | 'emitLeading' | 'mixed' | 'whitespaceOnly';
 
+export interface ComposerIntegration {
+  readonly adjustedCurrentNode: Element | null;
+  shouldUseForeignRules(): boolean;
+  accept(token: Token): void;
+}
+
 // TODO add reset method
 export class Tokenizer {
-  env!: ParserEnvironment;
   state: State = 'data';
   active: boolean = true;
   lastOpenTag?: string;
@@ -72,7 +77,7 @@ export class Tokenizer {
   whitespaceMode: WhitespaceMode = 'mixed';
   hasWhitespaceOnly: boolean = true;
 
-  composer!: TreeComposer;
+  composer!: ComposerIntegration;
 
   input!: CharacterSource;
   buffer!: StringBuilder;
@@ -112,11 +117,8 @@ export class Tokenizer {
 
   commitTokens() {
     // TODO this looks strange
-    const sink = this.env.tokens;
-    if (sink) {
-      for (let i = 0; i < this.tokenQueue.length; ++i)
-        sink.accept(this.tokenQueue[i]);
-    }
+    for (let i = 0; i < this.tokenQueue.length; ++i)
+      this.composer.accept(this.tokenQueue[i]);
     this.tokenQueue.length = 0;
   }
 

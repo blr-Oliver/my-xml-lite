@@ -3,11 +3,11 @@ import {DirectCharacterSource} from '../../src/common/stream-source.js';
 import {HTML_SPECIAL} from '../../src/decl/known-named-refs.js';
 import {buildIndex} from '../../src/impl/build-index.js';
 import {ErrorTracker} from '../../src/impl/interfaces/error-tracker.js';
-import {ParserEnvironment} from '../../src/impl/interfaces/ParserEnvironment.js';
 import {State} from '../../src/impl/interfaces/states.js';
 import {CharactersToken, CommentToken, EOF_TOKEN, TagToken, Token} from '../../src/impl/interfaces/tokens.js';
 import {Tokenizer} from '../../src/impl/Tokenizer.js';
 import {default as rawTests} from './samples/tags.json';
+import {TokenListSink} from './TokenListSink.js';
 
 type AttributeData = [string, string | null];
 type TestCase = [
@@ -41,13 +41,7 @@ function suite() {
     }
 
     parser = new MockCompositeTokenizer(buildIndex(HTML_SPECIAL), errorTracker);
-    parser.env = {
-      tokens: {
-        accept(token: Token) {
-          tokenList.push(token);
-        }
-      }
-    } as any as ParserEnvironment;
+    parser.composer = new TokenListSink(tokenList);
     parser.tokenQueue = [];
   });
 

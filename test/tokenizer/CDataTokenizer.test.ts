@@ -1,14 +1,14 @@
 import {stringToArray} from '../../src/common/code-sequences.js';
 import {DirectCharacterSource} from '../../src/common/stream-source.js';
+import {Element} from '../../src/decl/dom-like.js';
 import {HTML_SPECIAL} from '../../src/decl/known-named-refs.js';
 import {buildIndex} from '../../src/impl/build-index.js';
 import {ErrorTracker} from '../../src/impl/interfaces/error-tracker.js';
-import {ParserEnvironment} from '../../src/impl/interfaces/ParserEnvironment.js';
 import {State} from '../../src/impl/interfaces/states.js';
 import {CDataToken, CharactersToken, CommentToken, EOF_TOKEN, Token} from '../../src/impl/interfaces/tokens.js';
 import {Tokenizer} from '../../src/impl/Tokenizer.js';
-import {TreeComposer} from '../../src/impl/TreeComposer.js';
 import {default as rawTests} from './samples/cdata.json';
+import {TokenListSink} from './TokenListSink.js';
 
 type TestCase = [string/*name*/, string/*input*/, string/*CDATA*/, string[]/*errors*/, boolean/*completed*/];
 const testCases = rawTests as TestCase[];
@@ -32,15 +32,10 @@ function suite() {
     }
 
     parser = new MockCompositeTokenizer(buildIndex(HTML_SPECIAL), errorTracker);
-    parser.env = {
-      tokens: {
-        accept(token: Token) {
-          tokenList.push(token);
-        }
-      }
-    } as any as ParserEnvironment;
+    const composerMock = new TokenListSink(tokenList);
+    composerMock.adjustedCurrentNode = {namespaceURI: null} as unknown as Element;
+    parser.composer = composerMock;
     parser.tokenQueue = [];
-    parser.composer = {adjustedCurrentNode: {namespaceURI: null}} as unknown as TreeComposer;
   });
 
   beforeEach(() => {

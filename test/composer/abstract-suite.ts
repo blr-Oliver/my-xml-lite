@@ -4,7 +4,6 @@ import {ChildNode, Document, Element, Node, NodeType, NonDocumentTypeChildNode, 
 import {HTML_SPECIAL} from '../../src/decl/known-named-refs.js';
 import {buildIndex} from '../../src/impl/build-index.js';
 import {ErrorTracker} from '../../src/impl/interfaces/error-tracker.js';
-import {ParserEnvironment} from '../../src/impl/interfaces/ParserEnvironment.js';
 import {serialize} from '../../src/impl/Serializer.js';
 import {SimpleNodeFactory} from '../../src/impl/simple-tree/SimpleNodeFactory.js';
 import {Tokenizer} from '../../src/impl/Tokenizer.js';
@@ -52,12 +51,7 @@ export abstract class AbstractSuite<R, T extends TestCase, C extends TreeCompose
   configure() {
     this.composer.tokenizer = this.tokenizer;
     this.tokenizer.composer = this.composer;
-
     this.composer.reset();
-
-    this.tokenizer.env = {
-      tokens: this.composer
-    } as unknown as ParserEnvironment;
   }
 
   beforeEach() {
