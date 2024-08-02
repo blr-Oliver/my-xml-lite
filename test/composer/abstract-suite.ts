@@ -1,11 +1,12 @@
 import {stringToArray} from '../../src/common/code-sequences.js';
 import {DirectCharacterSource} from '../../src/common/stream-source.js';
+import {ChildNode, Document, Element, Node, NodeType, NonDocumentTypeChildNode, ParentNode} from '../../src/decl/dom-like.js';
 import {HTML_SPECIAL} from '../../src/decl/known-named-refs.js';
 import {buildIndex} from '../../src/impl/build-index.js';
 import {FixedSizeStringBuilder} from '../../src/impl/FixedSizeStringBuilder.js';
 import {ParserEnvironment} from '../../src/impl/interfaces/ParserEnvironment.js';
-import {StaticNodeFactory} from '../../src/impl/nodes/static-factory.js';
 import {serialize} from '../../src/impl/Serializer.js';
+import {SimpleNodeFactory} from '../../src/impl/simple-tree/SimpleNodeFactory.js';
 import {Tokenizer} from '../../src/impl/Tokenizer.js';
 import {TreeComposer} from '../../src/impl/TreeComposer.js';
 
@@ -96,7 +97,7 @@ export class DefaultSuite<R = DefaultRawTest, T extends DefaultTestCase = Defaul
   }
 
   createComposer(): C {
-    return new TreeComposer(new StaticNodeFactory()) as unknown as C;
+    return new TreeComposer(new SimpleNodeFactory()) as unknown as C;
   }
 
   prepareTest(rawTest: R): T {
@@ -128,5 +129,45 @@ export class DefaultSuite<R = DefaultRawTest, T extends DefaultTestCase = Defaul
     const output = serialize(document);
     expect(output).toStrictEqual(expectedOutput);
     expect(this.errorList).toStrictEqual(expectedErrors);
+    this.validateTree(document);
+  }
+
+  validateTree(document: Document) {
+    expect(document).toBeDefined();
+    expect(document.nodeType).toStrictEqual(NodeType.DOCUMENT_NODE);
+    expect(document.parentNode).toStrictEqual(null);
+    this.validateNode(document);
+  }
+
+  validateNode(parent: ParentNode) {
+    const count = parent.childNodes.length;
+    if (!count) return;
+    let previousNode: Node | null = null;
+    let previousElement: Element | null = null;
+    let elementCount: number = 0;
+    for (let i = 0; i < count; ++i) {
+      const currentNode = parent.childNodes[i];
+      expect(currentNode.parentNode).toBe(parent);
+      expect(currentNode.previousSibling).toBe(previousNode);
+      if (previousNode)
+        expect(previousNode.nextSibling).toBe(currentNode);
+      if (currentNode.nodeType === NodeType.DOCUMENT_TYPE_NODE) {
+        expect(parent.nodeType).toStrictEqual(NodeType.DOCUMENT_NODE);
+        expect((parent as Document).doctype).toBe(currentNode);
+      } else {
+        const currentChild = currentNode as (NonDocumentTypeChildNode & ChildNode);
+        expect(currentChild.previousElementSibling).toBe(previousElement);
+        if (currentNode.nodeType === NodeType.ELEMENT_NODE) {
+          const currentElement = currentChild as Element;
+          expect(parent.children[elementCount++]).toBe(currentElement);
+          if (previousElement)
+            expect(previousElement.nextElementSibling).toBe(currentElement);
+          previousElement = currentElement;
+          this.validateNode(currentElement);
+        }
+      }
+      previousNode = currentNode;
+    }
+    expect(parent.children.length).toStrictEqual(elementCount);
   }
 }

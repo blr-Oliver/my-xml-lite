@@ -1,4 +1,4 @@
-import {Document} from '../../src/decl/xml-lite-decl.js';
+import {Document} from '../../src/decl/dom-like.js';
 import {serialize} from '../../src/impl/Serializer.js';
 import {DefaultRawTestCore} from '../composer/abstract-suite.js';
 
@@ -76,7 +76,7 @@ export class Runner {
         const name = testCase[0];
         const input = testCase[1];
         const document = this.parser.parseFromString(input, 'text/html');
-        const output = serialize(document as unknown as Document);
+        const output = serialize(document);
         parsed.push([name, input, output]);
       }
       data[suiteName] = parsed;

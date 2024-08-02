@@ -1,4 +1,4 @@
-import {Attr, Element} from '../decl/xml-lite-decl.js';
+import {Attr, Element} from '../decl/dom-like.js';
 import {TagToken} from './interfaces/tokens.js';
 
 export interface FormattingElement {

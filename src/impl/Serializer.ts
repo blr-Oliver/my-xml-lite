@@ -1,4 +1,4 @@
-import {CDATASection, Comment, DocumentType, Element, Node, NodeType, ParentNode, ProcessingInstruction, Text} from '../decl/xml-lite-decl.js';
+import {CDATASection, Comment, DocumentType, Element, Node, NodeType, ParentNode, ProcessingInstruction, Text} from '../decl/dom-like.js';
 import {NS_HTML} from './TreeComposer.js';
 
 export function serialize(node: Node): string {
@@ -50,7 +50,7 @@ function serializeElement(node: Element, chunks: string[]) {
   if (node.selfClosed) {
     chunks.push('/>');
   } else if (serializesAsVoid(node)) {
-    chunks.push('>');
+    chunks.push('/>');
   } else {
     chunks.push('>');
     serializeContents(node, chunks);

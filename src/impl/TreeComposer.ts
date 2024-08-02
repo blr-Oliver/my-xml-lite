@@ -1,4 +1,4 @@
-import {CharacterData, Document, Element, Node, NodeType, ParentNode} from '../decl/xml-lite-decl.js';
+import {CharacterData, Document, Element, Node, NodeType, ParentNode} from '../decl/dom-like.js';
 import {FormattingList} from './FormattingList.js';
 import {InsertionMode} from './interfaces/insertion-mode.js';
 import {NodeFactory} from './interfaces/NodeFactory.js';
@@ -276,6 +276,7 @@ export class TreeComposer implements TokenSink {
   insertDoctype(doctypeToken: DoctypeToken) {
     const documentType = this.nodeFactory.createDoctype(this.document, doctypeToken.name ?? 'html', doctypeToken.publicId, doctypeToken.systemId);
     this.nodeFactory.appendNode(this.document, documentType);
+    this.nodeFactory.setDoctype(this.document, documentType);
   }
 
   insertComment(token: CommentToken, override?: ParentNode) {

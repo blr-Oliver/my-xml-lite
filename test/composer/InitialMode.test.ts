@@ -1,6 +1,6 @@
+import {SimpleNodeFactory} from '../../src/impl/simple-tree/SimpleNodeFactory.js';
 import {InsertionMode} from '../../src/impl/interfaces/insertion-mode.js';
 import {Token} from '../../src/impl/interfaces/tokens.js';
-import {StaticNodeFactory} from '../../src/impl/nodes/static-factory.js';
 import {TreeComposer} from '../../src/impl/TreeComposer.js';
 import {trackProperty} from '../util/property-tracker.js';
 import {DefaultRawTestCore, DefaultSuite, DefaultTestCase} from './abstract-suite.js';
@@ -22,7 +22,7 @@ class InitialModeSuite extends DefaultSuite<ModeTrackingRawTest, ModeTrackingTes
   createComposer(): TreeComposer {
     return new class SwallowEOF extends TreeComposer {
       constructor() {
-        super(new StaticNodeFactory());
+        super(new SimpleNodeFactory());
       }
       accept(token: Token) {
         if (token.type !== 'eof')

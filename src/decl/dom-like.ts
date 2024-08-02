@@ -54,10 +54,11 @@ export interface Element extends Node, ChildNode, NonDocumentTypeChildNode, Pare
   readonly prefix: string | null;
   readonly localName: string;
   readonly tagName: string;
+  readonly selfClosed?: boolean;
   // closest(selectors: string): Element | null;
   getAttribute(qualifiedName: string): string | null;
   getAttributeNS(namespace: string | null, localName: string): string | null;
-  getAttributeNames(): string[];
+  getAttributeNames(): ReadonlyArray<string>;
   getAttributeNode(qualifiedName: string): Attr | null;
   getAttributeNodeNS(namespace: string | null, localName: string): Attr | null;
   // getElementsByClassName(classNames: string): HTMLCollection;
@@ -71,10 +72,10 @@ export interface Element extends Node, ChildNode, NonDocumentTypeChildNode, Pare
 
 export interface Document extends Node, NonElementParentNode, ParentNode {
   readonly ownerDocument: null;
-  readonly body: Element;
   readonly doctype: DocumentType | null;
   readonly documentElement: Element;
   readonly head: Element;
+  readonly body: Element;
   // readonly title: string;
   // createNodeIterator(root: Node, whatToShow?: number, filter?: NodeFilter | null): NodeIterator;
   // createTreeWalker(root: Node, whatToShow?: number, filter?: NodeFilter | null): TreeWalker;
@@ -104,7 +105,7 @@ export interface ProcessingInstruction extends CharacterData {
   readonly target: string;
 }
 
-export interface DocumentType extends Node {
+export interface DocumentType extends Node, ChildNode {
   readonly ownerDocument: Document;
   readonly name: string;
   readonly publicId: string;
@@ -113,7 +114,6 @@ export interface DocumentType extends Node {
 
 export interface DocumentFragment extends Node, NonElementParentNode, ParentNode {
   readonly ownerDocument: Document;
-  // getElementById(elementId: string): HTMLElement | null;
 }
 
 export interface NonElementParentNode {
@@ -151,9 +151,9 @@ export interface Attr extends Node {
 
 export interface NodeListOf<TNode extends Node> {
   readonly length: number;
+  readonly [index: number]: TNode;
   item(index: number): TNode | null;
   forEach(callback: (value: TNode, key: number, parent: NodeListOf<TNode>) => void, thisArg?: any): void;
-  readonly [index: number]: TNode;
   [Symbol.iterator](): IterableIterator<TNode>;
   entries(): IterableIterator<[number, TNode]>;
   keys(): IterableIterator<number>;
@@ -162,9 +162,8 @@ export interface NodeListOf<TNode extends Node> {
 
 export interface HTMLCollection {
   readonly length: number;
-  item(index: number): Element | null;
-  namedItem(name: string): Element | null;
   readonly [index: number]: Element;
+  item(index: number): Element | null;
   [Symbol.iterator](): IterableIterator<Element>;
 }
 

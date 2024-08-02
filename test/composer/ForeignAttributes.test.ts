@@ -18,7 +18,7 @@ class ForeignAttributesTest extends DefaultSuite {
     let prefix: string | null | undefined, localName: string | null | undefined;
     [prefix, localName] = test.name.split(':');
     if (!localName) [prefix, localName] = [null, prefix];
-    const svg = this.composer.document.getElementById('test');
+    const svg = this.composer.document.body.children[0];
     expect(svg).toBeDefined();
     const idAttr = svg!.attributes[0];
     expect(idAttr).toBeDefined();
