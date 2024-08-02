@@ -14,6 +14,7 @@ import {
 import {CodePoints} from '../common/code-points.js';
 import {stringToArray} from '../common/code-sequences.js';
 import {PrefixNode} from '../decl/entity-ref-index.js';
+import {ErrorTracker, ignoring} from './interfaces/error-tracker.js';
 import {ParserEnvironment} from './interfaces/ParserEnvironment.js';
 import {State} from './interfaces/states.js';
 import {Attribute, CDataToken, CharactersToken, CommentToken, DoctypeToken, EOF_TOKEN, TagToken, Token} from './interfaces/tokens.js';
@@ -78,8 +79,11 @@ export class Tokenizer implements ITokenizer {
 
   composer!: TreeComposer;
 
-  constructor(refsIndex: PrefixNode<number[]>) {
+  errorTracker: ErrorTracker;
+
+  constructor(refsIndex: PrefixNode<number[]>, errorTracker: ErrorTracker = ignoring) {
     this.refsIndex = refsIndex;
+    this.errorTracker = errorTracker;
   }
 
   proceed() {
@@ -118,7 +122,7 @@ export class Tokenizer implements ITokenizer {
   }
 
   error(name: string) {
-    this.env.errors.push(name);
+    this.errorTracker.error(name);
   }
 
   emit(token: Token) {

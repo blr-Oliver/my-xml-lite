@@ -3,6 +3,7 @@ import {DirectCharacterSource} from '../../src/common/stream-source.js';
 import {HTML_SPECIAL} from '../../src/decl/known-named-refs.js';
 import {buildIndex} from '../../src/impl/build-index.js';
 import {FixedSizeStringBuilder} from '../../src/impl/FixedSizeStringBuilder.js';
+import {ErrorTracker} from '../../src/impl/interfaces/error-tracker.js';
 import {ParserEnvironment} from '../../src/impl/interfaces/ParserEnvironment.js';
 import {State} from '../../src/impl/interfaces/states.js';
 import {CharactersToken, EOF_TOKEN, TagToken, Token} from '../../src/impl/interfaces/tokens.js';
@@ -19,6 +20,10 @@ function suite() {
   let lastState!: State;
 
   beforeAll(() => {
+    const errorTracker: ErrorTracker = {
+      error: error => errorList.push(error)
+    }
+
     class MockCompositeTokenizer extends Tokenizer {
       data(code: number): State {
         if (tokenList.length === 1 && tokenList[0].type === 'startTag' && (tokenList[0] as TagToken).name === 'script') {
@@ -33,7 +38,7 @@ function suite() {
       }
     }
 
-    parser = new MockCompositeTokenizer(buildIndex(HTML_SPECIAL));
+    parser = new MockCompositeTokenizer(buildIndex(HTML_SPECIAL), errorTracker);
     parser.env = {
       buffer: new FixedSizeStringBuilder(1000),
       tokens: {

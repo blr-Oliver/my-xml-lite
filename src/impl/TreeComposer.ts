@@ -1,5 +1,6 @@
 import {CharacterData, Document, Element, Node, NodeType, ParentNode} from '../decl/dom-like.js';
 import {FormattingList} from './FormattingList.js';
+import {ErrorTracker, ignoring} from './interfaces/error-tracker.js';
 import {InsertionMode} from './interfaces/insertion-mode.js';
 import {NodeFactory} from './interfaces/NodeFactory.js';
 import {TokenSink} from './interfaces/ParserEnvironment.js';
@@ -41,8 +42,11 @@ export class TreeComposer implements TokenSink {
   insertParent!: ParentNode;
   insertBefore?: Node;
 
-  constructor(nodeFactory: NodeFactory) {
+  errorTracker: ErrorTracker;
+
+  constructor(nodeFactory: NodeFactory, errorTracker: ErrorTracker = ignoring) {
     this.nodeFactory = nodeFactory;
+    this.errorTracker = errorTracker;
   }
 
   get current(): Element {
@@ -527,8 +531,8 @@ export class TreeComposer implements TokenSink {
     return this.insertionMode;
   }
 
-  error(error?: string) { // TODO
-    this.tokenizer.env.errors.push(error || 'error');
+  error(error: string = 'error') { // TODO give names to all errors
+    this.errorTracker.error(error);
   }
 
   forceCloseElement(name: string) {
