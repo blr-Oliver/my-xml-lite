@@ -3,7 +3,7 @@ import {DirectCharacterSource} from '../../src/common/stream-source.js';
 import {ChildNode, Document, Element, Node, NodeType, NonDocumentTypeChildNode, ParentNode} from '../../src/decl/dom-like.js';
 import {HTML_SPECIAL} from '../../src/decl/known-named-refs.js';
 import {buildIndex} from '../../src/impl/build-index.js';
-import {ErrorTracker} from '../../src/impl/interfaces/error-tracker.js';
+import {ErrorHandler} from '../../src/impl/interfaces/error-tracker.js';
 import {serialize} from '../../src/impl/Serializer.js';
 import {SimpleNodeFactory} from '../../src/impl/simple-tree/SimpleNodeFactory.js';
 import {Tokenizer} from '../../src/impl/Tokenizer.js';
@@ -19,7 +19,7 @@ export abstract class AbstractSuite<R, T extends TestCase, C extends TreeCompose
   tokenizer!: Tokenizer;
   composer!: C;
   preparedTests!: T[];
-  errorTracker!: ErrorTracker;
+  errorHandler!: ErrorHandler;
   readonly name: string;
 
   protected constructor(name: string, testCases: R[]) {
@@ -29,10 +29,7 @@ export abstract class AbstractSuite<R, T extends TestCase, C extends TreeCompose
   }
 
   beforeAll() {
-    const errorList = this.errorList;
-    this.errorTracker = {
-      error: error => errorList.push(error)
-    }
+    this.errorHandler = error => this.errorList.push(error)
     this.composer = this.createComposer();
     this.tokenizer = this.createTokenizer();
     this.configure();
@@ -41,7 +38,7 @@ export abstract class AbstractSuite<R, T extends TestCase, C extends TreeCompose
   abstract createComposer(): C;
 
   createTokenizer(): Tokenizer {
-    return new Tokenizer(buildIndex(HTML_SPECIAL), this.errorTracker);
+    return new Tokenizer(buildIndex(HTML_SPECIAL), this.errorHandler);
   }
 
   prepareTests() {
@@ -94,7 +91,7 @@ export class DefaultSuite<R = DefaultRawTest, T extends DefaultTestCase = Defaul
   }
 
   createComposer(): C {
-    return new TreeComposer(new SimpleNodeFactory(), this.errorTracker) as unknown as C;
+    return new TreeComposer(new SimpleNodeFactory(), this.errorHandler) as unknown as C;
   }
 
   prepareTest(rawTest: R): T {

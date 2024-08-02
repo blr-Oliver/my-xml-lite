@@ -2,13 +2,12 @@ import {stringToArray} from '../../src/common/code-sequences.js';
 import {DirectCharacterSource} from '../../src/common/stream-source.js';
 import {HTML_SPECIAL} from '../../src/decl/known-named-refs.js';
 import {buildIndex} from '../../src/impl/build-index.js';
-import {ErrorTracker} from '../../src/impl/interfaces/error-tracker.js';
 import {State} from '../../src/impl/interfaces/states.js';
 import {Token} from '../../src/impl/interfaces/tokens.js';
 import {Tokenizer} from '../../src/impl/Tokenizer.js';
 import {TokenListSink} from './TokenListSink.js';
 
-export abstract class TokenizerTestSuite<T/*test case*/> implements ErrorTracker {
+export abstract class TokenizerTestSuite<T/*test case*/> {
   name!: string;
   parser!: Tokenizer;
   tokenList: Token[] = [];
@@ -30,11 +29,7 @@ export abstract class TokenizerTestSuite<T/*test case*/> implements ErrorTracker
   }
 
   createTokenizer(): Tokenizer {
-    return new (this.defineTokenizerClass())(buildIndex(HTML_SPECIAL), this);
-  }
-
-  error(name: string): void {
-    this.errorList.push(name);
+    return new (this.defineTokenizerClass())(buildIndex(HTML_SPECIAL), name => this.errorList.push(name));
   }
 
   beforeTest() {

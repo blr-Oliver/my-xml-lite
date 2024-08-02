@@ -2,7 +2,6 @@ import {stringToArray} from '../../src/common/code-sequences.js';
 import {DirectCharacterSource} from '../../src/common/stream-source.js';
 import {HTML_SPECIAL} from '../../src/decl/known-named-refs.js';
 import {buildIndex} from '../../src/impl/build-index.js';
-import {ErrorTracker} from '../../src/impl/interfaces/error-tracker.js';
 import {CharactersToken, CommentToken, EOF_TOKEN, Token} from '../../src/impl/interfaces/tokens.js';
 import {Tokenizer} from '../../src/impl/Tokenizer.js';
 import {default as rawTests} from './samples/comment.json';
@@ -17,10 +16,7 @@ function suite() {
   let errorList: string[] = [];
 
   beforeAll(() => {
-    const errorTracker: ErrorTracker = {
-      error: error => errorList.push(error)
-    }
-    parser = new Tokenizer(buildIndex(HTML_SPECIAL), errorTracker);
+    parser = new Tokenizer(buildIndex(HTML_SPECIAL), error => errorList.push(error));
     parser.composer = new TokenListSink(tokenList);
     parser.tokenQueue = [];
   });

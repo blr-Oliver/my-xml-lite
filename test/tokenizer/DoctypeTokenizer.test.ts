@@ -2,7 +2,6 @@ import {stringToArray} from '../../src/common/code-sequences.js';
 import {DirectCharacterSource} from '../../src/common/stream-source.js';
 import {HTML_SPECIAL} from '../../src/decl/known-named-refs.js';
 import {buildIndex} from '../../src/impl/build-index.js';
-import {ErrorTracker} from '../../src/impl/interfaces/error-tracker.js';
 import {State} from '../../src/impl/interfaces/states.js';
 import {CharactersToken, CommentToken, DoctypeToken, EOF_TOKEN, Token} from '../../src/impl/interfaces/tokens.js';
 import {Tokenizer} from '../../src/impl/Tokenizer.js';
@@ -19,10 +18,6 @@ function suite() {
   let lastState!: State;
 
   beforeAll(() => {
-    const errorTracker: ErrorTracker = {
-      error: error => errorList.push(error)
-    }
-
     class MockCompositeTokenizer extends Tokenizer {
       eof(): State {
         lastState = this.state;
@@ -30,7 +25,7 @@ function suite() {
       }
     }
 
-    parser = new MockCompositeTokenizer(buildIndex(HTML_SPECIAL), errorTracker);
+    parser = new MockCompositeTokenizer(buildIndex(HTML_SPECIAL), error => errorList.push(error));
     parser.composer = new TokenListSink(tokenList);
     parser.tokenQueue = [];
   });

@@ -1,4 +1,4 @@
-import {ErrorTracker} from '../../src/impl/interfaces/error-tracker.js';
+import {ErrorHandler} from '../../src/impl/interfaces/error-tracker.js';
 import {InsertionMode} from '../../src/impl/interfaces/insertion-mode.js';
 import {Token} from '../../src/impl/interfaces/tokens.js';
 import {SimpleNodeFactory} from '../../src/impl/simple-tree/SimpleNodeFactory.js';
@@ -22,14 +22,14 @@ class InitialModeSuite extends DefaultSuite<ModeTrackingRawTest, ModeTrackingTes
 
   createComposer(): TreeComposer {
     return new class SwallowEOF extends TreeComposer {
-      constructor(errorTracker: ErrorTracker) {
+      constructor(errorTracker: ErrorHandler) {
         super(new SimpleNodeFactory(), errorTracker);
       }
       accept(token: Token) {
         if (token.type !== 'eof')
           super.accept(token);
       }
-    }(this.errorTracker);
+    }(this.errorHandler);
   }
 
   configure() {

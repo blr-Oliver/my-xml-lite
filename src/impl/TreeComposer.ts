@@ -1,6 +1,6 @@
 import {CharacterData, Document, Element, Node, NodeType, ParentNode} from '../decl/dom-like.js';
 import {FormattingList} from './FormattingList.js';
-import {ErrorTracker, ignoring} from './interfaces/error-tracker.js';
+import {ErrorHandler, ignoring} from './interfaces/error-tracker.js';
 import {InsertionMode} from './interfaces/insertion-mode.js';
 import {NodeFactory} from './interfaces/NodeFactory.js';
 import {State} from './interfaces/states.js';
@@ -41,11 +41,11 @@ export class TreeComposer implements ComposerIntegration {
   insertParent!: ParentNode;
   insertBefore?: Node;
 
-  errorTracker: ErrorTracker;
+  errorHandler: ErrorHandler;
 
-  constructor(nodeFactory: NodeFactory, errorTracker: ErrorTracker = ignoring) {
+  constructor(nodeFactory: NodeFactory, errorHandler: ErrorHandler = ignoring) {
     this.nodeFactory = nodeFactory;
-    this.errorTracker = errorTracker;
+    this.errorHandler = errorHandler;
   }
 
   get current(): Element {
@@ -531,7 +531,7 @@ export class TreeComposer implements ComposerIntegration {
   }
 
   error(error: string = 'error') { // TODO give names to all errors
-    this.errorTracker.error(error);
+    this.errorHandler(error);
   }
 
   forceCloseElement(name: string) {

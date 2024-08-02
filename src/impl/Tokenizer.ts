@@ -18,7 +18,7 @@ import {Element} from '../decl/dom-like.js';
 import {PrefixNode} from '../decl/entity-ref-index.js';
 import {StringBuilder} from '../decl/StringBuilder.js';
 import {FixedSizeStringBuilder} from './FixedSizeStringBuilder.js';
-import {ErrorTracker, ignoring} from './interfaces/error-tracker.js';
+import {ErrorHandler, ignoring} from './interfaces/error-tracker.js';
 import {State} from './interfaces/states.js';
 import {Attribute, CDataToken, CharactersToken, CommentToken, DoctypeToken, EOF_TOKEN, TagToken, Token} from './interfaces/tokens.js';
 import {NS_HTML} from './TreeComposer.js';
@@ -81,12 +81,12 @@ export class Tokenizer {
 
   input!: CharacterSource;
   buffer!: StringBuilder;
-  errorTracker: ErrorTracker;
+  errorHandler: ErrorHandler;
 
   // TODO add input to constructor
-  constructor(refsIndex: PrefixNode<number[]>, errorTracker: ErrorTracker = ignoring) {
+  constructor(refsIndex: PrefixNode<number[]>, errorHandler: ErrorHandler = ignoring) {
     this.refsIndex = refsIndex;
-    this.errorTracker = errorTracker;
+    this.errorHandler = errorHandler;
     this.buffer = new FixedSizeStringBuilder(2048);
   }
 
@@ -106,6 +106,7 @@ export class Tokenizer {
   }
 
   execState(state: State, code: number): State {
+    // TODO switch through states
     // @ts-ignore
     return this[state](code);
   }
@@ -116,14 +117,13 @@ export class Tokenizer {
   }
 
   commitTokens() {
-    // TODO this looks strange
     for (let i = 0; i < this.tokenQueue.length; ++i)
       this.composer.accept(this.tokenQueue[i]);
     this.tokenQueue.length = 0;
   }
 
   error(name: string) {
-    this.errorTracker.error(name);
+    this.errorHandler(name);
   }
 
   emit(token: Token) {
