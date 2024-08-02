@@ -66,8 +66,7 @@ function suite() {
 
   function processInput(input: string) {
     const newInput = new DirectCharacterSource(new Uint16Array(stringToArray(input)));
-    // @ts-ignore
-    parser.env.input = newInput;
+    parser.input = newInput;
     parser.proceed();
   }
 

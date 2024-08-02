@@ -115,9 +115,7 @@ export class DefaultSuite<R = DefaultRawTest, T extends DefaultTestCase = Defaul
   }
 
   processInput(test: T) {
-    const source = this.createSource(test.input);
-    // @ts-ignore
-    this.tokenizer.env.input = source;
+    this.tokenizer.input = this.createSource(test.input);
     this.tokenizer.proceed();
   }
 

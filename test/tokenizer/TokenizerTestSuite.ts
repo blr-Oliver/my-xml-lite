@@ -56,8 +56,7 @@ export abstract class TokenizerTestSuite<T/*test case*/> implements ErrorTracker
 
   processInput(input: string) {
     const newInput = new DirectCharacterSource(new Uint16Array(stringToArray(input)));
-    // @ts-ignore
-    this.parser.env.input = newInput;
+    this.parser.input = newInput;
     this.parser.proceed();
   }
 

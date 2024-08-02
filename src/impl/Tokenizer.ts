@@ -13,6 +13,7 @@ import {
 } from '../common/code-checks.js';
 import {CodePoints} from '../common/code-points.js';
 import {stringToArray} from '../common/code-sequences.js';
+import {CharacterSource} from '../common/stream-source.js';
 import {PrefixNode} from '../decl/entity-ref-index.js';
 import {ErrorTracker, ignoring} from './interfaces/error-tracker.js';
 import {ParserEnvironment} from './interfaces/ParserEnvironment.js';
@@ -45,6 +46,7 @@ interface ITokenizer {
 
 export type WhitespaceMode = 'ignoreLeading' | 'emitLeading' | 'mixed' | 'whitespaceOnly';
 
+// TODO add reset method
 export class Tokenizer implements ITokenizer {
   env!: ParserEnvironment;
   state: State = 'data';
@@ -79,8 +81,10 @@ export class Tokenizer implements ITokenizer {
 
   composer!: TreeComposer;
 
+  input!: CharacterSource;
   errorTracker: ErrorTracker;
 
+  // TODO add input to constructor
   constructor(refsIndex: PrefixNode<number[]>, errorTracker: ErrorTracker = ignoring) {
     this.refsIndex = refsIndex;
     this.errorTracker = errorTracker;
@@ -98,7 +102,7 @@ export class Tokenizer implements ITokenizer {
 
   nextCode(): number {
     // TODO inline repeated calls
-    return this.env.input.next();
+    return this.input.next();
   }
 
   execState(state: State, code: number): State {
