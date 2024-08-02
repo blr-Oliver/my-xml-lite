@@ -58,8 +58,7 @@ export abstract class AbstractSuite<R, T extends TestCase, C extends TreeCompose
 
     this.tokenizer.env = {
       buffer: new FixedSizeStringBuilder(1000),
-      tokens: this.composer,
-      errors: this.errorList
+      tokens: this.composer
     } as unknown as ParserEnvironment;
   }
 

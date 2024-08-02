@@ -28,8 +28,7 @@ function suite() {
         accept(token: Token) {
           tokenList.push(token);
         }
-      },
-      errors: errorList
+      }
     } as any as ParserEnvironment;
     parser.tokenQueue = [];
   });

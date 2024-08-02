@@ -5,7 +5,6 @@ import {Token} from './tokens.js';
 export interface ParserEnvironment {
   readonly input: StringSource;
   readonly buffer: StringBuilder;
-  readonly errors: string[];
   tokens?: TokenSink;
 }
 

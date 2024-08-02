@@ -3,12 +3,13 @@ import {DirectCharacterSource} from '../../src/common/stream-source.js';
 import {HTML_SPECIAL} from '../../src/decl/known-named-refs.js';
 import {buildIndex} from '../../src/impl/build-index.js';
 import {FixedSizeStringBuilder} from '../../src/impl/FixedSizeStringBuilder.js';
+import {ErrorTracker} from '../../src/impl/interfaces/error-tracker.js';
 import {ParserEnvironment} from '../../src/impl/interfaces/ParserEnvironment.js';
 import {State} from '../../src/impl/interfaces/states.js';
 import {Token} from '../../src/impl/interfaces/tokens.js';
 import {Tokenizer} from '../../src/impl/Tokenizer.js';
 
-export abstract class TokenizerTestSuite<T/*test case*/> {
+export abstract class TokenizerTestSuite<T/*test case*/> implements ErrorTracker {
   name!: string;
   parser!: Tokenizer;
   tokenList: Token[] = [];
@@ -30,7 +31,11 @@ export abstract class TokenizerTestSuite<T/*test case*/> {
   }
 
   createTokenizer(): Tokenizer {
-    return new (this.defineTokenizerClass())(buildIndex(HTML_SPECIAL));
+    return new (this.defineTokenizerClass())(buildIndex(HTML_SPECIAL), this);
+  }
+
+  error(name: string): void {
+    this.errorList.push(name);
   }
 
   beforeTest() {
@@ -66,8 +71,7 @@ export abstract class TokenizerTestSuite<T/*test case*/> {
           accept(token: Token) {
             tokenList.push(token);
           }
-        },
-        errors: this.errorList
+        }
       } as any as ParserEnvironment;
       parser.tokenQueue = [];
     });
