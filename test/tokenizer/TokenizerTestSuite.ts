@@ -12,7 +12,7 @@ export interface GenericTestCase {
   input: string;
 }
 
-export type DefaultTokenizerRawTestCore = [string, string, string[], string[]];
+export type DefaultTokenizerRawTestCore = [string, string, string[], string[], State?];
 export type DefaultTokenizerRawTest = [...DefaultTokenizerRawTestCore, ...any[]];
 
 export interface DefaultTokenizerTestCase extends GenericTestCase {
@@ -63,9 +63,8 @@ export abstract class TokenizerTestSuite<Raw, Case extends GenericTestCase = Gen
   }
 
   beforeEach() {
-    this.tokenizer.state = 'data';
-    this.tokenizer.active = true;
-    this.tokenizer.buffer.clear();
+    this.tokenizer.reset();
+    this.tokenizer.whitespaceMode = 'mixed';
     this.tokenList.length = 0;
     this.errorList.length = 0;
   }

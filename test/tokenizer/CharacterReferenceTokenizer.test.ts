@@ -2,20 +2,13 @@ import {State} from '../../src/impl/interfaces/states.js';
 import {default as rawTests} from './samples/char-ref.json';
 import {DefaultTokenizerRawTestCore, DefaultTokenizerTestCase, DefaultTokenizerTestSuite} from './TokenizerTestSuite.js';
 
-type CharacterReferenceRawTest = [...DefaultTokenizerRawTestCore, State?, number?];
+type CharacterReferenceRawTest = [...DefaultTokenizerRawTestCore, number?];
 
 interface CharacterReferenceTestCase extends DefaultTokenizerTestCase {
   refStart?: number;
 }
 
 class CharacterReferenceTokenizerTest extends DefaultTokenizerTestSuite<CharacterReferenceRawTest, CharacterReferenceTestCase> {
-  beforeEach() {
-    super.beforeEach();
-    this.tokenizer.referenceStartMark = 0;
-    this.tokenizer.hasWhitespaceOnly = true;
-    this.tokenizer.whitespaceMode = 'mixed';
-  }
-
   prepareTest(rawTest: CharacterReferenceRawTest): CharacterReferenceTestCase {
     const testCase: CharacterReferenceTestCase = {
       name: rawTest[0],

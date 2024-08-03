@@ -45,15 +45,11 @@ export interface ComposerIntegration {
   accept(token: Token): void;
 }
 
-// TODO add reset method
 export class Tokenizer {
-  state: State = 'data';
-  active: boolean = true;
+  state!: State;
+  active!: boolean;
   lastOpenTag?: string;
-  tokenQueue: Token[] = [];
-
-  returnState!: State;
-  inAttribute!: boolean;
+  tokenQueue: Token[];
 
   currentComment!: CommentToken;
   currentTag!: TagToken;
@@ -70,17 +66,19 @@ export class Tokenizer {
 
   textEndMark!: number;
 
+  returnState!: State;
+  inAttribute!: boolean;
   referenceStartMark!: number;
   charCode!: number;
-  refsIndex!: PrefixNode<number[]>;
+  refsIndex: PrefixNode<number[]>;
 
-  whitespaceMode: WhitespaceMode = 'mixed';
-  hasWhitespaceOnly: boolean = true;
+  whitespaceMode!: WhitespaceMode;
+  hasWhitespaceOnly!: boolean;
 
   composer!: ComposerIntegration;
 
   input!: CharacterSource;
-  buffer!: StringBuilder;
+  buffer: StringBuilder;
   errorHandler: ErrorHandler;
 
   // TODO add input to constructor
@@ -88,6 +86,8 @@ export class Tokenizer {
     this.refsIndex = refsIndex;
     this.errorHandler = errorHandler;
     this.buffer = new FixedSizeStringBuilder(2048);
+    this.tokenQueue = [];
+    this.reset();
   }
 
   proceed() {
@@ -98,6 +98,26 @@ export class Tokenizer {
       this.state = this.execState(this.state, code);
       this.commitTokens();
     }
+  }
+
+  reset() {
+    this.state = 'data';
+    this.active = true;
+    this.lastOpenTag = undefined;
+    this.sequenceBufferOffset = undefined as unknown as number;
+    this.sequenceData = undefined as unknown as number[];
+    this.sequenceIndex = undefined as unknown as number;
+    this.sequenceCI = undefined as unknown as boolean;
+    this.sequencePositiveState = undefined as unknown as State;
+    this.sequenceNegativeState = undefined as unknown as State;
+    this.textEndMark = undefined as unknown as number;
+    this.returnState = undefined as unknown as State;
+    this.inAttribute = undefined as unknown as boolean;
+    this.referenceStartMark = undefined as unknown as number;
+    this.charCode = undefined as unknown as number;
+    this.whitespaceMode = 'ignoreLeading';
+    this.hasWhitespaceOnly = true;
+    this.buffer.clear();
   }
 
   nextCode(): number {

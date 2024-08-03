@@ -41,9 +41,8 @@ function suite() {
   });
 
   beforeEach(() => {
-    parser.state = 'data';
-    parser.active = true;
-    parser.buffer.clear();
+    parser.reset();
+    parser.whitespaceMode = 'mixed';
     tokenList.length = 0;
     errorList.length = 0;
   });

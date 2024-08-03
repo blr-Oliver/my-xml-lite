@@ -54,10 +54,9 @@ export abstract class AbstractSuite<R, T extends TestCase, C extends TreeCompose
   }
 
   beforeEach() {
-    this.tokenizer.active = true;
-    this.tokenizer.buffer.clear();
-    this.errorList.length = 0;
+    this.tokenizer.reset();
     this.composer.reset();
+    this.errorList.length = 0;
   }
 
   abstract prepareTest(rawTest: R): T;
