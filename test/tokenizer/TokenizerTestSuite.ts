@@ -2,19 +2,26 @@ import {HTML_SPECIAL} from '../../src/decl/known-named-refs.js';
 import {buildIndex} from '../../src/impl/build-index.js';
 import {StringCharacterSource} from '../../src/impl/input/StringCharacterSource.js';
 import {State} from '../../src/impl/interfaces/states.js';
-import {Token} from '../../src/impl/interfaces/tokens.js';
+import {CharactersToken, Token, TokenType} from '../../src/impl/interfaces/tokens.js';
+import {serializeToken} from '../../src/impl/Serializer.js';
 import {Tokenizer} from '../../src/impl/Tokenizer.js';
 import {TokenListSink} from './TokenListSink.js';
 
 export interface GenericTestCase {
   name: string;
   input: string;
-  output: string[];
-  errors: string[];
-  lastState?: string;
 }
 
-export class LastStateTrackingTokenizer extends Tokenizer {
+export type DefaultTokenizerRawTestCore = [string, string, string[], string[], State?];
+export type DefaultTokenizerRawTest = [...DefaultTokenizerRawTestCore, ...any[]];
+
+export interface DefaultTokenizerTestCase extends GenericTestCase {
+  output: string[];
+  errors: string[];
+  lastState?: State;
+}
+
+export class StateTrackingTokenizer extends Tokenizer {
   readonly suite: TokenizerTestSuite<unknown>;
   declare input: StringCharacterSource;
 
@@ -30,7 +37,7 @@ export class LastStateTrackingTokenizer extends Tokenizer {
   }
 }
 
-export abstract class TokenizerTestSuite<Raw, Case extends GenericTestCase = GenericTestCase, Subj extends LastStateTrackingTokenizer = LastStateTrackingTokenizer> {
+export abstract class TokenizerTestSuite<Raw, Case extends GenericTestCase = GenericTestCase, Subj extends StateTrackingTokenizer = StateTrackingTokenizer> {
   readonly name: string;
   rawTests: Raw[];
   preparedTests!: Case[];
@@ -40,13 +47,17 @@ export abstract class TokenizerTestSuite<Raw, Case extends GenericTestCase = Gen
   errorList: string[] = [];
   lastState!: State;
 
-  protected constructor(name: string, rawTests: Raw[]) {
+  constructor(name: string, rawTests: Raw[]) {
     this.name = name;
     this.rawTests = rawTests;
   }
 
   beforeAll() {
     this.tokenizer = this.createTokenizer();
+    this.configure();
+  }
+
+  configure() {
     this.tokenizer.composer = new TokenListSink(this.tokenList);
     this.tokenizer.tokenQueue = [];
   }
@@ -60,7 +71,7 @@ export abstract class TokenizerTestSuite<Raw, Case extends GenericTestCase = Gen
   }
 
   createTokenizer(): Subj {
-    return new LastStateTrackingTokenizer(this) as Subj;
+    return new StateTrackingTokenizer(this) as Subj;
   }
 
   prepareTests() {
@@ -86,9 +97,45 @@ export abstract class TokenizerTestSuite<Raw, Case extends GenericTestCase = Gen
 
     this.prepareTests();
 
-    describe(this.name, () => {
-      for (let test of this.preparedTests)
-        it(test.name, () => this.runTest(test));
-    });
+    for (let test of this.preparedTests)
+      it(test.name, () => this.runTest(test));
+  }
+}
+
+export class DefaultTokenizerTestSuite<Raw extends DefaultTokenizerRawTest = DefaultTokenizerRawTest,
+    Case extends DefaultTokenizerTestCase = DefaultTokenizerTestCase,
+    Subj extends StateTrackingTokenizer = StateTrackingTokenizer>
+    extends TokenizerTestSuite<Raw, Case, Subj> {
+
+  prepareTest(rawTest: Raw): Case {
+    return {
+      name: rawTest[0],
+      input: rawTest[1],
+      output: rawTest[2],
+      errors: rawTest[3],
+      lastState: rawTest[4] || 'data'
+    } as DefaultTokenizerTestCase as Case;
+  }
+
+  serializeTokens(): string[] {
+    const result: string[] = [];
+    for (let token of this.tokenList) {
+      let type: TokenType | 'whitespace' = token.type;
+      if (type === 'characters' && (token as CharactersToken).whitespaceOnly)
+        type = 'whitespace';
+      const content = serializeToken(token);
+      if (content !== null)
+        result.push(`${type}|${content}`);
+      else
+        result.push(type);
+    }
+    return result;
+  }
+
+  runChecks(test: Case): void {
+    const actualTokens = this.serializeTokens();
+    expect(actualTokens).toStrictEqual(test.output);
+    expect(this.errorList).toStrictEqual(test.errors);
+    expect(this.lastState).toStrictEqual(test.lastState);
   }
 }

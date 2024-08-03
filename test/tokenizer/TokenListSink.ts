@@ -5,6 +5,7 @@ import {ComposerIntegration} from '../../src/impl/Tokenizer.js';
 export class TokenListSink implements ComposerIntegration {
   tokens: Token[];
   adjustedCurrentNode: Element | null = null;
+  inForeignContent: boolean = false;
 
   constructor(tokens: Token[]) {
     this.tokens = tokens;
@@ -15,6 +16,6 @@ export class TokenListSink implements ComposerIntegration {
   }
 
   shouldUseForeignRules(): boolean {
-    return false;
+    return this.inForeignContent;
   }
 }
