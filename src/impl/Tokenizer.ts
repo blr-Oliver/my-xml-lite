@@ -823,7 +823,8 @@ export class Tokenizer {
     const buffer = this.buffer;
     this.referenceStartMark = buffer.position;
     if (this.inAttribute) buffer.append(CodePoints.AMPERSAND);
-    else this.appendNonWhitespace(CodePoints.AMPERSAND);
+    else  // TODO this should be handled with respect to current whitespace mode
+      this.appendNonWhitespace(CodePoints.AMPERSAND);
     if (code === CodePoints.SHARP) {
       if (this.inAttribute) buffer.append(CodePoints.SHARP);
       else this.appendNonWhitespace(CodePoints.SHARP);
