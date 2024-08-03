@@ -1,8 +1,59 @@
 import {CDATASection, Comment, DocumentType, Element, Node, NodeType, ParentNode, ProcessingInstruction, Text} from '../decl/dom-like.js';
+import {CharactersToken, CommentToken, DoctypeToken, TagToken, Token} from './interfaces/tokens.js';
 import {NS_HTML} from './TreeComposer.js';
+
+type DocumentTypeLike = {
+  name: string | undefined;
+  publicId: string | undefined;
+  systemId: string | undefined;
+}
+
+type ElementLike = {
+  namespaceURI?: string | null;
+  selfClosed?: boolean;
+  attributes: {
+    [Symbol.iterator](): IterableIterator<AttributeLike>
+  }
+}
+
+type AttributeLike = {
+  name: string;
+  value: string | null;
+}
+
+type DataLike = {
+  data: string;
+}
 
 export function serialize(node: Node): string {
   return serializeInChunks(node).join('');
+}
+
+export function serializeToken(token: Token): string | null {
+  const chunks: string[] = [];
+  switch (token.type) {
+    case 'doctype':
+      serializeDoctype(token as DoctypeToken, chunks);
+      break;
+    case 'startTag':
+    case 'endTag':
+      const tagToken = token as TagToken;
+      serializeElementStart(tagToken, tagToken.name, tagToken.selfClosed, chunks);
+      if (tagToken.type === 'endTag')
+        chunks.splice(1, 0, '/');
+      break;
+    case 'comment':
+      serializeComment(token as CommentToken, chunks);
+      break;
+    case 'characters':
+      return (token as CharactersToken).data;
+    case 'cdata':
+      serializeCData(token as CommentToken, chunks);
+      break;
+    case 'eof':
+      return null;
+  }
+  return chunks.join('');
 }
 
 function serializeInChunks(node: Node, chunks: string[] = []): string[] {
@@ -35,8 +86,19 @@ function serializeInChunks(node: Node, chunks: string[] = []): string[] {
 }
 
 function serializeElement(node: Element, chunks: string[]) {
-  chunks.push('<');
   const tagName = node.namespaceURI === NS_HTML ? node.tagName.toLowerCase() : node.tagName;
+  const selfClosed = node.selfClosed || serializesAsVoid(node);
+  serializeElementStart(node, tagName, selfClosed, chunks);
+  if (!selfClosed) {
+    serializeContents(node, chunks);
+    chunks.push('</');
+    chunks.push(tagName);
+    chunks.push('>');
+  }
+}
+
+function serializeElementStart(node: ElementLike, tagName: string, selfClosed: boolean, chunks: string[]) {
+  chunks.push('<');
   chunks.push(tagName);
   for (let attr of node.attributes) {
     chunks.push(' ');
@@ -47,17 +109,7 @@ function serializeElement(node: Element, chunks: string[]) {
       chunks.push('"');
     }
   }
-  if (node.selfClosed) {
-    chunks.push('/>');
-  } else if (serializesAsVoid(node)) {
-    chunks.push('/>');
-  } else {
-    chunks.push('>');
-    serializeContents(node, chunks);
-    chunks.push('</');
-    chunks.push(tagName);
-    chunks.push('>');
-  }
+  chunks.push(selfClosed ? '/>' : '>');
 }
 
 function serializeContents(node: ParentNode, chunks: string[]) {
@@ -65,7 +117,7 @@ function serializeContents(node: ParentNode, chunks: string[]) {
     serializeInChunks(child, chunks);
 }
 
-function serializeCData(node: CDATASection, chunks: string[]) {
+function serializeCData(node: DataLike, chunks: string[]) {
   chunks.push('<![CDATA[');
   chunks.push(node.data);
   chunks.push(']]>');
@@ -88,25 +140,27 @@ function serializePI(node: ProcessingInstruction, chunks: string[]) {
   chunks.push('>');
 }
 
-function serializeComment(node: Comment, chunks: string[]) {
+function serializeComment(node: DataLike, chunks: string[]) {
   chunks.push('<!--');
   chunks.push(node.data);
   chunks.push('-->');
 }
 
-function serializeDoctype(node: DocumentType, chunks: string[]) {
+function serializeDoctype(node: DocumentTypeLike, chunks: string[]) {
   chunks.push('<!DOCTYPE ');
-  chunks.push(node.name);
-  if (node.publicId) {
-    chunks.push(' PUBLIC ');
-    pushId(node.publicId);
-    if (node.systemId) {
-      chunks.push(' ');
+  if (node.name !== undefined) {
+    chunks.push(node.name);
+    if (node.publicId) {
+      chunks.push(' PUBLIC ');
+      pushId(node.publicId);
+      if (node.systemId) {
+        chunks.push(' ');
+        pushId(node.systemId);
+      }
+    } else if (node.systemId) {
+      chunks.push(' SYSTEM ');
       pushId(node.systemId);
     }
-  } else if (node.systemId) {
-    chunks.push(' SYSTEM ');
-    pushId(node.systemId);
   }
   chunks.push('>');
 
