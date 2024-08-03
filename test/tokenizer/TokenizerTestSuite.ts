@@ -12,7 +12,7 @@ export interface GenericTestCase {
   input: string;
 }
 
-export type DefaultTokenizerRawTestCore = [string, string, string[], string[], State?];
+export type DefaultTokenizerRawTestCore = [string, string, string[], string[]];
 export type DefaultTokenizerRawTest = [...DefaultTokenizerRawTestCore, ...any[]];
 
 export interface DefaultTokenizerTestCase extends GenericTestCase {
@@ -108,13 +108,15 @@ export class DefaultTokenizerTestSuite<Raw extends DefaultTokenizerRawTest = Def
     extends TokenizerTestSuite<Raw, Case, Subj> {
 
   prepareTest(rawTest: Raw): Case {
-    return {
+    const testCase = {
       name: rawTest[0],
       input: rawTest[1],
       output: rawTest[2],
-      errors: rawTest[3],
-      lastState: rawTest[4] || 'data'
-    } as DefaultTokenizerTestCase as Case;
+      errors: rawTest[3]
+    } as DefaultTokenizerTestCase;
+    if (rawTest[4])
+      testCase.lastState = rawTest[4] as State;
+    return testCase as Case;
   }
 
   serializeTokens(): string[] {
@@ -136,6 +138,7 @@ export class DefaultTokenizerTestSuite<Raw extends DefaultTokenizerRawTest = Def
     const actualTokens = this.serializeTokens();
     expect(actualTokens).toStrictEqual(test.output);
     expect(this.errorList).toStrictEqual(test.errors);
-    expect(this.lastState).toStrictEqual(test.lastState);
+    if (test.lastState)
+      expect(this.lastState).toStrictEqual(test.lastState);
   }
 }

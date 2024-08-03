@@ -1,98 +1,40 @@
-import {CodePoints} from '../../src/common/code-points.js';
-import {stringToArray} from '../../src/common/code-sequences.js';
-import {DirectCharacterSource} from '../../src/common/stream-source.js';
-import {HTML_SPECIAL} from '../../src/decl/known-named-refs.js';
-import {buildIndex} from '../../src/impl/build-index.js';
 import {State} from '../../src/impl/interfaces/states.js';
-import {EOF_TOKEN, Token} from '../../src/impl/interfaces/tokens.js';
-import {Tokenizer} from '../../src/impl/Tokenizer.js';
 import {default as rawTests} from './samples/char-ref.json';
-import {TokenListSink} from './TokenListSink.js';
+import {DefaultTokenizerRawTestCore, DefaultTokenizerTestCase, DefaultTokenizerTestSuite} from './TokenizerTestSuite.js';
 
-type TestCase = [string/*name*/, string/*input*/, string/*output*/, string[]/*errors*/, boolean? /*in attribute*/];
-const testCases = rawTests as TestCase[];
+type CharacterReferenceRawTest = [...DefaultTokenizerRawTestCore, boolean, number?, State?];
 
-function suite() {
-  let parser!: Tokenizer;
-  let tokenList: Token[] = [];
-  let errorList: string[] = [];
-  let lastState!: State;
+interface CharacterReferenceTestCase extends DefaultTokenizerTestCase {
+  inAttribute: boolean;
+  refStart?: number;
+}
 
-  beforeAll(() => {
-    class MockCompositeTokenizer extends Tokenizer {
-      attributeValueUnquoted(code: number): State {
-        switch (code) {
-          case CodePoints.EOF as const:
-            return this.eof();
-          case CodePoints.AMPERSAND:
-            return super.attributeValueUnquoted(code);
-          default:
-            this.buffer.append(code);
-            return 'attributeValueUnquoted';
-        }
-      }
-      emitAccumulatedCharacters() {
-        // do nothing
-      }
-      eof(): State {
-        lastState = this.state;
-        return super.eof();
-      }
-    }
-
-    parser = new MockCompositeTokenizer(buildIndex(HTML_SPECIAL), error => errorList.push(error));
-    parser.composer = new TokenListSink(tokenList);
-    parser.tokenQueue = [];
-  });
-
-  beforeEach(() => {
-    parser.referenceStartMark = 0;
-    parser.active = true;
-    parser.buffer.clear();
-    parser.buffer.append(CodePoints.X_REGULAR);
-    tokenList.length = 0;
-    errorList.length = 0;
-  });
-
-  describe('CharacterReferenceTokenizer tests', () => {
-    for (let test of testCases) {
-      createTestVariants(test);
-    }
-  });
-
-  function processInput(input: string) {
-    const newInput = new DirectCharacterSource(new Uint16Array(stringToArray(input)));
-    parser.input = newInput;
-    parser.proceed();
+class CharacterReferenceTokenizerTest extends DefaultTokenizerTestSuite<CharacterReferenceRawTest, CharacterReferenceTestCase> {
+  beforeEach() {
+    super.beforeEach();
+    this.tokenizer.referenceStartMark = 0;
   }
 
-  function createTestVariants(test: TestCase) {
-    const [name, input, expectedData, expectedErrors, inAttribute] = test;
-    if (typeof inAttribute === 'undefined') {
-      createTest([`${name} (in attribute)`, input, expectedData, expectedErrors, true] as TestCase);
-      createTest([`${name} (in text)`, input, expectedData, expectedErrors, false] as TestCase);
-    } else {
-      createTest(test);
-    }
+  prepareTest(rawTest: CharacterReferenceRawTest): CharacterReferenceTestCase {
+    const testCase: CharacterReferenceTestCase = {
+      name: rawTest[0],
+      input: rawTest[1],
+      output: rawTest[2],
+      errors: rawTest[3],
+      inAttribute: rawTest[4],
+      refStart: rawTest[5] || 0
+    };
+    if (rawTest[6])
+      testCase.lastState = rawTest[6] as State;
+    return testCase;
   }
 
-  function createTest(test: TestCase) {
-    const [name, input, expectedData, expectedErrors, inAttribute] = test;
-    it(name, () => {
-      const expectedLastState = parser.state = inAttribute ? 'attributeValueUnquoted' : 'data';
-      parser.inAttribute = !!inAttribute;
-      processInput(input);
-      expect(parser.state).toStrictEqual('eof');
-      expect(tokenList).toHaveLength(1);
-      expect(tokenList[0]).toBe(EOF_TOKEN);
-      expect(lastState).toStrictEqual(expectedLastState);
-      expect(parser.referenceStartMark).toStrictEqual(1);
-      const buffer = parser.buffer;
-      expect(buffer.buffer[0]).toStrictEqual(CodePoints.X_REGULAR);
-      expect(buffer.takeString(1)).toStrictEqual(expectedData);
-      expect(errorList).toStrictEqual(expectedErrors);
-    });
+  runChecks(test: CharacterReferenceTestCase) {
+    super.runChecks(test);
+    expect(this.tokenizer.referenceStartMark).toStrictEqual(test.refStart);
   }
 }
 
-suite();
+const suite = new CharacterReferenceTokenizerTest('CharacterReferenceTokenizer tests', rawTests as CharacterReferenceRawTest[]);
+
+describe(suite.name, () => suite.makeSuite());

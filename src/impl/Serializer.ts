@@ -38,7 +38,7 @@ export function serializeToken(token: Token): string | null {
     case 'startTag':
     case 'endTag':
       const tagToken = token as TagToken;
-      serializeElementStart(tagToken, tagToken.name, tagToken.selfClosed, chunks);
+      serializeElementStart(tagToken, tagToken.name, tagToken.selfClosed, chunks, false);
       if (tagToken.type === 'endTag')
         chunks.splice(1, 0, '/');
       break;
@@ -97,15 +97,15 @@ function serializeElement(node: Element, chunks: string[]) {
   }
 }
 
-function serializeElementStart(node: ElementLike, tagName: string, selfClosed: boolean, chunks: string[]) {
+function serializeElementStart(node: ElementLike, tagName: string, selfClosed: boolean, chunks: string[], escape: boolean = true) {
   chunks.push('<');
   chunks.push(tagName);
   for (let attr of node.attributes) {
     chunks.push(' ');
     chunks.push(attr.name);
-    if (attr.value) {
+    if (attr.value !== null) {
       chunks.push('="');
-      chunks.push(escapeAttribute(attr.value));
+      chunks.push(escape ? escapeAttribute(attr.value) : attr.value);
       chunks.push('"');
     }
   }
