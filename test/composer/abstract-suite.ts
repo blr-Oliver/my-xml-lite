@@ -30,7 +30,7 @@ export abstract class AbstractSuite<R, T extends TestCase, C extends TreeCompose
   }
 
   beforeAll() {
-    this.errorHandler = error => this.errorList.push(error)
+    this.errorHandler = error => this.errorList.push(error);
     this.composer = this.createComposer();
     this.tokenizer = this.createTokenizer();
     this.configure();

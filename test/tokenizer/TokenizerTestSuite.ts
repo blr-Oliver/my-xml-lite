@@ -1,77 +1,94 @@
-import {stringToArray} from '../../src/common/code-sequences.js';
-import {DirectCharacterSource} from '../../src/common/stream-source.js';
 import {HTML_SPECIAL} from '../../src/decl/known-named-refs.js';
 import {buildIndex} from '../../src/impl/build-index.js';
+import {StringCharacterSource} from '../../src/impl/input/StringCharacterSource.js';
 import {State} from '../../src/impl/interfaces/states.js';
 import {Token} from '../../src/impl/interfaces/tokens.js';
 import {Tokenizer} from '../../src/impl/Tokenizer.js';
 import {TokenListSink} from './TokenListSink.js';
 
-export abstract class TokenizerTestSuite<T/*test case*/> {
-  name!: string;
-  parser!: Tokenizer;
+export interface GenericTestCase {
+  name: string;
+  input: string;
+  output: string[];
+  errors: string[];
+  lastState?: string;
+}
+
+export class LastStateTrackingTokenizer extends Tokenizer {
+  readonly suite: TokenizerTestSuite<unknown>;
+  declare input: StringCharacterSource;
+
+  constructor(suite: TokenizerTestSuite<unknown>) {
+    super(buildIndex(HTML_SPECIAL), name => suite.errorList.push(name));
+    this.suite = suite;
+    this.input = new StringCharacterSource('');
+  }
+
+  eof(): State {
+    this.suite.lastState = this.state;
+    return super.eof();
+  }
+}
+
+export abstract class TokenizerTestSuite<Raw, Case extends GenericTestCase = GenericTestCase, Subj extends LastStateTrackingTokenizer = LastStateTrackingTokenizer> {
+  readonly name: string;
+  rawTests: Raw[];
+  preparedTests!: Case[];
+
+  tokenizer!: Subj;
   tokenList: Token[] = [];
   errorList: string[] = [];
   lastState!: State;
 
-  protected constructor(name: string) {
+  protected constructor(name: string, rawTests: Raw[]) {
     this.name = name;
+    this.rawTests = rawTests;
   }
 
-  defineTokenizerClass(): typeof Tokenizer {
-    const suite = this;
-    return class extends Tokenizer {
-      eof(): State {
-        suite.lastState = this.state;
-        return super.eof();
-      }
-    };
+  beforeAll() {
+    this.tokenizer = this.createTokenizer();
+    this.tokenizer.composer = new TokenListSink(this.tokenList);
+    this.tokenizer.tokenQueue = [];
   }
 
-  createTokenizer(): Tokenizer {
-    return new (this.defineTokenizerClass())(buildIndex(HTML_SPECIAL), name => this.errorList.push(name));
-  }
-
-  beforeTest() {
-    this.parser.state = 'data';
-    this.parser.active = true;
-    this.parser.buffer.clear();
+  beforeEach() {
+    this.tokenizer.state = 'data';
+    this.tokenizer.active = true;
+    this.tokenizer.buffer.clear();
     this.tokenList.length = 0;
     this.errorList.length = 0;
   }
 
-  protected abstract getRegularTestCases(): T[];
-  protected abstract runRegularTest(test: T): void;
-  protected getTestName(test: T): string {
-    return (test as any[])[0] as string;
-  }
-  protected makeCustomTests() {
+  createTokenizer(): Subj {
+    return new LastStateTrackingTokenizer(this) as Subj;
   }
 
-  processInput(input: string) {
-    const newInput = new DirectCharacterSource(new Uint16Array(stringToArray(input)));
-    this.parser.input = newInput;
-    this.parser.proceed();
+  prepareTests() {
+    this.preparedTests = this.rawTests.map(rawTest => this.prepareTest(rawTest));
+  }
+
+  abstract prepareTest(rawTest: Raw): Case;
+  abstract runChecks(test: Case): void;
+
+  runTest(test: Case) {
+    this.processInput(test);
+    this.runChecks(test);
+  }
+
+  processInput(test: Case) {
+    this.tokenizer.input.source = test.input;
+    this.tokenizer.proceed();
   }
 
   makeSuite() {
-    beforeAll(() => {
-      const parser = this.parser = this.createTokenizer();
-      parser.composer = new TokenListSink(this.tokenList);
-      parser.tokenQueue = [];
-    });
+    beforeAll(() => this.beforeAll());
+    beforeEach(() => this.beforeEach());
 
-    beforeEach(() => {
-      this.beforeTest();
-    });
+    this.prepareTests();
 
     describe(this.name, () => {
-      describe('regular tests', () => {
-        let tests = this.getRegularTestCases();
-        for (let test of tests)
-          it(this.getTestName(test), () => this.runRegularTest(test));
-      });
-      describe('special tests', () => this.makeCustomTests());
+      for (let test of this.preparedTests)
+        it(test.name, () => this.runTest(test));
     });
   }
 }
