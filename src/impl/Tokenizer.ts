@@ -1699,10 +1699,6 @@ export class Tokenizer {
     return this.matchSequence(code, SCRIPT, true, 'scriptDataEndTagNameMatched', 'scriptDataEscaped');
   }
 
-  scriptDataEscapedEndTagNameMatched(code: number): State {
-    return this.textDataEndTagMatched(code, 'scriptDataEscaped');
-  }
-
   scriptDataDoubleEscapeStart(code: number): State {
     return this.matchSequence(code, SCRIPT, true, 'scriptDataDoubleEscapeStartMatched', 'scriptDataEscaped');
   }

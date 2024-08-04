@@ -20,6 +20,7 @@
   ["with -", "<!--A-A-->", ["comment|<!--A-A-->", "eof"], []],
   ["with --", "<!--A--A-->", ["comment|<!--A--A-->", "eof"], []],
   ["with --!", "<!--A--!A-->", ["comment|<!--A--!A-->", "eof"], []],
+  ["with --!-", "<!--A--!-A-->", ["comment|<!--A--!-A-->", "eof"], []],
   ["with -!", "<!--A-!A-->", ["comment|<!--A-!A-->", "eof"], []],
   ["with >", "<!--A>A-->", ["comment|<!--A>A-->", "eof"], []],
   ["with ->", "<!--A->A-->", ["comment|<!--A->A-->", "eof"], []],
@@ -32,10 +33,12 @@
   ["abrupt on start", "<!-->", ["comment|<!---->", "eof"], ["abrupt-closing-of-empty-comment"]],
   ["abrupt after dash", "<!--->", ["comment|<!---->", "eof"], ["abrupt-closing-of-empty-comment"]],
   ["eof on start", "<!--", ["comment|<!---->", "eof"], ["eof-in-comment"], "comment"],
+  ["eof on start dash", "<!---", ["comment|<!---->", "eof"], ["eof-in-comment"], "commentStartDash"],
   ["eof in body", "<!--A", ["comment|<!--A-->", "eof"], ["eof-in-comment"], "comment"],
   ["eof in ending 1", "<!--A-", ["comment|<!--A-->", "eof"], ["eof-in-comment"], "commentEndDash"],
   ["eof in ending 2", "<!--A--", ["comment|<!--A-->", "eof"], ["eof-in-comment"], "commentEnd"],
   ["eof in ending 3", "<!--A--!", ["comment|<!--A-->", "eof"], ["eof-in-comment"], "commentEndBang"],
+  ["eof in ending 4", "<!--A--!-", ["comment|<!--A--!-->", "eof"], ["eof-in-comment"], "commentEndDash"],
   ["eof after -", "<!--A-", ["comment|<!--A-->", "eof"], ["eof-in-comment"], "commentEndDash"],
   ["eof after <", "<!--A<", ["comment|<!--A<-->", "eof"], ["eof-in-comment"], "comment"],
   ["eof after <<", "<!--A<<", ["comment|<!--A<<-->", "eof"], ["eof-in-comment"], "comment"],
@@ -47,5 +50,6 @@
   ["incomplete comment start hyphen", "a<!-b-->", ["characters|a", "comment|<!---b---->", "eof"], ["incorrectly-opened-comment"]],
   ["incomplete comment start", "a<!b>", ["characters|a", "comment|<!--b-->", "eof"], ["incorrectly-opened-comment"]],
   ["bogus comment + nested comment", "a<!-b<!--c>", ["characters|a", "comment|<!---b<!--c-->", "eof"], ["incorrectly-opened-comment"]],
+  ["bogus comment NUL", "a<!-\u0000c", ["characters|a", "comment|<!---\uFFFDc-->", "eof"], ["incorrectly-opened-comment", "unexpected-null-character"]],
   ["bogus comment unfinished", "a<!-bc", ["characters|a", "comment|<!---bc-->", "eof"], ["incorrectly-opened-comment"]]
 ]
