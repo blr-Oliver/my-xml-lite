@@ -10,21 +10,16 @@ export class SimpleNodeMap extends Array<SimpleAttr> implements NamedNodeMap {
   constructor(ownerElement: SimpleElement, attributes: NamespacedAttribute[]) {
     const count = attributes.length;
     super(count);
-    let unique = 0;
     const map = this.#namedMap = new Map<string, SimpleAttr>();
     const names = this.names = new Array(count);
     for (let i = 0; i < count; ++i) {
       const attribute = attributes[i];
-      const name = attribute.name;
-      if (!map.has(name)) {
-        names[unique] = name;
-        const attr = this[unique++] = new SimpleAttr(ownerElement, attribute, unique);
-        map.set(name, attr);
-        if (!(name in this))
-          (this as any)[name] = attr;
-      }
+      const name = names[i] = attribute.name;
+      const attr = this[i] = new SimpleAttr(ownerElement, attribute, i);
+      map.set(name, attr);
+      if (!(name in this))
+        (this as any)[name] = attr;
     }
-    this.length = unique;
   }
 
   addAttribute(ownerElement: SimpleElement, attribute: NamespacedAttribute) {

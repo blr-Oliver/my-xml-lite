@@ -54,7 +54,7 @@ export class Tokenizer {
   currentComment!: CommentToken;
   currentTag!: TagToken;
   currentAttribute!: Attribute;
-  currentAttributeNames!: { [name: string]: true }; // TODO make it actual Map
+  currentAttributeNames!: Set<string>;
   currentDoctype!: DoctypeToken;
 
   sequenceBufferOffset!: number;
@@ -87,6 +87,7 @@ export class Tokenizer {
     this.errorHandler = errorHandler;
     this.buffer = new FixedSizeStringBuilder(2048);
     this.tokenQueue = [];
+    this.currentAttributeNames = new Set<string>();
     this.reset();
   }
 
@@ -104,6 +105,8 @@ export class Tokenizer {
     this.state = 'data';
     this.active = true;
     this.lastOpenTag = undefined;
+    this.tokenQueue.length = 0;
+    this.currentAttributeNames.clear();
     this.sequenceBufferOffset = undefined as unknown as number;
     this.sequenceData = undefined as unknown as number[];
     this.sequenceIndex = undefined as unknown as number;
@@ -152,12 +155,9 @@ export class Tokenizer {
 
   emitCurrentTag() {
     this.emit(this.currentTag);
-    // @ts-ignore
-    this.currentTag = undefined;
-    // @ts-ignore
-    this.currentAttribute = undefined;
-    // @ts-ignore
-    this.currentAttributeNames = undefined;
+    this.currentTag = undefined as unknown as TagToken;
+    this.currentAttribute = undefined as unknown as Attribute;
+    this.currentAttributeNames.clear();
   }
 
   emitAccumulatedCharacters() {
@@ -214,7 +214,6 @@ export class Tokenizer {
       selfClosed: false,
       attributes: []
     };
-    this.currentAttributeNames = {};
   }
 
   startNewAttribute() {
@@ -616,11 +615,11 @@ export class Tokenizer {
   }
 
   checkDuplicateAttribute(name: string) {
-    if (name in this.currentAttributeNames) {
+    if (this.currentAttributeNames.has(name)) {
       this.error('duplicate-attribute');
       this.currentTag.attributes.pop();
     } else
-      this.currentAttributeNames[name] = true;
+      this.currentAttributeNames.add(name);
   }
 
   afterAttributeName(code: number): State {
