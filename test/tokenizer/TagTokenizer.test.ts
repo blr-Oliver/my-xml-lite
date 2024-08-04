@@ -1,152 +1,37 @@
-import {stringToArray} from '../../src/common/code-sequences.js';
-import {DirectCharacterSource} from '../../src/common/stream-source.js';
-import {HTML_SPECIAL} from '../../src/decl/known-named-refs.js';
-import {buildIndex} from '../../src/impl/build-index.js';
-import {State} from '../../src/impl/interfaces/states.js';
-import {CharactersToken, CommentToken, EOF_TOKEN, TagToken, Token} from '../../src/impl/interfaces/tokens.js';
-import {Tokenizer} from '../../src/impl/Tokenizer.js';
+import {TagToken} from '../../src/impl/interfaces/tokens.js';
 import {default as rawTests} from './samples/tags.json';
-import {TokenListSink} from './TokenListSink.js';
+import {DefaultTokenizerRawTestCore, DefaultTokenizerTestCase, DefaultTokenizerTestSuite} from './TokenizerTestSuite.js';
 
 type AttributeData = [string, string | null];
-type TestCase = [
-  string/*name*/,
-  string/*input*/,
-  string/*tag name*/,
-  boolean/*start/end*/,
-  boolean/*self-closing*/,
-  AttributeData[],
-  string[]/*errors*/,
-  boolean/*completed*/
-];
-const testCases = rawTests as TestCase[];
+type TagTokenizerRawTest = [...DefaultTokenizerRawTestCore, AttributeData[]];
 
-function suite() {
-  let parser!: Tokenizer;
-  let tokenList: Token[] = [];
-  let errorList: string[] = [];
-  let lastState!: State;
+interface TagTokenizerTestCase extends DefaultTokenizerTestCase {
+  attributes: AttributeData[];
+}
 
-  beforeAll(() => {
-    class MockCompositeTokenizer extends Tokenizer {
-      eof(): State {
-        lastState = this.state;
-        return super.eof();
-      }
-    }
-
-    parser = new MockCompositeTokenizer(buildIndex(HTML_SPECIAL), error => errorList.push(error));
-    parser.composer = new TokenListSink(tokenList);
-    parser.tokenQueue = [];
-  });
-
-  beforeEach(() => {
-    parser.reset();
-    parser.whitespaceMode = 'mixed';
-    tokenList.length = 0;
-    errorList.length = 0;
-  });
-
-  describe('TagTokenizer tests', () => {
-    for (let test of testCases) {
-      createTest(test);
-    }
-    it('eof before start tag name', () => {
-      processInput('<');
-      expect(parser.state).toStrictEqual('eof');
-      expect(tokenList).toHaveLength(2);
-      expect(tokenList[1]).toBe(EOF_TOKEN);
-      expect(tokenList[0].type).toStrictEqual('characters');
-      expect((tokenList[0] as CharactersToken).data).toStrictEqual('<');
-      expect(errorList).toStrictEqual(['eof-before-tag-name']);
-    });
-
-    it('eof before end tag name', () => {
-      processInput('</');
-      expect(parser.state).toStrictEqual('eof');
-      expect(tokenList).toHaveLength(2);
-      expect(tokenList[1]).toBe(EOF_TOKEN);
-      expect(tokenList[0].type).toStrictEqual('characters');
-      expect((tokenList[0] as CharactersToken).data).toStrictEqual('</');
-      expect(errorList).toStrictEqual(['eof-before-tag-name']);
-    });
-
-    it('missing start tag name', () => {
-      processInput('<>');
-      expect(parser.state).toStrictEqual('eof');
-      expect(tokenList).toHaveLength(2);
-      expect(tokenList[1]).toBe(EOF_TOKEN);
-      expect(tokenList[0].type).toStrictEqual('characters');
-      expect((tokenList[0] as CharactersToken).data).toStrictEqual('<>');
-      expect(errorList).toStrictEqual(['invalid-first-character-of-tag-name']);
-    });
-
-    it('missing end tag name', () => {
-      processInput('</>');
-      expect(parser.state).toStrictEqual('eof');
-      expect(tokenList).toHaveLength(1);
-      expect(tokenList[0]).toBe(EOF_TOKEN);
-      expect(errorList).toStrictEqual(['missing-end-tag-name']);
-    });
-
-    it('invalid start tag name', () => {
-      processInput('< >');
-      expect(parser.state).toStrictEqual('eof');
-      expect(tokenList).toHaveLength(2);
-      expect(tokenList[1]).toBe(EOF_TOKEN);
-      expect(tokenList[0].type).toStrictEqual('characters');
-      expect((tokenList[0] as CharactersToken).data).toStrictEqual('< >');
-      expect(errorList).toStrictEqual(['invalid-first-character-of-tag-name']);
-    });
-
-    it('invalid end tag name', () => {
-      processInput('</ >');
-      expect(parser.state).toStrictEqual('eof');
-      expect(tokenList).toHaveLength(2);
-      expect(tokenList[1]).toBe(EOF_TOKEN);
-      expect(tokenList[0].type).toStrictEqual('comment');
-      expect((tokenList[0] as CommentToken).data).toStrictEqual(' ');
-      expect(errorList).toStrictEqual(['invalid-first-character-of-tag-name']);
-    });
-
-  });
-
-  function processInput(input: string) {
-    const newInput = new DirectCharacterSource(new Uint16Array(stringToArray(input)));
-    parser.input = newInput;
-    parser.proceed();
+class TagTokenizerTest extends DefaultTokenizerTestSuite<TagTokenizerRawTest, TagTokenizerTestCase> {
+  prepareTest(rawTest: TagTokenizerRawTest): TagTokenizerTestCase {
+    const result = super.prepareTest(rawTest);
+    result.attributes = rawTest[5];
+    return result;
   }
 
-  function createTest(test: TestCase) {
-    const [name, input, expectedTagName, expectedIsStart, expectedSelfClosing, expectedAttributes, expectedErrors, completed] = test;
-    it(name, () => {
-      processInput(input);
-      expect(parser.state).toStrictEqual('eof');
-      if (!completed) {
-        expect(tokenList).toHaveLength(1);
-        expect(tokenList[0]).toBe(EOF_TOKEN);
-      } else {
-        expect(tokenList).toHaveLength(2);
-        expect(tokenList[1]).toBe(EOF_TOKEN);
-        const token = tokenList[0] as TagToken;
-        expect(token.name).toStrictEqual(expectedTagName);
-        expect(token.type).toStrictEqual(expectedIsStart ? 'startTag' : 'endTag');
-        expect(token.selfClosed).toStrictEqual(expectedSelfClosing);
-        expect(token.attributes).toHaveLength(expectedAttributes.length);
-        for (let i = 0; i < expectedAttributes.length; ++i) {
-          const expectedAttribute = expectedAttributes[i];
-          const actualAttribute = token.attributes[i];
-          expect(actualAttribute).toBeDefined();
-          expect(actualAttribute.name).toStrictEqual(expectedAttribute[0]);
-          expect(actualAttribute.value).toStrictEqual(expectedAttribute[1]);
-        }
-        expect(parser.currentTag).toBeUndefined();
-        expect(parser.currentAttribute).toBeUndefined();
-        expect(parser.currentAttributeNames).toBeUndefined();
+  runChecks(test: TagTokenizerTestCase) {
+    super.runChecks(test);
+    const tagToken = this.tokenList.find(token => token.type === 'startTag') as TagToken;
+    if (test.attributes.length)
+      expect(tagToken).toBeDefined();
+    if (tagToken) {
+      const len = tagToken.attributes.length;
+      expect(len).toStrictEqual(test.attributes.length);
+      for (let i = 0; i < len; ++i) {
+        expect(tagToken.attributes[i].name).toStrictEqual(test.attributes[i][0]);
+        expect(tagToken.attributes[i].value).toStrictEqual(test.attributes[i][1]);
       }
-      expect(errorList).toStrictEqual(expectedErrors);
-    });
+    }
   }
 }
 
-suite();
+const suite = new TagTokenizerTest('TagTokenizer tests', rawTests as TagTokenizerRawTest[]);
+
+describe(suite.name, () => suite.makeSuite());

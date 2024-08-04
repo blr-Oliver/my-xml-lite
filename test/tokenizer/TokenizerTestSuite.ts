@@ -118,9 +118,9 @@ export class DefaultTokenizerTestSuite<Raw extends DefaultTokenizerRawTest = Def
     return testCase as Case;
   }
 
-  serializeTokens(): string[] {
+  serializeTokens(tokenList: Token[]): string[] {
     const result: string[] = [];
-    for (let token of this.tokenList) {
+    for (let token of tokenList) {
       let type: TokenType | 'whitespace' = token.type;
       if (type === 'characters' && (token as CharactersToken).whitespaceOnly)
         type = 'whitespace';
@@ -134,7 +134,7 @@ export class DefaultTokenizerTestSuite<Raw extends DefaultTokenizerRawTest = Def
   }
 
   runChecks(test: Case): void {
-    const actualTokens = this.serializeTokens();
+    const actualTokens = this.serializeTokens(this.tokenList);
     expect(actualTokens).toStrictEqual(test.output);
     expect(this.errorList).toStrictEqual(test.errors);
     if (test.lastState)

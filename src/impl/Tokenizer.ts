@@ -54,7 +54,7 @@ export class Tokenizer {
   currentComment!: CommentToken;
   currentTag!: TagToken;
   currentAttribute!: Attribute;
-  currentAttributeNames!: { [name: string]: true };
+  currentAttributeNames!: { [name: string]: true }; // TODO make it actual Map
   currentDoctype!: DoctypeToken;
 
   sequenceBufferOffset!: number;
@@ -487,7 +487,7 @@ export class Tokenizer {
         this.startNewComment();
         return this.callState('bogusComment', code);
       case CodePoints.EOF:
-        buffer.append(CodePoints.LT);
+        this.appendCharacter(CodePoints.LT);
         this.emitAccumulatedCharacters();
         this.error('eof-before-tag-name');
         return this.eof();
