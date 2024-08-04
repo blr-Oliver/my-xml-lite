@@ -59,7 +59,6 @@ export abstract class TokenizerTestSuite<Raw, Case extends GenericTestCase = Gen
 
   configure() {
     this.tokenizer.composer = new TokenListSink(this.tokenList);
-    this.tokenizer.tokenQueue = [];
   }
 
   beforeEach() {
