@@ -92,6 +92,7 @@
   ["double escape self-closing end", "<script>A<!--B<script>C</script/D-->E</script>", ["startTag|<script>", "characters|A<!--B<script>C</script/D-->E", "endTag|</script>", "eof"], [], "data"],
   ["double escape self-closing end CI", "<script>A<!--B<ScRiPt>C</sCrIpT/D-->E</script>", ["startTag|<script>", "characters|A<!--B<ScRiPt>C</sCrIpT/D-->E", "endTag|</script>", "eof"], [], "data"],
   ["double escape triple dash", "<script>A<!--<script>C---</script>D-->E</script>", ["startTag|<script>", "characters|A<!--<script>C---</script>D-->E", "endTag|</script>", "eof"], [], "data"],
+  ["double escape four dashes", "<script>A<!--<script>C----</script>D-->E</script>", ["startTag|<script>", "characters|A<!--<script>C----</script>D-->E", "endTag|</script>", "eof"], [], "data"],
   ["double escape dash start", "<script>A<!---<script>C</script>D-->E</script>", ["startTag|<script>", "characters|A<!---<script>C</script>D-->E", "endTag|</script>", "eof"], [], "data"],
   ["double escape dash start CI", "<script>A<!---<ScRiPt>C</sCrIpT>D-->E</script>", ["startTag|<script>", "characters|A<!---<ScRiPt>C</sCrIpT>D-->E", "endTag|</script>", "eof"], [], "data"],
   ["double escape dash dash start", "<script>A<!----<script>C</script>D-->E</script>", ["startTag|<script>", "characters|A<!----<script>C</script>D-->E", "endTag|</script>", "eof"], [], "data"],
