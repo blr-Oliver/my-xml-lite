@@ -1,7 +1,8 @@
+import {CodePoints} from '../../src/common/code-points.js';
 import {ChildNode, Document, Element, Node, NodeType, NonDocumentTypeChildNode, ParentNode} from '../../src/decl/dom-like.js';
 import {HTML_SPECIAL} from '../../src/decl/known-named-refs.js';
 import {buildIndex} from '../../src/impl/build-index.js';
-import {StringCharacterSource} from '../../src/impl/input/StringCharacterSource.js';
+import {ArrayCharacterSource} from '../../src/impl/input/ArrayCharacterSource.js';
 import {ErrorHandler} from '../../src/impl/interfaces/error-tracker.js';
 import {serialize} from '../../src/impl/Serializer.js';
 import {SimpleNodeFactory} from '../../src/impl/simple-tree/SimpleNodeFactory.js';
@@ -19,14 +20,14 @@ export abstract class AbstractSuite<R, T extends TestCase, C extends TreeCompose
   composer!: C;
   preparedTests!: T[];
   errorHandler!: ErrorHandler;
-  input: StringCharacterSource;
+  input: ArrayCharacterSource<number[]>;
   readonly name: string;
 
   protected constructor(name: string, testCases: R[]) {
     this.name = name;
     this.testCases = testCases;
     this.errorList = [];
-    this.input = new StringCharacterSource('');
+    this.input = new ArrayCharacterSource<number[]>([]);
   }
 
   beforeAll() {
@@ -101,8 +102,20 @@ export class DefaultSuite<R = DefaultRawTest, T extends DefaultTestCase = Defaul
   }
 
   processInput(test: T) {
-    this.input.source = test.input;
-    this.tokenizer.proceed();
+    this.input.setData(this.constructInterlacedData(test.input));
+    while (this.tokenizer.active)
+      this.tokenizer.proceed();
+  }
+
+  // TODO duplicate code
+  constructInterlacedData(input: string): number[] {
+    const codePoints = Array.from(input).map(c => c.codePointAt(0)!);
+    const len = codePoints.length
+    const result = Array(len * 2 + 1);
+    result.fill(CodePoints.EOC);
+    for (let i = 0, j = 1; i < len; ++i, j += 2)
+      result[j] = codePoints[i];
+    return result;
   }
 
   runTest(test: T) {
