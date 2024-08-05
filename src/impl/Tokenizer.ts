@@ -48,6 +48,7 @@ export interface ComposerIntegration {
 export class Tokenizer {
   state!: State;
   active!: boolean;
+  paused!: boolean;
   lastOpenTag?: string;
   tokenQueue: Token[];
 
@@ -71,6 +72,8 @@ export class Tokenizer {
   referenceStartMark!: number;
   charCode!: number;
   refsIndex: PrefixNode<number[]>;
+  lastRefNode!: PrefixNode<number[]>;
+  lastMatch!: number;
 
   whitespaceMode!: WhitespaceMode;
   hasWhitespaceOnly!: boolean;
@@ -93,9 +96,13 @@ export class Tokenizer {
 
   proceed() {
     let code: number = 0;
-    while (this.active) {
+    this.paused = false;
+    while (this.active && !this.paused) {
       code = this.nextCode();
-      if (code === CodePoints.EOC) break;
+      if (code === CodePoints.EOC) {
+        this.paused = true;
+        break;
+      }
       this.state = this.execState(this.state, code);
       this.commitTokens();
     }
@@ -104,6 +111,7 @@ export class Tokenizer {
   reset() {
     this.state = 'data';
     this.active = true;
+    this.paused = false;
     this.lastOpenTag = undefined;
     this.tokenQueue.length = 0;
     this.currentAttributeNames.clear();
@@ -118,6 +126,8 @@ export class Tokenizer {
     this.inAttribute = undefined as unknown as boolean;
     this.referenceStartMark = undefined as unknown as number;
     this.charCode = undefined as unknown as number;
+    this.lastRefNode = this.refsIndex;
+    this.lastMatch = 0;
     this.whitespaceMode = 'ignoreLeading';
     this.hasWhitespaceOnly = true;
     this.buffer.clear();
@@ -306,6 +316,10 @@ export class Tokenizer {
       buffer.append(code); // TODO check if this should belong to characters
       code = this.nextCode();
     }
+    if (code === CodePoints.EOC) {
+      this.paused = true;
+      return this.sequencePositiveState;
+    }
     return this.callState(this.sequencePositiveState, code);
   }
 
@@ -322,13 +336,20 @@ export class Tokenizer {
       buffer.append(code); // TODO check if this should belong to characters
       code = this.nextCode();
     }
+    if (code === CodePoints.EOC) {
+      this.paused = true;
+      return this.sequencePositiveState;
+    }
     return this.callState(this.sequencePositiveState, code);
   }
 
   // -----text helpers-----
-  textDataNoRefs(code: number, ltState: State): State {
+  textDataNoRefs(code: number, ltState: State, thisState: State): State {
     while (true) {
       switch (code) {
+        case CodePoints.EOC:
+          this.paused = true;
+          return thisState;
         case CodePoints.LT:
           return ltState;
         case CodePoints.EOF:
@@ -345,32 +366,12 @@ export class Tokenizer {
     }
   }
 
-  textDataWithRefs(code: number, ltState: State): State {
+  textDataLessThanSign(code: number, endTagOpenState: State, textState: State, thisState: State): State {
     while (true) {
       switch (code) {
-        case CodePoints.AMPERSAND:
-          this.returnState = this.state;
-          this.inAttribute = false;
-          return 'characterReference';
-        case CodePoints.LT:
-          return ltState;
-        case CodePoints.EOF:
-          this.emitAccumulatedCharacters();
-          return this.eof();
-        case CodePoints.NUL:
-          this.error('unexpected-null-character');
-          code = CodePoints.REPLACEMENT_CHAR;
-        default:
-          this.appendCharacter(code);
-          code = this.nextCode();
-          break;
-      }
-    }
-  }
-
-  textDataLessThanSign(code: number, endTagOpenState: State, textState: State): State {
-    while (true) {
-      switch (code) {
+        case CodePoints.EOC:
+          this.paused = true;
+          return thisState;
         case CodePoints.SLASH:
           return endTagOpenState;
         case CodePoints.LT:
@@ -430,6 +431,9 @@ export class Tokenizer {
   data(code: number): State {
     while (true) {
       switch (code) {
+        case CodePoints.EOC:
+          this.paused = true;
+          return 'data';
         case CodePoints.AMPERSAND:
           this.returnState = this.state;
           this.inAttribute = false;
@@ -457,6 +461,9 @@ export class Tokenizer {
   plaintext(code: number): State {
     while (true) {
       switch (code) {
+        case CodePoints.EOC:
+          this.paused = true;
+          return 'plaintext';
         case CodePoints.EOF:
           this.emitAccumulatedCharacters();
           return this.eof();
@@ -530,6 +537,9 @@ export class Tokenizer {
     const buffer = this.buffer;
     while (true) {
       switch (code) {
+        case CodePoints.EOC:
+          this.paused = true;
+          return 'tagName';
         case CodePoints.TAB:
         case CodePoints.LF:
         case CodePoints.FF:
@@ -560,6 +570,9 @@ export class Tokenizer {
   beforeAttributeName(code: number): State {
     while (true) {
       switch (code) {
+        case CodePoints.EOC:
+          this.paused = true;
+          return 'beforeAttributeName';
         case CodePoints.TAB:
         case CodePoints.LF:
         case CodePoints.FF:
@@ -586,6 +599,9 @@ export class Tokenizer {
     const buffer = this.buffer;
     while (true) {
       switch (code) {
+        case CodePoints.EOC:
+          this.paused = true;
+          return 'attributeName';
         case CodePoints.EQ:
           this.checkDuplicateAttribute(this.currentAttribute.name = buffer.takeString());
           return 'beforeAttributeValue';
@@ -625,6 +641,9 @@ export class Tokenizer {
   afterAttributeName(code: number): State {
     while (true) {
       switch (code) {
+        case CodePoints.EOC:
+          this.paused = true;
+          return 'afterAttributeName';
         case CodePoints.EQ:
           return 'beforeAttributeValue';
         case CodePoints.TAB:
@@ -651,6 +670,9 @@ export class Tokenizer {
   beforeAttributeValue(code: number): State {
     while (true) {
       switch (code) {
+        case CodePoints.EOC:
+          this.paused = true;
+          return 'beforeAttributeValue';
         case CodePoints.TAB:
         case CodePoints.LF:
         case CodePoints.FF:
@@ -683,6 +705,9 @@ export class Tokenizer {
     const buffer = this.buffer;
     while (true) {
       switch (code) {
+        case CodePoints.EOC:
+          this.paused = true;
+          return terminator === CodePoints.DOUBLE_QUOTE ? 'attributeValueDoubleQuoted' : 'attributeValueSingleQuoted';
         case terminator:
           this.currentAttribute.value = buffer.takeString();
           return 'afterAttributeValueQuoted';
@@ -708,6 +733,9 @@ export class Tokenizer {
     const buffer = this.buffer;
     while (true) {
       switch (code) {
+        case CodePoints.EOC:
+          this.paused = true;
+          return 'attributeValueUnquoted';
         case CodePoints.TAB:
         case CodePoints.LF:
         case CodePoints.FF:
@@ -794,6 +822,9 @@ export class Tokenizer {
   cdataSection(code: number): State {
     while (true) {
       switch (code) {
+        case CodePoints.EOC:
+          this.paused = true;
+          return 'cdataSection';
         case CodePoints.CLOSE_SQUARE_BRACKET:
           return 'cdataSectionBracket';
         case CodePoints.EOF:
@@ -822,6 +853,9 @@ export class Tokenizer {
   cdataSectionEnd(code: number): State {
     while (true) {
       switch (code) {
+        case CodePoints.EOC:
+          this.paused = true;
+          return 'cdataSectionEnd';
         case CodePoints.CLOSE_SQUARE_BRACKET:
           this.appendNonWhitespace(CodePoints.CLOSE_SQUARE_BRACKET);
           code = this.nextCode();
@@ -848,9 +882,11 @@ export class Tokenizer {
       if (this.inAttribute) buffer.append(CodePoints.SHARP);
       else this.appendNonWhitespace(CodePoints.SHARP);
       return 'numericCharacterReference';
-    } else if (isAsciiAlphaNum(code))
+    } else if (isAsciiAlphaNum(code)) {
+      this.lastRefNode = this.refsIndex;
+      this.lastMatch = 0;
       return this.callState('namedCharacterReference', code);
-    else
+    } else
       return this.callState(this.returnState, code);
   }
 
@@ -889,13 +925,18 @@ export class Tokenizer {
 
   namedCharacterReference(code: number): State {
     const buffer = this.buffer;
-    let node = this.refsIndex, next: PrefixNode<number[]>;
-    let lastMatch = 0x00;
+    let node = this.lastRefNode, next: PrefixNode<number[]>;
+    let lastMatch = this.lastMatch;
     while (node.children && (next = node.children[code])) {
       node = next;
       if (this.inAttribute) buffer.append(lastMatch = code);
       else this.appendNonWhitespace(lastMatch = code);
-      code = this.nextCode();
+      if ((code = this.nextCode()) === CodePoints.EOC) {
+        this.paused = true;
+        this.lastRefNode = node;
+        this.lastMatch = lastMatch;
+        return 'namedCharacterReference';
+      }
     }
     if (node.value) {
       if (this.inAttribute && lastMatch !== CodePoints.SEMICOLON && (code === CodePoints.EQ || isAsciiAlphaNum(code))) { // for historical reasons
@@ -921,7 +962,10 @@ export class Tokenizer {
 
   hexadecimalCharacterReference(code: number): State {
     while (true) {
-      if (code === CodePoints.SEMICOLON) {
+      if (code === CodePoints.EOC) {
+        this.paused = true;
+        return 'hexadecimalCharacterReference';
+      } else if (code === CodePoints.SEMICOLON) {
         this.numericCharacterReferenceEnd();
         return this.returnState;
       } else if (isDigit(code)) {
@@ -949,34 +993,46 @@ export class Tokenizer {
 
   decimalCharacterReference(code: number): State {
     while (true) {
-      if (code === CodePoints.SEMICOLON) {
-        this.numericCharacterReferenceEnd();
-        return this.returnState;
-      } else if (isDigit(code)) {
-        this.charCode = this.charCode * 10 + code - 0x30;
-      } else {
-        this.error('missing-semicolon-after-character-reference');
-        this.numericCharacterReferenceEnd();
-        return this.callState(this.returnState, code);
+      switch (code) {
+        case CodePoints.EOC:
+          this.paused = true;
+          return 'decimalCharacterReference';
+        case CodePoints.SEMICOLON:
+          this.numericCharacterReferenceEnd();
+          return this.returnState;
+        default:
+          if (isDigit(code)) {
+            this.charCode = this.charCode * 10 + code - 0x30;
+          } else {
+            this.error('missing-semicolon-after-character-reference');
+            this.numericCharacterReferenceEnd();
+            return this.callState(this.returnState, code);
+          }
+          code = this.nextCode();
       }
-      code = this.nextCode();
     }
   }
 
   ambiguousAmpersand(code: number): State {
     const buffer = this.buffer;
     while (true) {
-      if (code === CodePoints.SEMICOLON) {
-        this.error('unknown-named-character-reference');
-        return this.callState(this.returnState, code);
-      } else if (isAsciiAlphaNum(code)) {
-        if (this.inAttribute)
-          buffer.append(code);
-        else
-          this.appendNonWhitespace(code);
-        code = this.nextCode();
-      } else
-        return this.callState(this.returnState, code);
+      switch (code) {
+        case CodePoints.EOC:
+          this.paused = true;
+          return 'ambiguousAmpersand';
+        case CodePoints.SEMICOLON:
+          this.error('unknown-named-character-reference');
+          return this.callState(this.returnState, code);
+        default:
+          if (isAsciiAlphaNum(code)) {
+            if (this.inAttribute)
+              buffer.append(code);
+            else
+              this.appendNonWhitespace(code);
+            code = this.nextCode();
+          } else
+            return this.callState(this.returnState, code);
+      }
     }
   }
 
@@ -1018,6 +1074,9 @@ export class Tokenizer {
     const buffer = this.buffer;
     while (true) {
       switch (code) {
+        case CodePoints.EOC:
+          this.paused = true;
+          return 'comment';
         case CodePoints.LT:
           buffer.append(code);
           return 'commentLessThanSign';
@@ -1041,6 +1100,9 @@ export class Tokenizer {
     const buffer = this.buffer;
     while (true) {
       switch (code) {
+        case CodePoints.EOC:
+          this.paused = true;
+          return 'commentLessThanSign';
         case CodePoints.EXCLAMATION:
           buffer.append(code);
           return 'commentLessThanSignBang';
@@ -1094,6 +1156,9 @@ export class Tokenizer {
     const buffer = this.buffer;
     while (true) {
       switch (code) {
+        case CodePoints.EOC:
+          this.paused = true;
+          return 'commentEnd';
         case CodePoints.GT:
           this.emitCurrentComment();
           return 'data';
@@ -1150,6 +1215,9 @@ export class Tokenizer {
     const buffer = this.buffer;
     while (true) {
       switch (code) {
+        case CodePoints.EOC:
+          this.paused = true;
+          return 'bogusComment';
         case CodePoints.GT:
           this.emitCurrentComment();
           return 'data';
@@ -1211,6 +1279,9 @@ export class Tokenizer {
     const buffer = this.buffer;
     while (true) {
       switch (code) {
+        case CodePoints.EOC:
+          this.paused = true;
+          return 'beforeDoctypeName';
         case CodePoints.TAB:
         case CodePoints.LF:
         case CodePoints.FF:
@@ -1239,6 +1310,9 @@ export class Tokenizer {
     const buffer = this.buffer;
     while (true) {
       switch (code) {
+        case CodePoints.EOC:
+          this.paused = true;
+          return 'doctypeName';
         case CodePoints.TAB:
         case CodePoints.LF:
         case CodePoints.FF:
@@ -1266,6 +1340,9 @@ export class Tokenizer {
   afterDoctypeName(code: number): State {
     while (true) {
       switch (code) {
+        case CodePoints.EOC:
+          this.paused = true;
+          return 'afterDoctypeName';
         case CodePoints.TAB:
         case CodePoints.LF:
         case CodePoints.FF:
@@ -1327,6 +1404,9 @@ export class Tokenizer {
   beforeDoctypePublicIdentifier(code: number): State {
     while (true) {
       switch (code) {
+        case CodePoints.EOC:
+          this.paused = true;
+          return 'beforeDoctypePublicIdentifier';
         case CodePoints.TAB:
         case CodePoints.LF:
         case CodePoints.FF:
@@ -1364,6 +1444,9 @@ export class Tokenizer {
     const buffer = this.buffer;
     while (true) {
       switch (code) {
+        case CodePoints.EOC:
+          this.paused = true;
+          return terminator === CodePoints.DOUBLE_QUOTE ? 'doctypePublicIdentifierDoubleQuoted' : 'doctypePublicIdentifierSingleQuoted';
         case terminator:
           this.currentDoctype.publicId = buffer.takeString();
           return 'afterDoctypePublicIdentifier';
@@ -1414,6 +1497,9 @@ export class Tokenizer {
   betweenDoctypePublicAndSystemIdentifiers(code: number): State {
     while (true) {
       switch (code) {
+        case CodePoints.EOC:
+          this.paused = true;
+          return 'betweenDoctypePublicAndSystemIdentifiers';
         case CodePoints.TAB:
         case CodePoints.LF:
         case CodePoints.FF:
@@ -1468,6 +1554,9 @@ export class Tokenizer {
   beforeDoctypeSystemIdentifier(code: number): State {
     while (true) {
       switch (code) {
+        case CodePoints.EOC:
+          this.paused = true;
+          return 'beforeDoctypeSystemIdentifier';
         case CodePoints.TAB:
         case CodePoints.LF:
         case CodePoints.FF:
@@ -1504,6 +1593,9 @@ export class Tokenizer {
     const buffer = this.buffer;
     while (true) {
       switch (code) {
+        case CodePoints.EOC:
+          this.paused = true;
+          return terminator === CodePoints.DOUBLE_QUOTE ? 'doctypeSystemIdentifierDoubleQuoted' : 'doctypeSystemIdentifierSingleQuoted';
         case terminator:
           this.currentDoctype.systemId = buffer.takeString();
           return 'afterDoctypeSystemIdentifier';
@@ -1529,6 +1621,9 @@ export class Tokenizer {
   afterDoctypeSystemIdentifier(code: number): State {
     while (true) {
       switch (code) {
+        case CodePoints.EOC:
+          this.paused = true;
+          return 'afterDoctypeSystemIdentifier';
         case CodePoints.TAB:
         case CodePoints.LF:
         case CodePoints.FF:
@@ -1550,6 +1645,9 @@ export class Tokenizer {
   bogusDoctype(code: number): State {
     while (true) {
       switch (code) {
+        case CodePoints.EOC:
+          this.paused = true;
+          return 'bogusDoctype';
         case CodePoints.GT:
           this.emitCurrentDoctype()
           return 'data';
@@ -1566,7 +1664,7 @@ export class Tokenizer {
 
   // -----script states-----
   scriptData(code: number): State {
-    return this.textDataNoRefs(code, 'scriptDataLessThanSign');
+    return this.textDataNoRefs(code, 'scriptDataLessThanSign', 'scriptData');
   }
 
   scriptDataLessThanSign(code: number): State {
@@ -1614,6 +1712,9 @@ export class Tokenizer {
   scriptDataEscaped(code: number): State {
     while (true) {
       switch (code) {
+        case CodePoints.EOC:
+          this.paused = true;
+          return 'scriptDataEscaped';
         case CodePoints.HYPHEN:
           this.appendNonWhitespace(code);
           return 'scriptDataEscapedDash';
@@ -1656,6 +1757,9 @@ export class Tokenizer {
   scriptDataEscapedDashDash(code: number): State {
     while (true) {
       switch (code) {
+        case CodePoints.EOC:
+          this.paused = true;
+          return 'scriptDataEscapedDashDash';
         case CodePoints.HYPHEN:
           this.appendNonWhitespace(code);
           code = this.nextCode();
@@ -1723,6 +1827,9 @@ export class Tokenizer {
   scriptDataDoubleEscaped(code: number): State {
     while (true) {
       switch (code) {
+        case CodePoints.EOC:
+          this.paused = true;
+          return 'scriptDataDoubleEscaped';
         case CodePoints.HYPHEN:
           this.appendNonWhitespace(code);
           return 'scriptDataDoubleEscapedDash';
@@ -1769,6 +1876,9 @@ export class Tokenizer {
   scriptDataDoubleEscapedDashDash(code: number): State {
     while (true) {
       switch (code) {
+        case CodePoints.EOC:
+          this.paused = true;
+          return 'scriptDataDoubleEscapedDashDash';
         case CodePoints.HYPHEN:
           this.appendNonWhitespace(code);
           code = this.nextCode();
@@ -1825,11 +1935,11 @@ export class Tokenizer {
   }
   // -----text states-----
   rawtext(code: number): State {
-    return this.textDataNoRefs(code, 'rawtextLessThanSign');
+    return this.textDataNoRefs(code, 'rawtextLessThanSign', 'rawtext');
   }
 
   rawtextLessThanSign(code: number): State {
-    return this.textDataLessThanSign(code, 'rawtextEndTagOpen', 'rawtext');
+    return this.textDataLessThanSign(code, 'rawtextEndTagOpen', 'rawtext', 'rawtextLessThanSign');
   }
 
   rawtextEndTagOpen(code: number): State {
@@ -1845,11 +1955,33 @@ export class Tokenizer {
   }
 
   rcdata(code: number): State {
-    return this.textDataWithRefs(code, 'rcdataLessThanSign');
+    while (true) {
+      switch (code) {
+        case CodePoints.EOC:
+          this.paused = true;
+          return 'rcdata';
+        case CodePoints.AMPERSAND:
+          this.returnState = this.state;
+          this.inAttribute = false;
+          return 'characterReference';
+        case CodePoints.LT:
+          return 'rcdataLessThanSign';
+        case CodePoints.EOF:
+          this.emitAccumulatedCharacters();
+          return this.eof();
+        case CodePoints.NUL:
+          this.error('unexpected-null-character');
+          code = CodePoints.REPLACEMENT_CHAR;
+        default:
+          this.appendCharacter(code);
+          code = this.nextCode();
+          break;
+      }
+    }
   }
 
   rcdataLessThanSign(code: number): State {
-    return this.textDataLessThanSign(code, 'rcdataEndTagOpen', 'rcdata');
+    return this.textDataLessThanSign(code, 'rcdataEndTagOpen', 'rcdata', 'rcdataLessThanSign');
   }
 
   rcdataEndTagOpen(code: number): State {

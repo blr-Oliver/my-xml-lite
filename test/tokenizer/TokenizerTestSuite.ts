@@ -1,6 +1,7 @@
+import {CodePoints} from '../../src/common/code-points.js';
 import {HTML_SPECIAL} from '../../src/decl/known-named-refs.js';
 import {buildIndex} from '../../src/impl/build-index.js';
-import {StringCharacterSource} from '../../src/impl/input/StringCharacterSource.js';
+import {ArrayCharacterSource} from '../../src/impl/input/ArrayCharacterSource.js';
 import {State} from '../../src/impl/interfaces/states.js';
 import {CharactersToken, Token, TokenType} from '../../src/impl/interfaces/tokens.js';
 import {serializeToken} from '../../src/impl/Serializer.js';
@@ -23,12 +24,12 @@ export interface DefaultTokenizerTestCase extends GenericTestCase {
 
 export class StateTrackingTokenizer extends Tokenizer {
   readonly suite: TokenizerTestSuite<unknown>;
-  declare input: StringCharacterSource;
+  declare input: ArrayCharacterSource<number[]>;
 
   constructor(suite: TokenizerTestSuite<unknown>) {
     super(buildIndex(HTML_SPECIAL), name => suite.errorList.push(name));
     this.suite = suite;
-    this.input = new StringCharacterSource('');
+    this.input = new ArrayCharacterSource<number[]>([]);
   }
 
   eof(): State {
@@ -85,8 +86,19 @@ export abstract class TokenizerTestSuite<Raw, Case extends GenericTestCase = Gen
   }
 
   processInput(test: Case) {
-    this.tokenizer.input.source = test.input;
-    this.tokenizer.proceed();
+    this.tokenizer.input.setData(this.constructInterlacedData(test.input));
+    while (this.tokenizer.active)
+      this.tokenizer.proceed();
+  }
+
+  constructInterlacedData(input: string): number[] {
+    const codePoints = Array.from(input).map(c => c.codePointAt(0)!);
+    const len = codePoints.length
+    const result = Array(len * 2 + 1);
+    result.fill(CodePoints.EOC);
+    for (let i = 0, j = 1; i < len; ++i, j += 2)
+      result[j] = codePoints[i];
+    return result;
   }
 
   makeSuite() {
