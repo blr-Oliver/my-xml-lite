@@ -1,4 +1,5 @@
 import {Document} from '../../src/decl/dom-like.js';
+import {SelfClosingOptions, Serializer} from '../../src/impl/Serializer.js';
 import {DefaultRawTestCore} from '../composer/abstract-suite.js';
 
 interface DOMParser {
@@ -59,36 +60,49 @@ async function loadAllSamples(sampleNames: string[]): Promise<SampleCollection> 
 export class Runner {
   parser: DOMParser;
   samples: SampleCollection;
-  data!: { [suite: string]: ParsedCase[] };
+  nativeData!: { [suite: string]: ParsedCase[] };
+  liteData!: { [suite: string]: ParsedCase[] };
+  serializer: Serializer;
 
   constructor(samples: SampleCollection) {
     this.parser = new DOMParser();
     this.samples = samples;
+    this.serializer = new Serializer({
+      htmlVoidSelfClose: SelfClosingOptions.SKIP,
+      foreignVoidSelfClose: SelfClosingOptions.SKIP
+    });
   }
 
   run() {
-    const data: { [suite: string]: ParsedCase[] } = {};
+    const nativeData: { [suite: string]: ParsedCase[] } = {};
+    const liteData: { [suite: string]: ParsedCase[] } = {};
     for (let suiteName in this.samples) {
       const suite = this.samples[suiteName];
-      const parsed: ParsedCase[] = [];
+      const nativeParsed: ParsedCase[] = [];
+      const liteParsed: ParsedCase[] = []
       for (let testCase of suite) {
         const name = testCase[0];
         const input = testCase[1];
         const document = this.parser.parseFromString(input, 'text/html');
-        const output = (document.documentElement as any).outerHTML as string;
-        parsed.push([name, input, output]);
+        const nativeOutput = (document.documentElement as any)['outerHTML'] as string;
+        const liteOutput = this.serializer.serializeNode(document.documentElement);
+        nativeParsed.push([name, input, nativeOutput]);
+        liteParsed.push([name, input, liteOutput]);
       }
-      data[suiteName] = parsed;
+      nativeData[suiteName] = nativeParsed;
+      liteData[suiteName] = liteParsed;
     }
-    return this.data = data;
+    this.nativeData = nativeData;
+    this.liteData = liteData;
   }
 }
 
 let samples = await loadAllSamples(sampleNames);
 let runner = new Runner(samples);
-let runResult = runner.run();
+runner.run();
 
-(globalThis as any)['runResult'] = runResult;
+(globalThis as any)['nativeData'] = runner.nativeData;
+(globalThis as any)['liteData'] = runner.liteData;
 (globalThis as any)['sampleNames'] = sampleNames;
 (globalThis as any)['Runner'] = Runner;
 (globalThis as any)['loadAllSamples'] = loadAllSamples;
