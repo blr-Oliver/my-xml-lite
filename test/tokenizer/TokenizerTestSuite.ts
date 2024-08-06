@@ -2,7 +2,7 @@ import {HTML_SPECIAL} from '../../src/decl/known-named-refs.js';
 import {buildIndex} from '../../src/impl/build-index.js';
 import {State} from '../../src/impl/interfaces/states.js';
 import {CharactersToken, Token, TokenType} from '../../src/impl/interfaces/tokens.js';
-import {serializeToken} from '../../src/impl/Serializer.js';
+import {DefaultSerializer} from '../../src/impl/Serializer.js';
 import {Tokenizer} from '../../src/impl/Tokenizer.js';
 import {InterlacedStringCharacterSource} from '../util/InterlacedStringCharacterSource.js';
 import {TokenListSink} from './TokenListSink.js';
@@ -124,7 +124,7 @@ export class DefaultTokenizerTestSuite<Raw extends DefaultTokenizerRawTest = Def
       let type: TokenType | 'whitespace' = token.type;
       if (type === 'characters' && (token as CharactersToken).whitespaceOnly)
         type = 'whitespace';
-      const content = serializeToken(token);
+      const content = DefaultSerializer.serializeToken(token);
       if (content !== null)
         result.push(`${type}|${content}`);
       else
