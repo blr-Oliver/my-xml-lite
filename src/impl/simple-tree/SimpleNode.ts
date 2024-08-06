@@ -7,6 +7,7 @@ import {SimpleParentNode} from './SimpleParentNode.js';
 
 export abstract class SimpleNode implements Node {
   readonly nodeType: NodeType;
+  ownerDocument: SimpleDocument | null;
   parentNode: SimpleParentNode | null;
   childNodes: SimpleNodeList<SimpleChildNode>;
 
@@ -16,14 +17,12 @@ export abstract class SimpleNode implements Node {
   protected constructor(nodeType: NodeType, parent: SimpleParentNode | null) {
     this.nodeType = nodeType;
     this.parentNode = parent;
+    this.ownerDocument = parent?.ownerDocument || (parent as SimpleDocument | null);
     this.childNodes = new SimpleNodeList<SimpleChildNode>(0);
     this.nodeIndex = -1;
     this.elementIndex = -1;
   }
 
-  get ownerDocument(): SimpleDocument | null {
-    return this.parentNode ? this.parentNode.nodeType === NodeType.DOCUMENT_NODE ? this.parentNode as SimpleDocument : this.parentNode.ownerDocument! : null;
-  }
   get parentElement(): SimpleElement | null {
     return this.parentNode?.nodeType === NodeType.ELEMENT_NODE ? this.parentNode as SimpleElement : null;
   }

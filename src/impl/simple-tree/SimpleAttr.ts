@@ -5,6 +5,7 @@ import {SimpleElement} from './SimpleElement.js';
 import {SimpleNode} from './SimpleNode.js';
 
 export class SimpleAttr extends SimpleNode implements Attr {
+  declare ownerDocument: SimpleDocument;
   declare parentNode: SimpleElement;
   readonly namespaceURI: string | null;
   readonly name: string;
@@ -22,9 +23,6 @@ export class SimpleAttr extends SimpleNode implements Attr {
     this.nodeIndex = index;
   }
 
-  get ownerDocument(): SimpleDocument {
-    return this.parentNode.ownerDocument;
-  }
   get ownerElement(): SimpleElement {
     return this.parentNode;
   }

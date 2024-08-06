@@ -7,6 +7,7 @@ import {SimpleParentNode} from './SimpleParentNode.js';
 import {SimpleTokenList} from './SimpleTokenList.js';
 
 export class SimpleElement extends SimpleParentNode implements Element {
+  declare ownerDocument: SimpleDocument;
   declare parentNode: SimpleParentNode;
   readonly attributes: SimpleNodeMap;
   readonly classList: SimpleTokenList;
@@ -31,9 +32,6 @@ export class SimpleElement extends SimpleParentNode implements Element {
     this.selfClosed = token.selfClosed;
   }
 
-  get ownerDocument(): SimpleDocument {
-    return this.parentNode.nodeType === NodeType.DOCUMENT_NODE ? this.parentNode as SimpleDocument : this.parentNode.ownerDocument!;
-  }
   get nextElementSibling(): SimpleElement | null {
     return this.parentNode!.children[this.elementIndex + 1] || null;
   }

@@ -4,6 +4,7 @@ import {SimpleDocument} from './SimpleDocument.js';
 import {SimpleParentNode} from './SimpleParentNode.js';
 
 export abstract class SimpleCharacterData extends SimpleChildNode implements CharacterData {
+  declare ownerDocument: SimpleDocument;
   declare parentNode: SimpleParentNode;
   readonly data: string;
 
@@ -11,9 +12,6 @@ export abstract class SimpleCharacterData extends SimpleChildNode implements Cha
     super(nodeType, parent);
     this.elementIndex = parent.children.length;
     this.data = data;
-  }
-  get ownerDocument(): SimpleDocument {
-    return this.parentNode.nodeType === NodeType.DOCUMENT_NODE ? this.parentNode as SimpleDocument : this.parentNode.ownerDocument!;
   }
   hasChildNodes(): boolean {
     return false;

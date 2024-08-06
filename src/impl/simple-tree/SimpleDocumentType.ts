@@ -3,6 +3,7 @@ import {SimpleChildNode} from './SimpleChildNode.js';
 import {SimpleDocument} from './SimpleDocument.js';
 
 export class SimpleDocumentType extends SimpleChildNode implements DocumentType {
+  declare ownerDocument: SimpleDocument;
   declare parentNode: SimpleDocument;
   readonly name: string;
   readonly publicId: string;
@@ -15,9 +16,6 @@ export class SimpleDocumentType extends SimpleChildNode implements DocumentType 
     this.systemId = systemId;
   }
 
-  get ownerDocument(): SimpleDocument {
-    return this.parentNode;
-  }
   get parentElement(): null {
     return null;
   }
