@@ -8,11 +8,11 @@
   ["space + text + space", "<!DOCTYPE html><table><colgroup> \n\t\fA \n\t\f</colgroup></table>", "<!DOCTYPE html><html><head></head><body>A \n\t\f<table><colgroup> \n\t\f</colgroup></table></body></html>", ["text-in-table", "unexpected-end-tag-in-table"]],
   ["unclosed", "<!DOCTYPE html><table><colgroup></table>", "<!DOCTYPE html><html><head></head><body><table><colgroup></colgroup></table></body></html>", []],
   ["html", "<!DOCTYPE html><table><colgroup><html></colgroup></table>", "<!DOCTYPE html><html><head></head><body><table><colgroup></colgroup></table></body></html>", ["unexpected-html-start-tag"]],
-  ["col start tag", "<!DOCTYPE html><table><colgroup><col></colgroup></table>", "<!DOCTYPE html><html><head></head><body><table><colgroup><col/></colgroup></table></body></html>", []],
-  ["col self-closed", "<!DOCTYPE html><table><colgroup><col/></colgroup></table>", "<!DOCTYPE html><html><head></head><body><table><colgroup><col/></colgroup></table></body></html>", []],
-  ["col empty", "<!DOCTYPE html><table><colgroup><col></col></colgroup></table>", "<!DOCTYPE html><html><head></head><body><table><colgroup><col/></colgroup></table></body></html>", ["void-html-element-end-tag"]],
+  ["col start tag", "<!DOCTYPE html><table><colgroup><col></colgroup></table>", "<!DOCTYPE html><html><head></head><body><table><colgroup><col></colgroup></table></body></html>", []],
+  ["col self-closed", "<!DOCTYPE html><table><colgroup><col/></colgroup></table>", "<!DOCTYPE html><html><head></head><body><table><colgroup><col></colgroup></table></body></html>", []],
+  ["col empty", "<!DOCTYPE html><table><colgroup><col></col></colgroup></table>", "<!DOCTYPE html><html><head></head><body><table><colgroup><col></colgroup></table></body></html>", ["void-html-element-end-tag"]],
   ["col end tag", "<!DOCTYPE html><table><colgroup></col></colgroup></table>", "<!DOCTYPE html><html><head></head><body><table><colgroup></colgroup></table></body></html>", ["void-html-element-end-tag"]],
-  ["template", "<!DOCTYPE html><table><colgroup><template></template><col/></colgroup></table>", "<!DOCTYPE html><html><head></head><body><table><colgroup><template></template><col/></colgroup></table></body></html>", []],
-  ["template end", "<!DOCTYPE html><table><colgroup></template><col/></colgroup></table>", "<!DOCTYPE html><html><head></head><body><table><colgroup><col/></colgroup></table></body></html>", ["orphan-end-tag"]],
-  ["EOF", "<!DOCTYPE html><table><colgroup><col/>", "<!DOCTYPE html><html><head></head><body><table><colgroup><col/></colgroup></table></body></html>", ["abrupt-end-of-document"]]
+  ["template", "<!DOCTYPE html><table><colgroup><template></template><col/></colgroup></table>", "<!DOCTYPE html><html><head></head><body><table><colgroup><template></template><col></colgroup></table></body></html>", []],
+  ["template end", "<!DOCTYPE html><table><colgroup></template><col/></colgroup></table>", "<!DOCTYPE html><html><head></head><body><table><colgroup><col></colgroup></table></body></html>", ["orphan-end-tag"]],
+  ["EOF", "<!DOCTYPE html><table><colgroup><col/>", "<!DOCTYPE html><html><head></head><body><table><colgroup><col></colgroup></table></body></html>", ["abrupt-end-of-document"]]
 ]

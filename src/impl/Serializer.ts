@@ -288,4 +288,4 @@ export class Serializer {
   }
 }
 
-export const DefaultSerializer = new Serializer({htmlVoidSelfClose: SelfClosingOptions.APPLY, foreignVoidSelfClose: SelfClosingOptions.KEEP_SKIP});
+export const DefaultSerializer = new Serializer({htmlVoidSelfClose: SelfClosingOptions.SKIP, foreignVoidSelfClose: SelfClosingOptions.KEEP_SKIP});

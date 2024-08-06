@@ -445,7 +445,6 @@ export class TreeComposer implements ComposerIntegration {
     this.updateInsertionLocation();
     if (!popImmediately && token.selfClosed)
       this.error('non-void-html-element-start-tag-with-trailing-solidus');
-    token.selfClosed = popImmediately;
     let element = this.createElementNS(token, namespace, this.insertParent);
     //if (!onlyAddToStack)
     this.insertElementAtCurrentLocation(element);
@@ -465,7 +464,6 @@ export class TreeComposer implements ComposerIntegration {
   createAndInsertHtmlTemplate(token: TagToken): TemplateElement {
     if (token.selfClosed)
       this.error('non-void-html-element-start-tag-with-trailing-solidus');
-    token.selfClosed = false;
     this.updateInsertionLocation();
     const element = this.nodeFactory.createTemplateElement(this.insertParent, token, NS_HTML);
     this.validateNsAttributes(element);
