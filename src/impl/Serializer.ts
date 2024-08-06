@@ -86,7 +86,7 @@ function serializeInChunks(node: Node, chunks: string[] = []): string[] {
 }
 
 function serializeElement(node: Element, chunks: string[]) {
-  const tagName = node.namespaceURI === NS_HTML ? node.tagName.toLowerCase() : node.tagName;
+  const tagName = node.localName;
   const selfClosed = node.selfClosed || serializesAsVoid(node);
   serializeElementStart(node, tagName, selfClosed, chunks);
   if (!selfClosed) {
@@ -181,7 +181,7 @@ function serializeDoctype(node: DocumentTypeLike, chunks: string[]) {
 
 function serializesAsVoid(node: Element): boolean {
   if (node.namespaceURI !== NS_HTML) return false;
-  switch (node.tagName) {
+  switch (node.localName) {
     case 'area':
     case 'base':
     case 'basefont':
@@ -208,7 +208,7 @@ function serializesAsVoid(node: Element): boolean {
 
 function hasPlainText(node: Element): boolean {
   if (node.namespaceURI !== NS_HTML) return false;
-  switch (node.tagName) {
+  switch (node.localName) {
     case 'style':
     case 'script':
     case 'xmp':
@@ -226,7 +226,7 @@ function escapeTextContents(value: string): string {
       .replaceAll('&', '&amp;')
       .replaceAll('\u00A0', '&nbsp;')
       .replaceAll('<', '&lt;')
-      .replaceAll('<', '&gt;');
+      .replaceAll('>', '&gt;');
 }
 
 function escapeAttribute(value: string): string {

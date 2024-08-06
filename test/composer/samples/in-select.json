@@ -32,6 +32,6 @@
   ["select nested", "<!DOCTYPE html><select>A<select>B</select>C</select>", "<!DOCTYPE html><html><head></head><body><select>A</select>BC</body></html>", ["select-start-tag-in-select", "orphan-end-tag-inside-special-element", "orphan-end-tag-inside-special-element"]],
   ["input", "<!DOCTYPE html><select>A<input></select>", "<!DOCTYPE html><html><head></head><body><select>A</select><input/></body></html>", ["input-inside-select", "orphan-end-tag-inside-special-element"]],
   ["keygen", "<!DOCTYPE html><select>A<keygen></select>", "<!DOCTYPE html><html><head></head><body><select>A</select><keygen/></body></html>", ["input-inside-select", "orphan-end-tag-inside-special-element"]],
-  ["textarea", "<!DOCTYPE html><select>A<textarea></select>", "<!DOCTYPE html><html><head></head><body><select>A</select><textarea>&lt;/select></textarea></body></html>", ["input-inside-select", "abrupt-end-of-text"]],
+  ["textarea", "<!DOCTYPE html><select>A<textarea></select>", "<!DOCTYPE html><html><head></head><body><select>A</select><textarea>&lt;/select&gt;</textarea></body></html>", ["input-inside-select", "abrupt-end-of-text"]],
   ["EOF", "<!DOCTYPE html><select>A", "<!DOCTYPE html><html><head></head><body><select>A</select></body></html>", ["abrupt-end-of-document"]]
 ]
