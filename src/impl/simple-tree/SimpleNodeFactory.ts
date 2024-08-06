@@ -4,11 +4,13 @@ import {TagToken} from '../interfaces/tokens.js';
 import {SimpleCDataSection} from './SimpleCDataSection.js';
 import {SimpleComment} from './SimpleComment.js';
 import {SimpleDocument} from './SimpleDocument.js';
+import {SimpleDocumentFragment} from './SimpleDocumentFragment.js';
 import {SimpleDocumentType} from './SimpleDocumentType.js';
 import {SimpleElement} from './SimpleElement.js';
 import {SimpleNode} from './SimpleNode.js';
 import {SimpleNodeMap} from './SimpleNodeMap.js';
 import {SimpleParentNode} from './SimpleParentNode.js';
+import {SimpleTemplate} from './SimpleTemplate.js';
 import {SimpleText} from './SimpleText.js';
 
 export interface SimpleNodeTypeMapping extends NodeTypeMapping {
@@ -16,7 +18,9 @@ export interface SimpleNodeTypeMapping extends NodeTypeMapping {
   Comment: SimpleComment;
   Document: SimpleDocument;
   DocumentType: SimpleDocumentType;
+  DocumentFragment: SimpleDocumentFragment;
   Element: SimpleElement;
+  TemplateElement: SimpleTemplate;
   NamedNodeMap: SimpleNodeMap;
   Node: SimpleNode;
   ParentNode: SimpleParentNode;
@@ -56,8 +60,15 @@ export class SimpleNodeFactory implements NodeFactory<SimpleNodeTypeMapping> {
   createDocument(): SimpleDocument {
     return new SimpleDocument();
   }
+  createDocumentFragment(document: SimpleDocument): SimpleDocumentFragment {
+    return new SimpleDocumentFragment(document);
+  }
   createElement(parent: SimpleParentNode, token: TagToken, namespaceURI: string | null): SimpleElement {
     return new SimpleElement(parent, token, namespaceURI);
+  }
+  createTemplateElement(parent: SimpleParentNode, token: TagToken, namespaceURI: string | null): SimpleTemplate {
+    const content = this.createDocumentFragment(parent.ownerDocument || (parent as SimpleDocument));
+    return new SimpleTemplate(parent, token, namespaceURI, content);
   }
   createProcessingInstruction(parent: SimpleParentNode, target: string, data: string): ProcessingInstruction {
     throw new Error('Not implemented');

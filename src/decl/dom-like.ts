@@ -70,6 +70,10 @@ export interface Element extends Node, ChildNode, NonDocumentTypeChildNode, Pare
   // matches(selectors: string): boolean;
 }
 
+export interface TemplateElement extends Element {
+  readonly content: DocumentFragment;
+}
+
 export interface Document extends Node, NonElementParentNode, ParentNode {
   readonly ownerDocument: null;
   readonly doctype: DocumentType | null;

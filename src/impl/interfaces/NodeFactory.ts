@@ -1,4 +1,17 @@
-import {CDATASection, Comment, Document, DocumentType, Element, NamedNodeMap, Node, ParentNode, ProcessingInstruction, Text} from '../../decl/dom-like.js';
+import {
+  CDATASection,
+  Comment,
+  Document,
+  DocumentFragment,
+  DocumentType,
+  Element,
+  NamedNodeMap,
+  Node,
+  ParentNode,
+  ProcessingInstruction,
+  TemplateElement,
+  Text
+} from '../../decl/dom-like.js';
 import {TagToken} from './tokens.js';
 
 export interface NodeTypeMapping {
@@ -6,7 +19,9 @@ export interface NodeTypeMapping {
   Comment: Comment;
   Document: Document;
   DocumentType: DocumentType;
+  DocumentFragment: DocumentFragment;
   Element: Element;
+  TemplateElement: TemplateElement;
   NamedNodeMap: NamedNodeMap;
   Node: Node;
   ParentNode: ParentNode;
@@ -16,11 +31,13 @@ export interface NodeTypeMapping {
 
 export interface NodeFactory<T extends NodeTypeMapping = NodeTypeMapping> {
   createElement(parent: T['ParentNode'], token: TagToken, namespaceURI: string | null): T['Element'];
+  createTemplateElement(parent: T['ParentNode'], token: TagToken, namespaceURI: string | null): T['TemplateElement'];
   createText(parent: T['ParentNode'], data: string): T['Text'];
   createCData(parent: T['ParentNode'], data: string): T['CDATASection'];
   createProcessingInstruction(parent: T['ParentNode'], target: string, data: string): T['ProcessingInstruction'];
   createComment(parent: T['ParentNode'], data: string): T['Comment'];
   createDocument(): T['Document'];
+  createDocumentFragment(document: T['Document']): T['DocumentFragment'];
   createDoctype(parent: T['Document'], name: string, publicId: string | undefined, systemId: string | undefined): T['DocumentType'];
   combineAttributes(element: T['Element'], token: TagToken): void;
 

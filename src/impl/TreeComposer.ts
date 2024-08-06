@@ -1,4 +1,4 @@
-import {CharacterData, Document, Element, Node, NodeType, ParentNode} from '../decl/dom-like.js';
+import {CharacterData, Document, Element, Node, NodeType, ParentNode, TemplateElement} from '../decl/dom-like.js';
 import {FormattingList} from './FormattingList.js';
 import {ErrorHandler, ignoring} from './interfaces/error-tracker.js';
 import {InsertionMode} from './interfaces/insertion-mode.js';
@@ -459,6 +459,18 @@ export class TreeComposer implements ComposerIntegration {
     return this.createAndInsertElementNS(token, NS_HTML, false);
   }
 
+  createAndInsertHtmlTemplate(token: TagToken): TemplateElement {
+    this.updateInsertionLocation();
+    if (token.selfClosed)
+      this.error('non-void-html-element-start-tag-with-trailing-solidus');
+    token.selfClosed = false;
+    const element = this.nodeFactory.createTemplateElement(this.insertParent, token, NS_HTML);
+    this.validateNsAttributes(element);
+    this.insertElementAtCurrentLocation(element);
+    this.pushOpenElement(element);
+    return element;
+  }
+
   pushOpenElement(element: Element) {
     this.openElements.push(element);
     this.openCounts[element.tagName] = (this.openCounts[element.tagName] || 0) + 1;
@@ -492,8 +504,12 @@ export class TreeComposer implements ComposerIntegration {
   removeFromStack(element: Element) {
     let index = this.openElements.indexOf(element);
     if (index >= 0) {
-      this.openElements.splice(index, 1);
-      this.openCounts[element.tagName]--;
+      if (index === this.openElements.length - 1)
+        this.popCurrentElement();
+      else {
+        this.openElements.splice(index, 1);
+        this.openCounts[element.tagName]--;
+      }
     }
   }
 
@@ -509,7 +525,7 @@ export class TreeComposer implements ComposerIntegration {
     this.formattingList.addMarker();
     this.framesetOk = false;
     this.templateInsertionModes.push('inTemplate');
-    this.createAndInsertHTMLElement(token);
+    this.createAndInsertHtmlTemplate(token);
     return 'inTemplate';
   }
 
@@ -1359,15 +1375,7 @@ export class TreeComposer implements ComposerIntegration {
         this.error('head-content-after-head');
         this.pushOpenElement(this.headElement!);
         let result = this.inHead(token);
-        let index = this.openElements.indexOf(this.headElement!);
-        if (index === this.openElements.length - 1)
-          this.popCurrentElement();
-        else {
-          this.openElements.splice(index, 1);
-          // pushing directly and popping ensures every side-effect of removing top element
-          this.openElements.push(this.headElement!);
-          this.popCurrentElement();
-        }
+        this.removeFromStack(this.headElement!);
         return result;
       default:
         return this.forceElementAndState('body', 'inBody', token);
