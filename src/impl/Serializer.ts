@@ -1,5 +1,5 @@
 import {CDATASection, Comment, DocumentType, Element, Node, NodeType, ParentNode, ProcessingInstruction, TemplateElement, Text} from '../decl/dom-like.js';
-import {CharactersToken, CommentToken, DoctypeToken, TagToken, Token} from './interfaces/tokens.js';
+import {CDataToken, CharactersToken, CommentToken, DoctypeToken, TagToken, Token} from './interfaces/tokens.js';
 import {NS_HTML} from './TreeComposer.js';
 
 type DocumentTypeLike = {
@@ -36,6 +36,8 @@ export interface SerializerOptions {
   htmlVoidSelfClose: SelfClosingOptions;
   foreignVoidSelfClose: SelfClosingOptions;
   escapeSingleQuoteInAttribute: boolean;
+  omitEmptyAttributeValue: boolean;
+  keepCDataSections: boolean;
 }
 
 export class Serializer {
@@ -45,7 +47,9 @@ export class Serializer {
     this.options = {
       htmlVoidSelfClose: options?.htmlVoidSelfClose || SelfClosingOptions.SKIP,
       foreignVoidSelfClose: options?.foreignVoidSelfClose || SelfClosingOptions.KEEP_SKIP,
-      escapeSingleQuoteInAttribute: options?.escapeSingleQuoteInAttribute || false
+      escapeSingleQuoteInAttribute: options?.escapeSingleQuoteInAttribute || false,
+      omitEmptyAttributeValue: options?.omitEmptyAttributeValue || false,
+      keepCDataSections: options?.keepCDataSections || false
     }
   }
 
@@ -72,7 +76,7 @@ export class Serializer {
       case 'characters':
         return (token as CharactersToken).data;
       case 'cdata':
-        this.serializeCData(token as CommentToken, chunks);
+        this.serializeCData(token as CDataToken, chunks);
         break;
       case 'eof':
         return null;
@@ -89,7 +93,10 @@ export class Serializer {
         this.serializeText(node as Text, chunks);
         break;
       case NodeType.CDATA_SECTION_NODE:
-        this.serializeCData(node as CDATASection, chunks);
+        if (this.options.keepCDataSections)
+          this.serializeCData(node as CDATASection, chunks);
+        else
+          this.serializeText(node as Text, chunks);
         break;
       case NodeType.PROCESSING_INSTRUCTION_NODE:
         this.serializePI(node as ProcessingInstruction, chunks);
@@ -149,9 +156,9 @@ export class Serializer {
     for (let attr of node.attributes) {
       chunks.push(' ');
       chunks.push(attr.name);
-      if (attr.value !== null) {
+      if (!this.options.omitEmptyAttributeValue || attr.value !== null) {
         chunks.push('="');
-        chunks.push(escape ? this.escapeAttribute(attr.value) : attr.value);
+        chunks.push(escape ? this.escapeAttribute(attr.value || '') : (attr.value || ''));
         chunks.push('"');
       }
     }
@@ -288,4 +295,12 @@ export class Serializer {
   }
 }
 
-export const DefaultSerializer = new Serializer({htmlVoidSelfClose: SelfClosingOptions.SKIP, foreignVoidSelfClose: SelfClosingOptions.KEEP_SKIP});
+export const TestSerializer = new Serializer({
+  htmlVoidSelfClose: SelfClosingOptions.SKIP,
+  foreignVoidSelfClose: SelfClosingOptions.KEEP_SKIP,
+  escapeSingleQuoteInAttribute: false,
+  omitEmptyAttributeValue: true,
+  keepCDataSections: true
+})
+
+export const DefaultSerializer = new Serializer();

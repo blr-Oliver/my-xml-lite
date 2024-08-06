@@ -2,7 +2,7 @@ import {ChildNode, Document, Element, Node, NodeType, NonDocumentTypeChildNode, 
 import {HTML_SPECIAL} from '../../src/decl/known-named-refs.js';
 import {buildIndex} from '../../src/impl/build-index.js';
 import {ErrorHandler} from '../../src/impl/interfaces/error-tracker.js';
-import {DefaultSerializer} from '../../src/impl/Serializer.js';
+import {TestSerializer} from '../../src/impl/Serializer.js';
 import {SimpleNodeFactory} from '../../src/impl/simple-tree/SimpleNodeFactory.js';
 import {Tokenizer} from '../../src/impl/Tokenizer.js';
 import {TreeComposer} from '../../src/impl/TreeComposer.js';
@@ -116,7 +116,7 @@ export class DefaultSuite<R = DefaultRawTest, T extends DefaultTestCase = Defaul
     expect(this.tokenizer.state).toStrictEqual('eof');
     const document = this.composer.document;
     expect(document).toBeDefined();
-    const output = DefaultSerializer.serializeNode(document);
+    const output = TestSerializer.serializeNode(document);
     expect(output).toStrictEqual(expectedOutput);
     expect(this.errorList).toStrictEqual(expectedErrors);
     this.validateTree(document);

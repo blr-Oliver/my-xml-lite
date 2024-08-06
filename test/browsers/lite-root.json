@@ -1,0 +1,3763 @@
+{
+  "after-after-body": [
+    [
+      "space",
+      "<!DOCTYPE html><body></body></html> \t\n\f",
+      "<html><head></head><body> \t\n\f</body></html>"
+    ],
+    [
+      "text",
+      "<!DOCTYPE html><body></body></html>A",
+      "<html><head></head><body>A</body></html>"
+    ],
+    [
+      "space + text",
+      "<!DOCTYPE html><body></body></html> \t\n\fA",
+      "<html><head></head><body> \t\n\fA</body></html>"
+    ],
+    [
+      "comment",
+      "<!DOCTYPE html><body></body></html><!--A-->",
+      "<html><head></head><body></body></html>"
+    ],
+    [
+      "doctype (repeated)",
+      "<!DOCTYPE html><body></body></html><!DOCTYPE html>",
+      "<html><head></head><body></body></html>"
+    ],
+    [
+      "doctype (first time)",
+      "<body></body></html><!DOCTYPE html>",
+      "<html><head></head><body></body></html>"
+    ],
+    [
+      "html start",
+      "<!DOCTYPE html><html a=\"1\" c=\"1\"><body></body></html><html b=\"2\" c=\"2\">",
+      "<html a=\"1\" c=\"1\" b=\"2\"><head></head><body></body></html>"
+    ],
+    [
+      "html end",
+      "<!DOCTYPE html><body></body></html></html>",
+      "<html><head></head><body></body></html>"
+    ],
+    [
+      "any start tag",
+      "<!DOCTYPE html><body></body></html><tag>",
+      "<html><head></head><body><tag></tag></body></html>"
+    ],
+    [
+      "any end tag",
+      "<!DOCTYPE html><body></body></html></tag>",
+      "<html><head></head><body></body></html>"
+    ],
+    [
+      "any proper element",
+      "<!DOCTYPE html><body></body></html><tag></tag>",
+      "<html><head></head><body><tag></tag></body></html>"
+    ]
+  ],
+  "after-after-frameset": [
+    [
+      "space",
+      "<!DOCTYPE html><frameset></frameset></html> \t\n\f",
+      "<html><head></head><frameset></frameset> \t\n\f</html>"
+    ],
+    [
+      "text",
+      "<!DOCTYPE html><frameset></frameset></html>A",
+      "<html><head></head><frameset></frameset></html>"
+    ],
+    [
+      "space + text",
+      "<!DOCTYPE html><frameset></frameset></html> \t\n\fA",
+      "<html><head></head><frameset></frameset> \t\n\f</html>"
+    ],
+    [
+      "comment",
+      "<!DOCTYPE html><frameset></frameset></html><!--A-->",
+      "<html><head></head><frameset></frameset></html>"
+    ],
+    [
+      "CDATA",
+      "<!DOCTYPE html><frameset></frameset></html><![CDATA[A]]>",
+      "<html><head></head><frameset></frameset></html>"
+    ],
+    [
+      "doctype (repeated)",
+      "<!DOCTYPE html><frameset></frameset></html><!DOCTYPE html>",
+      "<html><head></head><frameset></frameset></html>"
+    ],
+    [
+      "doctype (first time)",
+      "<frameset></frameset></html><!DOCTYPE html>",
+      "<html><head></head><frameset></frameset></html>"
+    ],
+    [
+      "noframes start",
+      "<!DOCTYPE html><frameset></frameset></html><noframes>&#x42;</html>",
+      "<html><head></head><frameset></frameset><noframes>&#x42;</html></noframes></html>"
+    ],
+    [
+      "noframes end",
+      "<!DOCTYPE html><frameset></frameset></html></noframes>",
+      "<html><head></head><frameset></frameset></html>"
+    ],
+    [
+      "noframes start",
+      "<!DOCTYPE html><frameset></frameset></html><noframes>&#x42;</html></noframes>",
+      "<html><head></head><frameset></frameset><noframes>&#x42;</html></noframes></html>"
+    ],
+    [
+      "html start",
+      "<!DOCTYPE html><html a=\"1\" c=\"1\"><frameset></frameset></html><html b=\"2\" c=\"2\">",
+      "<html a=\"1\" c=\"1\" b=\"2\"><head></head><frameset></frameset></html>"
+    ],
+    [
+      "html end",
+      "<!DOCTYPE html><frameset></frameset></html></html>",
+      "<html><head></head><frameset></frameset></html>"
+    ],
+    [
+      "any start tag",
+      "<!DOCTYPE html><frameset></frameset></html><tag>",
+      "<html><head></head><frameset></frameset></html>"
+    ],
+    [
+      "any end tag",
+      "<!DOCTYPE html><frameset></frameset></html></tag>",
+      "<html><head></head><frameset></frameset></html>"
+    ],
+    [
+      "any proper element",
+      "<!DOCTYPE html><frameset></frameset></html><tag></tag>",
+      "<html><head></head><frameset></frameset></html>"
+    ]
+  ],
+  "after-body": [
+    [
+      "space",
+      "<!DOCTYPE html><body></body> \t\n\f",
+      "<html><head></head><body> \t\n\f</body></html>"
+    ],
+    [
+      "text",
+      "<!DOCTYPE html><body></body>A",
+      "<html><head></head><body>A</body></html>"
+    ],
+    [
+      "space + text",
+      "<!DOCTYPE html><body></body> \t\n\fA",
+      "<html><head></head><body> \t\n\fA</body></html>"
+    ],
+    [
+      "comment",
+      "<!DOCTYPE html><body></body><!--A-->",
+      "<html><head></head><body></body><!--A--></html>"
+    ],
+    [
+      "doctype (repeated)",
+      "<!DOCTYPE html><body></body><!DOCTYPE html>",
+      "<html><head></head><body></body></html>"
+    ],
+    [
+      "doctype (first time)",
+      "<body></body><!DOCTYPE html>",
+      "<html><head></head><body></body></html>"
+    ],
+    [
+      "html start",
+      "<!DOCTYPE html><html a=\"1\" c=\"1\"><body></body><html b=\"2\" c=\"2\">",
+      "<html a=\"1\" c=\"1\" b=\"2\"><head></head><body></body></html>"
+    ],
+    [
+      "html end",
+      "<!DOCTYPE html><body></body></html>",
+      "<html><head></head><body></body></html>"
+    ],
+    [
+      "any start tag",
+      "<!DOCTYPE html><body></body><tag>",
+      "<html><head></head><body><tag></tag></body></html>"
+    ],
+    [
+      "any end tag",
+      "<!DOCTYPE html><body></body></tag>",
+      "<html><head></head><body></body></html>"
+    ],
+    [
+      "any proper element",
+      "<!DOCTYPE html><body></body><tag></tag>",
+      "<html><head></head><body><tag></tag></body></html>"
+    ]
+  ],
+  "after-frameset": [
+    [
+      "space",
+      "<!DOCTYPE html><frameset></frameset> \t\n\f",
+      "<html><head></head><frameset></frameset> \t\n\f</html>"
+    ],
+    [
+      "text",
+      "<!DOCTYPE html><frameset></frameset>A",
+      "<html><head></head><frameset></frameset></html>"
+    ],
+    [
+      "space + text",
+      "<!DOCTYPE html><frameset></frameset> \t\n\fA",
+      "<html><head></head><frameset></frameset> \t\n\f</html>"
+    ],
+    [
+      "comment",
+      "<!DOCTYPE html><frameset></frameset><!--A-->",
+      "<html><head></head><frameset></frameset><!--A--></html>"
+    ],
+    [
+      "CDATA",
+      "<!DOCTYPE html><frameset></frameset><![CDATA[A]]>",
+      "<html><head></head><frameset></frameset><!--[CDATA[A]]--></html>"
+    ],
+    [
+      "doctype (repeated)",
+      "<!DOCTYPE html><frameset></frameset><!DOCTYPE html>",
+      "<html><head></head><frameset></frameset></html>"
+    ],
+    [
+      "doctype (first time)",
+      "<frameset></frameset><!DOCTYPE html>",
+      "<html><head></head><frameset></frameset></html>"
+    ],
+    [
+      "noframes start",
+      "<!DOCTYPE html><frameset></frameset><noframes>&#x42;</html>",
+      "<html><head></head><frameset></frameset><noframes>&#x42;</html></noframes></html>"
+    ],
+    [
+      "noframes end",
+      "<!DOCTYPE html><frameset></frameset></noframes>",
+      "<html><head></head><frameset></frameset></html>"
+    ],
+    [
+      "noframes completed",
+      "<!DOCTYPE html><frameset></frameset><noframes>&#x42;</html></noframes>",
+      "<html><head></head><frameset></frameset><noframes>&#x42;</html></noframes></html>"
+    ],
+    [
+      "html start",
+      "<!DOCTYPE html><html a=\"1\" c=\"1\"><frameset></frameset><html b=\"2\" c=\"2\">",
+      "<html a=\"1\" c=\"1\" b=\"2\"><head></head><frameset></frameset></html>"
+    ],
+    [
+      "html end",
+      "<!DOCTYPE html><frameset></frameset></html>",
+      "<html><head></head><frameset></frameset></html>"
+    ],
+    [
+      "any start tag",
+      "<!DOCTYPE html><frameset></frameset><tag>",
+      "<html><head></head><frameset></frameset></html>"
+    ],
+    [
+      "any end tag",
+      "<!DOCTYPE html><frameset></frameset></tag>",
+      "<html><head></head><frameset></frameset></html>"
+    ],
+    [
+      "any proper element",
+      "<!DOCTYPE html><frameset></frameset><tag></tag>",
+      "<html><head></head><frameset></frameset></html>"
+    ]
+  ],
+  "after-head": [
+    [
+      "space",
+      "<!DOCTYPE html><head></head> \t\n\f",
+      "<html><head></head> \t\n\f<body></body></html>"
+    ],
+    [
+      "comment",
+      "<!DOCTYPE html><head></head><!--A-->",
+      "<html><head></head><!--A--><body></body></html>"
+    ],
+    [
+      "doctype",
+      "<!DOCTYPE html><head></head><!DOCTYPE html>",
+      "<html><head></head><body></body></html>"
+    ],
+    [
+      "text",
+      "<!DOCTYPE html><head></head>A",
+      "<html><head></head><body>A</body></html>"
+    ],
+    [
+      "NUL",
+      "<!DOCTYPE html><head></head>\u0000",
+      "<html><head></head><body></body></html>"
+    ],
+    [
+      "CDATA",
+      "<!DOCTYPE html><head></head><![CDATA[A]]>",
+      "<html><head></head><!--[CDATA[A]]--><body></body></html>"
+    ],
+    [
+      "html start",
+      "<!DOCTYPE html><html a=\"a\" b><head></head><html a=\"b\" c>",
+      "<html a=\"a\" b=\"\" c=\"\"><head></head><body></body></html>"
+    ],
+    [
+      "body start",
+      "<!DOCTYPE html><head></head><body a>",
+      "<html><head></head><body a=\"\"></body></html>"
+    ],
+    [
+      "frameset start",
+      "<!DOCTYPE html><head></head><frameset a>",
+      "<html><head></head><frameset a=\"\"></frameset></html>"
+    ],
+    [
+      "head start",
+      "<!DOCTYPE html><head a></head><head b>",
+      "<html><head a=\"\"></head><body></body></html>"
+    ],
+    [
+      "base",
+      "<!DOCTYPE html><head><!--A--></head><!--B--><base><!--C-->",
+      "<html><head><!--A--><base></head><!--B--><!--C--><body></body></html>"
+    ],
+    [
+      "basefont",
+      "<!DOCTYPE html><head><!--A--></head><!--B--><basefont><!--C-->",
+      "<html><head><!--A--><basefont></head><!--B--><!--C--><body></body></html>"
+    ],
+    [
+      "bgsound",
+      "<!DOCTYPE html><head><!--A--></head><!--B--><bgsound><!--C-->",
+      "<html><head><!--A--><bgsound></head><!--B--><!--C--><body></body></html>"
+    ],
+    [
+      "link",
+      "<!DOCTYPE html><head><!--A--></head><!--B--><link><!--C-->",
+      "<html><head><!--A--><link></head><!--B--><!--C--><body></body></html>"
+    ],
+    [
+      "meta",
+      "<!DOCTYPE html><head><!--A--></head><!--B--><meta><!--C-->",
+      "<html><head><!--A--><meta></head><!--B--><!--C--><body></body></html>"
+    ],
+    [
+      "noframes well-formed",
+      "<!DOCTYPE html><head><!--A--></head><!--B--><noframes>&#x41;<!--C--></noframes><!--D-->",
+      "<html><head><!--A--><noframes>&#x41;<!--C--></noframes></head><!--B--><!--D--><body></body></html>"
+    ],
+    [
+      "script well-formed",
+      "<!DOCTYPE html><head><!--A--></head><!--B--><script>&#x41;<!--C--></script><!--D-->",
+      "<html><head><!--A--><script>&#x41;<!--C--></script></head><!--B--><!--D--><body></body></html>"
+    ],
+    [
+      "style well-formed",
+      "<!DOCTYPE html><head><!--A--></head><!--B--><style>&#x41;<!--C--></style><!--D-->",
+      "<html><head><!--A--><style>&#x41;<!--C--></style></head><!--B--><!--D--><body></body></html>"
+    ],
+    [
+      "title well-formed",
+      "<!DOCTYPE html><head><!--A--></head><!--B--><title>&#x41;<!--C--></title><!--D-->",
+      "<html><head><!--A--><title>A&lt;!--C--&gt;</title></head><!--B--><!--D--><body></body></html>"
+    ],
+    [
+      "template well-formed",
+      "<!DOCTYPE html><head><!--A--></head><!--B--><template>&#x41;<!--C--></template><!--D-->",
+      "<html><head><!--A--><template>A<!--C--></template></head><!--B--><!--D--><body></body></html>"
+    ],
+    [
+      "template end",
+      "<!DOCTYPE html><head><!--A--></head><!--B--></template><!--C-->",
+      "<html><head><!--A--></head><!--B--><!--C--><body></body></html>"
+    ],
+    [
+      "body end",
+      "<!DOCTYPE html><head></head><!--A--></body>",
+      "<html><head></head><!--A--><body></body></html>"
+    ],
+    [
+      "html end",
+      "<!DOCTYPE html><head></head><!--A--></html>",
+      "<html><head></head><!--A--><body></body></html>"
+    ],
+    [
+      "br end",
+      "<!DOCTYPE html><head></head><!--A--></br>",
+      "<html><head></head><!--A--><body><br></body></html>"
+    ],
+    [
+      "any start tag",
+      "<!DOCTYPE html><head></head><!--A--><tag><!--B-->",
+      "<html><head></head><!--A--><body><tag><!--B--></tag></body></html>"
+    ],
+    [
+      "any end tag",
+      "<!DOCTYPE html><head></head><!--A--></tag><!--B-->",
+      "<html><head></head><!--A--><!--B--><body></body></html>"
+    ],
+    [
+      "any well-formed tag",
+      "<!DOCTYPE html><head></head><!--A--><tag><!--B--></tag><!--C-->",
+      "<html><head></head><!--A--><body><tag><!--B--></tag><!--C--></body></html>"
+    ]
+  ],
+  "before-head": [
+    [
+      "space",
+      "<!DOCTYPE html><html a> \n\f\t",
+      "<html a=\"\"><head></head><body></body></html>"
+    ],
+    [
+      "comment",
+      "<!DOCTYPE html><html a><!--A-->",
+      "<html a=\"\"><!--A--><head></head><body></body></html>"
+    ],
+    [
+      "doctype",
+      "<!DOCTYPE html><html a><!DOCTYPE html>",
+      "<html a=\"\"><head></head><body></body></html>"
+    ],
+    [
+      "NUL",
+      "<!DOCTYPE html><html a>\u0000",
+      "<html a=\"\"><head></head><body></body></html>"
+    ],
+    [
+      "text",
+      "<!DOCTYPE html><html a>A",
+      "<html a=\"\"><head></head><body>A</body></html>"
+    ],
+    [
+      "CDATA",
+      "<!DOCTYPE html><html a><![CDATA[A]]>",
+      "<html a=\"\"><!--[CDATA[A]]--><head></head><body></body></html>"
+    ],
+    [
+      "html start",
+      "<!DOCTYPE html><html a=\"a\" b><html a=\"b\" c>",
+      "<html a=\"a\" b=\"\" c=\"\"><head></head><body></body></html>"
+    ],
+    [
+      "head start",
+      "<!DOCTYPE html><html a><head b>",
+      "<html a=\"\"><head b=\"\"></head><body></body></html>"
+    ],
+    [
+      "head end",
+      "<!DOCTYPE html><html a></head>",
+      "<html a=\"\"><head></head><body></body></html>"
+    ],
+    [
+      "body end",
+      "<!DOCTYPE html><html a></body>",
+      "<html a=\"\"><head></head><body></body></html>"
+    ],
+    [
+      "html end",
+      "<!DOCTYPE html><html a></html>",
+      "<html a=\"\"><head></head><body></body></html>"
+    ],
+    [
+      "br end",
+      "<!DOCTYPE html><html a></br>",
+      "<html a=\"\"><head></head><body><br></body></html>"
+    ],
+    [
+      "any start tag",
+      "<!DOCTYPE html><html a><tag>",
+      "<html a=\"\"><head></head><body><tag></tag></body></html>"
+    ],
+    [
+      "any end tag",
+      "<!DOCTYPE html><html a></tag>",
+      "<html a=\"\"><head></head><body></body></html>"
+    ],
+    [
+      "any proper element",
+      "<!DOCTYPE html><html a><tag></tag>",
+      "<html a=\"\"><head></head><body><tag></tag></body></html>"
+    ]
+  ],
+  "before-html": [
+    [
+      "space",
+      "<!DOCTYPE html> \n\f\t",
+      "<html><head></head><body></body></html>"
+    ],
+    [
+      "comment",
+      "<!DOCTYPE html><!--A-->",
+      "<html><head></head><body></body></html>"
+    ],
+    [
+      "doctype",
+      "<!DOCTYPE html><!DOCTYPE html>",
+      "<html><head></head><body></body></html>"
+    ],
+    [
+      "space + doctype",
+      "<!DOCTYPE html> \n\f\t<!DOCTYPE html>",
+      "<html><head></head><body></body></html>"
+    ],
+    [
+      "NUL",
+      "<!DOCTYPE html>\u0000",
+      "<html><head></head><body></body></html>"
+    ],
+    [
+      "text",
+      "<!DOCTYPE html>A",
+      "<html><head></head><body>A</body></html>"
+    ],
+    [
+      "CDATA",
+      "<!DOCTYPE html><![CDATA[A]]>",
+      "<html><head></head><body></body></html>"
+    ],
+    [
+      "html start",
+      "<!DOCTYPE html><html a>",
+      "<html a=\"\"><head></head><body></body></html>"
+    ],
+    [
+      "head end",
+      "<!DOCTYPE html></head>",
+      "<html><head></head><body></body></html>"
+    ],
+    [
+      "body end",
+      "<!DOCTYPE html></body>",
+      "<html><head></head><body></body></html>"
+    ],
+    [
+      "html end",
+      "<!DOCTYPE html></html>",
+      "<html><head></head><body></body></html>"
+    ],
+    [
+      "br end",
+      "<!DOCTYPE html></br>",
+      "<html><head></head><body><br></body></html>"
+    ],
+    [
+      "any start tag",
+      "<!DOCTYPE html><tag>",
+      "<html><head></head><body><tag></tag></body></html>"
+    ],
+    [
+      "any end tag",
+      "<!DOCTYPE html></tag>",
+      "<html><head></head><body></body></html>"
+    ],
+    [
+      "any proper element",
+      "<!DOCTYPE html><tag></tag>",
+      "<html><head></head><body><tag></tag></body></html>"
+    ]
+  ],
+  "foreign-attributes": [
+    [
+      "xlink:actuate",
+      "<!DOCTYPE html><svg id=\"test\" xlink:actuate=\"test\"/>",
+      "<html><head></head><body><svg id=\"test\" xlink:actuate=\"test\"></svg></body></html>"
+    ],
+    [
+      "xlink:arcrole",
+      "<!DOCTYPE html><svg id=\"test\" xlink:arcrole=\"test\"/>",
+      "<html><head></head><body><svg id=\"test\" xlink:arcrole=\"test\"></svg></body></html>"
+    ],
+    [
+      "xlink:href",
+      "<!DOCTYPE html><svg id=\"test\" xlink:href=\"test\"/>",
+      "<html><head></head><body><svg id=\"test\" xlink:href=\"test\"></svg></body></html>"
+    ],
+    [
+      "xlink:role",
+      "<!DOCTYPE html><svg id=\"test\" xlink:role=\"test\"/>",
+      "<html><head></head><body><svg id=\"test\" xlink:role=\"test\"></svg></body></html>"
+    ],
+    [
+      "xlink:show",
+      "<!DOCTYPE html><svg id=\"test\" xlink:show=\"test\"/>",
+      "<html><head></head><body><svg id=\"test\" xlink:show=\"test\"></svg></body></html>"
+    ],
+    [
+      "xlink:title",
+      "<!DOCTYPE html><svg id=\"test\" xlink:title=\"test\"/>",
+      "<html><head></head><body><svg id=\"test\" xlink:title=\"test\"></svg></body></html>"
+    ],
+    [
+      "xlink:type",
+      "<!DOCTYPE html><svg id=\"test\" xlink:type=\"test\"/>",
+      "<html><head></head><body><svg id=\"test\" xlink:type=\"test\"></svg></body></html>"
+    ],
+    [
+      "xml:lang",
+      "<!DOCTYPE html><svg id=\"test\" xml:lang=\"test\"/>",
+      "<html><head></head><body><svg id=\"test\" xml:lang=\"test\"></svg></body></html>"
+    ],
+    [
+      "xml:space",
+      "<!DOCTYPE html><svg id=\"test\" xml:space=\"test\"/>",
+      "<html><head></head><body><svg id=\"test\" xml:space=\"test\"></svg></body></html>"
+    ],
+    [
+      "xmlns",
+      "<!DOCTYPE html><svg id=\"test\" xmlns=\"test\"/>",
+      "<html><head></head><body><svg id=\"test\" xmlns=\"test\"></svg></body></html>"
+    ],
+    [
+      "xmlns:xlink",
+      "<!DOCTYPE html><svg id=\"test\" xmlns:xlink=\"test\"/>",
+      "<html><head></head><body><svg id=\"test\" xmlns:xlink=\"test\"></svg></body></html>"
+    ]
+  ],
+  "formatting": [
+    [
+      "single",
+      "<!DOCTYPE html><body><b>A</b></body>",
+      "<html><head></head><body><b>A</b></body></html>"
+    ],
+    [
+      "triple",
+      "<!DOCTYPE html><body><b><b><b>A</b></b></b></body>",
+      "<html><head></head><body><b><b><b>A</b></b></b></body></html>"
+    ],
+    [
+      "4 deep",
+      "<!DOCTYPE html><body><b><b><b><b>A</b></b></b></b></body>",
+      "<html><head></head><body><b><b><b><b>A</b></b></b></b></body></html>"
+    ],
+    [
+      "mixed attributes",
+      "<!DOCTYPE html><body><b><b><b a><b a=\"1\">A</b></b></b></b></body>",
+      "<html><head></head><body><b><b><b a=\"\"><b a=\"1\">A</b></b></b></b></body></html>"
+    ],
+    [
+      "reconstruct single",
+      "<!DOCTYPE html><body><p><b>A<p>B</b></body>",
+      "<html><head></head><body><p><b>A</b></p><p><b>B</b></p></body></html>"
+    ],
+    [
+      "reconstruct triple",
+      "<!DOCTYPE html><body><p><b><b><b>A<p>B</b></b></b></body>",
+      "<html><head></head><body><p><b><b><b>A</b></b></b></p><p><b><b><b>B</b></b></b></p></body></html>"
+    ],
+    [
+      "reconstruct 4 deep",
+      "<!DOCTYPE html><body><p><b><b><b><b>A<p>B</b></b></b></b></body>",
+      "<html><head></head><body><p><b><b><b><b>A</b></b></b></b></p><p><b><b><b>B</b></b></b></p></body></html>"
+    ],
+    [
+      "reconstruct mixed",
+      "<!DOCTYPE html><body><p><b><b a><b><b a><b><b a><b><b a>A<p>B</body>",
+      "<html><head></head><body><p><b><b a=\"\"><b><b a=\"\"><b><b a=\"\"><b><b a=\"\">A</b></b></b></b></b></b></b></b></p><p><b><b a=\"\"><b><b a=\"\"><b><b a=\"\">B</b></b></b></b></b></b></p></body></html>"
+    ],
+    [
+      "reconstruct immediately after marker",
+      "<!DOCTYPE html><body><p><b>A<p><object>B</object></body>",
+      "<html><head></head><body><p><b>A</b></p><p><b><object>B</object></b></p></body></html>"
+    ],
+    [
+      "reconstruct local formatting after marker",
+      "<!DOCTYPE html><body><p><b>A<p><object><p><b a>B<p>C</object></body>",
+      "<html><head></head><body><p><b>A</b></p><p><b><object><p><b a=\"\">B</b></p><p><b a=\"\">C</b></p></object></b></p></body></html>"
+    ],
+    [
+      "AAA already closed",
+      "<!DOCTYPE html><body><p><b>A<div></b>B</body>",
+      "<html><head></head><body><p><b>A</b></p><div>B</div></body></html>"
+    ],
+    [
+      "AAA started outside scope (broken document end)",
+      "<!DOCTYPE html><body><b><math><mo></b>A</body>",
+      "<html><head></head><body><b><math><mo>A</mo></math></b></body></html>"
+    ],
+    [
+      "AAA started outside scope",
+      "<!DOCTYPE html><body><b><math><mo></b>A</mo></math></b></body>",
+      "<html><head></head><body><b><math><mo>A</mo></math></b></body></html>"
+    ],
+    [
+      "AAA F-special-f",
+      "<!DOCTYPE html><body><b><hr a/><div><hr b/><i><hr c/></b>A</body>",
+      "<html><head></head><body><b><hr a=\"\"></b><div><b><hr b=\"\"><i><hr c=\"\"></i></b><i>A</i></div></body></html>"
+    ],
+    [
+      "AAA F-f-special",
+      "<!DOCTYPE html><body><b><hr a/><i><hr b/><div><hr c/></b>A</body>",
+      "<html><head></head><body><b><hr a=\"\"><i><hr b=\"\"></i></b><i><div><b><hr c=\"\"></b>A</div></i></body></html>"
+    ],
+    [
+      "AAA F-any-special",
+      "<!DOCTYPE html><body><b><hr a/><foo><hr b/><div><hr c/></b>A</body>",
+      "<html><head></head><body><b><hr a=\"\"><foo><hr b=\"\"></foo></b><div><b><hr c=\"\"></b>A</div></body></html>"
+    ],
+    [
+      "AAA F-any-f-any-special",
+      "<!DOCTYPE html><body><b><hr a/><foo><hr b/><i><hr c/><bar><hr d/><div><hr e/></b>A</body>",
+      "<html><head></head><body><b><hr a=\"\"><foo><hr b=\"\"><i><hr c=\"\"><bar><hr d=\"\"></bar></i></foo></b><i><div><b><hr e=\"\"></b>A</div></i></body></html>"
+    ],
+    [
+      "AAA F-f-any-any-any-special",
+      "<!DOCTYPE html><body><b><hr a/><i><hr b/><foo><hr c/><bar><hr d/><baz><hr e/><div><hr f/></b>A</body>",
+      "<html><head></head><body><b><hr a=\"\"><i><hr b=\"\"><foo><hr c=\"\"><bar><hr d=\"\"><baz><hr e=\"\"></baz></bar></foo></i></b><div><b><hr f=\"\"></b>A</div></body></html>"
+    ],
+    [
+      "AAA F-f-f-f-special",
+      "<!DOCTYPE html><body><b><hr a/><i><hr b/><u><hr c/><em><hr d/><div><hr e/></b>A</body>",
+      "<html><head></head><body><b><hr a=\"\"><i><hr b=\"\"><u><hr c=\"\"><em><hr d=\"\"></em></u></i></b><i><u><em><div><b><hr e=\"\"></b>A</div></em></u></i></body></html>"
+    ],
+    [
+      "AAA F-f-f-f-f-special",
+      "<!DOCTYPE html><body><b><hr a/><i><hr b/><u><hr c/><em><hr d/><s><hr e/><div><hr f/></b>A</body>",
+      "<html><head></head><body><b><hr a=\"\"><i><hr b=\"\"><u><hr c=\"\"><em><hr d=\"\"><s><hr e=\"\"></s></em></u></i></b><u><em><s><div><b><hr f=\"\"></b>A</div></s></em></u></body></html>"
+    ],
+    [
+      "AAA F-f-f-f-f-special-f-f-f (bookmark check)",
+      "<!DOCTYPE html><body><b><hr a/><i><hr b/><u><hr c/><em><hr d/><s><hr e/><div><hr f/><tt><hr g/><strike><hr h/><code><hr i/></b></div>A</body>",
+      "<html><head></head><body><b><hr a=\"\"><i><hr b=\"\"><u><hr c=\"\"><em><hr d=\"\"><s><hr e=\"\"></s></em></u></i></b><u><em><s><div><b><hr f=\"\"><tt><hr g=\"\"><strike><hr h=\"\"><code><hr i=\"\"></code></strike></tt></b></div><tt><strike><code>A</code></strike></tt></s></em></u></body></html>"
+    ],
+    [
+      "AAA 7 nested",
+      "<!DOCTYPE html><body><b><hr a/><div><hr b/><div><hr c/><div><hr d/><div><hr e/><div><hr f/><div><hr g/><div><hr h/></b><hr i/></div></div></div></div></div></div></div></div>A</body>",
+      "<html><head></head><body><b><hr a=\"\"></b><div><b><hr b=\"\"></b><div><b><hr c=\"\"></b><div><b><hr d=\"\"></b><div><b><hr e=\"\"></b><div><b><hr f=\"\"></b><div><b><hr g=\"\"></b><div><b><hr h=\"\"></b><hr i=\"\"></div></div></div></div></div></div></div>A</body></html>"
+    ],
+    [
+      "AAA 8 nested",
+      "<!DOCTYPE html><body><b><hr a/><div><hr b/><div><hr c/><div><hr d/><div><hr e/><div><hr f/><div><hr g/><div><hr h/><div><hr i/></b><hr j/></div></div></div></div></div></div></div></div></div>A</body>",
+      "<html><head></head><body><b><hr a=\"\"></b><div><b><hr b=\"\"></b><div><b><hr c=\"\"></b><div><b><hr d=\"\"></b><div><b><hr e=\"\"></b><div><b><hr f=\"\"></b><div><b><hr g=\"\"></b><div><b><hr h=\"\"></b><div><b><hr i=\"\"><hr j=\"\"></b></div></div></div></div></div></div></div></div><b>A</b></body></html>"
+    ],
+    [
+      "AAA 9 nested",
+      "<!DOCTYPE html><body><b><hr a/><div><hr b/><div><hr c/><div><hr d/><div><hr e/><div><hr f/><div><hr g/><div><hr h/><div><hr i/><div><hr j/></b><hr k/></div></div></div></div></div></div></div></div></div></div>A</body>",
+      "<html><head></head><body><b><hr a=\"\"></b><div><b><hr b=\"\"></b><div><b><hr c=\"\"></b><div><b><hr d=\"\"></b><div><b><hr e=\"\"></b><div><b><hr f=\"\"></b><div><b><hr g=\"\"></b><div><b><hr h=\"\"></b><div><b><hr i=\"\"><div><hr j=\"\"><hr k=\"\"></div></b></div></div></div></div></div></div></div></div><b>A</b></body></html>"
+    ],
+    [
+      "AAA 8 nested + bookmark check",
+      "<!DOCTYPE html><body><b><hr a/><i><hr b/><u><hr c/><em><hr d/><s><hr e/><div><hr f/><div><hr g/><div><hr h/><div><hr i/><div><hr j/><div><hr k/><div><hr l/><div><hr m/><tt><hr n/><strike><hr o/><code><hr p/></b><hr q/></div></div></div></div></div></div></div></div></div>A</body>",
+      "<html><head></head><body><b><hr a=\"\"><i><hr b=\"\"><u><hr c=\"\"><em><hr d=\"\"><s><hr e=\"\"></s></em></u></i></b><u><em><s><div><b><hr f=\"\"></b><div><b><hr g=\"\"></b><div><b><hr h=\"\"></b><div><b><hr i=\"\"></b><div><b><hr j=\"\"></b><div><b><hr k=\"\"></b><div><b><hr l=\"\"></b><div><b><hr m=\"\"><tt><hr n=\"\"><strike><hr o=\"\"><code><hr p=\"\"><hr q=\"\"></code></strike></tt></b></div></div></div></div></div></div></div></div><b><tt><strike><code>A</code></strike></tt></b></s></em></u></body></html>"
+    ],
+    [
+      "nested anchor",
+      "<!DOCTYPE html><body><a a><div><a b></a></body>",
+      "<html><head></head><body><a a=\"\"></a><div><a a=\"\"></a><a b=\"\"></a></div></body></html>"
+    ],
+    [
+      "nested anchor over scope fence",
+      "<!DOCTYPE html><body><a a><math><mo><a b></a></mo></math></body>",
+      "<html><head></head><body><a a=\"\"><math><mo><a b=\"\"></a></mo></math></a></body></html>"
+    ],
+    [
+      "nested anchor + 9 nested between",
+      "<!DOCTYPE html><body><a a><hr a/><div a><hr b/><div b><hr c/><div c><hr d/><div d><hr e/><div e><hr f/><div f><hr g/><div g><hr h/><div h><hr i/><div i><hr j/><a b><hr k/></div></div></div></div></div></div></div></div></div></div></body>",
+      "<html><head></head><body><a a=\"\"><hr a=\"\"></a><div a=\"\"><a a=\"\"><hr b=\"\"></a><div b=\"\"><a a=\"\"><hr c=\"\"></a><div c=\"\"><a a=\"\"><hr d=\"\"></a><div d=\"\"><a a=\"\"><hr e=\"\"></a><div e=\"\"><a a=\"\"><hr f=\"\"></a><div f=\"\"><a a=\"\"><hr g=\"\"></a><div g=\"\"><a a=\"\"><hr h=\"\"></a><div h=\"\"><a a=\"\"><hr i=\"\"><div i=\"\"><hr j=\"\"><a b=\"\"><hr k=\"\"></a></div></a></div></div></div></div></div></div></div></div></body></html>"
+    ],
+    [
+      "AAA with same name",
+      "<!DOCTYPE html><body><b><hr a/><div><hr b/><b a><hr c/></div><hr d/></b>A</body>",
+      "<html><head></head><body><b><hr a=\"\"><div><hr b=\"\"><b a=\"\"><hr c=\"\"></b></div><hr d=\"\">A</b></body></html>"
+    ],
+    [
+      "nobr single start",
+      "<!DOCTYPE html><body><b><object><p><i><div><nobr></div></object></b></body>",
+      "<html><head></head><body><b><object><p><i></i></p><div><i><nobr></nobr></i></div></object></b></body></html>"
+    ],
+    [
+      "nobr nested over scope fence",
+      "<!DOCTYPE html><body><nobr><object><p><i><div><nobr></div></object></nobr></body>",
+      "<html><head></head><body><nobr><object><p><i></i></p><div><i><nobr></nobr></i></div></object></nobr></body></html>"
+    ],
+    [
+      "nobr nested",
+      "<!DOCTYPE html><body><a><object><nobr a><p><i><div></div><u><s><em><div><nobr b></div></object></a></body>",
+      "<html><head></head><body><a><object><nobr a=\"\"><p><i></i></p><div></div><i><u><s><em></em></s></u></i></nobr><u><s><em><div><nobr a=\"\"></nobr><nobr b=\"\"></nobr></div></em></s></u></object></a></body></html>"
+    ],
+    [
+      "example 1",
+      "<!DOCTYPE html><body>A<em>B<address>C</em>D</address>E</body>",
+      "<html><head></head><body>A<em>B</em><address><em>C</em>D</address>E</body></html>"
+    ],
+    [
+      "example 2",
+      "<!DOCTYPE html><body><p>1<b>2<i>3</b>4</i>5</p></body>",
+      "<html><head></head><body><p>1<b>2<i>3</i></b><i>4</i>5</p></body></html>"
+    ],
+    [
+      "example 3",
+      "<!DOCTYPE html><body><b>1<p>2</b>3</p></body>",
+      "<html><head></head><body><b>1</b><p><b>2</b>3</p></body></html>"
+    ],
+    [
+      "example 4",
+      "<!DOCTYPE html><body><table><b><tr><td>aaa</td></tr>bbb</table>ccc</body>",
+      "<html><head></head><body><b></b><b>bbb</b><table><tbody><tr><td>aaa</td></tr></tbody></table><b>ccc</b></body></html>"
+    ],
+    [
+      "example 5",
+      "<!DOCTYPE html><body><p><b class=x><b class=x><b><b class=x><b class=x><b>X\n<p>X\n<p><b><b class=x><b>X\n<p></b></b></b></b></b></b>X</body>",
+      "<html><head></head><body><p><b class=\"x\"><b class=\"x\"><b><b class=\"x\"><b class=\"x\"><b>X\n</b></b></b></b></b></b></p><p><b class=\"x\"><b><b class=\"x\"><b class=\"x\"><b>X\n</b></b></b></b></b></p><p><b class=\"x\"><b><b class=\"x\"><b class=\"x\"><b><b><b class=\"x\"><b>X\n</b></b></b></b></b></b></b></b></p><p>X</p></body></html>"
+    ],
+    [
+      "example 6",
+      "<!DOCTYPE html><body><a href=\"a\">A<table><a href=\"b\">B</table>X</body>",
+      "<html><head></head><body><a href=\"a\">A<a href=\"b\">B</a><table></table></a><a href=\"b\">X</a></body></html>"
+    ]
+  ],
+  "in-body": [
+    [
+      "empty",
+      "<!DOCTYPE html><html><body></body></html>",
+      "<html><head></head><body></body></html>"
+    ],
+    [
+      "unclosed",
+      "<!DOCTYPE html><html><body></html>",
+      "<html><head></head><body></body></html>"
+    ],
+    [
+      "space",
+      "<!DOCTYPE html><html><body> \t\n\f</body></html>",
+      "<html><head></head><body> \t\n\f</body></html>"
+    ],
+    [
+      "comment",
+      "<!DOCTYPE html><html><body><!--A--></body></html>",
+      "<html><head></head><body><!--A--></body></html>"
+    ],
+    [
+      "doctype",
+      "<!DOCTYPE html><html><body><!DOCTYPE html></body></html>",
+      "<html><head></head><body></body></html>"
+    ],
+    [
+      "NUL",
+      "<!DOCTYPE html><html><body>\u0000</body></html>",
+      "<html><head></head><body></body></html>"
+    ],
+    [
+      "text",
+      "<!DOCTYPE html><html><body>A</body></html>",
+      "<html><head></head><body>A</body></html>"
+    ],
+    [
+      "space + text + space",
+      "<!DOCTYPE html><html><body> \t\nA \t\f</body></html>",
+      "<html><head></head><body> \t\nA \t\f</body></html>"
+    ],
+    [
+      "CDATA",
+      "<!DOCTYPE html><html><body><![CDATA[A]]></body></html>",
+      "<html><head></head><body><!--[CDATA[A]]--></body></html>"
+    ],
+    [
+      "html start",
+      "<!DOCTYPE html><html b a=\"a\"><body><html c a=\"b\"></body></html>",
+      "<html b=\"\" a=\"a\" c=\"\"><head></head><body></body></html>"
+    ],
+    [
+      "body start",
+      "<!DOCTYPE html><html><body b a=\"a\"><body c a=\"b\"></body></html>",
+      "<html><head></head><body b=\"\" a=\"a\" c=\"\"></body></html>"
+    ],
+    [
+      "head void elements",
+      "<!DOCTYPE html><html><body><base><basefont><bgsound><link><meta></body></html>",
+      "<html><head></head><body><base><basefont><bgsound><link><meta></body></html>"
+    ],
+    [
+      "empty non-void element",
+      "<!DOCTYPE html><html><body><div/></body></html>",
+      "<html><head></head><body><div></div></body></html>"
+    ],
+    [
+      "text elements",
+      "<!DOCTYPE html><html><body><noframes>A&#x41;<tag></noframes><script>A&#x41;<tag></script><style>A&#x41;<tag></style><title>A&#x41;<tag></title><textarea>A&#x41;<tag></textarea><iframe>A&#x41;<tag></iframe><noembed>A&#x41;<tag></noembed></body></html>",
+      "<html><head></head><body><noframes>A&#x41;<tag></noframes><script>A&#x41;<tag></script><style>A&#x41;<tag></style><title>AA&lt;tag&gt;</title><textarea>AA&lt;tag&gt;</textarea><iframe>A&#x41;<tag></iframe><noembed>A&#x41;<tag></noembed></body></html>"
+    ],
+    [
+      "NUL and << in text elements",
+      "<!DOCTYPE html><html><body><noframes>\u0000<<</noframes><style>\u0000<<</style><title>\u0000<<</title><textarea>\u0000<<</textarea></body></html>",
+      "<html><head></head><body><noframes>�<<</noframes><style>�<<</style><title>�&lt;&lt;</title><textarea>�&lt;&lt;</textarea></body></html>"
+    ],
+    [
+      "template",
+      "<!DOCTYPE html><html><body><template><div><html a><body b></div></template></body></html>",
+      "<html><head></head><body><template><div></div></template></body></html>"
+    ],
+    [
+      "known simple elements",
+      "<!DOCTYPE html><html><body><p>01<address>A01</address><p>02<article>A02</article><p>03<aside>A03</aside><p>04<blockquote>A04</blockquote><p>05<center>A05</center><p>06<details>A06</details><p>07<dialog>A07</dialog><p>08<dir>A08</dir><p>09<div>A09</div><p>10<dl>A10</dl><p>11<fieldset>A11</fieldset><p>12<figcaption>A12</figcaption><p>13<figure>A13</figure><p>14<footer>A14</footer><p>15<header>A15</header><p>16<hgroup>A16</hgroup><p>17<main>A17</main><p>18<menu>A18</menu><p>19<nav>A19</nav><p>20<ol>A20</ol><p>21<p>A21</p><p>22<search>A22</search><p>23<section>A23</section><p>24<summary>A24</summary><p>25<ul>A25</ul><p>26<pre>A26</pre><p>27<listing>A27</listing></body></html>",
+      "<html><head></head><body><p>01</p><address>A01</address><p>02</p><article>A02</article><p>03</p><aside>A03</aside><p>04</p><blockquote>A04</blockquote><p>05</p><center>A05</center><p>06</p><details>A06</details><p>07</p><dialog>A07</dialog><p>08</p><dir>A08</dir><p>09</p><div>A09</div><p>10</p><dl>A10</dl><p>11</p><fieldset>A11</fieldset><p>12</p><figcaption>A12</figcaption><p>13</p><figure>A13</figure><p>14</p><footer>A14</footer><p>15</p><header>A15</header><p>16</p><hgroup>A16</hgroup><p>17</p><main>A17</main><p>18</p><menu>A18</menu><p>19</p><nav>A19</nav><p>20</p><ol>A20</ol><p>21</p><p>A21</p><p>22</p><search>A22</search><p>23</p><section>A23</section><p>24</p><summary>A24</summary><p>25</p><ul>A25</ul><p>26</p><pre>A26</pre><p>27</p><listing>A27</listing></body></html>"
+    ],
+    [
+      "known simple elements in buttons",
+      "<!DOCTYPE html><html><body><p>01<button>B01<address>A01</address></button><p>02<button>B02<article>A02</article></button><p>03<button>B03<aside>A03</aside></button><p>04<button>B04<blockquote>A04</blockquote></button><p>05<button>B05<center>A05</center></button><p>06<button>B06<details>A06</details></button><p>07<button>B07<dialog>A07</dialog></button><p>08<button>B08<dir>A08</dir></button><p>09<button>B09<div>A09</div></button><p>10<button>B10<dl>A10</dl></button><p>11<button>B11<fieldset>A11</fieldset></button><p>12<button>B12<figcaption>A12</figcaption></button><p>13<button>B13<figure>A13</figure></button><p>14<button>B14<footer>A14</footer></button><p>15<button>B15<header>A15</header></button><p>16<button>B16<hgroup>A16</hgroup></button><p>17<button>B17<main>A17</main></button><p>18<button>B18<menu>A18</menu></button><p>19<button>B19<nav>A19</nav></button><p>20<button>B20<ol>A20</ol></button><p>21<button>B21<p>A21</p></button><p>22<button>B22<search>A22</search></button><p>23<button>B23<section>A23</section></button><p>24<button>B24<summary>A24</summary></button><p>25<button>B25<ul>A25</ul></button><p>26<button>B26<pre>A26</pre></button><p>27<button>B27<listing>A27</listing></button></body></html>",
+      "<html><head></head><body><p>01<button>B01<address>A01</address></button></p><p>02<button>B02<article>A02</article></button></p><p>03<button>B03<aside>A03</aside></button></p><p>04<button>B04<blockquote>A04</blockquote></button></p><p>05<button>B05<center>A05</center></button></p><p>06<button>B06<details>A06</details></button></p><p>07<button>B07<dialog>A07</dialog></button></p><p>08<button>B08<dir>A08</dir></button></p><p>09<button>B09<div>A09</div></button></p><p>10<button>B10<dl>A10</dl></button></p><p>11<button>B11<fieldset>A11</fieldset></button></p><p>12<button>B12<figcaption>A12</figcaption></button></p><p>13<button>B13<figure>A13</figure></button></p><p>14<button>B14<footer>A14</footer></button></p><p>15<button>B15<header>A15</header></button></p><p>16<button>B16<hgroup>A16</hgroup></button></p><p>17<button>B17<main>A17</main></button></p><p>18<button>B18<menu>A18</menu></button></p><p>19<button>B19<nav>A19</nav></button></p><p>20<button>B20<ol>A20</ol></button></p><p>21<button>B21<p>A21</p></button></p><p>22<button>B22<search>A22</search></button></p><p>23<button>B23<section>A23</section></button></p><p>24<button>B24<summary>A24</summary></button></p><p>25<button>B25<ul>A25</ul></button></p><p>26<button>B26<pre>A26</pre></button></p><p>27<button>B27<listing>A27</listing></button></p></body></html>"
+    ],
+    [
+      "heading elements",
+      "<!DOCTYPE html><html><body><p>1<h1>A1</h1><p>2<h2>A2</h2><p>3<h3>A3</h3><p>4<h4>A4</h4><p>5<h5>A5</h5><p>6<h6>A6</h6></body></html>",
+      "<html><head></head><body><p>1</p><h1>A1</h1><p>2</p><h2>A2</h2><p>3</p><h3>A3</h3><p>4</p><h4>A4</h4><p>5</p><h5>A5</h5><p>6</p><h6>A6</h6></body></html>"
+    ],
+    [
+      "heading elements in buttons",
+      "<!DOCTYPE html><html><body><p>01<button>B01<h1>A01</h1></button><p>02<button>B02<h2>A02</h2></button><p>03<button>B03<h3>A03</h3></button><p>04<button>B04<h4>A04</h4></button><p>05<button>B05<h5>A05</h5></button><p>06<button>B06<h6>A06</h6></button></body></html>",
+      "<html><head></head><body><p>01<button>B01<h1>A01</h1></button></p><p>02<button>B02<h2>A02</h2></button></p><p>03<button>B03<h3>A03</h3></button></p><p>04<button>B04<h4>A04</h4></button></p><p>05<button>B05<h5>A05</h5></button></p><p>06<button>B06<h6>A06</h6></button></p></body></html>"
+    ],
+    [
+      "nested heading elements",
+      "<!DOCTYPE html><html><body>0.1<h2>1.1<div>1.2<h1>2.1<h3>3.1<div>3.2<h4>4.1<h5>5.1<div>5.2<h6>6.1</h6>5.3</div>5.4</h5>4.2</h4>3.3</div>3.4</h3>2.2</h1>1.3</div>1.4</h2>0.2</body></html>",
+      "<html><head></head><body>0.1<h2>1.1<div>1.2<h1>2.1</h1><h3>3.1<div>3.2<h4>4.1</h4><h5>5.1<div>5.2<h6>6.1</h6>5.3</div>5.4</h5>4.2</div></h3>3.3</div>3.4</h2>2.21.31.40.2</body></html>"
+    ],
+    [
+      "unclosed content in heading",
+      "<!DOCTYPE html><html><body>A<h1>B<div>C</h1>D</body></html>",
+      "<html><head></head><body>A<h1>B<div>C</div></h1>D</body></html>"
+    ],
+    [
+      "unclosed foreign content in heading",
+      "<!DOCTYPE html><html><body>A<h1>B<math>C<mi>D<p>E<h2>F</h2></math>G</h1>H</body></html>",
+      "<html><head></head><body>A<h1>B<math>C<mi>D<p>E</p><h2>F</h2></mi></math>G</h1>H</body></html>"
+    ],
+    [
+      "mismatched heading tags",
+      "<!DOCTYPE html><html><body>A<h1>B</h2>C</body></html>",
+      "<html><head></head><body>A<h1>B</h1>C</body></html>"
+    ],
+    [
+      "form start",
+      "<!DOCTYPE html><html><body><p>A<form>B</form></body></html>",
+      "<html><head></head><body><p>A</p><form>B</form></body></html>"
+    ],
+    [
+      "form start in button",
+      "<!DOCTYPE html><html><body><p>A<button>B<form>C</form>D</button></body></html>",
+      "<html><head></head><body><p>A<button>B<form>C</form>D</button></p></body></html>"
+    ],
+    [
+      "form early end",
+      "<!DOCTYPE html><html><body>A</form>B<form>C<div>D</form>E</div>F</body></html>",
+      "<html><head></head><body>AB<form>C<div>DE</div></form>F</body></html>"
+    ],
+    [
+      "form early end in template",
+      "<!DOCTYPE html><html><body>A<template><br/>B</form>C<form>D<div>E</form>F</div>G</template>H</body></html>",
+      "<html><head></head><body>A<template><br>BC<form>D<div>E</div></form>FG</template>H</body></html>"
+    ],
+    [
+      "nested form",
+      "<!DOCTYPE html><html><body>A<form>B<form>C</form>D</form>E</body></html>",
+      "<html><head></head><body>A<form>BC</form>DE</body></html>"
+    ],
+    [
+      "li",
+      "<!DOCTYPE html><html><body><li></body></html>",
+      "<html><head></head><body><li></li></body></html>"
+    ],
+    [
+      "li>li",
+      "<!DOCTYPE html><html><body><li>A<li>B</body></html>",
+      "<html><head></head><body><li>A</li><li>B</li></body></html>"
+    ],
+    [
+      "li>span>li",
+      "<!DOCTYPE html><html><body><li>A<span>B<li>C</body></html>",
+      "<html><head></head><body><li>A<span>B</span></li><li>C</li></body></html>"
+    ],
+    [
+      "li>address>li",
+      "<!DOCTYPE html><html><body><li>A<address>B<li>C</body></html>",
+      "<html><head></head><body><li>A<address>B</address></li><li>C</li></body></html>"
+    ],
+    [
+      "li>div>li",
+      "<!DOCTYPE html><html><body><li>A<div>B<li>C</body></html>",
+      "<html><head></head><body><li>A<div>B</div></li><li>C</li></body></html>"
+    ],
+    [
+      "li>p>li",
+      "<!DOCTYPE html><html><body><li>A<p>B<li>C</body></html>",
+      "<html><head></head><body><li>A<p>B</p></li><li>C</li></body></html>"
+    ],
+    [
+      "li>object>li",
+      "<!DOCTYPE html><html><body><li>A<object>B<li>C</body></html>D",
+      "<html><head></head><body><li>A<object>B<li>CD</li></object></li></body></html>"
+    ],
+    [
+      "li>object>li +object end",
+      "<!DOCTYPE html><html><body><li>A<object>B<li>C</body>D</html>E</object>F</body></html>",
+      "<html><head></head><body><li>A<object>B<li>CDE</li></object>F</li></body></html>"
+    ],
+    [
+      "li>p>object>li",
+      "<!DOCTYPE html><html><body><li>A<p>B<object>C<li>D</body></html>E",
+      "<html><head></head><body><li>A<p>B<object>C<li>DE</li></object></p></li></body></html>"
+    ],
+    [
+      "li>p>object>li +object end",
+      "<!DOCTYPE html><html><body><li>A<p>B<object>C<li>D</body>E</html>F</object>G</body></html>",
+      "<html><head></head><body><li>A<p>B<object>C<li>DEF</li></object>G</p></li></body></html>"
+    ],
+    [
+      "li>dt>dd>rb>rp>rt>rtc>li",
+      "<!DOCTYPE html><html><body><li>B<dt>C<dd>D<rb>E<rp>F<rt>G<rtc>H<li>I</body></html>",
+      "<html><head></head><body><li>B<dt>C</dt><dd>D<rb>E<rp>F<rt>G<rtc>H<li>I</li></rtc></rt></rp></rb></dd></li></body></html>"
+    ],
+    [
+      "li>p>dt>dd>rb>rp>rt>rtc>li",
+      "<!DOCTYPE html><html><body><li>A<p>B<dt>C<dd>D<rb>E<rp>F<rt>G<rtc>H<li></body></html>",
+      "<html><head></head><body><li>A<p>B</p><dt>C</dt><dd>D<rb>E<rp>F<rt>G<rtc>H<li></li></rtc></rt></rp></rb></dd></li></body></html>"
+    ],
+    [
+      "p>li>p>dt>dd>rb>rp>rt>rtc>li",
+      "<!DOCTYPE html><html><body><p>P<li>A<p>B<dt>C<dd>D<rb>E<rp>F<rt>G<rtc>H<li></body></html>",
+      "<html><head></head><body><p>P</p><li>A<p>B</p><dt>C</dt><dd>D<rb>E<rp>F<rt>G<rtc>H<li></li></rtc></rt></rp></rb></dd></li></body></html>"
+    ],
+    [
+      "p>button>li>p>dt>dd>rb>rp>rt>rtc>li",
+      "<!DOCTYPE html><html><body><p>P<button>Bt<li>A<p>B<dt>C<dd>D<rb>E<rp>F<rt>G<rtc>H<li>I</button></body></html>",
+      "<html><head></head><body><p>P<button>Bt<li>A<p>B</p><dt>C</dt><dd>D<rb>E<rp>F<rt>G<rtc>H<li>I</li></rtc></rt></rp></rb></dd></li></button></p></body></html>"
+    ],
+    [
+      "p>li>dt>li",
+      "<!DOCTYPE html><html><body>A<p>B<li>C<dt>D<li>E</body></html>",
+      "<html><head></head><body>A<p>B</p><li>C<dt>D<li>E</li></dt></li></body></html>"
+    ],
+    [
+      "li end",
+      "<!DOCTYPE html><html><body></li></body></html>",
+      "<html><head></head><body></body></html>"
+    ],
+    [
+      "li proper",
+      "<!DOCTYPE html><html><body>A<li>B</li>C</body></html>",
+      "<html><head></head><body>A<li>B</li>C</body></html>"
+    ],
+    [
+      "li>div li end",
+      "<!DOCTYPE html><html><body>A<li>B<div>C</li>D</body></html>",
+      "<html><head></head><body>A<li>B<div>C</div></li>D</body></html>"
+    ],
+    [
+      "li>ul li end",
+      "<!DOCTYPE html><html><body>A<li>B<ul>C</li>D</body></html>",
+      "<html><head></head><body>A<li>B<ul>CD</ul></li></body></html>"
+    ],
+    [
+      "li>ol li end",
+      "<!DOCTYPE html><html><body>A<li>B<ol>C</li>D</body></html>",
+      "<html><head></head><body>A<li>B<ol>CD</ol></li></body></html>"
+    ],
+    [
+      "dt",
+      "<!DOCTYPE html><html><body>A<dt>B</body></html>",
+      "<html><head></head><body>A<dt>B</dt></body></html>"
+    ],
+    [
+      "dd",
+      "<!DOCTYPE html><html><body>A<dd>B</body></html>",
+      "<html><head></head><body>A<dd>B</dd></body></html>"
+    ],
+    [
+      "dt>dt",
+      "<!DOCTYPE html><html><body>A<dt>B<dt>C</body></html>",
+      "<html><head></head><body>A<dt>B</dt><dt>C</dt></body></html>"
+    ],
+    [
+      "dd>dd",
+      "<!DOCTYPE html><html><body>A<dd>B<dd>C</body></html>",
+      "<html><head></head><body>A<dd>B</dd><dd>C</dd></body></html>"
+    ],
+    [
+      "dt>dd",
+      "<!DOCTYPE html><html><body>A<dt>B<dd>C</body></html>",
+      "<html><head></head><body>A<dt>B</dt><dd>C</dd></body></html>"
+    ],
+    [
+      "dd>dt",
+      "<!DOCTYPE html><html><body>A<dd>B<dt>C</body></html>",
+      "<html><head></head><body>A<dd>B</dd><dt>C</dt></body></html>"
+    ],
+    [
+      "dt>li>dt",
+      "<!DOCTYPE html><html><body>A<dt>B<li>C<dt>D</body></html>",
+      "<html><head></head><body>A<dt>B<li>C<dt>D</dt></li></dt></body></html>"
+    ],
+    [
+      "dt>li>dd",
+      "<!DOCTYPE html><html><body>A<dt>B<li>C<dd>D</body></html>",
+      "<html><head></head><body>A<dt>B<li>C<dd>D</dd></li></dt></body></html>"
+    ],
+    [
+      "dd>li>dt",
+      "<!DOCTYPE html><html><body>A<dd>B<li>C<dt>D</body></html>",
+      "<html><head></head><body>A<dd>B<li>C<dt>D</dt></li></dd></body></html>"
+    ],
+    [
+      "dd>li>dd",
+      "<!DOCTYPE html><html><body>A<dd>B<li>C<dd>D</body></html>",
+      "<html><head></head><body>A<dd>B<li>C<dd>D</dd></li></dd></body></html>"
+    ],
+    [
+      "dt>div>dt",
+      "<!DOCTYPE html><html><body>A<dt>B<div>C<dt>D</body></html>",
+      "<html><head></head><body>A<dt>B<div>C</div></dt><dt>D</dt></body></html>"
+    ],
+    [
+      "dt>div>dd",
+      "<!DOCTYPE html><html><body>A<dt>B<div>C<dd>D</body></html>",
+      "<html><head></head><body>A<dt>B<div>C</div></dt><dd>D</dd></body></html>"
+    ],
+    [
+      "dd>div>dt",
+      "<!DOCTYPE html><html><body>A<dd>B<div>C<dt>D</body></html>",
+      "<html><head></head><body>A<dd>B<div>C</div></dd><dt>D</dt></body></html>"
+    ],
+    [
+      "dd>div>dd",
+      "<!DOCTYPE html><html><body>A<dd>B<div>C<dd>D</body></html>",
+      "<html><head></head><body>A<dd>B<div>C</div></dd><dd>D</dd></body></html>"
+    ],
+    [
+      "dt>p>li>dt",
+      "<!DOCTYPE html><html><body>A<dt>B<p>P<li>C<dt>D</body></html>",
+      "<html><head></head><body>A<dt>B<p>P</p><li>C<dt>D</dt></li></dt></body></html>"
+    ],
+    [
+      "dt>p>li>dd",
+      "<!DOCTYPE html><html><body>A<dt>B<p>P<li>C<dd>D</body></html>",
+      "<html><head></head><body>A<dt>B<p>P</p><li>C<dd>D</dd></li></dt></body></html>"
+    ],
+    [
+      "dd>p>li>dt",
+      "<!DOCTYPE html><html><body>A<dd>B<p>P<li>C<dt>D</body></html>",
+      "<html><head></head><body>A<dd>B<p>P</p><li>C<dt>D</dt></li></dd></body></html>"
+    ],
+    [
+      "dd>p>li>dd",
+      "<!DOCTYPE html><html><body>A<dd>B<p>P<li>C<dd>D</body></html>",
+      "<html><head></head><body>A<dd>B<p>P</p><li>C<dd>D</dd></li></dd></body></html>"
+    ],
+    [
+      "dt/dd end",
+      "<!DOCTYPE html><html><body>A</dt>B</dd>C</body></html>",
+      "<html><head></head><body>ABC</body></html>"
+    ],
+    [
+      "dt/dd proper",
+      "<!DOCTYPE html><html><body>A<dt>B</dt>C<dd>D</dd>E</body></html>",
+      "<html><head></head><body>A<dt>B</dt>C<dd>D</dd>E</body></html>"
+    ],
+    [
+      "dt/dd mismatch",
+      "<!DOCTYPE html><html><body>A<dt>B</dd>C<dd>D</dt>E</body></html>",
+      "<html><head></head><body>A<dt>BC</dt><dd>DE</dd></body></html>"
+    ],
+    [
+      "dt>div dt end",
+      "<!DOCTYPE html><html><body>A<dt>B<div>C</dt>D</body></html>",
+      "<html><head></head><body>A<dt>B<div>C</div></dt>D</body></html>"
+    ],
+    [
+      "dd>div dd end",
+      "<!DOCTYPE html><html><body>A<dd>B<div>C</dd>D</body></html>",
+      "<html><head></head><body>A<dd>B<div>C</div></dd>D</body></html>"
+    ],
+    [
+      "dt>li dt end",
+      "<!DOCTYPE html><html><body>A<dt>B<li>C</dt>D</body></html>",
+      "<html><head></head><body>A<dt>B<li>C</li></dt>D</body></html>"
+    ],
+    [
+      "dd>li dd end",
+      "<!DOCTYPE html><html><body>A<dd>B<li>C</dd>D</body></html>",
+      "<html><head></head><body>A<dd>B<li>C</li></dd>D</body></html>"
+    ],
+    [
+      "plaintext",
+      "<!DOCTYPE html><html><body>A<plaintext>&#x41;</plaintext></body></html>",
+      "<html><head></head><body>A<plaintext>&#x41;</plaintext></body></html></plaintext></body></html>"
+    ],
+    [
+      "NUL in plaintext",
+      "<!DOCTYPE html><html><body>A<plaintext>\u0000</plaintext></body></html>",
+      "<html><head></head><body>A<plaintext>�</plaintext></body></html></plaintext></body></html>"
+    ],
+    [
+      "p>plaintext",
+      "<!DOCTYPE html><html><body>A<p>B<plaintext>&#x41;</plaintext></body></html>",
+      "<html><head></head><body>A<p>B</p><plaintext>&#x41;</plaintext></body></html></plaintext></body></html>"
+    ],
+    [
+      "button",
+      "<!DOCTYPE html><html><body>A<button>B</button>C</body></html>",
+      "<html><head></head><body>A<button>B</button>C</body></html>"
+    ],
+    [
+      "nested button",
+      "<!DOCTYPE html><html><body>A<button>B<button>C</button>D</button>E</body></html>",
+      "<html><head></head><body>A<button>B</button><button>C</button>DE</body></html>"
+    ],
+    [
+      "button-[scope]-button",
+      "<!DOCTYPE html><html><body>A<button>B<object>C<button>D</button>E</object>F</button>G</body></html>",
+      "<html><head></head><body>A<button>B<object>C<button>D</button>E</object>F</button>G</body></html>"
+    ],
+    [
+      "p>table",
+      "<!DOCTYPE html><html><body>A<p>B<table><!--C--></table>D</body></html>",
+      "<html><head></head><body>A<p>B</p><table><!--C--></table>D</body></html>"
+    ],
+    [
+      "p>button>table",
+      "<!DOCTYPE html><html><body>A<p>B<button>C<table><!--D--></table>E</button>F</body></html>",
+      "<html><head></head><body>A<p>B<button>C<table><!--D--></table>E</button>F</p></body></html>"
+    ],
+    [
+      "param, source, track",
+      "<!DOCTYPE html><html><body>A<param>B<source>C<track>D</body></html>",
+      "<html><head></head><body>A<param>B<source>C<track>D</body></html>"
+    ],
+    [
+      "param, source, track start+end",
+      "<!DOCTYPE html><html><body>A<param>B</param>C<source>D</source>E<track>F</track>G</body></html>",
+      "<html><head></head><body>A<param>BC<source>DE<track>FG</body></html>"
+    ],
+    [
+      "hr",
+      "<!DOCTYPE html><html><body>A<p>B<hr>C<p>D</hr>E<p>F<hr/>G<p>H<hr>I</body></html>",
+      "<html><head></head><body>A<p>B</p><hr>C<p>DE</p><p>F</p><hr>G<p>H</p><hr>I</body></html>"
+    ],
+    [
+      "image",
+      "<!DOCTYPE html><html><image a><image b/></html>",
+      "<html><head></head><body><img a=\"\"><img b=\"\"></body></html>"
+    ],
+    [
+      "xmp",
+      "<!DOCTYPE html><html>A<xmp>&#x41;<tag></xmp>B<p>C<xmp>D</xmp>E<p>F<button>G<xmp>H</xmp>I</button>J</html>",
+      "<html><head></head><body>A<xmp>&#x41;<tag></xmp>B<p>C</p><xmp>D</xmp>E<p>F<button>G<xmp>H</xmp>I</button>J</p></body></html>"
+    ],
+    [
+      "optgroup/option",
+      "<!DOCTYPE html><html>A<option>B<option>C<optgroup><option>D</option>E<optgroup>F</html>",
+      "<html><head></head><body>A<option>B</option><option>C</option><optgroup><option>D</option>E<optgroup>F</optgroup></optgroup></body></html>"
+    ],
+    [
+      "rb/rtc outside ruby",
+      "<!DOCTYPE html><html>A<rb>B<rtc>C<rb>D</html>",
+      "<html><head></head><body>A<rb>B<rtc>C<rb>D</rb></rtc></rb></body></html>"
+    ],
+    [
+      "rb/rtc inside ruby",
+      "<!DOCTYPE html><html>A<ruby>B<rb>C<rtc>D<rb>E<span>F<rtc>G</ruby>H</html>",
+      "<html><head></head><body>A<ruby>B<rb>C</rb><rtc>D</rtc><rb>E<span>F<rtc>G</rtc></span></rb></ruby>H</body></html>"
+    ],
+    [
+      "rp/rt outside ruby",
+      "<!DOCTYPE html><html>A<rp>B<rt>C<rp>D</html>",
+      "<html><head></head><body>A<rp>B<rt>C<rp>D</rp></rt></rp></body></html>"
+    ],
+    [
+      "rp/rt inside ruby",
+      "<!DOCTYPE html><html>A<ruby>B<rp>C<rt>D<rp>E<span>F<rt>G<rtc>H<rp>I</ruby>J</html>",
+      "<html><head></head><body>A<ruby>B<rp>C</rp><rt>D</rt><rp>E<span>F<rt>G</rt><rtc>H<rp>I</rp></rtc></span></rp></ruby>J</body></html>"
+    ],
+    [
+      "forbidden start tags",
+      "<!DOCTYPE html><html>A<caption>B<col>C<colgroup>D<frame>E<head>F<tbody>G<td>H<tfoot>I<th>J<thead>K<tr>L</html>",
+      "<html><head></head><body>ABCDEFGHIJKL</body></html>"
+    ],
+    [
+      "address end",
+      "<!DOCTYPE html><html><body>A</address>B<address>C<dd>D</address>E<address>F<div>G<dd>H</address>I<address>J<object>K</address>L</object>M</address>N</body></html>",
+      "<html><head></head><body>AB<address>C<dd>D</dd></address>E<address>F<div>G<dd>H</dd></div></address>I<address>J<object>KL</object>M</address>N</body></html>"
+    ],
+    [
+      "article end",
+      "<!DOCTYPE html><html><body>A</article>B<article>C<dd>D</article>E<article>F<div>G<dd>H</article>I<article>J<object>K</article>L</object>M</article>N</body></html>",
+      "<html><head></head><body>AB<article>C<dd>D</dd></article>E<article>F<div>G<dd>H</dd></div></article>I<article>J<object>KL</object>M</article>N</body></html>"
+    ],
+    [
+      "aside end",
+      "<!DOCTYPE html><html><body>A</aside>B<aside>C<dd>D</aside>E<aside>F<div>G<dd>H</aside>I<aside>J<object>K</aside>L</object>M</aside>N</body></html>",
+      "<html><head></head><body>AB<aside>C<dd>D</dd></aside>E<aside>F<div>G<dd>H</dd></div></aside>I<aside>J<object>KL</object>M</aside>N</body></html>"
+    ],
+    [
+      "blockquote end",
+      "<!DOCTYPE html><html><body>A</blockquote>B<blockquote>C<dd>D</blockquote>E<blockquote>F<div>G<dd>H</blockquote>I<blockquote>J<object>K</blockquote>L</object>M</blockquote>N</body></html>",
+      "<html><head></head><body>AB<blockquote>C<dd>D</dd></blockquote>E<blockquote>F<div>G<dd>H</dd></div></blockquote>I<blockquote>J<object>KL</object>M</blockquote>N</body></html>"
+    ],
+    [
+      "button end",
+      "<!DOCTYPE html><html><body>A</button>B<button>C<dd>D</button>E<button>F<div>G<dd>H</button>I<button>J<object>K</button>L</object>M</button>N</body></html>",
+      "<html><head></head><body>AB<button>C<dd>D</dd></button>E<button>F<div>G<dd>H</dd></div></button>I<button>J<object>KL</object>M</button>N</body></html>"
+    ],
+    [
+      "center end",
+      "<!DOCTYPE html><html><body>A</center>B<center>C<dd>D</center>E<center>F<div>G<dd>H</center>I<center>J<object>K</center>L</object>M</center>N</body></html>",
+      "<html><head></head><body>AB<center>C<dd>D</dd></center>E<center>F<div>G<dd>H</dd></div></center>I<center>J<object>KL</object>M</center>N</body></html>"
+    ],
+    [
+      "details end",
+      "<!DOCTYPE html><html><body>A</details>B<details>C<dd>D</details>E<details>F<div>G<dd>H</details>I<details>J<object>K</details>L</object>M</details>N</body></html>",
+      "<html><head></head><body>AB<details>C<dd>D</dd></details>E<details>F<div>G<dd>H</dd></div></details>I<details>J<object>KL</object>M</details>N</body></html>"
+    ],
+    [
+      "dialog end",
+      "<!DOCTYPE html><html><body>A</dialog>B<dialog>C<dd>D</dialog>E<dialog>F<div>G<dd>H</dialog>I<dialog>J<object>K</dialog>L</object>M</dialog>N</body></html>",
+      "<html><head></head><body>AB<dialog>C<dd>D</dd></dialog>E<dialog>F<div>G<dd>H</dd></div></dialog>I<dialog>J<object>KL</object>M</dialog>N</body></html>"
+    ],
+    [
+      "dir end",
+      "<!DOCTYPE html><html><body>A</dir>B<dir>C<dd>D</dir>E<dir>F<div>G<dd>H</dir>I<dir>J<object>K</dir>L</object>M</dir>N</body></html>",
+      "<html><head></head><body>AB<dir>C<dd>D</dd></dir>E<dir>F<div>G<dd>H</dd></div></dir>I<dir>J<object>KL</object>M</dir>N</body></html>"
+    ],
+    [
+      "div end",
+      "<!DOCTYPE html><html><body>A</div>B<div>C<dd>D</div>E<div>F<span>G<dd>H</div>I<div>J<object>K</div>L</object>M</div>N</body></html>",
+      "<html><head></head><body>AB<div>C<dd>D</dd></div>E<div>F<span>G<dd>H</dd></span></div>I<div>J<object>KL</object>M</div>N</body></html>"
+    ],
+    [
+      "dl end",
+      "<!DOCTYPE html><html><body>A</dl>B<dl>C<dd>D</dl>E<dl>F<div>G<dd>H</dl>I<dl>J<object>K</dl>L</object>M</dl>N</body></html>",
+      "<html><head></head><body>AB<dl>C<dd>D</dd></dl>E<dl>F<div>G<dd>H</dd></div></dl>I<dl>J<object>KL</object>M</dl>N</body></html>"
+    ],
+    [
+      "fieldset end",
+      "<!DOCTYPE html><html><body>A</fieldset>B<fieldset>C<dd>D</fieldset>E<fieldset>F<div>G<dd>H</fieldset>I<fieldset>J<object>K</fieldset>L</object>M</fieldset>N</body></html>",
+      "<html><head></head><body>AB<fieldset>C<dd>D</dd></fieldset>E<fieldset>F<div>G<dd>H</dd></div></fieldset>I<fieldset>J<object>KL</object>M</fieldset>N</body></html>"
+    ],
+    [
+      "figcaption end",
+      "<!DOCTYPE html><html><body>A</figcaption>B<figcaption>C<dd>D</figcaption>E<figcaption>F<div>G<dd>H</figcaption>I<figcaption>J<object>K</figcaption>L</object>M</figcaption>N</body></html>",
+      "<html><head></head><body>AB<figcaption>C<dd>D</dd></figcaption>E<figcaption>F<div>G<dd>H</dd></div></figcaption>I<figcaption>J<object>KL</object>M</figcaption>N</body></html>"
+    ],
+    [
+      "figure end",
+      "<!DOCTYPE html><html><body>A</figure>B<figure>C<dd>D</figure>E<figure>F<div>G<dd>H</figure>I<figure>J<object>K</figure>L</object>M</figure>N</body></html>",
+      "<html><head></head><body>AB<figure>C<dd>D</dd></figure>E<figure>F<div>G<dd>H</dd></div></figure>I<figure>J<object>KL</object>M</figure>N</body></html>"
+    ],
+    [
+      "footer end",
+      "<!DOCTYPE html><html><body>A</footer>B<footer>C<dd>D</footer>E<footer>F<div>G<dd>H</footer>I<footer>J<object>K</footer>L</object>M</footer>N</body></html>",
+      "<html><head></head><body>AB<footer>C<dd>D</dd></footer>E<footer>F<div>G<dd>H</dd></div></footer>I<footer>J<object>KL</object>M</footer>N</body></html>"
+    ],
+    [
+      "header end",
+      "<!DOCTYPE html><html><body>A</header>B<header>C<dd>D</header>E<header>F<div>G<dd>H</header>I<header>J<object>K</header>L</object>M</header>N</body></html>",
+      "<html><head></head><body>AB<header>C<dd>D</dd></header>E<header>F<div>G<dd>H</dd></div></header>I<header>J<object>KL</object>M</header>N</body></html>"
+    ],
+    [
+      "hgroup end",
+      "<!DOCTYPE html><html><body>A</hgroup>B<hgroup>C<dd>D</hgroup>E<hgroup>F<div>G<dd>H</hgroup>I<hgroup>J<object>K</hgroup>L</object>M</hgroup>N</body></html>",
+      "<html><head></head><body>AB<hgroup>C<dd>D</dd></hgroup>E<hgroup>F<div>G<dd>H</dd></div></hgroup>I<hgroup>J<object>KL</object>M</hgroup>N</body></html>"
+    ],
+    [
+      "listing end",
+      "<!DOCTYPE html><html><body>A</listing>B<listing>C<dd>D</listing>E<listing>F<div>G<dd>H</listing>I<listing>J<object>K</listing>L</object>M</listing>N</body></html>",
+      "<html><head></head><body>AB<listing>C<dd>D</dd></listing>E<listing>F<div>G<dd>H</dd></div></listing>I<listing>J<object>KL</object>M</listing>N</body></html>"
+    ],
+    [
+      "main end",
+      "<!DOCTYPE html><html><body>A</main>B<main>C<dd>D</main>E<main>F<div>G<dd>H</main>I<main>J<object>K</main>L</object>M</main>N</body></html>",
+      "<html><head></head><body>AB<main>C<dd>D</dd></main>E<main>F<div>G<dd>H</dd></div></main>I<main>J<object>KL</object>M</main>N</body></html>"
+    ],
+    [
+      "menu end",
+      "<!DOCTYPE html><html><body>A</menu>B<menu>C<dd>D</menu>E<menu>F<div>G<dd>H</menu>I<menu>J<object>K</menu>L</object>M</menu>N</body></html>",
+      "<html><head></head><body>AB<menu>C<dd>D</dd></menu>E<menu>F<div>G<dd>H</dd></div></menu>I<menu>J<object>KL</object>M</menu>N</body></html>"
+    ],
+    [
+      "nav end",
+      "<!DOCTYPE html><html><body>A</nav>B<nav>C<dd>D</nav>E<nav>F<div>G<dd>H</nav>I<nav>J<object>K</nav>L</object>M</nav>N</body></html>",
+      "<html><head></head><body>AB<nav>C<dd>D</dd></nav>E<nav>F<div>G<dd>H</dd></div></nav>I<nav>J<object>KL</object>M</nav>N</body></html>"
+    ],
+    [
+      "ol end",
+      "<!DOCTYPE html><html><body>A</ol>B<ol>C<dd>D</ol>E<ol>F<div>G<dd>H</ol>I<ol>J<object>K</ol>L</object>M</ol>N</body></html>",
+      "<html><head></head><body>AB<ol>C<dd>D</dd></ol>E<ol>F<div>G<dd>H</dd></div></ol>I<ol>J<object>KL</object>M</ol>N</body></html>"
+    ],
+    [
+      "pre end",
+      "<!DOCTYPE html><html><body>A</pre>B<pre>C<dd>D</pre>E<pre>F<div>G<dd>H</pre>I<pre>J<object>K</pre>L</object>M</pre>N</body></html>",
+      "<html><head></head><body>AB<pre>C<dd>D</dd></pre>E<pre>F<div>G<dd>H</dd></div></pre>I<pre>J<object>KL</object>M</pre>N</body></html>"
+    ],
+    [
+      "search end",
+      "<!DOCTYPE html><html><body>A</search>B<search>C<dd>D</search>E<search>F<div>G<dd>H</search>I<search>J<object>K</search>L</object>M</search>N</body></html>",
+      "<html><head></head><body>AB<search>C<dd>D</dd></search>E<search>F<div>G<dd>H</dd></div></search>I<search>J<object>KL</object>M</search>N</body></html>"
+    ],
+    [
+      "section end",
+      "<!DOCTYPE html><html><body>A</section>B<section>C<dd>D</section>E<section>F<div>G<dd>H</section>I<section>J<object>K</section>L</object>M</section>N</body></html>",
+      "<html><head></head><body>AB<section>C<dd>D</dd></section>E<section>F<div>G<dd>H</dd></div></section>I<section>J<object>KL</object>M</section>N</body></html>"
+    ],
+    [
+      "summary end",
+      "<!DOCTYPE html><html><body>A</summary>B<summary>C<dd>D</summary>E<summary>F<div>G<dd>H</summary>I<summary>J<object>K</summary>L</object>M</summary>N</body></html>",
+      "<html><head></head><body>AB<summary>C<dd>D</dd></summary>E<summary>F<div>G<dd>H</dd></div></summary>I<summary>J<object>KL</object>M</summary>N</body></html>"
+    ],
+    [
+      "ul end",
+      "<!DOCTYPE html><html><body>A</ul>B<ul>C<dd>D</ul>E<ul>F<div>G<dd>H</ul>I<ul>J<object>K</ul>L</object>M</ul>N</body></html>",
+      "<html><head></head><body>AB<ul>C<dd>D</dd></ul>E<ul>F<div>G<dd>H</dd></div></ul>I<ul>J<object>KL</object>M</ul>N</body></html>"
+    ],
+    [
+      "applet end",
+      "<!DOCTYPE html><html><body>A</applet>B<applet>C<dd>D</applet>E<applet>F<div>G<dd>H</applet>I<applet>J<object>K</applet>L</object>M</applet>N</body></html>",
+      "<html><head></head><body>AB<applet>C<dd>D</dd></applet>E<applet>F<div>G<dd>H</dd></div></applet>I<applet>J<object>KL</object>M</applet>N</body></html>"
+    ],
+    [
+      "marquee end",
+      "<!DOCTYPE html><html><body>A</marquee>B<marquee>C<dd>D</marquee>E<marquee>F<div>G<dd>H</marquee>I<marquee>J<object>K</marquee>L</object>M</marquee>N</body></html>",
+      "<html><head></head><body>AB<marquee>C<dd>D</dd></marquee>E<marquee>F<div>G<dd>H</dd></div></marquee>I<marquee>J<object>KL</object>M</marquee>N</body></html>"
+    ],
+    [
+      "object end",
+      "<!DOCTYPE html><html><body>A</object>B<object>C<dd>D</object>E<object>F<div>G<dd>H</object>I<object>J<marquee>K</object>L</marquee>M</object>N</body></html>",
+      "<html><head></head><body>AB<object>C<dd>D</dd></object>E<object>F<div>G<dd>H</dd></div></object>I<object>J<marquee>KL</marquee>M</object>N</body></html>"
+    ]
+  ],
+  "in-caption": [
+    [
+      "empty",
+      "<!DOCTYPE html><table><caption></caption></table>",
+      "<html><head></head><body><table><caption></caption></table></body></html>"
+    ],
+    [
+      "comment",
+      "<!DOCTYPE html><table><caption><!--A--></caption></table>",
+      "<html><head></head><body><table><caption><!--A--></caption></table></body></html>"
+    ],
+    [
+      "doctype",
+      "<!DOCTYPE html><table><caption><!DOCTYPE html></caption></table>",
+      "<html><head></head><body><table><caption></caption></table></body></html>"
+    ],
+    [
+      "text",
+      "<!DOCTYPE html><table><caption>A</caption></table>",
+      "<html><head></head><body><table><caption>A</caption></table></body></html>"
+    ],
+    [
+      "markup",
+      "<!DOCTYPE html><table><caption><div>A</div></caption></table>",
+      "<html><head></head><body><table><caption><div>A</div></caption></table></body></html>"
+    ],
+    [
+      "unclosed empty",
+      "<!DOCTYPE html><table><caption></table>",
+      "<html><head></head><body><table><caption></caption></table></body></html>"
+    ],
+    [
+      "unclosed text",
+      "<!DOCTYPE html><table><caption>A </table>",
+      "<html><head></head><body><table><caption>A </caption></table></body></html>"
+    ],
+    [
+      "unclosed markup",
+      "<!DOCTYPE html><table><caption><div>A</div></table>",
+      "<html><head></head><body><table><caption><div>A</div></caption></table></body></html>"
+    ],
+    [
+      "closed early",
+      "<!DOCTYPE html><table><caption><div>A</caption></table>",
+      "<html><head></head><body><table><caption><div>A</div></caption></table></body></html>"
+    ],
+    [
+      "caption",
+      "<!DOCTYPE html><table><caption>A<caption>B</table>",
+      "<html><head></head><body><table><caption>A</caption><caption>B</caption></table></body></html>"
+    ],
+    [
+      "colgroup",
+      "<!DOCTYPE html><table><caption>A<colgroup></table>",
+      "<html><head></head><body><table><caption>A</caption><colgroup></colgroup></table></body></html>"
+    ],
+    [
+      "col",
+      "<!DOCTYPE html><table><caption>A<col></table>",
+      "<html><head></head><body><table><caption>A</caption><colgroup><col></colgroup></table></body></html>"
+    ],
+    [
+      "tbody",
+      "<!DOCTYPE html><table><caption>A<tbody></table>",
+      "<html><head></head><body><table><caption>A</caption><tbody></tbody></table></body></html>"
+    ],
+    [
+      "thead",
+      "<!DOCTYPE html><table><caption>A<thead></table>",
+      "<html><head></head><body><table><caption>A</caption><thead></thead></table></body></html>"
+    ],
+    [
+      "tfoot",
+      "<!DOCTYPE html><table><caption>A<tfoot></table>",
+      "<html><head></head><body><table><caption>A</caption><tfoot></tfoot></table></body></html>"
+    ],
+    [
+      "tr",
+      "<!DOCTYPE html><table><caption>A<tr></table>",
+      "<html><head></head><body><table><caption>A</caption><tbody><tr></tr></tbody></table></body></html>"
+    ],
+    [
+      "td",
+      "<!DOCTYPE html><table><caption>A<td></table>",
+      "<html><head></head><body><table><caption>A</caption><tbody><tr><td></td></tr></tbody></table></body></html>"
+    ],
+    [
+      "th",
+      "<!DOCTYPE html><table><caption>A<th></table>",
+      "<html><head></head><body><table><caption>A</caption><tbody><tr><th></th></tr></tbody></table></body></html>"
+    ],
+    [
+      "end body",
+      "<!DOCTYPE html><table><caption>A</body>B</table>",
+      "<html><head></head><body><table><caption>AB</caption></table></body></html>"
+    ],
+    [
+      "end html",
+      "<!DOCTYPE html><table><caption>A</html>B</table>",
+      "<html><head></head><body><table><caption>AB</caption></table></body></html>"
+    ],
+    [
+      "end tbody",
+      "<!DOCTYPE html><table><caption>A</tbody>B</table>",
+      "<html><head></head><body><table><caption>AB</caption></table></body></html>"
+    ],
+    [
+      "known end tag",
+      "<!DOCTYPE html><table><caption>A</div>B</table>",
+      "<html><head></head><body><table><caption>AB</caption></table></body></html>"
+    ],
+    [
+      "any end tag",
+      "<!DOCTYPE html><table><caption>A</tag>B</table>",
+      "<html><head></head><body><table><caption>AB</caption></table></body></html>"
+    ],
+    [
+      "template",
+      "<!DOCTYPE html><table><caption>A<template>B</template>C</caption></table>",
+      "<html><head></head><body><table><caption>A<template>B</template>C</caption></table></body></html>"
+    ],
+    [
+      "template end",
+      "<!DOCTYPE html><table><caption>A</template>B</caption></table>",
+      "<html><head></head><body><table><caption>AB</caption></table></body></html>"
+    ]
+  ],
+  "in-cell": [
+    [
+      "empty",
+      "<!DOCTYPE html><table><tbody><tr><td></td></tr></tbody></table>",
+      "<html><head></head><body><table><tbody><tr><td></td></tr></tbody></table></body></html>"
+    ],
+    [
+      "comment",
+      "<!DOCTYPE html><table><tbody><tr><td><!--A--></td></tr></tbody></table>",
+      "<html><head></head><body><table><tbody><tr><td><!--A--></td></tr></tbody></table></body></html>"
+    ],
+    [
+      "doctype",
+      "<!DOCTYPE html><table><tbody><tr><td><!DOCTYPE html></td></tr></tbody></table>",
+      "<html><head></head><body><table><tbody><tr><td></td></tr></tbody></table></body></html>"
+    ],
+    [
+      "space",
+      "<!DOCTYPE html><table><tbody><tr><td> \n\t\f</td></tr></tbody></table>",
+      "<html><head></head><body><table><tbody><tr><td> \n\t\f</td></tr></tbody></table></body></html>"
+    ],
+    [
+      "text",
+      "<!DOCTYPE html><table><tbody><tr><td>A</td></tr></tbody></table>",
+      "<html><head></head><body><table><tbody><tr><td>A</td></tr></tbody></table></body></html>"
+    ],
+    [
+      "markup",
+      "<!DOCTYPE html><table><tbody><tr><td><div>A</div></td></tr></tbody></table>",
+      "<html><head></head><body><table><tbody><tr><td><div>A</div></td></tr></tbody></table></body></html>"
+    ],
+    [
+      "unclosed markup",
+      "<!DOCTYPE html><table><tbody><tr><td><div>A</td></tr></tbody></table>",
+      "<html><head></head><body><table><tbody><tr><td><div>A</div></td></tr></tbody></table></body></html>"
+    ],
+    [
+      "wrong end tag (td)",
+      "<!DOCTYPE html><table><tbody><tr><td>A</th></tr></tbody></table>",
+      "<html><head></head><body><table><tbody><tr><td>A</td></tr></tbody></table></body></html>"
+    ],
+    [
+      "wrong end tag (th)",
+      "<!DOCTYPE html><table><tbody><tr><th>A</td></tr></tbody></table>",
+      "<html><head></head><body><table><tbody><tr><th>A</th></tr></tbody></table></body></html>"
+    ],
+    [
+      "tr end early",
+      "<!DOCTYPE html><table><tbody><tr><td>A</tr></tbody></table>",
+      "<html><head></head><body><table><tbody><tr><td>A</td></tr></tbody></table></body></html>"
+    ],
+    [
+      "tr end early with content",
+      "<!DOCTYPE html><table><tbody><tr><td>A<div>B</tr></tbody></table>",
+      "<html><head></head><body><table><tbody><tr><td>A<div>B</div></td></tr></tbody></table></body></html>"
+    ],
+    [
+      "tbody end early",
+      "<!DOCTYPE html><table><tbody><tr><td>A</tbody></table>",
+      "<html><head></head><body><table><tbody><tr><td>A</td></tr></tbody></table></body></html>"
+    ],
+    [
+      "table end early",
+      "<!DOCTYPE html><table><tbody><tr><td>A</table>",
+      "<html><head></head><body><table><tbody><tr><td>A</td></tr></tbody></table></body></html>"
+    ],
+    [
+      "caption start",
+      "<!DOCTYPE html><table><tbody><tr><td>A<caption>B</td></tr></tbody></table>",
+      "<html><head></head><body><table><tbody><tr><td>A</td></tr></tbody><caption>B</caption></table></body></html>"
+    ],
+    [
+      "caption nested",
+      "<!DOCTYPE html><table><tbody><tr><td>A<caption>B</caption></td></tr></tbody></table>",
+      "<html><head></head><body><table><tbody><tr><td>A</td></tr></tbody><caption>B</caption></table></body></html>"
+    ],
+    [
+      "col",
+      "<!DOCTYPE html><table><tbody><tr><td>A<col/>B</td></tr></tbody></table>",
+      "<html><head></head><body>B<table><tbody><tr><td>A</td></tr></tbody><colgroup><col></colgroup></table></body></html>"
+    ],
+    [
+      "td start",
+      "<!DOCTYPE html><table><tbody><tr><td>A<td>B</td></tr></tbody></table>",
+      "<html><head></head><body><table><tbody><tr><td>A</td><td>B</td></tr></tbody></table></body></html>"
+    ],
+    [
+      "td nested",
+      "<!DOCTYPE html><table><tbody><tr><td>A<td>B</td>C</td></tr></tbody></table>",
+      "<html><head></head><body>C<table><tbody><tr><td>A</td><td>B</td></tr></tbody></table></body></html>"
+    ],
+    [
+      "td end after th in SVG namespace",
+      "<!DOCTYPE html><table><tbody><tr><td>A<svg>B<th>C</td></tr></tbody></table>",
+      "<html><head></head><body><table><tbody><tr><td>A<svg>B<th>C</th></svg></td></tr></tbody></table></body></html>"
+    ],
+    [
+      "tr end after th in SVG namespace",
+      "<!DOCTYPE html><table><tbody><tr><td>A<svg>B<th>C</tr></tbody></table>",
+      "<html><head></head><body><table><tbody><tr><td>A<svg>B<th>C</th></svg></td></tr></tbody></table></body></html>"
+    ],
+    [
+      "wrong table body end tag",
+      "<!DOCTYPE html><table><tbody><tr><td>A</td><td>B</thead></td><td>C</td></table>",
+      "<html><head></head><body><table><tbody><tr><td>A</td><td>B</td><td>C</td></tr></tbody></table></body></html>"
+    ],
+    [
+      "body end",
+      "<!DOCTYPE html><table><thead><tr><td>A</body></td><td>B</td></tr></thead></table>",
+      "<html><head></head><body><table><thead><tr><td>A</td><td>B</td></tr></thead></table></body></html>"
+    ],
+    [
+      "caption end",
+      "<!DOCTYPE html><table><thead><tr><td>A</caption></td><td>B</td></tr></thead></table>",
+      "<html><head></head><body><table><thead><tr><td>A</td><td>B</td></tr></thead></table></body></html>"
+    ],
+    [
+      "col end",
+      "<!DOCTYPE html><table><thead><tr><td>A</col></td><td>B</td></tr></thead></table>",
+      "<html><head></head><body><table><thead><tr><td>A</td><td>B</td></tr></thead></table></body></html>"
+    ],
+    [
+      "colgroup end",
+      "<!DOCTYPE html><table><thead><tr><td>A</colgroup></td><td>B</td></tr></thead></table>",
+      "<html><head></head><body><table><thead><tr><td>A</td><td>B</td></tr></thead></table></body></html>"
+    ],
+    [
+      "html end",
+      "<!DOCTYPE html><table><thead><tr><td>A</html></td><td>B</td></tr></thead></table>",
+      "<html><head></head><body><table><thead><tr><td>A</td><td>B</td></tr></thead></table></body></html>"
+    ]
+  ],
+  "in-column-group": [
+    [
+      "empty",
+      "<!DOCTYPE html><table><colgroup></colgroup></table>",
+      "<html><head></head><body><table><colgroup></colgroup></table></body></html>"
+    ],
+    [
+      "comment",
+      "<!DOCTYPE html><table><colgroup><!--A--></colgroup></table>",
+      "<html><head></head><body><table><colgroup><!--A--></colgroup></table></body></html>"
+    ],
+    [
+      "doctype",
+      "<!DOCTYPE html><table><colgroup><!DOCTYPE html></colgroup></table>",
+      "<html><head></head><body><table><colgroup></colgroup></table></body></html>"
+    ],
+    [
+      "space",
+      "<!DOCTYPE html><table><colgroup> \n\t\f</colgroup></table>",
+      "<html><head></head><body><table><colgroup> \n\t\f</colgroup></table></body></html>"
+    ],
+    [
+      "text",
+      "<!DOCTYPE html><table><colgroup>A</colgroup></table>",
+      "<html><head></head><body>A<table><colgroup></colgroup></table></body></html>"
+    ],
+    [
+      "space + text",
+      "<!DOCTYPE html><table><colgroup> \n\t\fA</colgroup></table>",
+      "<html><head></head><body>A<table><colgroup> \n\t\f</colgroup></table></body></html>"
+    ],
+    [
+      "space + text + space",
+      "<!DOCTYPE html><table><colgroup> \n\t\fA \n\t\f</colgroup></table>",
+      "<html><head></head><body>A \n\t\f<table><colgroup> \n\t\f</colgroup></table></body></html>"
+    ],
+    [
+      "unclosed",
+      "<!DOCTYPE html><table><colgroup></table>",
+      "<html><head></head><body><table><colgroup></colgroup></table></body></html>"
+    ],
+    [
+      "html",
+      "<!DOCTYPE html><table><colgroup><html></colgroup></table>",
+      "<html><head></head><body><table><colgroup></colgroup></table></body></html>"
+    ],
+    [
+      "col start tag",
+      "<!DOCTYPE html><table><colgroup><col></colgroup></table>",
+      "<html><head></head><body><table><colgroup><col></colgroup></table></body></html>"
+    ],
+    [
+      "col self-closed",
+      "<!DOCTYPE html><table><colgroup><col/></colgroup></table>",
+      "<html><head></head><body><table><colgroup><col></colgroup></table></body></html>"
+    ],
+    [
+      "col empty",
+      "<!DOCTYPE html><table><colgroup><col></col></colgroup></table>",
+      "<html><head></head><body><table><colgroup><col></colgroup></table></body></html>"
+    ],
+    [
+      "col end tag",
+      "<!DOCTYPE html><table><colgroup></col></colgroup></table>",
+      "<html><head></head><body><table><colgroup></colgroup></table></body></html>"
+    ],
+    [
+      "template",
+      "<!DOCTYPE html><table><colgroup><template></template><col/></colgroup></table>",
+      "<html><head></head><body><table><colgroup><template></template><col></colgroup></table></body></html>"
+    ],
+    [
+      "template end",
+      "<!DOCTYPE html><table><colgroup></template><col/></colgroup></table>",
+      "<html><head></head><body><table><colgroup><col></colgroup></table></body></html>"
+    ],
+    [
+      "EOF",
+      "<!DOCTYPE html><table><colgroup><col/>",
+      "<html><head></head><body><table><colgroup><col></colgroup></table></body></html>"
+    ]
+  ],
+  "in-foreign-content": [
+    [
+      "empty svg",
+      "<!DOCTYPE html><svg></svg>",
+      "<html><head></head><body><svg></svg></body></html>"
+    ],
+    [
+      "unclosed",
+      "<!DOCTYPE html><svg>",
+      "<html><head></head><body><svg></svg></body></html>"
+    ],
+    [
+      "space",
+      "<!DOCTYPE html><svg> \t\n\f</svg>",
+      "<html><head></head><body><svg> \t\n\f</svg></body></html>"
+    ],
+    [
+      "comment",
+      "<!DOCTYPE html><svg><!--A--></svg>",
+      "<html><head></head><body><svg><!--A--></svg></body></html>"
+    ],
+    [
+      "doctype",
+      "<!DOCTYPE html><svg><!DOCTYPE html></svg>",
+      "<html><head></head><body><svg></svg></body></html>"
+    ],
+    [
+      "text",
+      "<!DOCTYPE html><svg>A</svg>",
+      "<html><head></head><body><svg>A</svg></body></html>"
+    ],
+    [
+      "NUL",
+      "<!DOCTYPE html><svg>\u0000</svg>",
+      "<html><head></head><body><svg>�</svg></body></html>"
+    ],
+    [
+      "CDATA",
+      "<!DOCTYPE html><svg><![CDATA[A]]></svg>",
+      "<html><head></head><body><svg>A</svg></body></html>"
+    ],
+    [
+      "svg correct namespace",
+      "<!DOCTYPE html><svg xmlns=\"http://www.w3.org/2000/svg\"></svg>",
+      "<html><head></head><body><svg xmlns=\"http://www.w3.org/2000/svg\"></svg></body></html>"
+    ],
+    [
+      "svg invalid namespace",
+      "<!DOCTYPE html><svg xmlns=\"http://www.w3.org/1999/xhtml\"></svg>",
+      "<html><head></head><body><svg xmlns=\"http://www.w3.org/1999/xhtml\"></svg></body></html>"
+    ],
+    [
+      "svg invalid xlink",
+      "<!DOCTYPE html><svg xmlns:xlink=\"http://www.w3.org/1999/xhtml\"></svg>",
+      "<html><head></head><body><svg xmlns:xlink=\"http://www.w3.org/1999/xhtml\"></svg></body></html>"
+    ],
+    [
+      "math correct namespace",
+      "<!DOCTYPE html><math xmlns=\"http://www.w3.org/1998/Math/MathML\"></math>",
+      "<html><head></head><body><math xmlns=\"http://www.w3.org/1998/Math/MathML\"></math></body></html>"
+    ],
+    [
+      "math invalid namespace",
+      "<!DOCTYPE html><math xmlns=\"http://www.w3.org/1999/xhtml\"></math>",
+      "<html><head></head><body><math xmlns=\"http://www.w3.org/1999/xhtml\"></math></body></html>"
+    ],
+    [
+      "inherited svg inner correct namespace",
+      "<!DOCTYPE html><svg><tag xmlns=\"http://www.w3.org/2000/svg\"/></svg>",
+      "<html><head></head><body><svg><tag xmlns=\"http://www.w3.org/2000/svg\"></tag></svg></body></html>"
+    ],
+    [
+      "inherited svg inner invalid namespace",
+      "<!DOCTYPE html><svg><tag xmlns=\"http://www.w3.org/1999/xhtml\"/></svg>",
+      "<html><head></head><body><svg><tag xmlns=\"http://www.w3.org/1999/xhtml\"></tag></svg></body></html>"
+    ],
+    [
+      "inherited svg double invalid namespace",
+      "<!DOCTYPE html><svg xmlns=\"http://www.w3.org/1999/xhtml\"><tag xmlns=\"http://www.w3.org/1999/xhtml\"/></svg>",
+      "<html><head></head><body><svg xmlns=\"http://www.w3.org/1999/xhtml\"><tag xmlns=\"http://www.w3.org/1999/xhtml\"></tag></svg></body></html>"
+    ],
+    [
+      "inherited svg outer invalid namespace",
+      "<!DOCTYPE html><svg xmlns=\"http://www.w3.org/1999/xhtml\">\u0000<tag xmlns=\"http://www.w3.org/2000/svg\"/></svg>",
+      "<html><head></head><body><svg xmlns=\"http://www.w3.org/1999/xhtml\">�<tag xmlns=\"http://www.w3.org/2000/svg\"></tag></svg></body></html>"
+    ],
+    [
+      "inherited math inner correct namespace",
+      "<!DOCTYPE html><math><tag xmlns=\"http://www.w3.org/1998/Math/MathML\"/></math>",
+      "<html><head></head><body><math><tag xmlns=\"http://www.w3.org/1998/Math/MathML\"></tag></math></body></html>"
+    ],
+    [
+      "inherited math inner invalid namespace",
+      "<!DOCTYPE html><math><tag xmlns=\"http://www.w3.org/1999/xhtml\"/></math>",
+      "<html><head></head><body><math><tag xmlns=\"http://www.w3.org/1999/xhtml\"></tag></math></body></html>"
+    ],
+    [
+      "inherited math double invalid namespace",
+      "<!DOCTYPE html><math xmlns=\"http://www.w3.org/1999/xhtml\"><tag xmlns=\"http://www.w3.org/1999/xhtml\"/></math>",
+      "<html><head></head><body><math xmlns=\"http://www.w3.org/1999/xhtml\"><tag xmlns=\"http://www.w3.org/1999/xhtml\"></tag></math></body></html>"
+    ],
+    [
+      "inherited math outer invalid namespace",
+      "<!DOCTYPE html><math xmlns=\"http://www.w3.org/1999/xhtml\">\u0000<tag xmlns=\"http://www.w3.org/1998/Math/MathML\"/></math>",
+      "<html><head></head><body><math xmlns=\"http://www.w3.org/1999/xhtml\">�<tag xmlns=\"http://www.w3.org/1998/Math/MathML\"></tag></math></body></html>"
+    ],
+    [
+      "math inheriting svg namespace correct",
+      "<!DOCTYPE html><svg><math xmlns=\"http://www.w3.org/2000/svg\"/></svg>",
+      "<html><head></head><body><svg><math xmlns=\"http://www.w3.org/2000/svg\"></math></svg></body></html>"
+    ],
+    [
+      "math inheriting svg namespace invalid",
+      "<!DOCTYPE html><svg><math xmlns=\"http://www.w3.org/1998/Math/MathML\"/></svg>",
+      "<html><head></head><body><svg><math xmlns=\"http://www.w3.org/1998/Math/MathML\"></math></svg></body></html>"
+    ],
+    [
+      "svg inheriting math namespace correct",
+      "<!DOCTYPE html><math><svg xmlns=\"http://www.w3.org/1998/Math/MathML\"/></math>",
+      "<html><head></head><body><math><svg xmlns=\"http://www.w3.org/1998/Math/MathML\"></svg></math></body></html>"
+    ],
+    [
+      "svg inheriting math namespace invalid",
+      "<!DOCTYPE html><math><svg xmlns=\"http://www.w3.org/2000/svg\"/></math>",
+      "<html><head></head><body><math><svg xmlns=\"http://www.w3.org/2000/svg\"></svg></math></body></html>"
+    ],
+    [
+      "math:mi",
+      "<!DOCTYPE html><math><![CDATA[A]]>B\u0000C<mi><![CDATA[D]]>E\u0000F<div xmlns=\"http://www.w3.org/1999/xhtml\"></div>G</mi></math>",
+      "<html><head></head><body><math>AB�C<mi>DEF<div xmlns=\"http://www.w3.org/1999/xhtml\"></div>G</mi></math></body></html>"
+    ],
+    [
+      "math:mo",
+      "<!DOCTYPE html><math><![CDATA[A]]>B\u0000C<mo><![CDATA[D]]>E\u0000F<div xmlns=\"http://www.w3.org/1999/xhtml\"></div>G</mo></math>",
+      "<html><head></head><body><math>AB�C<mo>DEF<div xmlns=\"http://www.w3.org/1999/xhtml\"></div>G</mo></math></body></html>"
+    ],
+    [
+      "math:mn",
+      "<!DOCTYPE html><math><![CDATA[A]]>B\u0000C<mn><![CDATA[D]]>E\u0000F<div xmlns=\"http://www.w3.org/1999/xhtml\"></div>G</mn></math>",
+      "<html><head></head><body><math>AB�C<mn>DEF<div xmlns=\"http://www.w3.org/1999/xhtml\"></div>G</mn></math></body></html>"
+    ],
+    [
+      "math:ms",
+      "<!DOCTYPE html><math><![CDATA[A]]>B\u0000C<ms><![CDATA[D]]>E\u0000F<div xmlns=\"http://www.w3.org/1999/xhtml\"></div>G</ms></math>",
+      "<html><head></head><body><math>AB�C<ms>DEF<div xmlns=\"http://www.w3.org/1999/xhtml\"></div>G</ms></math></body></html>"
+    ],
+    [
+      "math:mtext",
+      "<!DOCTYPE html><math><![CDATA[A]]>B\u0000C<mtext><![CDATA[D]]>E\u0000F<div xmlns=\"http://www.w3.org/1999/xhtml\"></div>G</mtext></math>",
+      "<html><head></head><body><math>AB�C<mtext>DEF<div xmlns=\"http://www.w3.org/1999/xhtml\"></div>G</mtext></math></body></html>"
+    ],
+    [
+      "math:mtext>mglyph",
+      "<!DOCTYPE html><math><![CDATA[A]]>B\u0000C<mtext><![CDATA[D]]>E\u0000F<mglyph xmlns=\"http://www.w3.org/1998/Math/MathML\"></mglyph>G</mtext></math>",
+      "<html><head></head><body><math>AB�C<mtext>DEF<mglyph xmlns=\"http://www.w3.org/1998/Math/MathML\"></mglyph>G</mtext></math></body></html>"
+    ],
+    [
+      "math:mtext>malignmark",
+      "<!DOCTYPE html><math><![CDATA[A]]>B\u0000C<mtext><![CDATA[D]]>E\u0000F<malignmark xmlns=\"http://www.w3.org/1998/Math/MathML\"/>G</mtext></math>",
+      "<html><head></head><body><math>AB�C<mtext>DEF<malignmark xmlns=\"http://www.w3.org/1998/Math/MathML\"></malignmark>G</mtext></math></body></html>"
+    ],
+    [
+      "math:annotation-xml>svg",
+      "<!DOCTYPE html><math><![CDATA[A]]>\u0000<annotation-xml><![CDATA[B]]>\u0000<svg xmlns=\"http://www.w3.org/2000/svg\"><![CDATA[C]]>\u0000</svg></annotation-xml></math>",
+      "<html><head></head><body><math>A�<annotation-xml>B�<svg xmlns=\"http://www.w3.org/2000/svg\">C�</svg></annotation-xml></math></body></html>"
+    ],
+    [
+      "math:annotation-xml>tag",
+      "<!DOCTYPE html><math><![CDATA[A]]>\u0000<annotation-xml><![CDATA[B]]>\u0000<tag xmlns=\"http://www.w3.org/1998/Math/MathML\"><![CDATA[C]]>\u0000</tag></annotation-xml></math>",
+      "<html><head></head><body><math>A�<annotation-xml>B�<tag xmlns=\"http://www.w3.org/1998/Math/MathML\">C�</tag></annotation-xml></math></body></html>"
+    ],
+    [
+      "math:annotation-xml[encoding='text/html']>svg",
+      "<!DOCTYPE html><math><![CDATA[A]]>\u0000<annotation-xml encoding=\"text/html\"><![CDATA[B]]>\u0000<svg xmlns=\"http://www.w3.org/2000/svg\"><![CDATA[C]]>\u0000</svg></annotation-xml></math>",
+      "<html><head></head><body><math>A�<annotation-xml encoding=\"text/html\">B<svg xmlns=\"http://www.w3.org/2000/svg\">C�</svg></annotation-xml></math></body></html>"
+    ],
+    [
+      "math:annotation-xml[encoding='text/html']>math",
+      "<!DOCTYPE html><math><![CDATA[A]]>\u0000<annotation-xml encoding=\"TEXT/html\"><![CDATA[B]]>\u0000<math xmlns=\"http://www.w3.org/1998/Math/MathML\"><![CDATA[C]]>\u0000</math></annotation-xml></math>",
+      "<html><head></head><body><math>A�<annotation-xml encoding=\"TEXT/html\">B<math xmlns=\"http://www.w3.org/1998/Math/MathML\">C�</math></annotation-xml></math></body></html>"
+    ],
+    [
+      "math:annotation-xml[encoding='text/html']>tag",
+      "<!DOCTYPE html><math><![CDATA[A]]>\u0000<annotation-xml encoding=\"text/HTML\"><![CDATA[B]]>\u0000<tag xmlns=\"http://www.w3.org/1999/xhtml\"><![CDATA[C]]>\u0000</tag></annotation-xml></math>",
+      "<html><head></head><body><math>A�<annotation-xml encoding=\"text/HTML\">B<tag xmlns=\"http://www.w3.org/1999/xhtml\"><!--[CDATA[C]]--></tag></annotation-xml></math></body></html>"
+    ],
+    [
+      "math:annotation-xml[encoding='application/xhtml+xml']>tag",
+      "<!DOCTYPE html><math><![CDATA[A]]>\u0000<annotation-xml encoding=\"application/xhtml+xml\"><![CDATA[B]]>\u0000<tag xmlns=\"http://www.w3.org/1999/xhtml\"><![CDATA[C]]>\u0000</tag></annotation-xml></math>",
+      "<html><head></head><body><math>A�<annotation-xml encoding=\"application/xhtml+xml\">B<tag xmlns=\"http://www.w3.org/1999/xhtml\"><!--[CDATA[C]]--></tag></annotation-xml></math></body></html>"
+    ],
+    [
+      "math:annotation-xml[encoding='text/javascript']>svg",
+      "<!DOCTYPE html><math><![CDATA[A]]>\u0000<annotation-xml encoding=\"text/javascript\"><![CDATA[B]]>\u0000<svg xmlns=\"http://www.w3.org/2000/svg\"><![CDATA[C]]>\u0000</svg></annotation-xml></math>",
+      "<html><head></head><body><math>A�<annotation-xml encoding=\"text/javascript\">B�<svg xmlns=\"http://www.w3.org/2000/svg\">C�</svg></annotation-xml></math></body></html>"
+    ],
+    [
+      "math:annotation-xml[encoding='text/javascript']>tag",
+      "<!DOCTYPE html><math><![CDATA[A]]>\u0000<annotation-xml encoding=\"text/javascript\"><![CDATA[B]]>\u0000<tag xmlns=\"http://www.w3.org/1998/Math/MathML\"><![CDATA[C]]>\u0000</tag></annotation-xml></math>",
+      "<html><head></head><body><math>A�<annotation-xml encoding=\"text/javascript\">B�<tag xmlns=\"http://www.w3.org/1998/Math/MathML\">C�</tag></annotation-xml></math></body></html>"
+    ],
+    [
+      "svg:desc",
+      "<!DOCTYPE html><svg><![CDATA[A]]>B\u0000C<desc><![CDATA[D]]>E\u0000F<div xmlns=\"http://www.w3.org/1999/xhtml\"></div>G</desc></svg>",
+      "<html><head></head><body><svg>AB�C<desc>DEF<div xmlns=\"http://www.w3.org/1999/xhtml\"></div>G</desc></svg></body></html>"
+    ],
+    [
+      "svg:foreignObject",
+      "<!DOCTYPE html><svg><![CDATA[A]]>B\u0000C<foreignObject><![CDATA[D]]>E\u0000F<div xmlns=\"http://www.w3.org/1999/xhtml\"></div>G</foreignObject></svg>",
+      "<html><head></head><body><svg>AB�C<foreignObject>DEF<div xmlns=\"http://www.w3.org/1999/xhtml\"></div>G</foreignObject></svg></body></html>"
+    ],
+    [
+      "svg:title",
+      "<!DOCTYPE html><svg><![CDATA[A]]>B\u0000C<title><![CDATA[D]]>E\u0000F<div xmlns=\"http://www.w3.org/1999/xhtml\"></div>G</title></svg>",
+      "<html><head></head><body><svg>AB�C<title>DEF<div xmlns=\"http://www.w3.org/1999/xhtml\"></div>G</title></svg></body></html>"
+    ],
+    [
+      "svg CS tags",
+      "<!DOCTYPE html><svg><altglyph/><altglyphdef/><altglyphitem/><animatecolor/><animatemotion/><animatetransform/><clippath/><feblend/><fecolormatrix/><fecomponenttransfer/><fecomposite/><feconvolvematrix/><fediffuselighting/><fedisplacementmap/><fedistantlight/><fedropshadow/><feflood/><fefunca/><fefuncb/><fefuncg/><fefuncr/><fegaussianblur/><feimage/><femerge/><femergenode/><femorphology/><feoffset/><fepointlight/><fespecularlighting/><fespotlight/><fetile/><feturbulence/><foreignobject/><glyphref/><lineargradient/><radialgradient/><textpath/></svg>",
+      "<html><head></head><body><svg><altGlyph></altGlyph><altGlyphDef></altGlyphDef><altGlyphItem></altGlyphItem><animateColor></animateColor><animateMotion></animateMotion><animateTransform></animateTransform><clipPath></clipPath><feBlend></feBlend><feColorMatrix></feColorMatrix><feComponentTransfer></feComponentTransfer><feComposite></feComposite><feConvolveMatrix></feConvolveMatrix><feDiffuseLighting></feDiffuseLighting><feDisplacementMap></feDisplacementMap><feDistantLight></feDistantLight><feDropShadow></feDropShadow><feFlood></feFlood><feFuncA></feFuncA><feFuncB></feFuncB><feFuncG></feFuncG><feFuncR></feFuncR><feGaussianBlur></feGaussianBlur><feImage></feImage><feMerge></feMerge><feMergeNode></feMergeNode><feMorphology></feMorphology><feOffset></feOffset><fePointLight></fePointLight><feSpecularLighting></feSpecularLighting><feSpotLight></feSpotLight><feTile></feTile><feTurbulence></feTurbulence><foreignObject></foreignObject><glyphRef></glyphRef><linearGradient></linearGradient><radialGradient></radialGradient><textPath></textPath></svg></body></html>"
+    ],
+    [
+      "svg CS tag in math context",
+      "<!DOCTYPE html><math><altglyph/></math>",
+      "<html><head></head><body><math><altglyph></altglyph></math></body></html>"
+    ],
+    [
+      "math CS attributes",
+      "<!DOCTYPE html><math><mi definitionurl/></math>",
+      "<html><head></head><body><math><mi definitionURL=\"\"></mi></math></body></html>"
+    ],
+    [
+      "math CS attribute in svg context",
+      "<!DOCTYPE html><svg><mi definitionurl/></svg>",
+      "<html><head></head><body><svg><mi definitionurl=\"\"></mi></svg></body></html>"
+    ],
+    [
+      "math CS attribute on root math element",
+      "<!DOCTYPE html><math definitionurl/>",
+      "<html><head></head><body><math definitionURL=\"\"></math></body></html>"
+    ],
+    [
+      "svg CS attributes",
+      "<!DOCTYPE html><svg><g attributename attributetype basefrequency baseprofile calcmode clippathunits diffuseconstant edgemode filterunits glyphref gradienttransform gradientunits kernelmatrix kernelunitlength keypoints keysplines keytimes lengthadjust limitingconeangle markerheight markerunits markerwidth maskcontentunits maskunits numoctaves pathlength patterncontentunits patterntransform patternunits pointsatx pointsaty pointsatz preservealpha preserveaspectratio primitiveunits refx refy repeatcount repeatdur requiredextensions requiredfeatures specularconstant specularexponent spreadmethod startoffset stddeviation stitchtiles surfacescale systemlanguage tablevalues targetx targety textlength viewbox viewtarget xchannelselector ychannelselector zoomandpan /></svg>",
+      "<html><head></head><body><svg><g attributeName=\"\" attributeType=\"\" baseFrequency=\"\" baseProfile=\"\" calcMode=\"\" clipPathUnits=\"\" diffuseConstant=\"\" edgeMode=\"\" filterUnits=\"\" glyphRef=\"\" gradientTransform=\"\" gradientUnits=\"\" kernelMatrix=\"\" kernelUnitLength=\"\" keyPoints=\"\" keySplines=\"\" keyTimes=\"\" lengthAdjust=\"\" limitingConeAngle=\"\" markerHeight=\"\" markerUnits=\"\" markerWidth=\"\" maskContentUnits=\"\" maskUnits=\"\" numOctaves=\"\" pathLength=\"\" patternContentUnits=\"\" patternTransform=\"\" patternUnits=\"\" pointsAtX=\"\" pointsAtY=\"\" pointsAtZ=\"\" preserveAlpha=\"\" preserveAspectRatio=\"\" primitiveUnits=\"\" refX=\"\" refY=\"\" repeatCount=\"\" repeatDur=\"\" requiredExtensions=\"\" requiredFeatures=\"\" specularConstant=\"\" specularExponent=\"\" spreadMethod=\"\" startOffset=\"\" stdDeviation=\"\" stitchTiles=\"\" surfaceScale=\"\" systemLanguage=\"\" tableValues=\"\" targetX=\"\" targetY=\"\" textLength=\"\" viewBox=\"\" viewTarget=\"\" xChannelSelector=\"\" yChannelSelector=\"\" zoomAndPan=\"\"></g></svg></body></html>"
+    ],
+    [
+      "svg CS attribute in math context",
+      "<!DOCTYPE html><math><g attributename/></math>",
+      "<html><head></head><body><math><g attributename=\"\"></g></math></body></html>"
+    ],
+    [
+      "svg CS attribute on root svg element",
+      "<!DOCTYPE html><svg viewbox/>",
+      "<html><head></head><body><svg viewBox=\"\"></svg></body></html>"
+    ],
+    [
+      "font[]",
+      "<!DOCTYPE html><svg><font>\u0000</font></svg>",
+      "<html><head></head><body><svg><font>�</font></svg></body></html>"
+    ],
+    [
+      "font[foo]",
+      "<!DOCTYPE html><svg><font foo>\u0000</font></svg>",
+      "<html><head></head><body><svg><font foo=\"\">�</font></svg></body></html>"
+    ],
+    [
+      "font[color]",
+      "<!DOCTYPE html><svg><font foo color>\u0000</font></svg>",
+      "<html><head></head><body><svg></svg><font foo=\"\" color=\"\"></font></body></html>"
+    ],
+    [
+      "font[face]",
+      "<!DOCTYPE html><svg><font foo face>\u0000</font></svg>",
+      "<html><head></head><body><svg></svg><font foo=\"\" face=\"\"></font></body></html>"
+    ],
+    [
+      "font[size]",
+      "<!DOCTYPE html><svg><font foo size>\u0000</font></svg>",
+      "<html><head></head><body><svg></svg><font foo=\"\" size=\"\"></font></body></html>"
+    ],
+    [
+      "br end",
+      "<!DOCTYPE html><svg></br></svg>",
+      "<html><head></head><body><svg></svg><br></body></html>"
+    ],
+    [
+      "br end wrapped",
+      "<!DOCTYPE html><svg><g><desc><math><mi><mglyph><mfrac></br></mfrac></mglyph></mi></math></desc></g></svg>",
+      "<html><head></head><body><svg><g><desc><math><mi><mglyph><mfrac></mfrac></mglyph><br></mi></math></desc></g></svg></body></html>"
+    ],
+    [
+      "p end",
+      "<!DOCTYPE html><svg></p></svg>",
+      "<html><head></head><body><svg></svg><p></p></body></html>"
+    ],
+    [
+      "p end inside p",
+      "<!DOCTYPE html><p a><svg></p></svg></p>",
+      "<html><head></head><body><p a=\"\"><svg></svg></p><p></p></body></html>"
+    ],
+    [
+      "p end wrapped",
+      "<!DOCTYPE html><svg><g><desc><math><mi><mglyph><mfrac></p></mfrac></mglyph></mi></math></desc></g></svg>",
+      "<html><head></head><body><svg><g><desc><math><mi><mglyph><mfrac></mfrac></mglyph><p></p></mi></math></desc></g></svg></body></html>"
+    ],
+    [
+      "MathML special check",
+      "<!DOCTYPE html><math><mf><mi><math></tag></mi></mf></math>",
+      "<html><head></head><body><math><mf><mi><math></math></mi></mf></math></body></html>"
+    ],
+    [
+      "svg special check",
+      "<!DOCTYPE html><svg><g><foreignObject><svg></tag></foreignObject></g></svg>",
+      "<html><head></head><body><svg><g><foreignObject><svg></svg></foreignObject></g></svg></body></html>"
+    ],
+    [
+      "html specific start tags",
+      "<!DOCTYPE html><body b a=\"a\"><math><mtext><mglyph n=\"1\"><b></b><mglyph n=\"2\"><big></big><mglyph n=\"3\"><blockquote></blockquote><mglyph n=\"4\">A<body a=\"b\" c>B</body>C<mglyph n=\"5\"><br><mglyph n=\"6\"><center></center><mglyph n=\"7\"><code></code><mglyph n=\"8\"><dd></dd><mglyph n=\"9\"><div></div><mglyph n=\"10\"><dl></dl><mglyph n=\"11\"><dt></dt><mglyph n=\"12\"><em></em><mglyph n=\"13\"><embed/><mglyph n=\"14\"><h1></h1><mglyph n=\"15\"><h2></h2><mglyph n=\"16\"><h3></h3><mglyph n=\"17\"><h4></h4><mglyph n=\"18\"><h5></h5><mglyph n=\"19\"><h6></h6><mglyph n=\"20\"><head></head><mglyph n=\"21\"><hr/><mglyph n=\"22\"><i></i><mglyph n=\"23\"><img/><mglyph n=\"24\"><li></li><mglyph n=\"25\"><listing></listing><mglyph n=\"26\"><menu></menu><mglyph n=\"27\"><meta/><mglyph n=\"28\"><nobr></nobr><mglyph n=\"29\"><ol></ol><mglyph n=\"30\"><p></p><mglyph n=\"31\"><pre></pre><mglyph n=\"32\"><ruby></ruby><mglyph n=\"33\"><s></s><mglyph n=\"34\"><small></small><mglyph n=\"35\"><span></span><mglyph n=\"36\"><strong></strong><mglyph n=\"37\"><strike></strike><mglyph n=\"38\"><sub></sub><mglyph n=\"39\"><sup></sup><mglyph n=\"40\"><table></table><mglyph n=\"41\"><tt></tt><mglyph n=\"42\"><u></u><mglyph n=\"43\"><ul></ul><mglyph n=\"44\"><var></var></mtext></math>",
+      "<html><head></head><body b=\"\" a=\"a\" c=\"\"><math><mtext><mglyph n=\"1\"></mglyph><b></b><mglyph n=\"2\"></mglyph><big></big><mglyph n=\"3\"></mglyph><blockquote></blockquote><mglyph n=\"4\">A</mglyph>BC<mglyph n=\"5\"></mglyph><br><mglyph n=\"6\"></mglyph><center></center><mglyph n=\"7\"></mglyph><code></code><mglyph n=\"8\"></mglyph><dd></dd><mglyph n=\"9\"></mglyph><div></div><mglyph n=\"10\"></mglyph><dl></dl><mglyph n=\"11\"></mglyph><dt></dt><mglyph n=\"12\"></mglyph><em></em><mglyph n=\"13\"></mglyph><embed><mglyph n=\"14\"></mglyph><h1></h1><mglyph n=\"15\"></mglyph><h2></h2><mglyph n=\"16\"></mglyph><h3></h3><mglyph n=\"17\"></mglyph><h4></h4><mglyph n=\"18\"></mglyph><h5></h5><mglyph n=\"19\"></mglyph><h6></h6><mglyph n=\"20\"></mglyph><mglyph n=\"21\"></mglyph><hr><mglyph n=\"22\"></mglyph><i></i><mglyph n=\"23\"></mglyph><img><mglyph n=\"24\"></mglyph><li></li><mglyph n=\"25\"></mglyph><listing></listing><mglyph n=\"26\"></mglyph><menu></menu><mglyph n=\"27\"></mglyph><meta><mglyph n=\"28\"></mglyph><nobr></nobr><mglyph n=\"29\"></mglyph><ol></ol><mglyph n=\"30\"></mglyph><p></p><mglyph n=\"31\"></mglyph><pre></pre><mglyph n=\"32\"></mglyph><ruby></ruby><mglyph n=\"33\"></mglyph><s></s><mglyph n=\"34\"></mglyph><small></small><mglyph n=\"35\"></mglyph><span></span><mglyph n=\"36\"></mglyph><strong></strong><mglyph n=\"37\"></mglyph><strike></strike><mglyph n=\"38\"></mglyph><sub></sub><mglyph n=\"39\"></mglyph><sup></sup><mglyph n=\"40\"></mglyph><table></table><mglyph n=\"41\"></mglyph><tt></tt><mglyph n=\"42\"></mglyph><u></u><mglyph n=\"43\"></mglyph><ul></ul><mglyph n=\"44\"></mglyph><var></var></mtext></math></body></html>"
+    ]
+  ],
+  "in-frameset": [
+    [
+      "empty",
+      "<!DOCTYPE html><frameset></frameset>",
+      "<html><head></head><frameset></frameset></html>"
+    ],
+    [
+      "unclosed (EOF)",
+      "<!DOCTYPE html><frameset>",
+      "<html><head></head><frameset></frameset></html>"
+    ],
+    [
+      "whitespace",
+      "<!DOCTYPE html><frameset> \t\n\f</frameset>",
+      "<html><head></head><frameset> \t\n\f</frameset></html>"
+    ],
+    [
+      "text",
+      "<!DOCTYPE html><frameset>A</frameset>",
+      "<html><head></head><frameset></frameset></html>"
+    ],
+    [
+      "space + text",
+      "<!DOCTYPE html><frameset> \t\n\fA</frameset>",
+      "<html><head></head><frameset> \t\n\f</frameset></html>"
+    ],
+    [
+      "comment",
+      "<!DOCTYPE html><frameset><!--A--></frameset>",
+      "<html><head></head><frameset><!--A--></frameset></html>"
+    ],
+    [
+      "doctype (repeated)",
+      "<!DOCTYPE html><frameset><!DOCTYPE html></frameset>",
+      "<html><head></head><frameset></frameset></html>"
+    ],
+    [
+      "doctype (first time)",
+      "<frameset><!DOCTYPE html></frameset>",
+      "<html><head></head><frameset></frameset></html>"
+    ],
+    [
+      "html start",
+      "<!DOCTYPE html><html a=\"1\" c=\"1\"><frameset><html b=\"2\" c=\"2\"></frameset>",
+      "<html a=\"1\" c=\"1\" b=\"2\"><head></head><frameset></frameset></html>"
+    ],
+    [
+      "html end",
+      "<!DOCTYPE html><frameset>\t</html>\n</frameset>\f",
+      "<html><head></head><frameset>\t\n</frameset>\f</html>"
+    ],
+    [
+      "nested frameset",
+      "<!DOCTYPE html><frameset><frameset></frameset></frameset>",
+      "<html><head></head><frameset><frameset></frameset></frameset></html>"
+    ],
+    [
+      "frame start",
+      "<!DOCTYPE html><frameset><frame></frameset>",
+      "<html><head></head><frameset><frame></frameset></html>"
+    ],
+    [
+      "frame end",
+      "<!DOCTYPE html><frameset></frame></frameset>",
+      "<html><head></head><frameset></frameset></html>"
+    ],
+    [
+      "frame start + end",
+      "<!DOCTYPE html><frameset><frame></frame></frameset>",
+      "<html><head></head><frameset><frame></frameset></html>"
+    ],
+    [
+      "noframes",
+      "<!DOCTYPE html><frameset><noframes>&#x42;</frameset></noframes></frameset>",
+      "<html><head></head><frameset><noframes>&#x42;</frameset></noframes></frameset></html>"
+    ],
+    [
+      "any start tag",
+      "<!DOCTYPE html><frameset><tag></frameset>",
+      "<html><head></head><frameset></frameset></html>"
+    ],
+    [
+      "any end tag",
+      "<!DOCTYPE html><frameset></tag></frameset>",
+      "<html><head></head><frameset></frameset></html>"
+    ],
+    [
+      "any proper element",
+      "<!DOCTYPE html><frameset><tag></tag></frameset>",
+      "<html><head></head><frameset></frameset></html>"
+    ],
+    [
+      "frameset in body",
+      "<!DOCTYPE html><body><frameset></frameset></body>",
+      "<html><head></head><body></body></html>"
+    ],
+    [
+      "frameset after head template",
+      "<!DOCTYPE html><head><template></template></head><frameset></frameset>",
+      "<html><head><template></template></head><frameset></frameset></html>"
+    ],
+    [
+      "frameset after implicit body element",
+      "<!DOCTYPE html><div></div><frameset></frameset>",
+      "<html><head></head><frameset></frameset></html>"
+    ],
+    [
+      "frameset inside template",
+      "<!DOCTYPE html><head><template><frameset></frameset></template></head>",
+      "<html><head><template></template></head><body></body></html>"
+    ],
+    [
+      "CDATA",
+      "<!DOCTYPE html><frameset><![CDATA[A]]></frameset>",
+      "<html><head></head><frameset><!--[CDATA[A]]--></frameset></html>"
+    ]
+  ],
+  "in-head-noscript": [
+    [
+      "empty",
+      "<!DOCTYPE html><head><noscript></noscript></head>",
+      "<html><head><noscript></noscript></head><body></body></html>"
+    ],
+    [
+      "unclosed",
+      "<!DOCTYPE html><head><noscript>",
+      "<html><head><noscript></noscript></head><body></body></html>"
+    ],
+    [
+      "space",
+      "<!DOCTYPE html><head><noscript> \t\n\f</noscript></head>",
+      "<html><head><noscript> \t\n\f</noscript></head><body></body></html>"
+    ],
+    [
+      "comment",
+      "<!DOCTYPE html><head><noscript><!--A--></noscript></head>",
+      "<html><head><noscript><!--A--></noscript></head><body></body></html>"
+    ],
+    [
+      "doctype",
+      "<!DOCTYPE html><head><noscript><!DOCTYPE html></noscript></head>",
+      "<html><head><noscript></noscript></head><body></body></html>"
+    ],
+    [
+      "text",
+      "<!DOCTYPE html><head><noscript><!--A-->B<!--C--></noscript></head>",
+      "<html><head><noscript><!--A--></noscript></head><body>B<!--C--></body></html>"
+    ],
+    [
+      "char ref",
+      "<!DOCTYPE html><head><noscript>&#x41;</noscript></head>",
+      "<html><head><noscript></noscript></head><body>A</body></html>"
+    ],
+    [
+      "NUL",
+      "<!DOCTYPE html><head><noscript><!--A-->\u0000<!--B--></noscript></head>",
+      "<html><head><noscript><!--A--><!--B--></noscript></head><body></body></html>"
+    ],
+    [
+      "CDATA",
+      "<!DOCTYPE html><head><noscript><![CDATA[A]]></noscript></head>",
+      "<html><head><noscript><!--[CDATA[A]]--></noscript></head><body></body></html>"
+    ],
+    [
+      "html start",
+      "<!DOCTYPE html><html b a=\"a\"><head><noscript><html c a=\"a\"></noscript></head>",
+      "<html b=\"\" a=\"a\" c=\"\"><head><noscript></noscript></head><body></body></html>"
+    ],
+    [
+      "base start",
+      "<!DOCTYPE html><head><noscript><!--A--><base><!--B--></noscript></head>",
+      "<html><head><noscript><!--A--></noscript><base><!--B--></head><body></body></html>"
+    ],
+    [
+      "basefont start",
+      "<!DOCTYPE html><head><noscript><basefont></noscript></head>",
+      "<html><head><noscript><basefont></noscript></head><body></body></html>"
+    ],
+    [
+      "bgsound start",
+      "<!DOCTYPE html><head><noscript><bgsound></noscript></head>",
+      "<html><head><noscript><bgsound></noscript></head><body></body></html>"
+    ],
+    [
+      "link start",
+      "<!DOCTYPE html><head><noscript><link></noscript></head>",
+      "<html><head><noscript><link></noscript></head><body></body></html>"
+    ],
+    [
+      "meta start",
+      "<!DOCTYPE html><head><noscript><meta></noscript></head>",
+      "<html><head><noscript><meta></noscript></head><body></body></html>"
+    ],
+    [
+      "noframes",
+      "<!DOCTYPE html><head><noscript><noframes>&#x41;</noscript></noframes></noscript></head>",
+      "<html><head><noscript><noframes>&#x41;</noscript></noframes></noscript></head><body></body></html>"
+    ],
+    [
+      "style",
+      "<!DOCTYPE html><head><noscript><style>&#x41;</noscript></style></noscript></head>",
+      "<html><head><noscript><style>&#x41;</noscript></style></noscript></head><body></body></html>"
+    ],
+    [
+      "head start",
+      "<!DOCTYPE html><head><noscript><head></noscript></head>",
+      "<html><head><noscript></noscript></head><body></body></html>"
+    ],
+    [
+      "noscript start",
+      "<!DOCTYPE html><head><noscript><noscript></noscript></head>",
+      "<html><head><noscript></noscript></head><body></body></html>"
+    ],
+    [
+      "br end",
+      "<!DOCTYPE html><head><noscript><!--A--></br><!--B--></noscript></head>",
+      "<html><head><noscript><!--A--></noscript></head><body><br><!--B--></body></html>"
+    ],
+    [
+      "any start tag",
+      "<!DOCTYPE html><head><noscript><!--A--><tag><!--B--></noscript></head>",
+      "<html><head><noscript><!--A--></noscript></head><body><tag><!--B--></tag></body></html>"
+    ],
+    [
+      "any end tag",
+      "<!DOCTYPE html><head><noscript><!--A--></tag><!--B--></noscript></head>",
+      "<html><head><noscript><!--A--><!--B--></noscript></head><body></body></html>"
+    ],
+    [
+      "any proper element",
+      "<!DOCTYPE html><head><noscript><!--A--><tag><!--B--></tag><!--C--></noscript></head>",
+      "<html><head><noscript><!--A--></noscript></head><body><tag><!--B--></tag><!--C--></body></html>"
+    ]
+  ],
+  "in-head": [
+    [
+      "empty",
+      "<!DOCTYPE html><head></head>",
+      "<html><head></head><body></body></html>"
+    ],
+    [
+      "unclosed",
+      "<!DOCTYPE html><head>",
+      "<html><head></head><body></body></html>"
+    ],
+    [
+      "comment",
+      "<!DOCTYPE html><head><!--A--></head>",
+      "<html><head><!--A--></head><body></body></html>"
+    ],
+    [
+      "doctype",
+      "<!DOCTYPE html><head><!DOCTYPE html></head>",
+      "<html><head></head><body></body></html>"
+    ],
+    [
+      "space",
+      "<!DOCTYPE html><head> \t\n\f</head>",
+      "<html><head> \t\n\f</head><body></body></html>"
+    ],
+    [
+      "text",
+      "<!DOCTYPE html><head>A</head>",
+      "<html><head></head><body>A</body></html>"
+    ],
+    [
+      "NUL",
+      "<!DOCTYPE html><head>\u0000</head>",
+      "<html><head></head><body></body></html>"
+    ],
+    [
+      "CDATA",
+      "<!DOCTYPE html><head><![CDATA[A]]></head>",
+      "<html><head><!--[CDATA[A]]--></head><body></body></html>"
+    ],
+    [
+      "html start",
+      "<!DOCTYPE html><html a=\"a\" b><head><html a=\"b\" c></head>",
+      "<html a=\"a\" b=\"\" c=\"\"><head></head><body></body></html>"
+    ],
+    [
+      "base start",
+      "<!DOCTYPE html><head><base></head>",
+      "<html><head><base></head><body></body></html>"
+    ],
+    [
+      "basefont start",
+      "<!DOCTYPE html><head><basefont></head>",
+      "<html><head><basefont></head><body></body></html>"
+    ],
+    [
+      "bgsound start",
+      "<!DOCTYPE html><head><bgsound></head>",
+      "<html><head><bgsound></head><body></body></html>"
+    ],
+    [
+      "link start",
+      "<!DOCTYPE html><head><link></head>",
+      "<html><head><link></head><body></body></html>"
+    ],
+    [
+      "meta start",
+      "<!DOCTYPE html><head><meta></head>",
+      "<html><head><meta></head><body></body></html>"
+    ],
+    [
+      "base end",
+      "<!DOCTYPE html><head></base></head>",
+      "<html><head></head><body></body></html>"
+    ],
+    [
+      "basefont end",
+      "<!DOCTYPE html><head></basefont></head>",
+      "<html><head></head><body></body></html>"
+    ],
+    [
+      "bgsound end",
+      "<!DOCTYPE html><head></bgsound></head>",
+      "<html><head></head><body></body></html>"
+    ],
+    [
+      "link end",
+      "<!DOCTYPE html><head></link></head>",
+      "<html><head></head><body></body></html>"
+    ],
+    [
+      "meta end",
+      "<!DOCTYPE html><head></meta></head>",
+      "<html><head></head><body></body></html>"
+    ],
+    [
+      "base start + end",
+      "<!DOCTYPE html><head><base></base></head>",
+      "<html><head><base></head><body></body></html>"
+    ],
+    [
+      "basefont start + end",
+      "<!DOCTYPE html><head><basefont></basefont></head>",
+      "<html><head><basefont></head><body></body></html>"
+    ],
+    [
+      "bgsound start + end",
+      "<!DOCTYPE html><head><bgsound></bgsound></head>",
+      "<html><head><bgsound></head><body></body></html>"
+    ],
+    [
+      "link start + end",
+      "<!DOCTYPE html><head><link></link></head>",
+      "<html><head><link></head><body></body></html>"
+    ],
+    [
+      "meta start + end",
+      "<!DOCTYPE html><head><meta></meta></head>",
+      "<html><head><meta></head><body></body></html>"
+    ],
+    [
+      "title unclosed",
+      "<!DOCTYPE html><head><title>&#x41;</head>",
+      "<html><head><title>A&lt;/head&gt;</title></head><body></body></html>"
+    ],
+    [
+      "title closed",
+      "<!DOCTYPE html><head><title>&#x41;</head></title></head>",
+      "<html><head><title>A&lt;/head&gt;</title></head><body></body></html>"
+    ],
+    [
+      "noframes",
+      "<!DOCTYPE html><head><noframes>&#x41;</head></noframes></head>",
+      "<html><head><noframes>&#x41;</head></noframes></head><body></body></html>"
+    ],
+    [
+      "style",
+      "<!DOCTYPE html><head><style>&#x41;</head></style></head>",
+      "<html><head><style>&#x41;</head></style></head><body></body></html>"
+    ],
+    [
+      "script",
+      "<!DOCTYPE html><head><script>&#x41;</head></script></head>",
+      "<html><head><script>&#x41;</head></script></head><body></body></html>"
+    ],
+    [
+      "head start",
+      "<!DOCTYPE html><head a><head b></head>",
+      "<html><head a=\"\"></head><body></body></html>"
+    ],
+    [
+      "template well-formed",
+      "<!DOCTYPE html><head><template></template></head>",
+      "<html><head><template></template></head><body></body></html>"
+    ],
+    [
+      "template end",
+      "<!DOCTYPE html><head></template></head>",
+      "<html><head></head><body></body></html>"
+    ],
+    [
+      "body end",
+      "<!DOCTYPE html><head></body></head>",
+      "<html><head></head><body></body></html>"
+    ],
+    [
+      "html end",
+      "<!DOCTYPE html><head></html></head>",
+      "<html><head></head><body></body></html>"
+    ],
+    [
+      "br end",
+      "<!DOCTYPE html><head></br></head>",
+      "<html><head></head><body><br></body></html>"
+    ],
+    [
+      "any start tag",
+      "<!DOCTYPE html><head><tag></head>",
+      "<html><head></head><body><tag></tag></body></html>"
+    ],
+    [
+      "any end tag",
+      "<!DOCTYPE html><head></tag></head>",
+      "<html><head></head><body></body></html>"
+    ],
+    [
+      "any proper element",
+      "<!DOCTYPE html><head><tag></tag></head>",
+      "<html><head></head><body><tag></tag></body></html>"
+    ]
+  ],
+  "in-row": [
+    [
+      "empty",
+      "<!DOCTYPE html><table><tbody><tr></tr></tbody></table>",
+      "<html><head></head><body><table><tbody><tr></tr></tbody></table></body></html>"
+    ],
+    [
+      "comment",
+      "<!DOCTYPE html><table><tbody><tr><!--A--></tr></tbody></table>",
+      "<html><head></head><body><table><tbody><tr><!--A--></tr></tbody></table></body></html>"
+    ],
+    [
+      "doctype",
+      "<!DOCTYPE html><table><tbody><tr><!DOCTYPE html></tr></tbody></table>",
+      "<html><head></head><body><table><tbody><tr></tr></tbody></table></body></html>"
+    ],
+    [
+      "space",
+      "<!DOCTYPE html><table><tbody><tr> \n\t\f</tr></tbody></table>",
+      "<html><head></head><body><table><tbody><tr> \n\t\f</tr></tbody></table></body></html>"
+    ],
+    [
+      "text",
+      "<!DOCTYPE html><table><tbody><tr>A</tr></tbody></table>",
+      "<html><head></head><body>A<table><tbody><tr></tr></tbody></table></body></html>"
+    ],
+    [
+      "space + text",
+      "<!DOCTYPE html><table><tbody><tr> \n\t\fA</tr></tbody></table>",
+      "<html><head></head><body> \n\t\fA<table><tbody><tr></tr></tbody></table></body></html>"
+    ],
+    [
+      "td",
+      "<!DOCTYPE html><table><tbody><tr><td></td></tr></tbody></table>",
+      "<html><head></head><body><table><tbody><tr><td></td></tr></tbody></table></body></html>"
+    ],
+    [
+      "th",
+      "<!DOCTYPE html><table><tbody><tr><th></th></tr></tbody></table>",
+      "<html><head></head><body><table><tbody><tr><th></th></tr></tbody></table></body></html>"
+    ],
+    [
+      "cell + caption",
+      "<!DOCTYPE html><table><tbody><tr><td>A</td><caption>B</caption></tr></tbody></table>",
+      "<html><head></head><body><table><tbody><tr><td>A</td></tr></tbody><caption>B</caption></table></body></html>"
+    ],
+    [
+      "cell + caption + cell",
+      "<!DOCTYPE html><table><tbody><tr><td>A</td><caption>B</caption><td>C</td></tr></tbody></table>",
+      "<html><head></head><body><table><tbody><tr><td>A</td></tr></tbody><caption>B</caption><tbody><tr><td>C</td></tr></tbody></table></body></html>"
+    ],
+    [
+      "cell + caption + cell in thead",
+      "<!DOCTYPE html><table><thead><tr><td>A</td><caption>B</caption><td>C</td></tr></thead></table>",
+      "<html><head></head><body><table><thead><tr><td>A</td></tr></thead><caption>B</caption><tbody><tr><td>C</td></tr></tbody></table></body></html>"
+    ],
+    [
+      "tr start tag",
+      "<!DOCTYPE html><table><tbody><tr><td>A</td><tr><td>B</td></tr></tbody></table>",
+      "<html><head></head><body><table><tbody><tr><td>A</td></tr><tr><td>B</td></tr></tbody></table></body></html>"
+    ],
+    [
+      "tr fully nested",
+      "<!DOCTYPE html><table><tbody><tr><td>A</td><tr><td>B</td></tr><td>C</td></tr></tbody></table>",
+      "<html><head></head><body><table><tbody><tr><td>A</td></tr><tr><td>B</td></tr><tr><td>C</td></tr></tbody></table></body></html>"
+    ],
+    [
+      "end table early",
+      "<!DOCTYPE html><table><tbody><tr><td>A</td></table>",
+      "<html><head></head><body><table><tbody><tr><td>A</td></tr></tbody></table></body></html>"
+    ],
+    [
+      "end tbody early",
+      "<!DOCTYPE html><table><tbody><tr><td>A</td></tbody></table>",
+      "<html><head></head><body><table><tbody><tr><td>A</td></tr></tbody></table></body></html>"
+    ],
+    [
+      "end thead",
+      "<!DOCTYPE html><table><tbody><tr><td>A</td></thead></table>",
+      "<html><head></head><body><table><tbody><tr><td>A</td></tr></tbody></table></body></html>"
+    ],
+    [
+      "template",
+      "<!DOCTYPE html><table><tbody><tr><template></template><td></td></tr></tbody></table>",
+      "<html><head></head><body><table><tbody><tr><template></template><td></td></tr></tbody></table></body></html>"
+    ],
+    [
+      "template end",
+      "<!DOCTYPE html><table><tbody><tr></template><th></th></tr></tbody></table>",
+      "<html><head></head><body><table><tbody><tr><th></th></tr></tbody></table></body></html>"
+    ],
+    [
+      "forbidden content",
+      "<!DOCTYPE html><table><tbody><tr><div a><hr a/></div><div b><hr b/></tr></tbody></table>",
+      "<html><head></head><body><div a=\"\"><hr a=\"\"></div><div b=\"\"><hr b=\"\"></div><table><tbody><tr></tr></tbody></table></body></html>"
+    ],
+    [
+      "forbidden foreign content",
+      "<!DOCTYPE html><table><tbody><tr><svg a><g a/></svg><svg b><g b/></tr></tbody></table>",
+      "<html><head></head><body><svg a=\"\"><g a=\"\"></g></svg><svg b=\"\"><g b=\"\"></g></svg><table><tbody><tr></tr></tbody></table></body></html>"
+    ],
+    [
+      "body end",
+      "<!DOCTYPE html><table><thead><tr><td>A</td></body></tr></thead></table>",
+      "<html><head></head><body><table><thead><tr><td>A</td></tr></thead></table></body></html>"
+    ],
+    [
+      "caption end",
+      "<!DOCTYPE html><table><thead><tr><td>A</td></caption></tr></thead></table>",
+      "<html><head></head><body><table><thead><tr><td>A</td></tr></thead></table></body></html>"
+    ],
+    [
+      "col end",
+      "<!DOCTYPE html><table><thead><tr><td>A</td></col></tr></thead></table>",
+      "<html><head></head><body><table><thead><tr><td>A</td></tr></thead></table></body></html>"
+    ],
+    [
+      "colgroup end",
+      "<!DOCTYPE html><table><thead><tr><td>A</td></colgroup></tr></thead></table>",
+      "<html><head></head><body><table><thead><tr><td>A</td></tr></thead></table></body></html>"
+    ],
+    [
+      "html end",
+      "<!DOCTYPE html><table><thead><tr><td>A</td></html></tr></thead></table>",
+      "<html><head></head><body><table><thead><tr><td>A</td></tr></thead></table></body></html>"
+    ],
+    [
+      "td end",
+      "<!DOCTYPE html><table><thead><tr><td>A</td></td></tr></thead></table>",
+      "<html><head></head><body><table><thead><tr><td>A</td></tr></thead></table></body></html>"
+    ],
+    [
+      "th end",
+      "<!DOCTYPE html><table><thead><tr><td>A</td></th></tr></thead></table>",
+      "<html><head></head><body><table><thead><tr><td>A</td></tr></thead></table></body></html>"
+    ]
+  ],
+  "in-select-in-table": [
+    [
+      "empty",
+      "<!DOCTYPE html><table><select></select></table>",
+      "<html><head></head><body><select></select><table></table></body></html>"
+    ],
+    [
+      "comment",
+      "<!DOCTYPE html><table><select><!--A--></select></table>",
+      "<html><head></head><body><select><!--A--></select><table></table></body></html>"
+    ],
+    [
+      "doctype",
+      "<!DOCTYPE html><table><select><!DOCTYPE html></select></table>",
+      "<html><head></head><body><select></select><table></table></body></html>"
+    ],
+    [
+      "space",
+      "<!DOCTYPE html><table><select> \n\t\f</select></table>",
+      "<html><head></head><body><select> \n\t\f</select><table></table></body></html>"
+    ],
+    [
+      "NUL",
+      "<!DOCTYPE html><table><select>\u0000</select></table>",
+      "<html><head></head><body><select></select><table></table></body></html>"
+    ],
+    [
+      "text",
+      "<!DOCTYPE html><table><select>A</select></table>",
+      "<html><head></head><body><select>A</select><table></table></body></html>"
+    ],
+    [
+      "html start",
+      "<!DOCTYPE html><table><select>A<html></select></table>",
+      "<html><head></head><body><select>A</select><table></table></body></html>"
+    ],
+    [
+      "select start",
+      "<!DOCTYPE html><table><select>A<select></table>",
+      "<html><head></head><body><select>A</select><table></table></body></html>"
+    ],
+    [
+      "option empty",
+      "<!DOCTYPE html><table><select><option></option></select></table>",
+      "<html><head></head><body><select><option></option></select><table></table></body></html>"
+    ],
+    [
+      "option text",
+      "<!DOCTYPE html><table><select><option>A</option></select></table>",
+      "<html><head></head><body><select><option>A</option></select><table></table></body></html>"
+    ],
+    [
+      "option end",
+      "<!DOCTYPE html><table><select></option></select></table>",
+      "<html><head></head><body><select></select><table></table></body></html>"
+    ],
+    [
+      "option unclosed",
+      "<!DOCTYPE html><table><select><option>A</select></table>",
+      "<html><head></head><body><select><option>A</option></select><table></table></body></html>"
+    ],
+    [
+      "option pair unclosed",
+      "<!DOCTYPE html><table><select><option>A<option>B</select></table>",
+      "<html><head></head><body><select><option>A</option><option>B</option></select><table></table></body></html>"
+    ],
+    [
+      "option pair nested",
+      "<!DOCTYPE html><table><select><option>A<option>B</option>C</option></select></table>",
+      "<html><head></head><body><select><option>A</option><option>B</option>C</select><table></table></body></html>"
+    ],
+    [
+      "optgroup empty",
+      "<!DOCTYPE html><table><select><optgroup></optgroup></select></table>",
+      "<html><head></head><body><select><optgroup></optgroup></select><table></table></body></html>"
+    ],
+    [
+      "optgroup end",
+      "<!DOCTYPE html><table><select></optgroup></select></table>",
+      "<html><head></head><body><select></select><table></table></body></html>"
+    ],
+    [
+      "optgroup unclosed",
+      "<!DOCTYPE html><table><select><optgroup>A</select></table>",
+      "<html><head></head><body><select><optgroup>A</optgroup></select><table></table></body></html>"
+    ],
+    [
+      "optgroup pair unclosed",
+      "<!DOCTYPE html><table><select><optgroup>A<optgroup>B</select></table>",
+      "<html><head></head><body><select><optgroup>A</optgroup><optgroup>B</optgroup></select><table></table></body></html>"
+    ],
+    [
+      "optgroup pair nested",
+      "<!DOCTYPE html><table><select><optgroup>A<optgroup>B</optgroup>C</optgroup></select></table>",
+      "<html><head></head><body><select><optgroup>A</optgroup><optgroup>B</optgroup>C</select><table></table></body></html>"
+    ],
+    [
+      "optgroup start in option",
+      "<!DOCTYPE html><table><select><optgroup>A<option>B<optgroup>C</optgroup>D</optgroup></select></table>",
+      "<html><head></head><body><select><optgroup>A<option>B</option></optgroup><optgroup>C</optgroup>D</select><table></table></body></html>"
+    ],
+    [
+      "optgroup end in option",
+      "<!DOCTYPE html><table><select><optgroup>A<option>B</optgroup></select></table>",
+      "<html><head></head><body><select><optgroup>A<option>B</option></optgroup></select><table></table></body></html>"
+    ],
+    [
+      "script",
+      "<!DOCTYPE html><table><select><script>&#x41;<tag></script></select></table>",
+      "<html><head></head><body><select><script>&#x41;<tag></script></select><table></table></body></html>"
+    ],
+    [
+      "hr",
+      "<!DOCTYPE html><table><select><hr></select></table>",
+      "<html><head></head><body><select><hr></select><table></table></body></html>"
+    ],
+    [
+      "hr in option",
+      "<!DOCTYPE html><table><select><option>A<hr>B</option>C</select></table>",
+      "<html><head></head><body><select><option>A</option><hr>BC</select><table></table></body></html>"
+    ],
+    [
+      "hr in optgroup",
+      "<!DOCTYPE html><table><select><optgroup>A<hr>B</optgroup>C</select></table>",
+      "<html><head></head><body><select><optgroup>A</optgroup><hr>BC</select><table></table></body></html>"
+    ],
+    [
+      "hr in option in optgroup",
+      "<!DOCTYPE html><table><select><optgroup>A<option>B<hr>C</option>D</optgroup>E</select></table>",
+      "<html><head></head><body><select><optgroup>A<option>B</option></optgroup><hr>CDE</select><table></table></body></html>"
+    ],
+    [
+      "div start",
+      "<!DOCTYPE html><table><select>A<div>B</select></table>",
+      "<html><head></head><body><select>AB</select><table></table></body></html>"
+    ],
+    [
+      "div end",
+      "<!DOCTYPE html><table><select>A</div>B</select></table>",
+      "<html><head></head><body><select>AB</select><table></table></body></html>"
+    ],
+    [
+      "template",
+      "<!DOCTYPE html><table><select><template></template></select></table>",
+      "<html><head></head><body><select><template></template></select><table></table></body></html>"
+    ],
+    [
+      "template end",
+      "<!DOCTYPE html><table><select></template></select></table>",
+      "<html><head></head><body><select></select><table></table></body></html>"
+    ],
+    [
+      "select nested",
+      "<!DOCTYPE html><table><select>A<select>B</select>C</select></table>",
+      "<html><head></head><body><select>A</select>BC<table></table></body></html>"
+    ],
+    [
+      "input",
+      "<!DOCTYPE html><table><select>A<input></select></table>",
+      "<html><head></head><body><select>A</select><input><table></table></body></html>"
+    ],
+    [
+      "keygen",
+      "<!DOCTYPE html><table><select>A<keygen></select></table>",
+      "<html><head></head><body><select>A</select><keygen><table></table></body></html>"
+    ],
+    [
+      "textarea",
+      "<!DOCTYPE html><table><select>A<textarea></select></table>",
+      "<html><head></head><body><select>A</select><textarea>&lt;/select&gt;&lt;/table&gt;</textarea><table></table></body></html>"
+    ],
+    [
+      "table start",
+      "<!DOCTYPE html><table><select>A<table>B</select></table>",
+      "<html><head></head><body><select>A</select><table></table>B<table></table></body></html>"
+    ],
+    [
+      "table end",
+      "<!DOCTYPE html><table><select>A</table>B</select></table>",
+      "<html><head></head><body><select>A</select><table></table>B</body></html>"
+    ],
+    [
+      "tbody start",
+      "<!DOCTYPE html><table><select>A<tbody>B</select></table>",
+      "<html><head></head><body><select>A</select>B<table><tbody></tbody></table></body></html>"
+    ],
+    [
+      "tbody end",
+      "<!DOCTYPE html><table><select>A</tbody>B</select></table>",
+      "<html><head></head><body><select>AB</select><table></table></body></html>"
+    ],
+    [
+      "caption start",
+      "<!DOCTYPE html><table><select>A<caption>B</select></table>",
+      "<html><head></head><body><select>A</select><table><caption>B</caption></table></body></html>"
+    ],
+    [
+      "caption end",
+      "<!DOCTYPE html><table><select>A</caption>B</select></table>",
+      "<html><head></head><body><select>AB</select><table></table></body></html>"
+    ],
+    [
+      "table start in td",
+      "<!DOCTYPE html><table><tbody><tr><td>A<select>B<table>C</select>D</td></tr></tbody></table>",
+      "<html><head></head><body><table><tbody><tr><td>A<select>B</select>CD<table></table></td></tr></tbody></table></body></html>"
+    ],
+    [
+      "table end in td",
+      "<!DOCTYPE html><table><tbody><tr><td>A<select>B</table>D</select>E</td></tr></tbody></table>",
+      "<html><head></head><body><table><tbody><tr><td>A<select>B</select></td></tr></tbody></table>DE</body></html>"
+    ],
+    [
+      "table with content in td",
+      "<!DOCTYPE html><table><tbody><tr><td>A<select>B<table><tr><td>C</td></tr></table>D</select>E</td></tr></tbody></table>",
+      "<html><head></head><body><table><tbody><tr><td>A<select>B</select><table><tbody><tr><td>C</td></tr></tbody></table>DE</td></tr></tbody></table></body></html>"
+    ],
+    [
+      "in td: empty",
+      "<!DOCTYPE html><table><tbody><tr><td><select></select></td></tr></tbody></table>",
+      "<html><head></head><body><table><tbody><tr><td><select></select></td></tr></tbody></table></body></html>"
+    ],
+    [
+      "in td: comment",
+      "<!DOCTYPE html><table><tbody><tr><td><select><!--A--></select></td></tr></tbody></table>",
+      "<html><head></head><body><table><tbody><tr><td><select><!--A--></select></td></tr></tbody></table></body></html>"
+    ],
+    [
+      "in td: doctype",
+      "<!DOCTYPE html><table><tbody><tr><td><select><!DOCTYPE html></select></td></tr></tbody></table>",
+      "<html><head></head><body><table><tbody><tr><td><select></select></td></tr></tbody></table></body></html>"
+    ],
+    [
+      "in td: space",
+      "<!DOCTYPE html><table><tbody><tr><td><select> \n\t\f</select></td></tr></tbody></table>",
+      "<html><head></head><body><table><tbody><tr><td><select> \n\t\f</select></td></tr></tbody></table></body></html>"
+    ],
+    [
+      "in td: NUL",
+      "<!DOCTYPE html><table><tbody><tr><td><select>\u0000</select></td></tr></tbody></table>",
+      "<html><head></head><body><table><tbody><tr><td><select></select></td></tr></tbody></table></body></html>"
+    ],
+    [
+      "in td: text",
+      "<!DOCTYPE html><table><tbody><tr><td><select>A</select></td></tr></tbody></table>",
+      "<html><head></head><body><table><tbody><tr><td><select>A</select></td></tr></tbody></table></body></html>"
+    ],
+    [
+      "in td: html start",
+      "<!DOCTYPE html><table><tbody><tr><td><select>A<html></select></td></tr></tbody></table>",
+      "<html><head></head><body><table><tbody><tr><td><select>A</select></td></tr></tbody></table></body></html>"
+    ],
+    [
+      "in td: select start",
+      "<!DOCTYPE html><table><tbody><tr><td><select>A<select></td></tr></tbody></table>",
+      "<html><head></head><body><table><tbody><tr><td><select>A</select></td></tr></tbody></table></body></html>"
+    ],
+    [
+      "in td: option empty",
+      "<!DOCTYPE html><table><tbody><tr><td><select><option></option></select></td></tr></tbody></table>",
+      "<html><head></head><body><table><tbody><tr><td><select><option></option></select></td></tr></tbody></table></body></html>"
+    ],
+    [
+      "in td: option text",
+      "<!DOCTYPE html><table><tbody><tr><td><select><option>A</option></select></td></tr></tbody></table>",
+      "<html><head></head><body><table><tbody><tr><td><select><option>A</option></select></td></tr></tbody></table></body></html>"
+    ],
+    [
+      "in td: option end",
+      "<!DOCTYPE html><table><tbody><tr><td><select></option></select></td></tr></tbody></table>",
+      "<html><head></head><body><table><tbody><tr><td><select></select></td></tr></tbody></table></body></html>"
+    ],
+    [
+      "in td: option unclosed",
+      "<!DOCTYPE html><table><tbody><tr><td><select><option>A</select></td></tr></tbody></table>",
+      "<html><head></head><body><table><tbody><tr><td><select><option>A</option></select></td></tr></tbody></table></body></html>"
+    ],
+    [
+      "in td: option pair unclosed",
+      "<!DOCTYPE html><table><tbody><tr><td><select><option>A<option>B</select></td></tr></tbody></table>",
+      "<html><head></head><body><table><tbody><tr><td><select><option>A</option><option>B</option></select></td></tr></tbody></table></body></html>"
+    ],
+    [
+      "in td: option pair nested",
+      "<!DOCTYPE html><table><tbody><tr><td><select><option>A<option>B</option>C</option></select></td></tr></tbody></table>",
+      "<html><head></head><body><table><tbody><tr><td><select><option>A</option><option>B</option>C</select></td></tr></tbody></table></body></html>"
+    ],
+    [
+      "in td: optgroup empty",
+      "<!DOCTYPE html><table><tbody><tr><td><select><optgroup></optgroup></select></td></tr></tbody></table>",
+      "<html><head></head><body><table><tbody><tr><td><select><optgroup></optgroup></select></td></tr></tbody></table></body></html>"
+    ],
+    [
+      "in td: optgroup end",
+      "<!DOCTYPE html><table><tbody><tr><td><select></optgroup></select></td></tr></tbody></table>",
+      "<html><head></head><body><table><tbody><tr><td><select></select></td></tr></tbody></table></body></html>"
+    ],
+    [
+      "in td: optgroup unclosed",
+      "<!DOCTYPE html><table><tbody><tr><td><select><optgroup>A</select></td></tr></tbody></table>",
+      "<html><head></head><body><table><tbody><tr><td><select><optgroup>A</optgroup></select></td></tr></tbody></table></body></html>"
+    ],
+    [
+      "in td: optgroup pair unclosed",
+      "<!DOCTYPE html><table><tbody><tr><td><select><optgroup>A<optgroup>B</select></td></tr></tbody></table>",
+      "<html><head></head><body><table><tbody><tr><td><select><optgroup>A</optgroup><optgroup>B</optgroup></select></td></tr></tbody></table></body></html>"
+    ],
+    [
+      "in td: optgroup pair nested",
+      "<!DOCTYPE html><table><tbody><tr><td><select><optgroup>A<optgroup>B</optgroup>C</optgroup></select></td></tr></tbody></table>",
+      "<html><head></head><body><table><tbody><tr><td><select><optgroup>A</optgroup><optgroup>B</optgroup>C</select></td></tr></tbody></table></body></html>"
+    ],
+    [
+      "in td: optgroup start in option",
+      "<!DOCTYPE html><table><tbody><tr><td><select><optgroup>A<option>B<optgroup>C</optgroup>D</optgroup></select></td></tr></tbody></table>",
+      "<html><head></head><body><table><tbody><tr><td><select><optgroup>A<option>B</option></optgroup><optgroup>C</optgroup>D</select></td></tr></tbody></table></body></html>"
+    ],
+    [
+      "in td: optgroup end in option",
+      "<!DOCTYPE html><table><tbody><tr><td><select><optgroup>A<option>B</optgroup></select></td></tr></tbody></table>",
+      "<html><head></head><body><table><tbody><tr><td><select><optgroup>A<option>B</option></optgroup></select></td></tr></tbody></table></body></html>"
+    ],
+    [
+      "in td: script",
+      "<!DOCTYPE html><table><tbody><tr><td><select><script>&#x41;<tag></script></select></td></tr></tbody></table>",
+      "<html><head></head><body><table><tbody><tr><td><select><script>&#x41;<tag></script></select></td></tr></tbody></table></body></html>"
+    ],
+    [
+      "in td: hr",
+      "<!DOCTYPE html><table><tbody><tr><td><select><hr></select></td></tr></tbody></table>",
+      "<html><head></head><body><table><tbody><tr><td><select><hr></select></td></tr></tbody></table></body></html>"
+    ],
+    [
+      "in td: hr in option",
+      "<!DOCTYPE html><table><tbody><tr><td><select><option>A<hr>B</option>C</select></td></tr></tbody></table>",
+      "<html><head></head><body><table><tbody><tr><td><select><option>A</option><hr>BC</select></td></tr></tbody></table></body></html>"
+    ],
+    [
+      "in td: hr in optgroup",
+      "<!DOCTYPE html><table><tbody><tr><td><select><optgroup>A<hr>B</optgroup>C</select></td></tr></tbody></table>",
+      "<html><head></head><body><table><tbody><tr><td><select><optgroup>A</optgroup><hr>BC</select></td></tr></tbody></table></body></html>"
+    ],
+    [
+      "in td: hr in option in optgroup",
+      "<!DOCTYPE html><table><tbody><tr><td><select><optgroup>A<option>B<hr>C</option>D</optgroup>E</select></td></tr></tbody></table>",
+      "<html><head></head><body><table><tbody><tr><td><select><optgroup>A<option>B</option></optgroup><hr>CDE</select></td></tr></tbody></table></body></html>"
+    ],
+    [
+      "in td: div start",
+      "<!DOCTYPE html><table><tbody><tr><td><select>A<div>B</select></td></tr></tbody></table>",
+      "<html><head></head><body><table><tbody><tr><td><select>AB</select></td></tr></tbody></table></body></html>"
+    ],
+    [
+      "in td: div end",
+      "<!DOCTYPE html><table><tbody><tr><td><select>A</div>B</select></td></tr></tbody></table>",
+      "<html><head></head><body><table><tbody><tr><td><select>AB</select></td></tr></tbody></table></body></html>"
+    ],
+    [
+      "in td: template",
+      "<!DOCTYPE html><table><tbody><tr><td><select><template></template></select></td></tr></tbody></table>",
+      "<html><head></head><body><table><tbody><tr><td><select><template></template></select></td></tr></tbody></table></body></html>"
+    ],
+    [
+      "in td: template end",
+      "<!DOCTYPE html><table><tbody><tr><td><select></template></select></td></tr></tbody></table>",
+      "<html><head></head><body><table><tbody><tr><td><select></select></td></tr></tbody></table></body></html>"
+    ],
+    [
+      "in td: select nested",
+      "<!DOCTYPE html><table><tbody><tr><td><select>A<select>B</select>C</select></td></tr></tbody></table>",
+      "<html><head></head><body><table><tbody><tr><td><select>A</select>BC</td></tr></tbody></table></body></html>"
+    ],
+    [
+      "in td: input",
+      "<!DOCTYPE html><table><tbody><tr><td><select>A<input></select></td></tr></tbody></table>",
+      "<html><head></head><body><table><tbody><tr><td><select>A</select><input></td></tr></tbody></table></body></html>"
+    ],
+    [
+      "in td: keygen",
+      "<!DOCTYPE html><table><tbody><tr><td><select>A<keygen></select></td></tr></tbody></table>",
+      "<html><head></head><body><table><tbody><tr><td><select>A</select><keygen></td></tr></tbody></table></body></html>"
+    ],
+    [
+      "in td: textarea",
+      "<!DOCTYPE html><table><tbody><tr><td><select>A<textarea></select></td></tr></tbody></table>",
+      "<html><head></head><body><table><tbody><tr><td><select>A</select><textarea>&lt;/select&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;&lt;/table&gt;</textarea></td></tr></tbody></table></body></html>"
+    ]
+  ],
+  "in-select": [
+    [
+      "empty",
+      "<!DOCTYPE html><select></select>",
+      "<html><head></head><body><select></select></body></html>"
+    ],
+    [
+      "comment",
+      "<!DOCTYPE html><select><!--A--></select>",
+      "<html><head></head><body><select><!--A--></select></body></html>"
+    ],
+    [
+      "doctype",
+      "<!DOCTYPE html><select><!DOCTYPE html></select>",
+      "<html><head></head><body><select></select></body></html>"
+    ],
+    [
+      "space",
+      "<!DOCTYPE html><select> \n\t\f</select>",
+      "<html><head></head><body><select> \n\t\f</select></body></html>"
+    ],
+    [
+      "NUL",
+      "<!DOCTYPE html><select>\u0000</select>",
+      "<html><head></head><body><select></select></body></html>"
+    ],
+    [
+      "text",
+      "<!DOCTYPE html><select>A</select>",
+      "<html><head></head><body><select>A</select></body></html>"
+    ],
+    [
+      "html start",
+      "<!DOCTYPE html><select>A<html></select>",
+      "<html><head></head><body><select>A</select></body></html>"
+    ],
+    [
+      "select start",
+      "<!DOCTYPE html><select>A<select>",
+      "<html><head></head><body><select>A</select></body></html>"
+    ],
+    [
+      "option empty",
+      "<!DOCTYPE html><select><option></option></select>",
+      "<html><head></head><body><select><option></option></select></body></html>"
+    ],
+    [
+      "option text",
+      "<!DOCTYPE html><select><option>A</option></select>",
+      "<html><head></head><body><select><option>A</option></select></body></html>"
+    ],
+    [
+      "option end",
+      "<!DOCTYPE html><select></option></select>",
+      "<html><head></head><body><select></select></body></html>"
+    ],
+    [
+      "option unclosed",
+      "<!DOCTYPE html><select><option>A</select>",
+      "<html><head></head><body><select><option>A</option></select></body></html>"
+    ],
+    [
+      "option pair unclosed",
+      "<!DOCTYPE html><select><option>A<option>B</select>",
+      "<html><head></head><body><select><option>A</option><option>B</option></select></body></html>"
+    ],
+    [
+      "option pair nested",
+      "<!DOCTYPE html><select><option>A<option>B</option>C</option></select>",
+      "<html><head></head><body><select><option>A</option><option>B</option>C</select></body></html>"
+    ],
+    [
+      "optgroup empty",
+      "<!DOCTYPE html><select><optgroup></optgroup></select>",
+      "<html><head></head><body><select><optgroup></optgroup></select></body></html>"
+    ],
+    [
+      "optgroup end",
+      "<!DOCTYPE html><select></optgroup></select>",
+      "<html><head></head><body><select></select></body></html>"
+    ],
+    [
+      "optgroup unclosed",
+      "<!DOCTYPE html><select><optgroup>A</select>",
+      "<html><head></head><body><select><optgroup>A</optgroup></select></body></html>"
+    ],
+    [
+      "optgroup pair unclosed",
+      "<!DOCTYPE html><select><optgroup>A<optgroup>B</select>",
+      "<html><head></head><body><select><optgroup>A</optgroup><optgroup>B</optgroup></select></body></html>"
+    ],
+    [
+      "optgroup pair nested",
+      "<!DOCTYPE html><select><optgroup>A<optgroup>B</optgroup>C</optgroup></select>",
+      "<html><head></head><body><select><optgroup>A</optgroup><optgroup>B</optgroup>C</select></body></html>"
+    ],
+    [
+      "optgroup start in option",
+      "<!DOCTYPE html><select><optgroup>A<option>B<optgroup>C</optgroup>D</optgroup></select>",
+      "<html><head></head><body><select><optgroup>A<option>B</option></optgroup><optgroup>C</optgroup>D</select></body></html>"
+    ],
+    [
+      "optgroup end in option",
+      "<!DOCTYPE html><select><optgroup>A<option>B</optgroup></select>",
+      "<html><head></head><body><select><optgroup>A<option>B</option></optgroup></select></body></html>"
+    ],
+    [
+      "script",
+      "<!DOCTYPE html><select><script>&#x41;<tag></script></select>",
+      "<html><head></head><body><select><script>&#x41;<tag></script></select></body></html>"
+    ],
+    [
+      "hr",
+      "<!DOCTYPE html><select><hr></select>",
+      "<html><head></head><body><select><hr></select></body></html>"
+    ],
+    [
+      "hr in option",
+      "<!DOCTYPE html><select><option>A<hr>B</option>C</select>",
+      "<html><head></head><body><select><option>A</option><hr>BC</select></body></html>"
+    ],
+    [
+      "hr in optgroup",
+      "<!DOCTYPE html><select><optgroup>A<hr>B</optgroup>C</select>",
+      "<html><head></head><body><select><optgroup>A</optgroup><hr>BC</select></body></html>"
+    ],
+    [
+      "hr in option in optgroup",
+      "<!DOCTYPE html><select><optgroup>A<option>B<hr>C</option>D</optgroup>E</select>",
+      "<html><head></head><body><select><optgroup>A<option>B</option></optgroup><hr>CDE</select></body></html>"
+    ],
+    [
+      "div start",
+      "<!DOCTYPE html><select>A<div>B</select>",
+      "<html><head></head><body><select>AB</select></body></html>"
+    ],
+    [
+      "div end",
+      "<!DOCTYPE html><select>A</div>B</select>",
+      "<html><head></head><body><select>AB</select></body></html>"
+    ],
+    [
+      "template",
+      "<!DOCTYPE html><select><template></template></select>",
+      "<html><head></head><body><select><template></template></select></body></html>"
+    ],
+    [
+      "template end",
+      "<!DOCTYPE html><select></template></select>",
+      "<html><head></head><body><select></select></body></html>"
+    ],
+    [
+      "select nested",
+      "<!DOCTYPE html><select>A<select>B</select>C</select>",
+      "<html><head></head><body><select>A</select>BC</body></html>"
+    ],
+    [
+      "input",
+      "<!DOCTYPE html><select>A<input></select>",
+      "<html><head></head><body><select>A</select><input></body></html>"
+    ],
+    [
+      "keygen",
+      "<!DOCTYPE html><select>A<keygen></select>",
+      "<html><head></head><body><select>A</select><keygen></body></html>"
+    ],
+    [
+      "textarea",
+      "<!DOCTYPE html><select>A<textarea></select>",
+      "<html><head></head><body><select>A</select><textarea>&lt;/select&gt;</textarea></body></html>"
+    ],
+    [
+      "EOF",
+      "<!DOCTYPE html><select>A",
+      "<html><head></head><body><select>A</select></body></html>"
+    ]
+  ],
+  "in-table-body": [
+    [
+      "empty",
+      "<!DOCTYPE html><table><tbody></tbody></table>",
+      "<html><head></head><body><table><tbody></tbody></table></body></html>"
+    ],
+    [
+      "comment",
+      "<!DOCTYPE html><table><tbody><!--A--></tbody></table>",
+      "<html><head></head><body><table><tbody><!--A--></tbody></table></body></html>"
+    ],
+    [
+      "doctype",
+      "<!DOCTYPE html><table><tbody><!DOCTYPE html></tbody></table>",
+      "<html><head></head><body><table><tbody></tbody></table></body></html>"
+    ],
+    [
+      "space",
+      "<!DOCTYPE html><table><tbody> \n\f\t</tbody></table>",
+      "<html><head></head><body><table><tbody> \n\f\t</tbody></table></body></html>"
+    ],
+    [
+      "text",
+      "<!DOCTYPE html><table><tbody>A</tbody></table>",
+      "<html><head></head><body>A<table><tbody></tbody></table></body></html>"
+    ],
+    [
+      "space + text",
+      "<!DOCTYPE html><table><tbody> \n\f\tA</tbody></table>",
+      "<html><head></head><body> \n\f\tA<table><tbody></tbody></table></body></html>"
+    ],
+    [
+      "unclosed",
+      "<!DOCTYPE html><table><tbody></table>",
+      "<html><head></head><body><table><tbody></tbody></table></body></html>"
+    ],
+    [
+      "tr",
+      "<!DOCTYPE html><table><tbody><tr></tbody></table>",
+      "<html><head></head><body><table><tbody><tr></tr></tbody></table></body></html>"
+    ],
+    [
+      "td",
+      "<!DOCTYPE html><table><thead><td><tr></tr></thead></table>",
+      "<html><head></head><body><table><thead><tr><td></td></tr><tr></tr></thead></table></body></html>"
+    ],
+    [
+      "th",
+      "<!DOCTYPE html><table><thead><th><tr></tr></thead></table>",
+      "<html><head></head><body><table><thead><tr><th></th></tr><tr></tr></thead></table></body></html>"
+    ],
+    [
+      "caption",
+      "<!DOCTYPE html><table><thead><caption><tr></tr></thead></table>",
+      "<html><head></head><body><table><thead></thead><caption></caption><tbody><tr></tr></tbody></table></body></html>"
+    ],
+    [
+      "col",
+      "<!DOCTYPE html><table><thead><col><tr></tr></thead></table>",
+      "<html><head></head><body><table><thead></thead><colgroup><col></colgroup><tbody><tr></tr></tbody></table></body></html>"
+    ],
+    [
+      "colgroup",
+      "<!DOCTYPE html><table><thead><colgroup><tr></tr></thead></table>",
+      "<html><head></head><body><table><thead></thead><colgroup></colgroup><tbody><tr></tr></tbody></table></body></html>"
+    ],
+    [
+      "nested same",
+      "<!DOCTYPE html><table><thead><tr a=\"1\"></tr><thead><tr a=\"2\"></tr></thead></table>",
+      "<html><head></head><body><table><thead><tr a=\"1\"></tr></thead><thead><tr a=\"2\"></tr></thead></table></body></html>"
+    ],
+    [
+      "nested other",
+      "<!DOCTYPE html><table><thead><tr a=\"1\"></tr><tfoot><tr a=\"2\"></tr></thead></table>",
+      "<html><head></head><body><table><thead><tr a=\"1\"></tr></thead><tfoot><tr a=\"2\"></tr></tfoot></table></body></html>"
+    ],
+    [
+      "mismatched end tag",
+      "<!DOCTYPE html><table><tbody></thead><tr></tr></table>",
+      "<html><head></head><body><table><tbody><tr></tr></tbody></table></body></html>"
+    ],
+    [
+      "template",
+      "<!DOCTYPE html><table><tbody><template></template><tr></tr></tbody></table>",
+      "<html><head></head><body><table><tbody><template></template><tr></tr></tbody></table></body></html>"
+    ],
+    [
+      "template end",
+      "<!DOCTYPE html><table><tbody></template><tr></tr></tbody></table>",
+      "<html><head></head><body><table><tbody><tr></tr></tbody></table></body></html>"
+    ],
+    [
+      "unclosed with extra tags",
+      "<!DOCTYPE html><table><tbody><div a><hr a/></div><div b><hr b/></table>",
+      "<html><head></head><body><div a=\"\"><hr a=\"\"></div><div b=\"\"><hr b=\"\"></div><table><tbody></tbody></table></body></html>"
+    ],
+    [
+      "unclosed with foreign content",
+      "<!DOCTYPE html><table><tbody><svg a><g a/></svg><svg b><g b/></table>",
+      "<html><head></head><body><svg a=\"\"><g a=\"\"></g></svg><svg b=\"\"><g b=\"\"></g></svg><table><tbody></tbody></table></body></html>"
+    ],
+    [
+      "body end",
+      "<!DOCTYPE html><table><tbody></body><tr></tr></tbody></table>",
+      "<html><head></head><body><table><tbody><tr></tr></tbody></table></body></html>"
+    ],
+    [
+      "caption end",
+      "<!DOCTYPE html><table><tbody></caption><tr></tr></tbody></table>",
+      "<html><head></head><body><table><tbody><tr></tr></tbody></table></body></html>"
+    ],
+    [
+      "col end",
+      "<!DOCTYPE html><table><tbody></col><tr></tr></tbody></table>",
+      "<html><head></head><body><table><tbody><tr></tr></tbody></table></body></html>"
+    ],
+    [
+      "colgroup end",
+      "<!DOCTYPE html><table><tbody></colgroup><tr></tr></tbody></table>",
+      "<html><head></head><body><table><tbody><tr></tr></tbody></table></body></html>"
+    ],
+    [
+      "html end",
+      "<!DOCTYPE html><table><tbody></html><tr></tr></tbody></table>",
+      "<html><head></head><body><table><tbody><tr></tr></tbody></table></body></html>"
+    ],
+    [
+      "td end",
+      "<!DOCTYPE html><table><tbody></td><tr></tr></tbody></table>",
+      "<html><head></head><body><table><tbody><tr></tr></tbody></table></body></html>"
+    ],
+    [
+      "th end",
+      "<!DOCTYPE html><table><tbody></th><tr></tr></tbody></table>",
+      "<html><head></head><body><table><tbody><tr></tr></tbody></table></body></html>"
+    ],
+    [
+      "tr end",
+      "<!DOCTYPE html><table><tbody></tr><tr></tr></tbody></table>",
+      "<html><head></head><body><table><tbody><tr></tr></tbody></table></body></html>"
+    ]
+  ],
+  "in-table": [
+    [
+      "unclosed table",
+      "<!DOCTYPE html><table>",
+      "<html><head></head><body><table></table></body></html>"
+    ],
+    [
+      "empty table",
+      "<!DOCTYPE html><table></table>",
+      "<html><head></head><body><table></table></body></html>"
+    ],
+    [
+      "comment",
+      "<!DOCTYPE html><table><!--A--></table>",
+      "<html><head></head><body><table><!--A--></table></body></html>"
+    ],
+    [
+      "doctype",
+      "<!DOCTYPE html><table><!DOCTYPE html></table>",
+      "<html><head></head><body><table></table></body></html>"
+    ],
+    [
+      "space",
+      "<!DOCTYPE html><table> \n\t\f</table>",
+      "<html><head></head><body><table> \n\t\f</table></body></html>"
+    ],
+    [
+      "text",
+      "<!DOCTYPE html><table>A</table>",
+      "<html><head></head><body>A<table></table></body></html>"
+    ],
+    [
+      "space + text",
+      "<!DOCTYPE html><table> \n\t\fA</table>",
+      "<html><head></head><body> \n\t\fA<table></table></body></html>"
+    ],
+    [
+      "space + text + space",
+      "<!DOCTYPE html><table> \n\t\fA \n\t\f</table>",
+      "<html><head></head><body> \n\t\fA \n\t\f<table></table></body></html>"
+    ],
+    [
+      "NUL",
+      "<!DOCTYPE html><table>\u0000</table>",
+      "<html><head></head><body><table></table></body></html>"
+    ],
+    [
+      "table start",
+      "<!DOCTYPE html><table>\t<table>\n</table>",
+      "<html><head></head><body><table>\t</table><table>\n</table></body></html>"
+    ],
+    [
+      "col start",
+      "<!DOCTYPE html><table>\t<col>\n</table>",
+      "<html><head></head><body><table>\t<colgroup><col>\n</colgroup></table></body></html>"
+    ],
+    [
+      "tr start",
+      "<!DOCTYPE html><table>\t<tr>\n</table>",
+      "<html><head></head><body><table>\t<tbody><tr>\n</tr></tbody></table></body></html>"
+    ],
+    [
+      "td start",
+      "<!DOCTYPE html><table>\t<td>\n</table>",
+      "<html><head></head><body><table>\t<tbody><tr><td>\n</td></tr></tbody></table></body></html>"
+    ],
+    [
+      "th start",
+      "<!DOCTYPE html><table>\t<th>\n</table>",
+      "<html><head></head><body><table>\t<tbody><tr><th>\n</th></tr></tbody></table></body></html>"
+    ],
+    [
+      "body end",
+      "<!DOCTYPE html><table>\t</body>\n</table>",
+      "<html><head></head><body><table>\t\n</table></body></html>"
+    ],
+    [
+      "caption end",
+      "<!DOCTYPE html><table>\t</caption>\n</table>",
+      "<html><head></head><body><table>\t\n</table></body></html>"
+    ],
+    [
+      "col end",
+      "<!DOCTYPE html><table>\t</col>\n</table>",
+      "<html><head></head><body><table>\t\n</table></body></html>"
+    ],
+    [
+      "colgroup end",
+      "<!DOCTYPE html><table>\t</colgroup>\n</table>",
+      "<html><head></head><body><table>\t\n</table></body></html>"
+    ],
+    [
+      "html end",
+      "<!DOCTYPE html><table>\t</html>\n</table>",
+      "<html><head></head><body><table>\t\n</table></body></html>"
+    ],
+    [
+      "tbody end",
+      "<!DOCTYPE html><table>\t</tbody>\n</table>",
+      "<html><head></head><body><table>\t\n</table></body></html>"
+    ],
+    [
+      "td end",
+      "<!DOCTYPE html><table>\t</td>\n</table>",
+      "<html><head></head><body><table>\t\n</table></body></html>"
+    ],
+    [
+      "tfoot end",
+      "<!DOCTYPE html><table>\t</tfoot>\n</table>",
+      "<html><head></head><body><table>\t\n</table></body></html>"
+    ],
+    [
+      "th end",
+      "<!DOCTYPE html><table>\t</th>\n</table>",
+      "<html><head></head><body><table>\t\n</table></body></html>"
+    ],
+    [
+      "thead end",
+      "<!DOCTYPE html><table>\t</thead>\n</table>",
+      "<html><head></head><body><table>\t\n</table></body></html>"
+    ],
+    [
+      "tr end",
+      "<!DOCTYPE html><table>\t</tr>\n</table>",
+      "<html><head></head><body><table>\t\n</table></body></html>"
+    ],
+    [
+      "style",
+      "<!DOCTYPE html><table><style>A</style></table>",
+      "<html><head></head><body><table><style>A</style></table></body></html>"
+    ],
+    [
+      "script",
+      "<!DOCTYPE html><table><script>A</script></table>",
+      "<html><head></head><body><table><script>A</script></table></body></html>"
+    ],
+    [
+      "input",
+      "<!DOCTYPE html><table><input></table>",
+      "<html><head></head><body><input><table></table></body></html>"
+    ],
+    [
+      "input type (no value)",
+      "<!DOCTYPE html><table><input type></table>",
+      "<html><head></head><body><input type=\"\"><table></table></body></html>"
+    ],
+    [
+      "input type='text'",
+      "<!DOCTYPE html><table><input type='text'></table>",
+      "<html><head></head><body><input type=\"text\"><table></table></body></html>"
+    ],
+    [
+      "input type='hidden'",
+      "<!DOCTYPE html><table><input type='hidden'></table>",
+      "<html><head></head><body><table><input type=\"hidden\"></table></body></html>"
+    ],
+    [
+      "form (start)",
+      "<!DOCTYPE html><table><form></table>",
+      "<html><head></head><body><table><form></form></table></body></html>"
+    ],
+    [
+      "form (inside)",
+      "<!DOCTYPE html><form><table><form></table></form>",
+      "<html><head></head><body><form><table></table></form></body></html>"
+    ],
+    [
+      "any start tag",
+      "<!DOCTYPE html><table><div></table>",
+      "<html><head></head><body><div></div><table></table></body></html>"
+    ],
+    [
+      "any end tag",
+      "<!DOCTYPE html><table></div></table>",
+      "<html><head></head><body><table></table></body></html>"
+    ],
+    [
+      "misnested known end tag",
+      "<!DOCTYPE html><div><table></div></table>",
+      "<html><head></head><body><div><table></table></div></body></html>"
+    ],
+    [
+      "misnested unknown end tag",
+      "<!DOCTYPE html><tag><table></tag></table>",
+      "<html><head></head><body><tag><table></table></tag></body></html>"
+    ],
+    [
+      "separated whitespace",
+      "<!DOCTYPE html><table> <div>  </div>   </table>",
+      "<html><head></head><body><div>  </div><table>    </table></body></html>"
+    ],
+    [
+      "foreign template element (pseudo-scope)",
+      "<!DOCTYPE html><table><svg><template><desc></table>",
+      "<html><head></head><body><svg><template><desc></desc></template></svg><table></table></body></html>"
+    ],
+    [
+      "tbody after forbidden content",
+      "<!DOCTYPE html><table><div a><hr a/></div><div b><hr b/><tbody></table>",
+      "<html><head></head><body><div a=\"\"><hr a=\"\"></div><div b=\"\"><hr b=\"\"></div><table><tbody></tbody></table></body></html>"
+    ],
+    [
+      "tbody after forbidden foreign content",
+      "<!DOCTYPE html><table><svg a><g a/></svg><svg b><g b/><tbody></table>",
+      "<html><head></head><body><svg a=\"\"><g a=\"\"></g></svg><svg b=\"\"><g b=\"\"></g><tbody></tbody></svg><table></table></body></html>"
+    ],
+    [
+      "tbody in HTML integration point",
+      "<!DOCTYPE html><table><svg><desc><tbody></table>",
+      "<html><head></head><body><svg><desc></desc></svg><table><tbody></tbody></table></body></html>"
+    ]
+  ],
+  "in-template": [
+    [
+      "empty",
+      "<!DOCTYPE html><html><head></head><body><template></template>",
+      "<html><head></head><body><template></template></body></html>"
+    ],
+    [
+      "start only",
+      "<!DOCTYPE html><html><head></head><body><template>",
+      "<html><head></head><body><template></template></body></html>"
+    ],
+    [
+      "whitespace",
+      "<!DOCTYPE html><html><head></head><body><template> \t\n\f</template>",
+      "<html><head></head><body><template> \t\n\f</template></body></html>"
+    ],
+    [
+      "text",
+      "<!DOCTYPE html><html><head></head><body><template>A</template>",
+      "<html><head></head><body><template>A</template></body></html>"
+    ],
+    [
+      "comment",
+      "<!DOCTYPE html><html><head></head><body><template>A<!--B-->C</template>",
+      "<html><head></head><body><template>A<!--B-->C</template></body></html>"
+    ],
+    [
+      "doctype",
+      "<!DOCTYPE html><html><head></head><body><template>A<!DOCTYPE html>B</template>",
+      "<html><head></head><body><template>AB</template></body></html>"
+    ],
+    [
+      "base",
+      "<!DOCTYPE html><html><head></head><body><template>A<base>B</template>",
+      "<html><head></head><body><template>A<base>B</template></body></html>"
+    ],
+    [
+      "bgsound",
+      "<!DOCTYPE html><html><head></head><body><template>A<bgsound>B</template>",
+      "<html><head></head><body><template>A<bgsound>B</template></body></html>"
+    ],
+    [
+      "link",
+      "<!DOCTYPE html><html><head></head><body><template>A<link>B</template>",
+      "<html><head></head><body><template>A<link>B</template></body></html>"
+    ],
+    [
+      "meta",
+      "<!DOCTYPE html><html><head></head><body><template>A<meta>B</template>",
+      "<html><head></head><body><template>A<meta>B</template></body></html>"
+    ],
+    [
+      "noframes",
+      "<!DOCTYPE html><html><head></head><body><template>A<noframes>&#x42;</template>",
+      "<html><head></head><body><template>A<noframes>&#x42;</template></noframes></template></body></html>"
+    ],
+    [
+      "script",
+      "<!DOCTYPE html><html><head></head><body><template>A<script>&#x42;</template>",
+      "<html><head></head><body><template>A<script>&#x42;</template></script></template></body></html>"
+    ],
+    [
+      "style",
+      "<!DOCTYPE html><html><head></head><body><template>A<style>&#x42;</template>",
+      "<html><head></head><body><template>A<style>&#x42;</template></style></template></body></html>"
+    ],
+    [
+      "title",
+      "<!DOCTYPE html><html><head></head><body><template>A<title>&#x42;</template>",
+      "<html><head></head><body><template>A<title>B&lt;/template&gt;</title></template></body></html>"
+    ],
+    [
+      "caption",
+      "<!DOCTYPE html><html><head></head><body><template>A<caption>B</template>C",
+      "<html><head></head><body><template>A<caption>B</caption></template>C</body></html>"
+    ],
+    [
+      "colgroup",
+      "<!DOCTYPE html><html><head></head><body><template>A<colgroup>B</template>C",
+      "<html><head></head><body><template>A<colgroup></colgroup>B</template>C</body></html>"
+    ],
+    [
+      "tbody",
+      "<!DOCTYPE html><html><head></head><body><template>A<tbody>B</template>C",
+      "<html><head></head><body><template>A<tbody></tbody>B</template>C</body></html>"
+    ],
+    [
+      "tfoot",
+      "<!DOCTYPE html><html><head></head><body><template>A<tfoot>B</template>C",
+      "<html><head></head><body><template>A<tfoot></tfoot>B</template>C</body></html>"
+    ],
+    [
+      "thead",
+      "<!DOCTYPE html><html><head></head><body><template>A<thead>B</template>C",
+      "<html><head></head><body><template>A<thead></thead>B</template>C</body></html>"
+    ],
+    [
+      "col",
+      "<!DOCTYPE html><html><head></head><body><template>A<col>B</template>C",
+      "<html><head></head><body><template>A<col></template>C</body></html>"
+    ],
+    [
+      "tr",
+      "<!DOCTYPE html><html><head></head><body><template>A<tr>B</template>C",
+      "<html><head></head><body><template>A<tr></tr>B</template>C</body></html>"
+    ],
+    [
+      "td",
+      "<!DOCTYPE html><html><head></head><body><template>A<td>B</template>C",
+      "<html><head></head><body><template>A<td>B</td></template>C</body></html>"
+    ],
+    [
+      "th",
+      "<!DOCTYPE html><html><head></head><body><template>A<th>B</template>C",
+      "<html><head></head><body><template>A<th>B</th></template>C</body></html>"
+    ],
+    [
+      "body",
+      "<!DOCTYPE html><html><head></head><body><template>A<body a>B</template>C",
+      "<html><head></head><body><template>AB</template>C</body></html>"
+    ],
+    [
+      "template start",
+      "<!DOCTYPE html><html><head></head><body><template>A<template>B<div>C</template>D",
+      "<html><head></head><body><template>A<template>B<div>C</div></template>D</template></body></html>"
+    ],
+    [
+      "nested template",
+      "<!DOCTYPE html><html><head></head><body><template>A<template>B<div>C</template>D</template>",
+      "<html><head></head><body><template>A<template>B<div>C</div></template>D</template></body></html>"
+    ],
+    [
+      "table-template-table",
+      "<!DOCTYPE html><html><head></head><body><table>A<template>B<table>C</table>D</template>E</table>F",
+      "<html><head></head><body>AE<table><template>BC<table></table>D</template></table>F</body></html>"
+    ],
+    [
+      "template-table-template",
+      "<!DOCTYPE html><html><head></head><body><template>A<table>B<template>C<tbody>D</tbody>E</template>F</table>G</template>H",
+      "<html><head></head><body><template>ABF<table><template>C<tbody></tbody>DE</template></table>G</template>H</body></html>"
+    ],
+    [
+      "table-select-template",
+      "<!DOCTYPE html><html><head></head><body><table><tr><td>A<select>B<template>C</template>D</tr>E</select></table>",
+      "<html><head></head><body>E<table><tbody><tr><td>A<select>B<template>C</template>D</select></td></tr></tbody></table></body></html>"
+    ],
+    [
+      "select-template",
+      "<!DOCTYPE html><html><head></head><body><select>A<template>B</template>C</tr>D</select>",
+      "<html><head></head><body><select>A<template>B</template>CD</select></body></html>"
+    ],
+    [
+      "html in template",
+      "<!DOCTYPE html><html><head></head><body><template><html lang=\"en\"></template><div></div>",
+      "<html><head></head><body><template></template><div></div></body></html>"
+    ],
+    [
+      "form end",
+      "<!DOCTYPE html><html><head></head><body><template><br/></form></template>",
+      "<html><head></head><body><template><br></template></body></html>"
+    ],
+    [
+      "form-template-form",
+      "<!DOCTYPE html><html><head></head><body><form><template><form></form></template></form>",
+      "<html><head></head><body><form><template><form></form></template></form></body></html>"
+    ],
+    [
+      "any start tag",
+      "<!DOCTYPE html><html><head></head><body><template>A<tag>B</template>",
+      "<html><head></head><body><template>A<tag>B</tag></template></body></html>"
+    ],
+    [
+      "any end tag",
+      "<!DOCTYPE html><html><head></head><body><template>A</tag>B</template>",
+      "<html><head></head><body><template>AB</template></body></html>"
+    ],
+    [
+      "closing foreign element",
+      "<!DOCTYPE html><html><head></head><body><template>A<math>B<mo>C</template>",
+      "<html><head></head><body><template>A<math>B<mo>C</mo></math></template></body></html>"
+    ],
+    [
+      "EOF",
+      "<!DOCTYPE html><html><head></head><body><template><br/>",
+      "<html><head></head><body><template><br></template></body></html>"
+    ],
+    [
+      "reset to select via template",
+      "<!DOCTYPE html><html><head></head><body><template><select><template></template></select></template>",
+      "<html><head></head><body><template><select><template></template></select></template></body></html>"
+    ]
+  ]
+}
