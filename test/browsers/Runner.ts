@@ -1,5 +1,4 @@
 import {Document} from '../../src/decl/dom-like.js';
-import {DefaultSerializer} from '../../src/impl/Serializer.js';
 import {DefaultRawTestCore} from '../composer/abstract-suite.js';
 
 interface DOMParser {
@@ -76,7 +75,7 @@ export class Runner {
         const name = testCase[0];
         const input = testCase[1];
         const document = this.parser.parseFromString(input, 'text/html');
-        const output = DefaultSerializer.serializeNode(document);
+        const output = (document.documentElement as any).outerHTML as string;
         parsed.push([name, input, output]);
       }
       data[suiteName] = parsed;
