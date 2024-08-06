@@ -1,4 +1,4 @@
-import {CDATASection, Comment, DocumentType, Element, Node, NodeType, ParentNode, ProcessingInstruction, Text} from '../decl/dom-like.js';
+import {CDATASection, Comment, DocumentType, Element, Node, NodeType, ParentNode, ProcessingInstruction, TemplateElement, Text} from '../decl/dom-like.js';
 import {CharactersToken, CommentToken, DoctypeToken, TagToken, Token} from './interfaces/tokens.js';
 import {NS_HTML} from './TreeComposer.js';
 
@@ -113,8 +113,12 @@ function serializeElementStart(node: ElementLike, tagName: string, selfClosed: b
 }
 
 function serializeContents(node: ParentNode, chunks: string[]) {
-  for (let child of node.childNodes)
-    serializeInChunks(child, chunks);
+  if (node.nodeType === NodeType.ELEMENT_NODE && (node as Element).localName === 'template' && (node as Element).namespaceURI === NS_HTML) {
+    serializeContents((node as TemplateElement).content, chunks);
+  } else {
+    for (let child of node.childNodes)
+      serializeInChunks(child, chunks);
+  }
 }
 
 function serializeCData(node: DataLike, chunks: string[]) {

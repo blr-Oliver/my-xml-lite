@@ -407,16 +407,19 @@ export class TreeComposer implements ComposerIntegration {
           let lastTemplateIndex = this.openElements.findLastIndex(el => el.tagName === 'template' && el.namespaceURI === NS_HTML);
           let lastTableIndex = this.openElements.findLastIndex(el => el.tagName === 'table' && el.namespaceURI === NS_HTML);
           if (lastTemplateIndex >= 0 && (lastTableIndex < 0 || lastTemplateIndex > lastTableIndex)) {
-            this.insertParent = this.openElements[lastTemplateIndex];
-          } else if (lastTableIndex < 0) {
+            this.insertParent = (this.openElements[lastTemplateIndex] as TemplateElement).content;
+            return;
+          } else if (lastTableIndex < 0) { // fragment case
             this.insertParent = this.openElements[0];
+            return;
           } else {
             this.insertParent = (this.insertBefore = this.openElements[lastTableIndex]).parentNode!;
+            return;
           }
       }
     }
-    if ((this.insertParent as Element).tagName === 'template' && (this.insertParent as Element).namespaceURI === NS_HTML) {
-      // TODO use template contents
+    if ((this.insertParent as Element).localName === 'template' && (this.insertParent as Element).namespaceURI === NS_HTML) {
+      this.insertParent = (this.insertParent as TemplateElement).content;
     }
   }
 
@@ -460,10 +463,10 @@ export class TreeComposer implements ComposerIntegration {
   }
 
   createAndInsertHtmlTemplate(token: TagToken): TemplateElement {
-    this.updateInsertionLocation();
     if (token.selfClosed)
       this.error('non-void-html-element-start-tag-with-trailing-solidus');
     token.selfClosed = false;
+    this.updateInsertionLocation();
     const element = this.nodeFactory.createTemplateElement(this.insertParent, token, NS_HTML);
     this.validateNsAttributes(element);
     this.insertElementAtCurrentLocation(element);
