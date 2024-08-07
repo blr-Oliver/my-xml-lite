@@ -17,8 +17,6 @@ export interface ParserFactory {
   readonly characterReferenceIndex: PrefixNode<number[]>;
   readonly errorHandler: ErrorHandler;
 
-  new(options?: Partial<ParserOptions>): ParserFactory;
-
   configure(options: Partial<ParserOptions>): void;
   createParser(options?: Partial<ParserOptions>): Parser;
   parseString(html: string, options?: Partial<ParserOptions>): Document;
