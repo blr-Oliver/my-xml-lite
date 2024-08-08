@@ -1,4 +1,4 @@
-import {CharacterSource} from '../common/stream-source.js';
+import {CharacterSource} from '../common/character-source.js';
 import {Document} from './dom-like.js';
 
 export interface Parser {

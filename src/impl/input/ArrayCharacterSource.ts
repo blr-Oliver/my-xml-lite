@@ -1,4 +1,4 @@
-import {CharacterSource, Resettable} from '../../common/stream-source.js';
+import {CharacterSource, Resettable} from '../../common/character-source.js';
 
 export interface ArrayCharacterData {
   readonly [index: number]: number;

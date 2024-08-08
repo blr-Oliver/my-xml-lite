@@ -1,4 +1,4 @@
-import {stringToArray} from '../common/code-sequences.js';
+import {stringToArray} from '../common/string-to-array.js';
 import {PrefixNode} from '../decl/entity-ref-index.js';
 import {EntityMapping} from '../decl/known-named-refs.js';
 

@@ -1,9 +1,11 @@
+import {CharacterSource, Resettable} from '../../common/character-source.js';
 import {CodePoints} from '../../common/code-points.js';
-import {CharacterSource} from '../../common/stream-source.js';
 
-export class EmptyCharacterSource implements CharacterSource {
+export class EmptyCharacterSource implements CharacterSource, Resettable {
   next(): number {
     return CodePoints.EOF;
+  }
+  reset() {
   }
 }
 

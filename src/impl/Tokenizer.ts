@@ -1,3 +1,4 @@
+import {CharacterSource} from '../common/character-source.js';
 import {
   isAsciiAlpha,
   isAsciiAlphaNum,
@@ -12,8 +13,7 @@ import {
   isUpperHexDigit
 } from '../common/code-checks.js';
 import {CodePoints} from '../common/code-points.js';
-import {stringToArray} from '../common/code-sequences.js';
-import {CharacterSource} from '../common/stream-source.js';
+import {stringToArray} from '../common/string-to-array.js';
 import {Element} from '../decl/dom-like.js';
 import {PrefixNode} from '../decl/entity-ref-index.js';
 import {StringBuilder} from '../decl/StringBuilder.js';
