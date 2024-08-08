@@ -9,4 +9,3 @@ export class SimpleNodeList<T extends Node> extends Array<T> implements NodeList
   }
   declare forEach: (callback: (value: T, key: number, parent: SimpleNodeList<T>) => void, thisArg?: any) => void;
 }
-

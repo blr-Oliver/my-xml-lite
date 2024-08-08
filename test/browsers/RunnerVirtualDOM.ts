@@ -1,6 +1,6 @@
 import {JSDOM} from 'jsdom';
 import * as fs from 'node:fs/promises';
-import {parseFromString} from '../../src/impl/parse.js';
+import {HtmlLite} from '../../src/index.js';
 import {SelfClosingOptions, Serializer} from '../../src/impl/Serializer.js';
 import {DefaultRawTestCore} from '../composer/abstract-suite.js';
 
@@ -89,7 +89,7 @@ export class RunnerVirtualDOM {
         const input = testCase[1];
         const jsdom = new JSDOM(input);
         const jsdomDocument = jsdom.window.document;
-        const liteDocument = parseFromString(input);
+        const liteDocument = HtmlLite.parseString(input);
         const jsdomNativeOutput = jsdom.serialize();
         const jsdomLiteOutput = this.serializer.serializeNode(jsdomDocument);
         const liteFullOutput = this.serializer.serializeNode(liteDocument);

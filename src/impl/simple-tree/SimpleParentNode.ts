@@ -3,6 +3,7 @@ import {Element, NodeListOf, NodeType, ParentNode} from '../../interfaces/dom-ty
 import {SimpleElement} from './SimpleElement.js';
 import {SimpleNode} from './SimpleNode.js';
 import {SimpleNodeList} from './SimpleNodeList.js';
+import {SimpleTokenList} from './SimpleTokenList.js';
 
 export abstract class SimpleParentNode extends SimpleNode implements ParentNode {
   children: SimpleNodeList<SimpleElement>;
@@ -26,6 +27,7 @@ export abstract class SimpleParentNode extends SimpleNode implements ParentNode 
   get childElementCount(): number {
     return this.children.length;
   }
+
   querySelector(selectors: string): Element | null {
     return this.nwsapi.first(selectors, this as any) as Element | null;
   }
@@ -35,6 +37,52 @@ export abstract class SimpleParentNode extends SimpleNode implements ParentNode 
     const result = new SimpleNodeList<Element>(len);
     for (let i = 0; i < len; ++i)
       result[i] = elements[i] as Element;
+    return result;
+  }
+  getElementById(elementId: string): Element | null {
+    let element = this.firstElementChild, next: SimpleElement | null;
+    while (element) {
+      if (element.id === elementId) return element;
+      if (!(next = element.firstElementChild)) {
+        while (!(next = element.nextElementSibling)) {
+          if (!(element = element.parentElement)) break;
+        }
+      }
+      element = next;
+    }
+    return null;
+  }
+  getElementsByClassName(classNames: string): SimpleNodeList<Element> {
+    // FIXME something is wrong here
+    const classList = new SimpleTokenList(classNames);
+    if (classList.length !== 0)
+      return this.collectElements(
+          element => classList.every(
+              className => element.classList.contains(className)
+          )
+      );
+    else
+      return new SimpleNodeList<Element>(0);
+  }
+  getElementsByTagNameNS(namespace: string | null, localName: string): SimpleNodeList<Element> {
+    const predicate = namespace === '*' ?
+        (localName === '*' ? () => true : (element: SimpleElement) => element.localName === localName) :
+        (localName === '*' ? (element: SimpleElement) => element.namespaceURI === namespace : (element: SimpleElement) => element.namespaceURI === namespace && element.localName === localName);
+    return this.collectElements(predicate);
+  }
+  collectElements(predicate: (element: SimpleElement) => boolean): SimpleNodeList<Element> {
+    const result = new SimpleNodeList<Element>(0);
+    let element = this.firstElementChild, next: SimpleElement | null;
+    while (element) {
+      if (predicate(element))
+        result.push(element);
+      if (!(next = element.firstElementChild)) {
+        while (!(next = element.nextElementSibling)) {
+          if (!(element = element.parentElement)) break;
+        }
+      }
+      element = next;
+    }
     return result;
   }
 }

@@ -61,9 +61,9 @@ export interface Element extends ChildNode, NonDocumentTypeChildNode, ParentNode
   getAttributeNames(): ReadonlyArray<string>;
   getAttributeNode(qualifiedName: string): Attr | null;
   getAttributeNodeNS(namespace: string | null, localName: string): Attr | null;
-  // getElementsByClassName(classNames: string): HTMLCollection;
+  getElementsByClassName(classNames: string): HTMLCollection;
   // getElementsByTagName(qualifiedName: string): HTMLCollection;
-  // getElementsByTagNameNS(namespace: string | null, localName: string): HTMLCollection;
+  getElementsByTagNameNS(namespace: string | null, localName: string): HTMLCollection;
   hasAttribute(qualifiedName: string): boolean;
   hasAttributeNS(namespace: string | null, localName: string): boolean;
   hasAttributes(): boolean;
@@ -85,11 +85,10 @@ export interface Document extends Node, NonElementParentNode, ParentNode {
   // readonly title: string;
   // createNodeIterator(root: Node, whatToShow?: number, filter?: NodeFilter | null): NodeIterator;
   // createTreeWalker(root: Node, whatToShow?: number, filter?: NodeFilter | null): TreeWalker;
-  // getElementById(elementId: string): HTMLElement | null;
-  // getElementsByClassName(classNames: string): HTMLCollection;
+  getElementsByClassName(classNames: string): HTMLCollection;
   // getElementsByName(elementName: string): NodeListOf<Element>;
   // getElementsByTagName(qualifiedName: string): HTMLCollection;
-  // getElementsByTagNameNS(namespace: string | null, localName: string): HTMLCollection;
+  getElementsByTagNameNS(namespace: string | null, localName: string): HTMLCollection;
 }
 
 export interface CharacterData extends Node, ChildNode, NonDocumentTypeChildNode {
@@ -123,7 +122,7 @@ export interface DocumentFragment extends Node, NonElementParentNode, ParentNode
 }
 
 export interface NonElementParentNode {
-  // getElementById(elementId: string): Element | null;
+  getElementById(elementId: string): Element | null;
 }
 
 export interface NonDocumentTypeChildNode {
