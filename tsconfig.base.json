@@ -19,11 +19,13 @@
     },
     "resolveJsonModule": true,
     "sourceMap": true,
+    "skipLibCheck": true,
     "strict": true,
     "target": "ESNext",
     "types": [
       "jest",
-      "node"
+      "node",
+      "nwsapi"
     ],
     "lib": [
       "es2023"

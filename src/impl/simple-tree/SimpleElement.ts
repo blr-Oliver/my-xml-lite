@@ -19,7 +19,7 @@ export class SimpleElement extends SimpleParentNode implements Element {
   readonly tagName: string;
   readonly selfClosed: boolean;
 
-  constructor(parentNode: SimpleParentNode, token: TagToken,
+  constructor(parentNode: SimpleParentNode | null, token: TagToken,
               namespaceURI: string | null) {
     super(NodeType.ELEMENT_NODE, parentNode);
     this.namespaceURI = namespaceURI;
@@ -63,5 +63,4 @@ export class SimpleElement extends SimpleParentNode implements Element {
   get nodeName(): string {
     return this.tagName;
   }
-
 }

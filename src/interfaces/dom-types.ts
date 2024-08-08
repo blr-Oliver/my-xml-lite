@@ -40,11 +40,11 @@ export interface ParentNode extends Node {
   readonly children: HTMLCollection;
   readonly firstElementChild: Element | null;
   readonly lastElementChild: Element | null;
-  // querySelector(selectors: string): E | null;
-  // querySelectorAll(selectors: string): NodeListOf<Element>;
+  querySelector(selectors: string): Element | null;
+  querySelectorAll(selectors: string): NodeListOf<Element>;
 }
 
-export interface Element extends Node, ChildNode, NonDocumentTypeChildNode, ParentNode {
+export interface Element extends ChildNode, NonDocumentTypeChildNode, ParentNode {
   readonly ownerDocument: Document;
   readonly attributes: NamedNodeMap;
   readonly id: string;
@@ -80,6 +80,8 @@ export interface Document extends Node, NonElementParentNode, ParentNode {
   readonly documentElement: Element;
   readonly head: Element;
   readonly body: Element;
+  readonly compatMode: string;
+  readonly contentType: string;
   // readonly title: string;
   // createNodeIterator(root: Node, whatToShow?: number, filter?: NodeFilter | null): NodeIterator;
   // createTreeWalker(root: Node, whatToShow?: number, filter?: NodeFilter | null): TreeWalker;
