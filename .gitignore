@@ -5,3 +5,4 @@ dist
 coverage
 /test/example.html
 /etc/experiment/out/
+/etc/experiment/HTML_Standard.html
