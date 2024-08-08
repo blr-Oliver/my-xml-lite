@@ -1,7 +1,7 @@
 {
   "name": "my-xml-lite",
   "version": "0.1.0",
-  "description": "Minimal ArrayBuffer-based UTF-8/UTF-16 DOM XML/HTML parser with weak validation",
+  "description": "Minimal streaming array-based HTML parser",
   "type": "module",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
@@ -17,14 +17,11 @@
   },
   "keywords": [
     "DOM",
-    "XML",
     "HTML",
     "parser",
-    "utf8",
-    "UTF-8",
     "buffer",
     "document",
-    "structure"
+    "stream"
   ],
   "author": "Vasily Liaskovsky <vasily.liaskovsky@gmail.com>",
   "license": "UNLICENSED",
