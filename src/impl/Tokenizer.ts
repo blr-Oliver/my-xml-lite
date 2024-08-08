@@ -1,4 +1,13 @@
-import {CharacterSource} from '../common/character-source.js';
+import {CharacterSource} from '../interfaces/CharacterSource.js';
+import {CodePoints} from '../interfaces/CodePoints.js';
+import {Element} from '../interfaces/dom-types.js';
+import {ErrorHandler, ignoring} from '../interfaces/ErrorHandler.js';
+import {PrefixNode} from '../interfaces/PrefixNode.js';
+import {FixedSizeStringBuilder} from './FixedSizeStringBuilder.js';
+import {State} from './interfaces/states.js';
+import {StringBuilder} from './interfaces/StringBuilder.js';
+import {Attribute, CDataToken, CharactersToken, CommentToken, DoctypeToken, EOF_TOKEN, TagToken, Token} from './interfaces/tokens.js';
+import {NS_HTML} from './TreeComposer.js';
 import {
   isAsciiAlpha,
   isAsciiAlphaNum,
@@ -11,17 +20,8 @@ import {
   isSpace,
   isSurrogate,
   isUpperHexDigit
-} from '../common/code-checks.js';
-import {CodePoints} from '../common/code-points.js';
-import {stringToArray} from '../common/string-to-array.js';
-import {Element} from '../decl/dom-like.js';
-import {PrefixNode} from '../decl/entity-ref-index.js';
-import {StringBuilder} from '../decl/StringBuilder.js';
-import {FixedSizeStringBuilder} from './FixedSizeStringBuilder.js';
-import {ErrorHandler, ignoring} from './interfaces/error-tracker.js';
-import {State} from './interfaces/states.js';
-import {Attribute, CDataToken, CharactersToken, CommentToken, DoctypeToken, EOF_TOKEN, TagToken, Token} from './interfaces/tokens.js';
-import {NS_HTML} from './TreeComposer.js';
+} from './util/code-checks.js';
+import {stringToArray} from './util/string-to-array.js';
 
 const SCRIPT: number[] = [0x73, 0x63, 0x72, 0x69, 0x70, 0x74];
 const TWO_HYPHENS: number[] = [CodePoints.HYPHEN, CodePoints.HYPHEN];

@@ -1,4 +1,5 @@
-import {CharacterSource, Resettable} from '../../common/character-source.js';
+import {CharacterSource} from '../../interfaces/CharacterSource.js';
+import {Resettable} from '../../interfaces/Resettable.js';
 
 export interface ArrayCharacterData {
   readonly [index: number]: number;

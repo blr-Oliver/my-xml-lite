@@ -1,4 +1,4 @@
-import {Attr, NodeType} from '../../decl/dom-like.js';
+import {Attr, NodeType} from '../../interfaces/dom-types.js';
 import {NamespacedAttribute} from '../interfaces/tokens.js';
 import {SimpleDocument} from './SimpleDocument.js';
 import {SimpleElement} from './SimpleElement.js';

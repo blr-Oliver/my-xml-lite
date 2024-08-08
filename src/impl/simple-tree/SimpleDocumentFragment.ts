@@ -1,4 +1,4 @@
-import {DocumentFragment, NodeType} from '../../decl/dom-like.js';
+import {DocumentFragment, NodeType} from '../../interfaces/dom-types.js';
 import {SimpleDocument} from './SimpleDocument.js';
 import {SimpleParentNode} from './SimpleParentNode.js';
 

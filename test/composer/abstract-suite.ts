@@ -1,11 +1,11 @@
-import {ChildNode, Document, Element, Node, NodeType, NonDocumentTypeChildNode, ParentNode} from '../../src/decl/dom-like.js';
-import {HTML_SPECIAL} from '../../src/decl/known-named-refs.js';
-import {buildIndex} from '../../src/impl/build-index.js';
-import {ErrorHandler} from '../../src/impl/interfaces/error-tracker.js';
 import {TestSerializer} from '../../src/impl/Serializer.js';
 import {SimpleNodeFactory} from '../../src/impl/simple-tree/SimpleNodeFactory.js';
 import {Tokenizer} from '../../src/impl/Tokenizer.js';
 import {TreeComposer} from '../../src/impl/TreeComposer.js';
+import {buildIndex} from '../../src/impl/util/build-index.js';
+import {ChildNode, Document, Element, Node, NodeType, NonDocumentTypeChildNode, ParentNode} from '../../src/interfaces/dom-types.js';
+import {ErrorHandler} from '../../src/interfaces/ErrorHandler.js';
+import {HTML_SPECIAL} from '../../src/interfaces/named-character-refs.js';
 import {InterlacedStringCharacterSource} from '../util/InterlacedStringCharacterSource.js';
 
 export interface TestCase {

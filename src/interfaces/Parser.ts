@@ -1,5 +1,5 @@
-import {CharacterSource} from '../common/character-source.js';
-import {Document} from './dom-like.js';
+import {CharacterSource} from './CharacterSource.js';
+import {Document} from './dom-types.js';
 
 export interface Parser {
   readonly active: boolean;

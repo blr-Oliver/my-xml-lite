@@ -1,10 +1,10 @@
-import {Document} from '../decl/dom-like.js';
-import {HTML_SPECIAL} from '../decl/known-named-refs.js';
-import {buildIndex} from './build-index.js';
+import {Document} from '../interfaces/dom-types.js';
+import {HTML_SPECIAL} from '../interfaces/named-character-refs.js';
 import {StringCharacterSource} from './input/StringCharacterSource.js';
 import {SimpleNodeFactory} from './simple-tree/SimpleNodeFactory.js';
 import {Tokenizer} from './Tokenizer.js';
 import {TreeComposer} from './TreeComposer.js';
+import {buildIndex} from './util/build-index.js';
 
 export function parseFromString(html: string): Document {
   const source = new StringCharacterSource(html);

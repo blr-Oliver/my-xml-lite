@@ -1,4 +1,4 @@
-import {NamedNodeMap} from '../../decl/dom-like.js';
+import {NamedNodeMap} from '../../interfaces/dom-types.js';
 import {NamespacedAttribute} from '../interfaces/tokens.js';
 import {SimpleAttr} from './SimpleAttr.js';
 import {SimpleElement} from './SimpleElement.js';

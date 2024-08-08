@@ -1,3 +1,4 @@
+import {TagToken} from '../impl/interfaces/tokens.js';
 import {
   CDATASection,
   Comment,
@@ -11,8 +12,7 @@ import {
   ProcessingInstruction,
   TemplateElement,
   Text
-} from '../../decl/dom-like.js';
-import {TagToken} from './tokens.js';
+} from './dom-types.js';
 
 export interface NodeTypeMapping {
   CDATASection: CDATASection;

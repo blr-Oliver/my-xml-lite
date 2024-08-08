@@ -1,5 +1,6 @@
-import {CharacterSource, Resettable} from '../../common/character-source.js';
-import {CodePoints} from '../../common/code-points.js';
+import {CharacterSource} from '../../interfaces/CharacterSource.js';
+import {CodePoints} from '../../interfaces/CodePoints.js';
+import {Resettable} from '../../interfaces/Resettable.js';
 
 export class EmptyCharacterSource implements CharacterSource, Resettable {
   next(): number {

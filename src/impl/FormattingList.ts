@@ -1,4 +1,4 @@
-import {Attr, Element} from '../decl/dom-like.js';
+import {Attr, Element} from '../interfaces/dom-types.js';
 import {TagToken} from './interfaces/tokens.js';
 
 export interface FormattingElement {

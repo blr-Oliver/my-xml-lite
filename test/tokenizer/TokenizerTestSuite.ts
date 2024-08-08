@@ -1,9 +1,9 @@
-import {HTML_SPECIAL} from '../../src/decl/known-named-refs.js';
-import {buildIndex} from '../../src/impl/build-index.js';
 import {State} from '../../src/impl/interfaces/states.js';
 import {CharactersToken, Token, TokenType} from '../../src/impl/interfaces/tokens.js';
 import {TestSerializer} from '../../src/impl/Serializer.js';
 import {Tokenizer} from '../../src/impl/Tokenizer.js';
+import {buildIndex} from '../../src/impl/util/build-index.js';
+import {HTML_SPECIAL} from '../../src/interfaces/named-character-refs.js';
 import {InterlacedStringCharacterSource} from '../util/InterlacedStringCharacterSource.js';
 import {TokenListSink} from './TokenListSink.js';
 

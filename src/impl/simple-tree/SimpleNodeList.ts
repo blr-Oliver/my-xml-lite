@@ -1,4 +1,4 @@
-import {Node, NodeListOf} from '../../decl/dom-like.js';
+import {Node, NodeListOf} from '../../interfaces/dom-types.js';
 
 export class SimpleNodeList<T extends Node> extends Array<T> implements NodeListOf<T> {
   constructor(length: number) {

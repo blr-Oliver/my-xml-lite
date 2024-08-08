@@ -1,5 +1,5 @@
-import {NodeType, ProcessingInstruction} from '../../decl/dom-like.js';
-import {NodeFactory, NodeTypeMapping} from '../interfaces/NodeFactory.js';
+import {NodeType, ProcessingInstruction} from '../../interfaces/dom-types.js';
+import {NodeFactory, NodeTypeMapping} from '../../interfaces/NodeFactory.js';
 import {TagToken} from '../interfaces/tokens.js';
 import {SimpleCDataSection} from './SimpleCDataSection.js';
 import {SimpleComment} from './SimpleComment.js';

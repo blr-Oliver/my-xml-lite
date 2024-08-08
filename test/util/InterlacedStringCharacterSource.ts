@@ -1,5 +1,5 @@
-import {CodePoints} from '../../src/common/code-points.js';
 import {StringCharacterSource} from '../../src/impl/input/StringCharacterSource.js';
+import {CodePoints} from '../../src/interfaces/CodePoints.js';
 
 export class InterlacedStringCharacterSource extends StringCharacterSource {
   readonly frequency: number;

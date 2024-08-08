@@ -5,7 +5,3 @@ export interface CharacterSource {
    */
   next(): number;
 }
-
-export interface Resettable {
-  reset(): void;
-}

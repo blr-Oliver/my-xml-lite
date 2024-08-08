@@ -1,4 +1,4 @@
-import {StringBuilder} from '../decl/StringBuilder.js';
+import {StringBuilder} from './interfaces/StringBuilder.js';
 
 export class FixedSizeStringBuilder implements StringBuilder {
   buffer: Uint32Array;

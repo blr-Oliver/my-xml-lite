@@ -1,5 +1,5 @@
-import {Document} from '../../src/decl/dom-like.js';
 import {SelfClosingOptions, Serializer} from '../../src/impl/Serializer.js';
+import {Document} from '../../src/interfaces/dom-types.js';
 import {DefaultRawTestCore} from '../composer/abstract-suite.js';
 
 interface DOMParser {

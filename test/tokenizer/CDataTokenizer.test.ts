@@ -1,4 +1,4 @@
-import {Element} from '../../src/decl/dom-like.js';
+import {Element} from '../../src/interfaces/dom-types.js';
 import {default as rawTests} from './samples/cdata.json';
 import {DefaultTokenizerRawTest, DefaultTokenizerTestSuite} from './TokenizerTestSuite.js';
 import {TokenListSink} from './TokenListSink.js';

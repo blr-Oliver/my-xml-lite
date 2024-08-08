@@ -1,6 +1,6 @@
-import {stringToArray} from '../common/string-to-array.js';
-import {PrefixNode} from '../decl/entity-ref-index.js';
-import {EntityMapping} from '../decl/known-named-refs.js';
+import {EntityMapping} from '../../interfaces/EntityMapping.js';
+import {PrefixNode} from '../../interfaces/PrefixNode.js';
+import {stringToArray} from './string-to-array.js';
 
 type DecodedEntity<T> = {
   name: number[];

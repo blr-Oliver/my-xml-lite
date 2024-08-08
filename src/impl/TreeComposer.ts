@@ -1,8 +1,8 @@
-import {CharacterData, Document, Element, Node, NodeType, ParentNode, TemplateElement} from '../decl/dom-like.js';
+import {CharacterData, Document, Element, Node, NodeType, ParentNode, TemplateElement} from '../interfaces/dom-types.js';
+import {ErrorHandler, ignoring} from '../interfaces/ErrorHandler.js';
+import {NodeFactory} from '../interfaces/NodeFactory.js';
 import {FormattingList} from './FormattingList.js';
-import {ErrorHandler, ignoring} from './interfaces/error-tracker.js';
 import {InsertionMode} from './interfaces/insertion-mode.js';
-import {NodeFactory} from './interfaces/NodeFactory.js';
 import {State} from './interfaces/states.js';
 import {CharactersToken, CommentToken, DoctypeToken, NamespacedAttribute, TagToken, Token} from './interfaces/tokens.js';
 import {ComposerIntegration, Tokenizer} from './Tokenizer.js';

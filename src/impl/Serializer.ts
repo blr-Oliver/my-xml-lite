@@ -1,4 +1,15 @@
-import {CDATASection, Comment, DocumentType, Element, Node, NodeType, ParentNode, ProcessingInstruction, TemplateElement, Text} from '../decl/dom-like.js';
+import {
+  CDATASection,
+  Comment,
+  DocumentType,
+  Element,
+  Node,
+  NodeType,
+  ParentNode,
+  ProcessingInstruction,
+  TemplateElement,
+  Text
+} from '../interfaces/dom-types.js';
 import {CDataToken, CharactersToken, CommentToken, DoctypeToken, TagToken, Token} from './interfaces/tokens.js';
 import {NS_HTML} from './TreeComposer.js';
 

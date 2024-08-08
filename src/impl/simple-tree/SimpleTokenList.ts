@@ -1,4 +1,4 @@
-import {DOMTokenList} from '../../decl/dom-like.js';
+import {DOMTokenList} from '../../interfaces/dom-types.js';
 
 export class SimpleTokenList extends Array<string> implements DOMTokenList {
   readonly value: string;

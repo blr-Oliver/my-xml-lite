@@ -1,4 +1,4 @@
-import {TemplateElement} from '../../decl/dom-like.js';
+import {TemplateElement} from '../../interfaces/dom-types.js';
 import {TagToken} from '../interfaces/tokens.js';
 import {SimpleDocumentFragment} from './SimpleDocumentFragment.js';
 import {SimpleElement} from './SimpleElement.js';

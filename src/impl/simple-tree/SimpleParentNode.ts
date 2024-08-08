@@ -1,4 +1,4 @@
-import {NodeType, ParentNode} from '../../decl/dom-like.js';
+import {NodeType, ParentNode} from '../../interfaces/dom-types.js';
 import {SimpleElement} from './SimpleElement.js';
 import {SimpleNode} from './SimpleNode.js';
 import {SimpleNodeList} from './SimpleNodeList.js';

@@ -1,10 +1,10 @@
 import {Readable} from 'stream';
 import {ReadableStream} from 'stream/web';
-import {ErrorHandler} from '../impl/interfaces/error-tracker.js';
-import {NodeFactory} from '../impl/interfaces/NodeFactory.js';
-import {Document} from './dom-like.js';
-import {PrefixNode} from './entity-ref-index.js';
+import {Document} from './dom-types.js';
+import {ErrorHandler} from './ErrorHandler.js';
+import {NodeFactory} from './NodeFactory.js';
 import {Parser} from './Parser.js';
+import {PrefixNode} from './PrefixNode.js';
 
 export interface ParserOptions {
   nodeFactory: NodeFactory;

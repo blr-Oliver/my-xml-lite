@@ -1,17 +1,17 @@
 import {Readable} from 'stream';
 import {ReadableStream} from 'stream/web';
-import {Document} from '../decl/dom-like.js';
-import {PrefixNode} from '../decl/entity-ref-index.js';
-import {HTML_SPECIAL} from '../decl/known-named-refs.js';
-import {Parser} from '../decl/Parser.js';
-import {ParserFactory, ParserOptions} from '../decl/ParserFactory.js';
-import {buildIndex} from './build-index.js';
+import {Document} from '../interfaces/dom-types.js';
+import {ErrorHandler, ignoring} from '../interfaces/ErrorHandler.js';
+import {HTML_SPECIAL} from '../interfaces/named-character-refs.js';
+import {NodeFactory} from '../interfaces/NodeFactory.js';
+import {Parser} from '../interfaces/Parser.js';
+import {ParserFactory, ParserOptions} from '../interfaces/ParserFactory.js';
+import {PrefixNode} from '../interfaces/PrefixNode.js';
 import {HtmlLiteParser} from './HtmlLiteParser.js';
 import {EMPTY_SOURCE} from './input/EmptyCharacterSource.js';
 import {StringCharacterSource} from './input/StringCharacterSource.js';
-import {ErrorHandler, ignoring} from './interfaces/error-tracker.js';
-import {NodeFactory} from './interfaces/NodeFactory.js';
 import {SimpleNodeFactory} from './simple-tree/SimpleNodeFactory.js';
+import {buildIndex} from './util/build-index.js';
 
 export class HtmlLite implements ParserFactory {
   nodeFactory: NodeFactory;

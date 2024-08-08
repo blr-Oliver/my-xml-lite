@@ -1,8 +1,8 @@
-import {ErrorHandler} from '../../src/impl/interfaces/error-tracker.js';
 import {InsertionMode} from '../../src/impl/interfaces/insertion-mode.js';
 import {Token} from '../../src/impl/interfaces/tokens.js';
 import {SimpleNodeFactory} from '../../src/impl/simple-tree/SimpleNodeFactory.js';
 import {TreeComposer} from '../../src/impl/TreeComposer.js';
+import {ErrorHandler} from '../../src/interfaces/ErrorHandler.js';
 import {trackProperty} from '../util/property-tracker.js';
 import {DefaultRawTestCore, DefaultSuite, DefaultTestCase} from './abstract-suite.js';
 import {initial} from './samples/index.js';

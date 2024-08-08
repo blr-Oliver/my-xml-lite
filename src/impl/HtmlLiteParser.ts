@@ -1,9 +1,9 @@
-import {CharacterSource} from '../common/character-source.js';
-import {Document} from '../decl/dom-like.js';
-import {PrefixNode} from '../decl/entity-ref-index.js';
-import {Parser} from '../decl/Parser.js';
-import {ErrorHandler, ignoring} from './interfaces/error-tracker.js';
-import {NodeFactory} from './interfaces/NodeFactory.js';
+import {CharacterSource} from '../interfaces/CharacterSource.js';
+import {Document} from '../interfaces/dom-types.js';
+import {ErrorHandler, ignoring} from '../interfaces/ErrorHandler.js';
+import {NodeFactory} from '../interfaces/NodeFactory.js';
+import {Parser} from '../interfaces/Parser.js';
+import {PrefixNode} from '../interfaces/PrefixNode.js';
 import {Tokenizer} from './Tokenizer.js';
 import {TreeComposer} from './TreeComposer.js';
 

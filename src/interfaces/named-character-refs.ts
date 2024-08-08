@@ -1,8 +1,5 @@
-import {CodePoints} from '../common/code-points.js';
-
-export type EntityMapping<T> = {
-  [entity: string]: T;
-}
+import {CodePoints} from './CodePoints.js';
+import {EntityMapping} from './EntityMapping.js';
 
 export const HTML_SPECIAL: EntityMapping<number[]> = {
   'amp;': [CodePoints.AMPERSAND],

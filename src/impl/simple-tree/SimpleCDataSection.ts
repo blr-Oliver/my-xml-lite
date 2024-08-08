@@ -1,4 +1,4 @@
-import {CDATASection, NodeType} from '../../decl/dom-like.js';
+import {CDATASection, NodeType} from '../../interfaces/dom-types.js';
 import {SimpleParentNode} from './SimpleParentNode.js';
 import {SimpleText} from './SimpleText.js';
 
