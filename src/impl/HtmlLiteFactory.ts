@@ -13,7 +13,7 @@ import {StringCharacterSource} from './input/StringCharacterSource.js';
 import {SimpleNodeFactory} from './simple-tree/SimpleNodeFactory.js';
 import {buildIndex} from './util/build-index.js';
 
-export class HtmlLite implements ParserFactory {
+export class HtmlLiteFactory implements ParserFactory {
   nodeFactory: NodeFactory;
   characterReferenceIndex: PrefixNode<number[]>;
   errorHandler: ErrorHandler;
