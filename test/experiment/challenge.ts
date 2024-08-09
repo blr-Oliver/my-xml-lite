@@ -28,6 +28,7 @@ const serializer = new Serializer({
 
 console.log(liteDoc.querySelectorAll('#head').length);
 console.log(liteDoc.querySelectorAll('dd').length);
+console.log(liteDoc.getElementsByTagName('dd').length);
 console.log(liteDoc.querySelectorAll('.switch').length);
 console.log(liteDoc.querySelectorAll('.split #head~dl.switch').length);
 

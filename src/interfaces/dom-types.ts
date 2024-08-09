@@ -62,7 +62,7 @@ export interface Element extends ChildNode, NonDocumentTypeChildNode, ParentNode
   getAttributeNode(qualifiedName: string): Attr | null;
   getAttributeNodeNS(namespace: string | null, localName: string): Attr | null;
   getElementsByClassName(classNames: string): HTMLCollection;
-  // getElementsByTagName(qualifiedName: string): HTMLCollection;
+  getElementsByTagName(qualifiedName: string): HTMLCollection;
   getElementsByTagNameNS(namespace: string | null, localName: string): HTMLCollection;
   hasAttribute(qualifiedName: string): boolean;
   hasAttributeNS(namespace: string | null, localName: string): boolean;
@@ -87,7 +87,7 @@ export interface Document extends Node, NonElementParentNode, ParentNode {
   // createTreeWalker(root: Node, whatToShow?: number, filter?: NodeFilter | null): TreeWalker;
   getElementsByClassName(classNames: string): HTMLCollection;
   // getElementsByName(elementName: string): NodeListOf<Element>;
-  // getElementsByTagName(qualifiedName: string): HTMLCollection;
+  getElementsByTagName(qualifiedName: string): HTMLCollection;
   getElementsByTagNameNS(namespace: string | null, localName: string): HTMLCollection;
 }
 

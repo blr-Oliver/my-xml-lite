@@ -1,5 +1,6 @@
 import nwsapi from 'nwsapi';
 import {Element, NodeListOf, NodeType, ParentNode} from '../../interfaces/dom-types.js';
+import {NS_HTML} from '../TreeComposer.js';
 import {SimpleElement} from './SimpleElement.js';
 import {SimpleNode} from './SimpleNode.js';
 import {SimpleNodeList} from './SimpleNodeList.js';
@@ -58,6 +59,11 @@ export abstract class SimpleParentNode extends SimpleNode implements ParentNode 
       return this.collectElements(element => classList.every(className => element.classList.contains(className)));
     else
       return new SimpleNodeList<Element>(0);
+  }
+  getElementsByTagName(qualifiedName: string): SimpleNodeList<Element> {
+    if (qualifiedName === '*') return this.getElementsByTagNameNS('*', '*');
+    const lowerName = qualifiedName.toLowerCase();
+    return this.collectElements(element => element.namespaceURI === NS_HTML ? element.tagName === lowerName : element.tagName === qualifiedName);
   }
   getElementsByTagNameNS(namespace: string | null, localName: string): SimpleNodeList<Element> {
     const predicate = namespace === '*' ?
