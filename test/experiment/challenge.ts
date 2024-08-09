@@ -29,6 +29,7 @@ const serializer = new Serializer({
 console.log(liteDoc.querySelectorAll('#head').length);
 console.log(liteDoc.querySelectorAll('dd').length);
 console.log(liteDoc.querySelectorAll('.switch').length);
+console.log(liteDoc.querySelectorAll('.split #head~dl.switch').length);
 
 fs.writeFileSync(challengeRoot + litePath, serializer.serializeNode(liteDoc), {encoding: 'utf-8'});
 fs.writeFileSync(challengeRoot + jsdomPath, jsdomContext.serialize(), {encoding: 'utf-8'});

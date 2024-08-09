@@ -6,16 +6,12 @@ export class SimpleTokenList extends Array<string> implements DOMTokenList {
   [index: number]: string;
 
   constructor(value: string) {
-    const rawTokens = value.trim().split(/\s+/);
-    const set = new Set<string>(rawTokens);
+    const set = new Set<string>(value.trim().split(/\s+/));
     super(set.size);
     this.value = value;
     this.#set = set;
-    const count = rawTokens.length;
-    for (let i = 0, j = 0; i < count; ++i) {
-      const token = rawTokens[i];
-      if (!set.has(token)) this[j++] = token;
-    }
+    let i = 0;
+    set.forEach(value => this[i++] = value);
   }
   toString(): string {
     return this.value;

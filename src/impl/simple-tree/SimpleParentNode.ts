@@ -53,14 +53,9 @@ export abstract class SimpleParentNode extends SimpleNode implements ParentNode 
     return null;
   }
   getElementsByClassName(classNames: string): SimpleNodeList<Element> {
-    // FIXME something is wrong here
     const classList = new SimpleTokenList(classNames);
     if (classList.length !== 0)
-      return this.collectElements(
-          element => classList.every(
-              className => element.classList.contains(className)
-          )
-      );
+      return this.collectElements(element => classList.every(className => element.classList.contains(className)));
     else
       return new SimpleNodeList<Element>(0);
   }
