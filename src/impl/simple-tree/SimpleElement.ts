@@ -36,6 +36,9 @@ export class SimpleElement extends SimpleParentNode implements Element {
     return this.parentNode!.children[this.elementIndex + 1] || null;
   }
 
+  closest(selectors: string): Element | null {
+    return this.nwsapi.closest(selectors, this as any) as Element | null;
+  }
   getAttribute(qualifiedName: string): string | null {
     return this.attributes.getNamedItem(qualifiedName)?.value || null;
   }
@@ -62,5 +65,8 @@ export class SimpleElement extends SimpleParentNode implements Element {
   }
   get nodeName(): string {
     return this.tagName;
+  }
+  matches(selectors: string): boolean {
+    return this.nwsapi.match(selectors, this as any);
   }
 }

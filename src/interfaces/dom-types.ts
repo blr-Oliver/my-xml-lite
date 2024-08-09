@@ -55,7 +55,7 @@ export interface Element extends ChildNode, NonDocumentTypeChildNode, ParentNode
   readonly localName: string;
   readonly tagName: string;
   readonly selfClosed?: boolean;
-  // closest(selectors: string): Element | null;
+  closest(selectors: string): Element | null;
   getAttribute(qualifiedName: string): string | null;
   getAttributeNS(namespace: string | null, localName: string): string | null;
   getAttributeNames(): ReadonlyArray<string>;
@@ -67,7 +67,7 @@ export interface Element extends ChildNode, NonDocumentTypeChildNode, ParentNode
   hasAttribute(qualifiedName: string): boolean;
   hasAttributeNS(namespace: string | null, localName: string): boolean;
   hasAttributes(): boolean;
-  // matches(selectors: string): boolean;
+  matches(selectors: string): boolean;
 }
 
 export interface TemplateElement extends Element {
