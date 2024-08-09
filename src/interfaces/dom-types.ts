@@ -86,7 +86,7 @@ export interface Document extends Node, NonElementParentNode, ParentNode {
   // createNodeIterator(root: Node, whatToShow?: number, filter?: NodeFilter | null): NodeIterator;
   // createTreeWalker(root: Node, whatToShow?: number, filter?: NodeFilter | null): TreeWalker;
   getElementsByClassName(classNames: string): HTMLCollection;
-  // getElementsByName(elementName: string): NodeListOf<Element>;
+  getElementsByName(elementName: string): NodeListOf<Element>;
   getElementsByTagName(qualifiedName: string): HTMLCollection;
   getElementsByTagNameNS(namespace: string | null, localName: string): HTMLCollection;
 }

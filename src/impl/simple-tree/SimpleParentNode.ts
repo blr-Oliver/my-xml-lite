@@ -60,6 +60,9 @@ export abstract class SimpleParentNode extends SimpleNode implements ParentNode 
     else
       return new SimpleNodeList<Element>(0);
   }
+  getElementsByName(name: string): SimpleNodeList<Element> {
+    return this.collectElements(element => element.getAttribute('name') === name);
+  }
   getElementsByTagName(qualifiedName: string): SimpleNodeList<Element> {
     if (qualifiedName === '*') return this.getElementsByTagNameNS('*', '*');
     const lowerName = qualifiedName.toLowerCase();
