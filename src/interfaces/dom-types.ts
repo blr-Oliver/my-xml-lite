@@ -10,6 +10,15 @@ export const enum NodeType {
   DOCUMENT_FRAGMENT_NODE = 11
 }
 
+export const enum DocumentPosition {
+  DISCONNECTED = 1 << 0,
+  PRECEDING = 1 << 1,
+  FOLLOWING = 1 << 2,
+  CONTAINS = 1 << 3,
+  CONTAINED_BY = 1 << 4,
+  IMPLEMENTATION_SPECIFIC = 1 << 5
+}
+
 export interface Node {
   readonly ownerDocument: Document | null;
   readonly childNodes: NodeListOf<ChildNode>;
@@ -23,13 +32,14 @@ export interface Node {
   readonly parentElement: Element | null;
   readonly parentNode: ParentNode | null;
   readonly textContent: string | null;
-  // compareDocumentPosition(other: Node): number;
+  compareDocumentPosition(other: Node): number;
   // contains(other: Node | null): boolean;
   hasChildNodes(): boolean;
   // isEqualNode(otherNode: Node | null): boolean;
   isSameNode(otherNode: Node | null): boolean;
   // lookupNamespaceURI(prefix: string | null): string | null;
   // lookupPrefix(namespace: string | null): string | null;
+  normalize(): void;
 }
 
 export interface ChildNode extends Node {

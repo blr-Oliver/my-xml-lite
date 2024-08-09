@@ -3,8 +3,8 @@
   "version": "0.1.0",
   "description": "Minimal streaming array-based HTML parser",
   "type": "module",
-  "main": "./dist/index.js",
-  "types": "./dist/index.d.ts",
+  "main": "./build/index",
+  "typings": "./build/index.d.ts",
   "scripts": {
     "build": "tsc --project tsconfig.src.json",
     "build-test": "tsc",
@@ -13,7 +13,9 @@
     "coverage": "node --experimental-vm-modules node_modules/jest/bin/jest.js --coverage",
     "copy-browser-index": "copy test\\index.html dist",
     "start-browser-server": "http-server -c-1 -p8082 ./dist",
-    "browsers": "npm run build-test && npm run copy-browser-index && npm run start-browser-server"
+    "browsers": "npm run build-test && npm run copy-browser-index && npm run start-browser-server",
+    "esbuild": "node ./esbuild.js",
+    "esbuild-def": "dts-bundle-generator --no-check -o build/index.d.ts src/index.ts"
   },
   "keywords": [
     "DOM",
@@ -32,6 +34,8 @@
     "@types/node": "^20.11.28",
     "@types/nwsapi": "^2.2.7",
     "braces": ">=3.0.3",
+    "dts-bundle-generator": "^9.5.1",
+    "esbuild": "^0.23.0",
     "http-server": "^14.1.1",
     "jest": "^29.7.0",
     "jsdom": "^24.1.1",
