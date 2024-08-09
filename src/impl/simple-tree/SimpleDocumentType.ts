@@ -31,4 +31,7 @@ export class SimpleDocumentType extends SimpleChildNode implements DocumentType 
   get nodeValue(): null {
     return null;
   }
+  get textContent(): null {
+    return null;
+  }
 }

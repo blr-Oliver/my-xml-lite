@@ -47,8 +47,12 @@ export abstract class SimpleNode implements Node {
 
   abstract get nodeName(): string;
   abstract get nodeValue(): string | null;
+  abstract get textContent(): string | null;
 
   hasChildNodes(): boolean {
     return this.childNodes.length !== 0;
+  }
+  isSameNode(otherNode: SimpleNode | null): boolean {
+    return this === otherNode;
   }
 }

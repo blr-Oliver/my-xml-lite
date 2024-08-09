@@ -47,6 +47,9 @@ export class SimpleDocument extends SimpleParentNode implements Document {
   get compatMode(): string {
     return 'CSS1Compat';
   }
+  get textContent(): null {
+    return null;
+  }
   get nwsapi(): nwsapi.NWSAPI {
     return this.#nwsapi;
   }

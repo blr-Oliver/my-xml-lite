@@ -51,4 +51,7 @@ export class SimpleAttr extends SimpleNode implements Attr {
   get nodeValue(): string | null {
     return this.value;
   }
+  get textContent(): string | null {
+    return this.value;
+  }
 }

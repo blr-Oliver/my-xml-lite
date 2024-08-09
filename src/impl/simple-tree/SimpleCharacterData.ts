@@ -22,4 +22,7 @@ export abstract class SimpleCharacterData extends SimpleChildNode implements Cha
   get nodeValue(): string {
     return this.data;
   }
+  get textContent(): string {
+    return this.data;
+  }
 }

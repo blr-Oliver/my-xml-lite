@@ -6,6 +6,7 @@ import {SimpleNode} from './SimpleNode.js';
 import {SimpleNodeList} from './SimpleNodeList.js';
 import {SimpleTokenList} from './SimpleTokenList.js';
 
+// TODO content from descendants should be cached
 export abstract class SimpleParentNode extends SimpleNode implements ParentNode {
   children: SimpleNodeList<SimpleElement>;
 
@@ -18,6 +19,14 @@ export abstract class SimpleParentNode extends SimpleNode implements ParentNode 
   }
   get nodeValue(): string | null {
     return null;
+  }
+  get textContent(): string | null {
+    const chunks: string[] = [];
+    this.traverseNodes(node => {
+      if (node.nodeType === NodeType.TEXT_NODE || node.nodeType === NodeType.CDATA_SECTION_NODE)
+        chunks.push(node.nodeValue!);
+    });
+    return chunks.join('');
   }
   get firstElementChild(): SimpleElement | null {
     return this.children[0] || null;
@@ -76,10 +85,25 @@ export abstract class SimpleParentNode extends SimpleNode implements ParentNode 
   }
   collectElements(predicate: (element: SimpleElement) => boolean): SimpleNodeList<Element> {
     const result = new SimpleNodeList<Element>(0);
+    this.traverseElements(element => predicate(element) && result.push(element));
+    return result;
+  }
+  traverseNodes(callback: (node: SimpleNode) => void): void {
+    let node = this.firstChild, next: SimpleNode | null;
+    while (node) {
+      callback(node);
+      if (!(next = node.firstChild)) {
+        while (!(next = node.nextSibling)) {
+          if (!(node = node.parentNode)) break;
+        }
+      }
+      node = next;
+    }
+  }
+  traverseElements(callback: (element: SimpleElement) => void): void {
     let element = this.firstElementChild, next: SimpleElement | null;
     while (element) {
-      if (predicate(element))
-        result.push(element);
+      callback(element);
       if (!(next = element.firstElementChild)) {
         while (!(next = element.nextElementSibling)) {
           if (!(element = element.parentElement)) break;
@@ -87,6 +111,5 @@ export abstract class SimpleParentNode extends SimpleNode implements ParentNode 
       }
       element = next;
     }
-    return result;
   }
 }

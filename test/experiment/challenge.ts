@@ -32,6 +32,7 @@ console.log(liteDoc.getElementsByTagName('dd').length);
 console.log(liteDoc.querySelectorAll('.switch').length);
 console.log(liteDoc.querySelectorAll('.split #head~dl.switch').length);
 console.log(liteDoc.getElementsByName('viewport').length);
+console.log(liteDoc.body.textContent!.length);
 
 fs.writeFileSync(challengeRoot + litePath, serializer.serializeNode(liteDoc), {encoding: 'utf-8'});
 fs.writeFileSync(challengeRoot + jsdomPath, jsdomContext.serialize(), {encoding: 'utf-8'});

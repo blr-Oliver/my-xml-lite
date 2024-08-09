@@ -22,12 +22,12 @@ export interface Node {
   readonly nodeValue: string | null;
   readonly parentElement: Element | null;
   readonly parentNode: ParentNode | null;
-  // textContent: string | null;
+  readonly textContent: string | null;
   // compareDocumentPosition(other: Node): number;
   // contains(other: Node | null): boolean;
   hasChildNodes(): boolean;
   // isEqualNode(otherNode: Node | null): boolean;
-  // isSameNode(otherNode: Node | null): boolean;
+  isSameNode(otherNode: Node | null): boolean;
   // lookupNamespaceURI(prefix: string | null): string | null;
   // lookupPrefix(namespace: string | null): string | null;
 }
