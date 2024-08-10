@@ -88,13 +88,30 @@ export abstract class SimpleParentNode extends SimpleNode implements ParentNode 
     this.traverseElements(element => predicate(element) && result.push(element));
     return result;
   }
+  traverseNodes(callback: (node: SimpleNode) => void): void {
+    // TODO with immutable tree this could be implemented as sub-range of `all` collection
+    let node: SimpleNode | null = this.firstChild, next: SimpleNode | null;
+    while (node) {
+      callback(node);
+      if (!(next = node.firstChild)) {
+        while (!(next = node!.nextSibling)) {
+          if ((node = node!.parentNode) === this) return;
+        }
+      }
+      node = next;
+    }
+  }
   traverseElements(callback: (element: SimpleElement) => void): void {
-    const children = this.children;
-    const len = children.length;
-    for (let i = 0; i < len; ++i) {
-      const child = children[i];
-      callback(child);
-      child.traverseElements(callback);
+    const stop: SimpleElement | null = this.nodeType === NodeType.ELEMENT_NODE ? this as unknown as SimpleElement : null;
+    let element: SimpleElement | null = this.firstElementChild, next: SimpleElement | null;
+    while (element) {
+      callback(element);
+      if (!(next = element.firstElementChild)) {
+        while (!(next = element!.nextElementSibling)) {
+          if ((element = element!.parentElement) === stop) return;
+        }
+      }
+      element = next;
     }
   }
 }

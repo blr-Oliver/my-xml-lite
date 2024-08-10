@@ -33,7 +33,7 @@ export interface Node {
   readonly parentNode: ParentNode | null;
   readonly textContent: string | null;
   compareDocumentPosition(other: Node): number;
-  // contains(other: Node | null): boolean;
+  contains(other: Node | null): boolean;
   hasChildNodes(): boolean;
   // isEqualNode(otherNode: Node | null): boolean;
   isSameNode(otherNode: Node | null): boolean;

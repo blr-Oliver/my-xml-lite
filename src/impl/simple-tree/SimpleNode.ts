@@ -81,6 +81,9 @@ export abstract class SimpleNode implements Node {
       return DocumentPosition.CONTAINED_BY && DocumentPosition.FOLLOWING;
     return node1.isPreceding(node2) ? DocumentPosition.PRECEDING : DocumentPosition.FOLLOWING;
   }
+  contains(other: SimpleNode | null): boolean {
+    return !!other && other.isDescendant(this, true);
+  }
   isDescendant(other: SimpleNode, inclusive: boolean = false): boolean {
     if (other === this) return inclusive;
     let node: SimpleNode | null = this;
@@ -89,6 +92,7 @@ export abstract class SimpleNode implements Node {
     return false;
   }
   isPreceding(other: SimpleNode): boolean {
+    // TODO marking the path while ascending should probably make it faster
     const thisRootPath = this.getRootPath();
     const otherRootPath = other.getRootPath();
     let thisDepth = thisRootPath.length, otherDepth = otherRootPath.length;
@@ -109,16 +113,6 @@ export abstract class SimpleNode implements Node {
   }
   isSameNode(otherNode: SimpleNode | null): boolean {
     return this === otherNode;
-  }
-  // TODO eliminate recursion
-  traverseNodes(callback: (node: SimpleNode) => void): void {
-    const childNodes = this.childNodes;
-    const len = childNodes.length;
-    for (let i = 0; i < len; ++i) {
-      const childNode = childNodes[i];
-      callback(childNode);
-      childNode.traverseNodes(callback);
-    }
   }
   normalize(): void {
   }
