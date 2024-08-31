@@ -1,5 +1,6 @@
 import {Readable} from 'stream';
 import {ReadableStream} from 'stream/web';
+import {CharacterSource} from './CharacterSource.js';
 import {Document} from './dom-types.js';
 import {ErrorHandler} from './ErrorHandler.js';
 import {NodeFactory} from './NodeFactory.js';
@@ -18,7 +19,8 @@ export interface ParserFactory {
   readonly errorHandler: ErrorHandler;
 
   configure(options: Partial<ParserOptions>): void;
-  createParser(options?: Partial<ParserOptions>): Parser;
+  createParser(input?: CharacterSource, options?: Partial<ParserOptions>): Parser;
+  parse(input: CharacterSource, options?: Partial<ParserOptions>): Document;
   parseString(html: string, options?: Partial<ParserOptions>): Document;
 
   parseNodeStream(stream: Readable, callback: (document: Document) => void, options?: Partial<ParserOptions>): void;

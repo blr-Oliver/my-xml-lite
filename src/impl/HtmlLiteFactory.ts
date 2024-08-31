@@ -1,5 +1,6 @@
 import {Readable} from 'stream';
 import {ReadableStream} from 'stream/web';
+import {CharacterSource} from '../interfaces/CharacterSource.js';
 import {Document} from '../interfaces/dom-types.js';
 import {ErrorHandler, ignoring} from '../interfaces/ErrorHandler.js';
 import {HTML_SPECIAL} from '../interfaces/named-character-refs.js';
@@ -30,22 +31,22 @@ export class HtmlLiteFactory implements ParserFactory {
     this.errorHandler = options.errorHandler || this.errorHandler;
   }
 
-  createParser(options?: Partial<ParserOptions>): Parser {
-    return new HtmlLiteParser(EMPTY_SOURCE,
+  createParser(input: CharacterSource = EMPTY_SOURCE, options?: Partial<ParserOptions>): Parser {
+    return new HtmlLiteParser(input,
         options?.nodeFactory || this.nodeFactory,
         options?.characterReferenceIndex || this.characterReferenceIndex,
         options?.errorHandler || this.errorHandler);
   }
 
-  parseString(html: string, options?: Partial<ParserOptions>): Document {
-    const source = new StringCharacterSource(html);
-    const parser = new HtmlLiteParser(source,
-        options?.nodeFactory || this.nodeFactory,
-        options?.characterReferenceIndex || this.characterReferenceIndex,
-        options?.errorHandler || this.errorHandler);
+  parse(input: CharacterSource, options?: Partial<ParserOptions>) {
+    const parser = this.createParser(input, options);
     while (parser.proceed()) {
     }
     return parser.document;
+  }
+
+  parseString(html: string, options?: Partial<ParserOptions>): Document {
+    return this.parse(new StringCharacterSource(html), options);
   }
 
   parseNodeStream(stream: Readable, callback: (document: Document) => void, options?: Partial<ParserOptions>): void {
