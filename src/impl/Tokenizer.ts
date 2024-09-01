@@ -168,7 +168,7 @@ export class Tokenizer {
       case State.SCRIPT_DATA_ESCAPED_LESS_THAN_SIGN: return this.scriptDataEscapedLessThanSign(code);
       case State.SCRIPT_DATA_ESCAPED_END_TAG_OPEN: return this.scriptDataEscapedEndTagOpen(code);
       case State.SCRIPT_DATA_ESCAPED_END_TAG_NAME: return this.scriptDataEscapedEndTagName(code);
-      case State.SCRIPT_DATA_DOUBLE_ESCAPE_START: return this.scriptDataDoubleEscapeStart(code);
+      // case State.SCRIPT_DATA_DOUBLE_ESCAPE_START: return this.scriptDataDoubleEscapeStart(code);
       case State.SCRIPT_DATA_DOUBLE_ESCAPE_START_MATCHED: return this.scriptDataDoubleEscapeStartMatched(code);
       case State.SCRIPT_DATA_DOUBLE_ESCAPED: return this.scriptDataDoubleEscaped(code);
       case State.SCRIPT_DATA_DOUBLE_ESCAPED_DASH: return this.scriptDataDoubleEscapedDash(code);
@@ -224,7 +224,7 @@ export class Tokenizer {
       case State.AMBIGUOUS_AMPERSAND: return this.ambiguousAmpersand(code);
       case State.NUMERIC_CHARACTER_REFERENCE: return this.numericCharacterReference(code);
       case State.HEXADECIMAL_CHARACTER_REFERENCE_START: return this.hexadecimalCharacterReferenceStart(code);
-      case State.DECIMAL_CHARACTER_REFERENCE_START: return this.decimalCharacterReferenceStart(code);
+      // case State.DECIMAL_CHARACTER_REFERENCE_START: return this.decimalCharacterReferenceStart(code);
       case State.HEXADECIMAL_CHARACTER_REFERENCE: return this.hexadecimalCharacterReference(code);
       case State.DECIMAL_CHARACTER_REFERENCE: return this.decimalCharacterReference(code);
       case State.SEQUENCE_CASE_SENSITIVE: return this.sequenceCaseSensitive(code);
@@ -233,7 +233,6 @@ export class Tokenizer {
     }
   }
 
-  // TODO inline this for static transitions
   callState(state: State, code: number): State {
     return this.execState(this.state = state, code);
   }
@@ -581,7 +580,8 @@ export class Tokenizer {
         this.emitAccumulatedCharacters();
         this.error('unexpected-question-mark-instead-of-tag-name');
         this.startNewComment();
-        return this.callState(State.BOGUS_COMMENT, code);
+        this.state = State.BOGUS_COMMENT;
+        return this.bogusComment(code);
       case CodePoints.EOF:
         this.appendCharacter(CodePoints.LT);
         this.emitAccumulatedCharacters();
@@ -591,11 +591,13 @@ export class Tokenizer {
         if (isAsciiAlpha(code)) {
           this.emitAccumulatedCharacters();
           this.startNewTag();
-          return this.callState(State.TAG_NAME, code);
+          this.state = State.TAG_NAME;
+          return this.tagName(code);
         }
         this.error('invalid-first-character-of-tag-name');
         buffer.append(CodePoints.LT);
-        return this.callState(State.DATA, code);
+        this.state = State.DATA;
+        return this.data(code);
     }
   }
 
@@ -614,12 +616,14 @@ export class Tokenizer {
         if (isAsciiAlpha(code)) {
           this.emitAccumulatedCharacters();
           this.currentTag.type = 'endTag';
-          return this.callState(State.TAG_NAME, code);
+          this.state = State.TAG_NAME;
+          return this.tagName(code);
         }
         this.emitAccumulatedCharacters();
         this.error('invalid-first-character-of-tag-name');
         this.startNewComment();
-        return this.callState(State.BOGUS_COMMENT, code);
+        this.state = State.BOGUS_COMMENT;
+        return this.bogusComment(code);
     }
   }
 
@@ -672,7 +676,8 @@ export class Tokenizer {
         case CodePoints.SLASH:
         case CodePoints.GT:
         case CodePoints.EOF:
-          return this.callState(State.AFTER_ATTRIBUTE_NAME, code);
+          this.state = State.AFTER_ATTRIBUTE_NAME;
+          return this.afterAttributeName(code);
         case CodePoints.EQ:
           this.error('unexpected-equals-sign-before-attribute-name');
           this.startNewAttribute();
@@ -680,7 +685,8 @@ export class Tokenizer {
           return State.ATTRIBUTE_NAME;
         default:
           this.startNewAttribute();
-          return this.callState(State.ATTRIBUTE_NAME, code);
+          this.state = State.ATTRIBUTE_NAME;
+          return this.attributeName(code);
       }
     }
   }
@@ -703,7 +709,8 @@ export class Tokenizer {
         case CodePoints.SLASH:
         case CodePoints.EOF:
           this.checkDuplicateAttribute(this.currentAttribute.name = buffer.takeString());
-          return this.callState(State.AFTER_ATTRIBUTE_NAME, code);
+          this.state = State.AFTER_ATTRIBUTE_NAME;
+          return this.afterAttributeName(code);
         case CodePoints.NUL:
           this.error('unexpected-null-character');
           buffer.append(CodePoints.REPLACEMENT_CHAR);
@@ -752,7 +759,8 @@ export class Tokenizer {
           return this.eof();
         default:
           this.startNewAttribute();
-          return this.callState(State.ATTRIBUTE_NAME, code);
+          this.state = State.ATTRIBUTE_NAME;
+          return this.attributeName(code);
       }
     }
   }
@@ -778,7 +786,8 @@ export class Tokenizer {
           this.emitCurrentTag();
           return State.DATA;
         default:
-          return this.callState(State.ATTRIBUTE_VALUE_UNQUOTED, code);
+          this.state = State.ATTRIBUTE_VALUE_UNQUOTED;
+          return this.attributeValueUnquoted(code);
       }
     }
   }
@@ -878,7 +887,8 @@ export class Tokenizer {
         return this.eof();
       default:
         this.error('missing-whitespace-between-attributes');
-        return this.callState(State.BEFORE_ATTRIBUTE_NAME, code);
+        this.state = State.BEFORE_ATTRIBUTE_NAME;
+        return this.beforeAttributeName(code);
     }
   }
 
@@ -893,7 +903,8 @@ export class Tokenizer {
         return this.eof();
       default:
         this.error('unexpected-solidus-in-tag');
-        return this.callState(State.BEFORE_ATTRIBUTE_NAME, code);
+        this.state = State.BEFORE_ATTRIBUTE_NAME;
+        return this.beforeAttributeName(code);
     }
   }
 
@@ -902,10 +913,12 @@ export class Tokenizer {
     const adjustedNode = this.composer.adjustedCurrentNode;
     if (adjustedNode && adjustedNode.namespaceURI !== NS_HTML) {
       this.buffer.position = this.sequenceBufferOffset;
-      return this.callState(State.CDATA_SECTION, code);
+      this.state = State.CDATA_SECTION;
+      return this.cdataSection(code);
     }
     this.startNewComment();
     this.error('cdata-in-html-content');
+    this.state = State.BOGUS_COMMENT;
     return this.bogusComment(code);
   }
 
@@ -936,7 +949,8 @@ export class Tokenizer {
       return State.CDATA_SECTION_END;
     else {
       this.appendNonWhitespace(CodePoints.CLOSE_SQUARE_BRACKET);
-      return this.callState(State.CDATA_SECTION, code);
+      this.state = State.CDATA_SECTION;
+      return this.cdataSection(code);
     }
   }
 
@@ -956,7 +970,8 @@ export class Tokenizer {
         default:
           this.appendNonWhitespace(CodePoints.CLOSE_SQUARE_BRACKET);
           this.appendNonWhitespace(CodePoints.CLOSE_SQUARE_BRACKET);
-          return this.callState(State.CDATA_SECTION, code);
+          this.state = State.CDATA_SECTION;
+          return this.cdataSection(code);
       }
     }
   }
@@ -975,7 +990,8 @@ export class Tokenizer {
     } else if (isAsciiAlphaNum(code)) {
       this.lastRefNode = this.refsIndex;
       this.lastMatch = 0;
-      return this.callState(State.NAMED_CHARACTER_REFERENCE, code);
+      this.state = State.NAMED_CHARACTER_REFERENCE;
+      return this.namedCharacterReference(code);
     } else
       return this.callState(this.returnState, code);
   }
@@ -986,8 +1002,10 @@ export class Tokenizer {
       if (this.inAttribute) this.buffer.append(code);
       else this.appendNonWhitespace(code);
       return State.HEXADECIMAL_CHARACTER_REFERENCE_START;
-    } else
-      return this.callState(State.DECIMAL_CHARACTER_REFERENCE_START, code);
+    } else {
+      // no need to update state as it is immediately changed to "decimal character reference" or saved return state
+      return this.decimalCharacterReferenceStart(code);
+    }
   }
 
   numericCharacterReferenceEnd(): void {
@@ -1038,16 +1056,19 @@ export class Tokenizer {
         buffer.appendSequence(node.value);
         return this.callState(this.returnState, code);
       }
-    } else
-      return this.callState(State.AMBIGUOUS_AMPERSAND, code);
+    } else {
+      this.state = State.AMBIGUOUS_AMPERSAND;
+      return this.ambiguousAmpersand(code);
+    }
   }
 
   hexadecimalCharacterReferenceStart(code: number): State {
     if (!isHexDigit(code)) {
       this.error('absence-of-digits-in-numeric-character-reference');
       return this.callState(this.returnState, code);
-    } else
-      return this.callState(State.HEXADECIMAL_CHARACTER_REFERENCE, code);
+    }
+    this.state = State.HEXADECIMAL_CHARACTER_REFERENCE;
+    return this.hexadecimalCharacterReference(code);
   }
 
   hexadecimalCharacterReference(code: number): State {
@@ -1077,8 +1098,9 @@ export class Tokenizer {
     if (!isDigit(code)) {
       this.error('absence-of-digits-in-numeric-character-reference');
       return this.callState(this.returnState, code);
-    } else
-      return this.callState(State.DECIMAL_CHARACTER_REFERENCE, code);
+    }
+    this.state = State.DECIMAL_CHARACTER_REFERENCE;
+    return this.decimalCharacterReference(code);
   }
 
   decimalCharacterReference(code: number): State {
@@ -1138,7 +1160,8 @@ export class Tokenizer {
         this.emitCurrentComment();
         return State.DATA;
       default:
-        return this.callState(State.COMMENT, code);
+        this.state = State.COMMENT;
+        return this.comment(code);
     }
   }
 
@@ -1156,7 +1179,8 @@ export class Tokenizer {
         return this.eof();
       default:
         this.buffer.append(CodePoints.HYPHEN);
-        return this.callState(State.COMMENT, code);
+        this.state = State.COMMENT;
+        return this.comment(code);
     }
   }
 
@@ -1201,7 +1225,8 @@ export class Tokenizer {
           code = this.nextCode();
           break;
         default:
-          return this.callState(State.COMMENT, code);
+          this.state = State.COMMENT;
+          return this.comment(code);
       }
     }
   }
@@ -1209,21 +1234,22 @@ export class Tokenizer {
   commentLessThanSignBang(code: number): State {
     if (code === CodePoints.HYPHEN)
       return State.COMMENT_LESS_THAN_SIGN_BANG_DASH;
-    else
-      return this.callState(State.COMMENT, code);
+    this.state = State.COMMENT;
+    return this.comment(code);
   }
 
   commentLessThanSignBangDash(code: number): State {
     if (code === CodePoints.HYPHEN)
       return State.COMMENT_LESS_THAN_SIGN_BANG_DASH_DASH;
-    else
-      return this.callState(State.COMMENT_END_DASH, code);
+    this.state = State.COMMENT_END_DASH;
+    return this.commentEndDash(code);
   }
 
   commentLessThanSignBangDashDash(code: number): State {
     if (code !== CodePoints.GT && code !== CodePoints.EOF)
       this.error('nested-comment');
-    return this.callState(State.COMMENT_END, code);
+    this.state = State.COMMENT_END;
+    return this.commentEnd(code);
   }
 
   commentEndDash(code: number): State {
@@ -1238,7 +1264,8 @@ export class Tokenizer {
         return this.eof();
       default:
         this.buffer.append(CodePoints.HYPHEN);
-        return this.callState(State.COMMENT, code);
+        this.state = State.COMMENT;
+        return this.comment(code);
     }
   }
 
@@ -1265,7 +1292,8 @@ export class Tokenizer {
         default:
           buffer.append(CodePoints.HYPHEN);
           buffer.append(CodePoints.HYPHEN);
-          return this.callState(State.COMMENT, code);
+          this.state = State.COMMENT;
+          return this.comment(code);
       }
     }
   }
@@ -1297,7 +1325,8 @@ export class Tokenizer {
         data[position++] = CodePoints.HYPHEN;
         data[position++] = CodePoints.EXCLAMATION;
         buffer.position += 3;
-        return this.callState(State.COMMENT, code);
+        this.state = State.COMMENT;
+        return this.comment(code);
     }
   }
 
@@ -1335,14 +1364,16 @@ export class Tokenizer {
       case CodePoints.OPEN_SQUARE_BRACKET:
         return this.matchSequence(code, CDATA, false, State.CDATA_SECTION_START, State.MARKUP_DECLARATION_FAIL);
       default:
-        return this.callState(State.MARKUP_DECLARATION_FAIL, code);
+        // no need to update state as it is immediately changed to "bogus comment"
+        return this.markupDeclarationFail(code);
     }
   }
 
   markupDeclarationFail(code: number): State {
     this.startNewComment();
     this.error('incorrectly-opened-comment');
-    return this.callState(State.BOGUS_COMMENT, code);
+    this.state = State.BOGUS_COMMENT;
+    return this.bogusComment(code);
   }
 
   // -----doctype states-----
@@ -1361,7 +1392,8 @@ export class Tokenizer {
       default:
         this.error('missing-whitespace-before-doctype-name');
       case CodePoints.GT:
-        return this.callState(State.BEFORE_DOCTYPE_NAME, code);
+        this.state = State.BEFORE_DOCTYPE_NAME;
+        return this.beforeDoctypeName(code);
     }
   }
 
@@ -1451,7 +1483,8 @@ export class Tokenizer {
         case 0x73: // s
           return this.matchSequence(code, SYSTEM, true, State.AFTER_DOCTYPE_SYSTEM_KEYWORD, State.AFTER_DOCTYPE_NAME_FAILED_SEQUENCE);
         default:
-          return this.callState(State.AFTER_DOCTYPE_NAME_FAILED_SEQUENCE, code);
+          this.state = State.AFTER_DOCTYPE_NAME_FAILED_SEQUENCE;
+          return this.afterDoctypeNameFailedSequence(code);
       }
     }
   }
@@ -1460,7 +1493,8 @@ export class Tokenizer {
     this.buffer.position = this.sequenceBufferOffset;
     this.currentDoctype.forceQuirks = true;
     this.error('invalid-character-sequence-after-doctype-name');
-    return this.callState(State.BOGUS_DOCTYPE, code);
+    this.state = State.BOGUS_DOCTYPE;
+    return this.bogusDoctype(code);
   }
 
   afterDoctypePublicKeyword(code: number): State {
@@ -1487,7 +1521,8 @@ export class Tokenizer {
       default:
         this.currentDoctype.forceQuirks = true;
         this.error('missing-quote-before-doctype-public-identifier');
-        return this.callState(State.BOGUS_DOCTYPE, code);
+        this.state = State.BOGUS_DOCTYPE;
+        return this.bogusDoctype(code);
     }
   }
 
@@ -1517,7 +1552,8 @@ export class Tokenizer {
         default:
           this.currentDoctype.forceQuirks = true;
           this.error('missing-quote-before-doctype-public-identifier');
-          return this.callState(State.BOGUS_DOCTYPE, code);
+          this.state = State.BOGUS_DOCTYPE;
+          return this.bogusDoctype(code);
       }
     }
   }
@@ -1580,7 +1616,8 @@ export class Tokenizer {
       default:
         this.currentDoctype.forceQuirks = true;
         this.error('missing-quote-before-doctype-system-identifier');
-        return this.callState(State.BOGUS_DOCTYPE, code);
+        this.state = State.BOGUS_DOCTYPE;
+        return this.bogusDoctype(code);
     }
   }
 
@@ -1608,7 +1645,8 @@ export class Tokenizer {
         default:
           this.currentDoctype.forceQuirks = true;
           this.error('missing-quote-before-doctype-system-identifier');
-          return this.callState(State.BOGUS_DOCTYPE, code);
+          this.state = State.BOGUS_DOCTYPE;
+          return this.bogusDoctype(code);
       }
     }
   }
@@ -1637,7 +1675,8 @@ export class Tokenizer {
       default:
         this.currentDoctype.forceQuirks = true;
         this.error('missing-quote-before-doctype-system-identifier');
-        return this.callState(State.BOGUS_DOCTYPE, code);
+        this.state = State.BOGUS_DOCTYPE;
+        return this.bogusDoctype(code);
     }
   }
 
@@ -1667,7 +1706,8 @@ export class Tokenizer {
         default:
           this.currentDoctype.forceQuirks = true;
           this.error('missing-quote-before-doctype-system-identifier');
-          return this.callState(State.BOGUS_DOCTYPE, code);
+          this.state = State.BOGUS_DOCTYPE;
+          return this.bogusDoctype(code);
       }
     }
   }
@@ -1727,7 +1767,8 @@ export class Tokenizer {
           return this.eofInDoctype();
         default:
           this.error('unexpected-character-after-doctype-system-identifier');
-          return this.callState(State.BOGUS_DOCTYPE, code);
+          this.state = State.BOGUS_DOCTYPE;
+          return this.bogusDoctype(code);
       }
     }
   }
@@ -1767,7 +1808,8 @@ export class Tokenizer {
         return State.SCRIPT_DATA_ESCAPE_START;
       default:
         this.appendNonWhitespace(CodePoints.LT);
-        return this.callState(State.SCRIPT_DATA, code);
+        this.state = State.SCRIPT_DATA;
+        return this.scriptData(code);
     }
   }
 
@@ -1787,16 +1829,18 @@ export class Tokenizer {
     if (code === CodePoints.HYPHEN) {
       this.appendNonWhitespace(code);
       return State.SCRIPT_DATA_ESCAPE_START_DASH;
-    } else
-      return this.callState(State.SCRIPT_DATA, code);
+    }
+    this.state = State.SCRIPT_DATA;
+    return this.scriptData(code);
   }
 
   scriptDataEscapeStartDash(code: number): State {
     if (code === CodePoints.HYPHEN) {
       this.appendNonWhitespace(code);
       return State.SCRIPT_DATA_ESCAPED_DASH_DASH;
-    } else
-      return this.callState(State.SCRIPT_DATA, code);
+    }
+    this.state = State.SCRIPT_DATA;
+    return this.scriptData(code);
   }
 
   scriptDataEscaped(code: number): State {
@@ -1881,7 +1925,8 @@ export class Tokenizer {
       return this.scriptDataDoubleEscapeStart(code);
     } else {
       this.appendNonWhitespace(CodePoints.LT);
-      return this.callState(State.SCRIPT_DATA_ESCAPED, code);
+      this.state = State.SCRIPT_DATA_ESCAPED;
+      return this.scriptDataEscaped(code);
     }
   }
 
@@ -1910,7 +1955,8 @@ export class Tokenizer {
         this.appendNonWhitespace(code);
         return State.SCRIPT_DATA_DOUBLE_ESCAPED;
       default:
-        return this.callState(State.SCRIPT_DATA_ESCAPED, code);
+        this.state = State.SCRIPT_DATA_ESCAPED;
+        return this.scriptDataEscaped(code);
     }
   }
 
@@ -1999,7 +2045,8 @@ export class Tokenizer {
       this.appendNonWhitespace(code);
       return State.SCRIPT_DATA_DOUBLE_ESCAPE_END;
     } else {
-      return this.callState(State.SCRIPT_DATA_DOUBLE_ESCAPED, code);
+      this.state = State.SCRIPT_DATA_DOUBLE_ESCAPED;
+      return this.scriptDataDoubleEscaped(code);
     }
   }
 
@@ -2020,7 +2067,8 @@ export class Tokenizer {
         this.appendNonWhitespace(code);
         return State.SCRIPT_DATA_ESCAPED;
       default:
-        return this.callState(State.SCRIPT_DATA_DOUBLE_ESCAPED, code);
+        this.state = State.SCRIPT_DATA_DOUBLE_ESCAPED;
+        return this.scriptDataDoubleEscaped(code);
     }
   }
   // -----text states-----
