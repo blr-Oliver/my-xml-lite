@@ -1,97 +1,5 @@
-export type StateLiteral =
-    'data' |
-    'rcdata' |
-    'rawtext' |
-    'scriptData' |
-    'plaintext' |
-    'tagOpen' |
-    'endTagOpen' |
-    'tagName' |
-    'rcdataLessThanSign' |
-    'rcdataEndTagOpen' |
-    'rcdataEndTagName' |
-    'rcdataEndTagNameMatched' |
-    'rawtextLessThanSign' |
-    'rawtextEndTagOpen' |
-    'rawtextEndTagName' |
-    'rawtextEndTagNameMatched' |
-    'scriptDataLessThanSign' |
-    'scriptDataEndTagOpen' |
-    'scriptDataEndTagName' |
-    'scriptDataEndTagNameMatched' |
-    'scriptDataEscapeStart' |
-    'scriptDataEscapeStartDash' |
-    'scriptDataEscaped' |
-    'scriptDataEscapedDash' |
-    'scriptDataEscapedDashDash' |
-    'scriptDataEscapedLessThanSign' |
-    'scriptDataEscapedEndTagOpen' |
-    'scriptDataEscapedEndTagName' |
-    'scriptDataEscapedEndTagNameMatched' |
-    'scriptDataDoubleEscapeStart' |
-    'scriptDataDoubleEscapeStartMatched' |
-    'scriptDataDoubleEscaped' |
-    'scriptDataDoubleEscapedDash' |
-    'scriptDataDoubleEscapedDashDash' |
-    'scriptDataDoubleEscapedLessThanSign' |
-    'scriptDataDoubleEscapeEnd' |
-    'scriptDataDoubleEscapeEndMatched' |
-    'beforeAttributeName' |
-    'attributeName' |
-    'afterAttributeName' |
-    'beforeAttributeValue' |
-    'attributeValueDoubleQuoted' |
-    'attributeValueSingleQuoted' |
-    'attributeValueUnquoted' |
-    'afterAttributeValueQuoted' |
-    'selfClosingStartTag' |
-    'bogusComment' |
-    'markupDeclarationOpen' |
-    'markupDeclarationFail' |
-    'commentStart' |
-    'commentStartDash' |
-    'comment' |
-    'commentLessThanSign' |
-    'commentLessThanSignBang' |
-    'commentLessThanSignBangDash' |
-    'commentLessThanSignBangDashDash' |
-    'commentEndDash' |
-    'commentEnd' |
-    'commentEndBang' |
-    'doctype' |
-    'beforeDoctypeName' |
-    'doctypeName' |
-    'afterDoctypeName' |
-    'afterDoctypeNameFailedSequence' |
-    'afterDoctypePublicKeyword' |
-    'beforeDoctypePublicIdentifier' |
-    'doctypePublicIdentifierDoubleQuoted' |
-    'doctypePublicIdentifierSingleQuoted' |
-    'afterDoctypePublicIdentifier' |
-    'betweenDoctypePublicAndSystemIdentifiers' |
-    'afterDoctypeSystemKeyword' |
-    'beforeDoctypeSystemIdentifier' |
-    'doctypeSystemIdentifierDoubleQuoted' |
-    'doctypeSystemIdentifierSingleQuoted' |
-    'afterDoctypeSystemIdentifier' |
-    'bogusDoctype' |
-    'cdataSectionStart' |
-    'cdataSection' |
-    'cdataSectionBracket' |
-    'cdataSectionEnd' |
-    'characterReference' |
-    'namedCharacterReference' |
-    'ambiguousAmpersand' |
-    'numericCharacterReference' |
-    'hexadecimalCharacterReferenceStart' |
-    'decimalCharacterReferenceStart' |
-    'hexadecimalCharacterReference' |
-    'decimalCharacterReference' |
-    'eof' |
-    'eoc' |
-    'sequence';
-
 export const enum StateEnum {
+  EOF = 'eof',
   DATA = 'data',
   RCDATA = 'rcdata',
   RAWTEXT = 'rawtext',
@@ -120,7 +28,6 @@ export const enum StateEnum {
   SCRIPT_DATA_ESCAPED_LESS_THAN_SIGN = 'scriptDataEscapedLessThanSign',
   SCRIPT_DATA_ESCAPED_END_TAG_OPEN = 'scriptDataEscapedEndTagOpen',
   SCRIPT_DATA_ESCAPED_END_TAG_NAME = 'scriptDataEscapedEndTagName',
-  SCRIPT_DATA_ESCAPED_END_TAG_NAME_MATCHED = 'scriptDataEscapedEndTagNameMatched',
   SCRIPT_DATA_DOUBLE_ESCAPE_START = 'scriptDataDoubleEscapeStart',
   SCRIPT_DATA_DOUBLE_ESCAPE_START_MATCHED = 'scriptDataDoubleEscapeStartMatched',
   SCRIPT_DATA_DOUBLE_ESCAPED = 'scriptDataDoubleEscaped',
@@ -180,7 +87,5 @@ export const enum StateEnum {
   DECIMAL_CHARACTER_REFERENCE_START = 'decimalCharacterReferenceStart',
   HEXADECIMAL_CHARACTER_REFERENCE = 'hexadecimalCharacterReference',
   DECIMAL_CHARACTER_REFERENCE = 'decimalCharacterReference',
-  EOF = 'eof',
-  EOC = 'eoc',
   SEQUENCE = 'sequence'
 }
