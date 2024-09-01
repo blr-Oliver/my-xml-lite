@@ -1,4 +1,4 @@
-import {StateEnum} from '../../src/impl/interfaces/states.js';
+import {StateEnum, StateStringEnum, StateStringReversedEnum} from '../../src/impl/interfaces/states.js';
 import {CharactersToken, Token, TokenType} from '../../src/impl/interfaces/tokens.js';
 import {TestSerializer} from '../../src/impl/Serializer.js';
 import {Tokenizer} from '../../src/impl/Tokenizer.js';
@@ -12,13 +12,13 @@ export interface GenericTestCase {
   input: string;
 }
 
-export type DefaultTokenizerRawTestCore = [string, string, string[], string[], StateEnum?];
+export type DefaultTokenizerRawTestCore = [string, string, string[], string[], StateStringEnum?];
 export type DefaultTokenizerRawTest = [...DefaultTokenizerRawTestCore, ...any[]];
 
 export interface DefaultTokenizerTestCase extends GenericTestCase {
   output: string[];
   errors: string[];
-  lastState?: StateEnum;
+  lastState?: StateStringEnum;
 }
 
 export class StateTrackingTokenizer extends Tokenizer {
@@ -114,7 +114,7 @@ export class DefaultTokenizerTestSuite<Raw extends DefaultTokenizerRawTest = Def
       errors: rawTest[3]
     } as DefaultTokenizerTestCase;
     if (rawTest[4])
-      testCase.lastState = rawTest[4] as StateEnum;
+      testCase.lastState = rawTest[4] as StateStringEnum;
     return testCase as Case;
   }
 
@@ -138,6 +138,6 @@ export class DefaultTokenizerTestSuite<Raw extends DefaultTokenizerRawTest = Def
     expect(actualTokens).toStrictEqual(test.output);
     expect(this.errorList).toStrictEqual(test.errors);
     if (test.lastState)
-      expect(this.lastState).toStrictEqual(test.lastState);
+      expect(StateStringReversedEnum[this.lastState]).toStrictEqual(test.lastState);
   }
 }
