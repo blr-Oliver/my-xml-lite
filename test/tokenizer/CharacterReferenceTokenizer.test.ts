@@ -1,4 +1,4 @@
-import {State} from '../../src/impl/interfaces/states.js';
+import {StateEnum} from '../../src/impl/interfaces/states.js';
 import {default as rawTests} from './samples/char-ref.json';
 import {DefaultTokenizerRawTestCore, DefaultTokenizerTestCase, DefaultTokenizerTestSuite} from './TokenizerTestSuite.js';
 
@@ -15,7 +15,7 @@ class CharacterReferenceTokenizerTest extends DefaultTokenizerTestSuite<Characte
       input: rawTest[1],
       output: rawTest[2],
       errors: rawTest[3],
-      lastState: rawTest[4] as State || 'data',
+      lastState: rawTest[4] as StateEnum || StateEnum.DATA,
       refStart: rawTest[5] || 0
     };
     return testCase;

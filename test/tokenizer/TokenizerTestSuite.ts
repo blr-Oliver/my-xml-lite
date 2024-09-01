@@ -1,4 +1,4 @@
-import {State} from '../../src/impl/interfaces/states.js';
+import {StateEnum} from '../../src/impl/interfaces/states.js';
 import {CharactersToken, Token, TokenType} from '../../src/impl/interfaces/tokens.js';
 import {TestSerializer} from '../../src/impl/Serializer.js';
 import {Tokenizer} from '../../src/impl/Tokenizer.js';
@@ -12,13 +12,13 @@ export interface GenericTestCase {
   input: string;
 }
 
-export type DefaultTokenizerRawTestCore = [string, string, string[], string[], State?];
+export type DefaultTokenizerRawTestCore = [string, string, string[], string[], StateEnum?];
 export type DefaultTokenizerRawTest = [...DefaultTokenizerRawTestCore, ...any[]];
 
 export interface DefaultTokenizerTestCase extends GenericTestCase {
   output: string[];
   errors: string[];
-  lastState?: State;
+  lastState?: StateEnum;
 }
 
 export class StateTrackingTokenizer extends Tokenizer {
@@ -31,7 +31,7 @@ export class StateTrackingTokenizer extends Tokenizer {
     this.input = new InterlacedStringCharacterSource(2, '');
   }
 
-  eof(): State {
+  eof(): StateEnum {
     this.suite.lastState = this.state;
     return super.eof();
   }
@@ -45,7 +45,7 @@ export abstract class TokenizerTestSuite<Raw, Case extends GenericTestCase = Gen
   tokenizer!: Subj;
   tokenList: Token[] = [];
   errorList: string[] = [];
-  lastState!: State;
+  lastState!: StateEnum;
 
   constructor(name: string, rawTests: Raw[]) {
     this.name = name;
@@ -114,7 +114,7 @@ export class DefaultTokenizerTestSuite<Raw extends DefaultTokenizerRawTest = Def
       errors: rawTest[3]
     } as DefaultTokenizerTestCase;
     if (rawTest[4])
-      testCase.lastState = rawTest[4] as State;
+      testCase.lastState = rawTest[4] as StateEnum;
     return testCase as Case;
   }
 
