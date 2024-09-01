@@ -141,39 +141,39 @@ export class Tokenizer {
 // @formatter:off
       case State.DATA: return this.data(code);
       case State.RCDATA: return this.rcdata(code);
-      case State.RAWTEXT: return this.rawtext(code);
+      case State.RAWTEXT: return this.textDataNoRefs(code, State.RAWTEXT_LESS_THAN_SIGN, State.RAWTEXT);
       case State.SCRIPT_DATA: return this.scriptData(code);
       case State.PLAINTEXT: return this.plaintext(code);
       case State.TAG_OPEN: return this.tagOpen(code);
       case State.END_TAG_OPEN: return this.endTagOpen(code);
       case State.TAG_NAME: return this.tagName(code);
-      case State.RCDATA_LESS_THAN_SIGN: return this.rcdataLessThanSign(code);
-      case State.RCDATA_END_TAG_OPEN: return this.rcdataEndTagOpen(code);
-      case State.RCDATA_END_TAG_NAME: return this.rcdataEndTagName(code);
-      case State.RCDATA_END_TAG_NAME_MATCHED: return this.rcdataEndTagNameMatched(code);
-      case State.RAWTEXT_LESS_THAN_SIGN: return this.rawtextLessThanSign(code);
-      case State.RAWTEXT_END_TAG_OPEN: return this.rawtextEndTagOpen(code);
-      case State.RAWTEXT_END_TAG_NAME: return this.rawtextEndTagName(code);
-      case State.RAWTEXT_END_TAG_NAME_MATCHED: return this.rawtextEndTagNameMatched(code);
+      case State.RCDATA_LESS_THAN_SIGN: return this.textDataLessThanSign(code, State.RCDATA_END_TAG_OPEN, State.RCDATA, State.RCDATA_LESS_THAN_SIGN);
+      case State.RCDATA_END_TAG_OPEN: return this.textDataEndTagOpen(code, State.RCDATA_END_TAG_NAME, State.RCDATA);
+      case State.RCDATA_END_TAG_NAME: return this.matchSequence(code, stringToArray(this.lastOpenTag!), true, State.RCDATA_END_TAG_NAME_MATCHED, State.RCDATA);
+      case State.RCDATA_END_TAG_NAME_MATCHED: return this.textDataEndTagMatched(code, State.RCDATA);
+      case State.RAWTEXT_LESS_THAN_SIGN: return this.textDataLessThanSign(code, State.RAWTEXT_END_TAG_OPEN, State.RAWTEXT, State.RAWTEXT_LESS_THAN_SIGN);
+      case State.RAWTEXT_END_TAG_OPEN: return this.textDataEndTagOpen(code, State.RAWTEXT_END_TAG_NAME, State.RAWTEXT);
+      case State.RAWTEXT_END_TAG_NAME: return this.matchSequence(code, stringToArray(this.lastOpenTag!), true, State.RAWTEXT_END_TAG_NAME_MATCHED, State.RAWTEXT);
+      case State.RAWTEXT_END_TAG_NAME_MATCHED: return this.textDataEndTagMatched(code, State.RAWTEXT);
       case State.SCRIPT_DATA_LESS_THAN_SIGN: return this.scriptDataLessThanSign(code);
-      case State.SCRIPT_DATA_END_TAG_OPEN: return this.scriptDataEndTagOpen(code);
-      case State.SCRIPT_DATA_END_TAG_NAME: return this.scriptDataEndTagName(code);
-      case State.SCRIPT_DATA_END_TAG_NAME_MATCHED: return this.scriptDataEndTagNameMatched(code);
+      case State.SCRIPT_DATA_END_TAG_OPEN: return this.textDataEndTagOpen(code, State.SCRIPT_DATA_END_TAG_NAME, State.SCRIPT_DATA);
+      case State.SCRIPT_DATA_END_TAG_NAME: return this.matchSequence(code, SCRIPT, true, State.SCRIPT_DATA_END_TAG_NAME_MATCHED, State.SCRIPT_DATA);
+      case State.SCRIPT_DATA_END_TAG_NAME_MATCHED: return this.textDataEndTagMatched(code, State.SCRIPT_DATA);
       case State.SCRIPT_DATA_ESCAPE_START: return this.scriptDataEscapeStart(code);
       case State.SCRIPT_DATA_ESCAPE_START_DASH: return this.scriptDataEscapeStartDash(code);
       case State.SCRIPT_DATA_ESCAPED: return this.scriptDataEscaped(code);
       case State.SCRIPT_DATA_ESCAPED_DASH: return this.scriptDataEscapedDash(code);
       case State.SCRIPT_DATA_ESCAPED_DASH_DASH: return this.scriptDataEscapedDashDash(code);
       case State.SCRIPT_DATA_ESCAPED_LESS_THAN_SIGN: return this.scriptDataEscapedLessThanSign(code);
-      case State.SCRIPT_DATA_ESCAPED_END_TAG_OPEN: return this.scriptDataEscapedEndTagOpen(code);
-      case State.SCRIPT_DATA_ESCAPED_END_TAG_NAME: return this.scriptDataEscapedEndTagName(code);
+      case State.SCRIPT_DATA_ESCAPED_END_TAG_OPEN: return this.textDataEndTagOpen(code, State.SCRIPT_DATA_ESCAPED_END_TAG_NAME, State.SCRIPT_DATA_ESCAPED);
+      case State.SCRIPT_DATA_ESCAPED_END_TAG_NAME: return this.matchSequence(code, SCRIPT, true, State.SCRIPT_DATA_END_TAG_NAME_MATCHED, State.SCRIPT_DATA_ESCAPED);
       // case State.SCRIPT_DATA_DOUBLE_ESCAPE_START: return this.scriptDataDoubleEscapeStart(code);
       case State.SCRIPT_DATA_DOUBLE_ESCAPE_START_MATCHED: return this.scriptDataDoubleEscapeStartMatched(code);
       case State.SCRIPT_DATA_DOUBLE_ESCAPED: return this.scriptDataDoubleEscaped(code);
       case State.SCRIPT_DATA_DOUBLE_ESCAPED_DASH: return this.scriptDataDoubleEscapedDash(code);
       case State.SCRIPT_DATA_DOUBLE_ESCAPED_DASH_DASH: return this.scriptDataDoubleEscapedDashDash(code);
       case State.SCRIPT_DATA_DOUBLE_ESCAPED_LESS_THAN_SIGN: return this.scriptDataDoubleEscapedLessThanSign(code);
-      case State.SCRIPT_DATA_DOUBLE_ESCAPE_END: return this.scriptDataDoubleEscapeEnd(code);
+      case State.SCRIPT_DATA_DOUBLE_ESCAPE_END: return this.matchSequence(code, SCRIPT, true, State.SCRIPT_DATA_DOUBLE_ESCAPE_END_MATCHED, State.SCRIPT_DATA_DOUBLE_ESCAPED);
       case State.SCRIPT_DATA_DOUBLE_ESCAPE_END_MATCHED: return this.scriptDataDoubleEscapeEndMatched(code);
       case State.BEFORE_ATTRIBUTE_NAME: return this.beforeAttributeName(code);
       case State.ATTRIBUTE_NAME: return this.attributeName(code);
@@ -1812,18 +1812,6 @@ export class Tokenizer {
     }
   }
 
-  scriptDataEndTagOpen(code: number): State {
-    return this.textDataEndTagOpen(code, State.SCRIPT_DATA_END_TAG_NAME, State.SCRIPT_DATA);
-  }
-
-  scriptDataEndTagName(code: number): State {
-    return this.matchSequence(code, SCRIPT, true, State.SCRIPT_DATA_END_TAG_NAME_MATCHED, State.SCRIPT_DATA);
-  }
-
-  scriptDataEndTagNameMatched(code: number): State {
-    return this.textDataEndTagMatched(code, State.SCRIPT_DATA);
-  }
-
   scriptDataEscapeStart(code: number): State {
     if (code === CodePoints.HYPHEN) {
       this.appendNonWhitespace(code);
@@ -1927,14 +1915,6 @@ export class Tokenizer {
       this.state = State.SCRIPT_DATA_ESCAPED;
       return this.scriptDataEscaped(code);
     }
-  }
-
-  scriptDataEscapedEndTagOpen(code: number): State {
-    return this.textDataEndTagOpen(code, State.SCRIPT_DATA_ESCAPED_END_TAG_NAME, State.SCRIPT_DATA_ESCAPED);
-  }
-
-  scriptDataEscapedEndTagName(code: number): State {
-    return this.matchSequence(code, SCRIPT, true, State.SCRIPT_DATA_END_TAG_NAME_MATCHED, State.SCRIPT_DATA_ESCAPED);
   }
 
   scriptDataDoubleEscapeStart(code: number): State {
@@ -2049,10 +2029,6 @@ export class Tokenizer {
     }
   }
 
-  scriptDataDoubleEscapeEnd(code: number) {
-    return this.matchSequence(code, SCRIPT, true, State.SCRIPT_DATA_DOUBLE_ESCAPE_END_MATCHED, State.SCRIPT_DATA_DOUBLE_ESCAPED);
-  }
-
   scriptDataDoubleEscapeEndMatched(code: number): State {
     switch (code) {
       case CodePoints.TAB:
@@ -2069,26 +2045,6 @@ export class Tokenizer {
         this.state = State.SCRIPT_DATA_DOUBLE_ESCAPED;
         return this.scriptDataDoubleEscaped(code);
     }
-  }
-  // -----text states-----
-  rawtext(code: number): State {
-    return this.textDataNoRefs(code, State.RAWTEXT_LESS_THAN_SIGN, State.RAWTEXT);
-  }
-
-  rawtextLessThanSign(code: number): State {
-    return this.textDataLessThanSign(code, State.RAWTEXT_END_TAG_OPEN, State.RAWTEXT, State.RAWTEXT_LESS_THAN_SIGN);
-  }
-
-  rawtextEndTagOpen(code: number): State {
-    return this.textDataEndTagOpen(code, State.RAWTEXT_END_TAG_NAME, State.RAWTEXT);
-  }
-
-  rawtextEndTagName(code: number): State {
-    return this.matchSequence(code, stringToArray(this.lastOpenTag!), true, State.RAWTEXT_END_TAG_NAME_MATCHED, State.RAWTEXT);
-  }
-
-  rawtextEndTagNameMatched(code: number): State {
-    return this.textDataEndTagMatched(code, State.RAWTEXT);
   }
 
   rcdata(code: number): State {
@@ -2115,21 +2071,5 @@ export class Tokenizer {
           break;
       }
     }
-  }
-
-  rcdataLessThanSign(code: number): State {
-    return this.textDataLessThanSign(code, State.RCDATA_END_TAG_OPEN, State.RCDATA, State.RCDATA_LESS_THAN_SIGN);
-  }
-
-  rcdataEndTagOpen(code: number): State {
-    return this.textDataEndTagOpen(code, State.RCDATA_END_TAG_NAME, State.RCDATA);
-  }
-
-  rcdataEndTagName(code: number): State {
-    return this.matchSequence(code, stringToArray(this.lastOpenTag!), true, State.RCDATA_END_TAG_NAME_MATCHED, State.RCDATA);
-  }
-
-  rcdataEndTagNameMatched(code: number): State {
-    return this.textDataEndTagMatched(code, State.RCDATA);
   }
 }
