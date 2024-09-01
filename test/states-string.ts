@@ -89,7 +89,8 @@ export enum StateStringEnum {
   DECIMAL_CHARACTER_REFERENCE_START = 'decimalCharacterReferenceStart',
   HEXADECIMAL_CHARACTER_REFERENCE = 'hexadecimalCharacterReference',
   DECIMAL_CHARACTER_REFERENCE = 'decimalCharacterReference',
-  SEQUENCE = 'sequence'
+  SEQUENCE_CASE_SENSITIVE = 'sequenceCaseSensitive',
+  SEQUENCE_CASE_INSENSITIVE = 'sequenceCaseInsensitive'
 }
 
 export enum StateStringReversedEnum {
@@ -181,5 +182,6 @@ export enum StateStringReversedEnum {
   decimalCharacterReferenceStart = State.DECIMAL_CHARACTER_REFERENCE_START,
   hexadecimalCharacterReference = State.HEXADECIMAL_CHARACTER_REFERENCE,
   decimalCharacterReference = State.DECIMAL_CHARACTER_REFERENCE,
-  sequence = State.SEQUENCE
+  sequenceCaseSensitive = State.SEQUENCE_CASE_SENSITIVE,
+  sequenceCaseInsensitive = State.SEQUENCE_CASE_INSENSITIVE
 }

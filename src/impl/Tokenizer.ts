@@ -61,7 +61,6 @@ export class Tokenizer {
   sequenceBufferOffset!: number;
   sequenceData!: readonly number[];
   sequenceIndex!: number;
-  sequenceCI!: boolean;
   sequencePositiveState!: State;
   sequenceNegativeState!: State;
 
@@ -118,7 +117,6 @@ export class Tokenizer {
     this.sequenceBufferOffset = undefined as unknown as number;
     this.sequenceData = undefined as unknown as number[];
     this.sequenceIndex = undefined as unknown as number;
-    this.sequenceCI = undefined as unknown as boolean;
     this.sequencePositiveState = undefined as unknown as State;
     this.sequenceNegativeState = undefined as unknown as State;
     this.textEndMark = undefined as unknown as number;
@@ -229,7 +227,8 @@ export class Tokenizer {
       case State.DECIMAL_CHARACTER_REFERENCE_START: return this.decimalCharacterReferenceStart(code);
       case State.HEXADECIMAL_CHARACTER_REFERENCE: return this.hexadecimalCharacterReference(code);
       case State.DECIMAL_CHARACTER_REFERENCE: return this.decimalCharacterReference(code);
-      case State.SEQUENCE: return this.sequence(code);
+      case State.SEQUENCE_CASE_SENSITIVE: return this.sequenceCaseSensitive(code);
+      case State.SEQUENCE_CASE_INSENSITIVE: return this.sequenceCaseInsensitive(code);
 // @formatter:on
     }
   }
@@ -382,17 +381,18 @@ export class Tokenizer {
    @param negativeState state to continue when the sequence is failed; first character in that state will be the first character that differs
    */
   matchSequence(code: number, seq: readonly number[], caseInsensitive: boolean, positiveState: State, negativeState: State): State {
-    this.state = State.SEQUENCE;
     this.sequenceBufferOffset = this.buffer.position;
     this.sequenceData = seq;
     this.sequenceIndex = 0;
     this.sequencePositiveState = positiveState;
     this.sequenceNegativeState = negativeState;
-    return (this.sequenceCI = caseInsensitive) ? this.sequenceCaseInsensitive(code) : this.sequenceCaseSensitive(code);
-  }
-
-  sequence(code: number): State {
-    return this.sequenceCI ? this.sequenceCaseInsensitive(code) : this.sequenceCaseSensitive(code);
+    if (caseInsensitive) {
+      this.state = State.SEQUENCE_CASE_INSENSITIVE;
+      return this.sequenceCaseInsensitive(code);
+    } else {
+      this.state = State.SEQUENCE_CASE_SENSITIVE;
+      return this.sequenceCaseSensitive(code);
+    }
   }
 
   sequenceCaseSensitive(code: number): State {
@@ -400,7 +400,7 @@ export class Tokenizer {
     const buffer = this.buffer;
     const len = this.sequenceData.length;
     while (this.sequenceIndex < len) {
-      if (code === CodePoints.EOC) return State.SEQUENCE;
+      if (code === CodePoints.EOC) return State.SEQUENCE_CASE_SENSITIVE;
       if (code !== seqData[this.sequenceIndex++])
         return this.callState(this.sequenceNegativeState, code);
       buffer.append(code); // TODO check if this should belong to characters
@@ -418,7 +418,7 @@ export class Tokenizer {
     const buffer = this.buffer;
     const len = this.sequenceData.length;
     while (this.sequenceIndex < len) {
-      if (code === CodePoints.EOC) return State.SEQUENCE;
+      if (code === CodePoints.EOC) return State.SEQUENCE_CASE_INSENSITIVE;
       let ciCode = code;
       if (isAsciiUpperAlpha(ciCode)) ciCode += 0x20;
       if (ciCode !== seqData[this.sequenceIndex++])
