@@ -1,4 +1,3 @@
-import {StateStringReversedEnum} from '../../test/states-string.js';
 import {CharacterSource} from '../interfaces/CharacterSource.js';
 import {CodePoints} from '../interfaces/CodePoints.js';
 import {Element} from '../interfaces/dom-types.js';
@@ -140,9 +139,99 @@ export class Tokenizer {
   }
 
   execState(state: State, code: number): State {
-    // TODO switch through states
-    // @ts-ignore
-    return this[StateStringReversedEnum[state]](code);
+    switch (state) {
+// @formatter:off
+      case State.EOF: return this.eof();
+      case State.DATA: return this.data(code);
+      case State.RCDATA: return this.rcdata(code);
+      case State.RAWTEXT: return this.rawtext(code);
+      case State.SCRIPT_DATA: return this.scriptData(code);
+      case State.PLAINTEXT: return this.plaintext(code);
+      case State.TAG_OPEN: return this.tagOpen(code);
+      case State.END_TAG_OPEN: return this.endTagOpen(code);
+      case State.TAG_NAME: return this.tagName(code);
+      case State.RCDATA_LESS_THAN_SIGN: return this.rcdataLessThanSign(code);
+      case State.RCDATA_END_TAG_OPEN: return this.rcdataEndTagOpen(code);
+      case State.RCDATA_END_TAG_NAME: return this.rcdataEndTagName(code);
+      case State.RCDATA_END_TAG_NAME_MATCHED: return this.rcdataEndTagNameMatched(code);
+      case State.RAWTEXT_LESS_THAN_SIGN: return this.rawtextLessThanSign(code);
+      case State.RAWTEXT_END_TAG_OPEN: return this.rawtextEndTagOpen(code);
+      case State.RAWTEXT_END_TAG_NAME: return this.rawtextEndTagName(code);
+      case State.RAWTEXT_END_TAG_NAME_MATCHED: return this.rawtextEndTagNameMatched(code);
+      case State.SCRIPT_DATA_LESS_THAN_SIGN: return this.scriptDataLessThanSign(code);
+      case State.SCRIPT_DATA_END_TAG_OPEN: return this.scriptDataEndTagOpen(code);
+      case State.SCRIPT_DATA_END_TAG_NAME: return this.scriptDataEndTagName(code);
+      case State.SCRIPT_DATA_END_TAG_NAME_MATCHED: return this.scriptDataEndTagNameMatched(code);
+      case State.SCRIPT_DATA_ESCAPE_START: return this.scriptDataEscapeStart(code);
+      case State.SCRIPT_DATA_ESCAPE_START_DASH: return this.scriptDataEscapeStartDash(code);
+      case State.SCRIPT_DATA_ESCAPED: return this.scriptDataEscaped(code);
+      case State.SCRIPT_DATA_ESCAPED_DASH: return this.scriptDataEscapedDash(code);
+      case State.SCRIPT_DATA_ESCAPED_DASH_DASH: return this.scriptDataEscapedDashDash(code);
+      case State.SCRIPT_DATA_ESCAPED_LESS_THAN_SIGN: return this.scriptDataEscapedLessThanSign(code);
+      case State.SCRIPT_DATA_ESCAPED_END_TAG_OPEN: return this.scriptDataEscapedEndTagOpen(code);
+      case State.SCRIPT_DATA_ESCAPED_END_TAG_NAME: return this.scriptDataEscapedEndTagName(code);
+      case State.SCRIPT_DATA_DOUBLE_ESCAPE_START: return this.scriptDataDoubleEscapeStart(code);
+      case State.SCRIPT_DATA_DOUBLE_ESCAPE_START_MATCHED: return this.scriptDataDoubleEscapeStartMatched(code);
+      case State.SCRIPT_DATA_DOUBLE_ESCAPED: return this.scriptDataDoubleEscaped(code);
+      case State.SCRIPT_DATA_DOUBLE_ESCAPED_DASH: return this.scriptDataDoubleEscapedDash(code);
+      case State.SCRIPT_DATA_DOUBLE_ESCAPED_DASH_DASH: return this.scriptDataDoubleEscapedDashDash(code);
+      case State.SCRIPT_DATA_DOUBLE_ESCAPED_LESS_THAN_SIGN: return this.scriptDataDoubleEscapedLessThanSign(code);
+      case State.SCRIPT_DATA_DOUBLE_ESCAPE_END: return this.scriptDataDoubleEscapeEnd(code);
+      case State.SCRIPT_DATA_DOUBLE_ESCAPE_END_MATCHED: return this.scriptDataDoubleEscapeEndMatched(code);
+      case State.BEFORE_ATTRIBUTE_NAME: return this.beforeAttributeName(code);
+      case State.ATTRIBUTE_NAME: return this.attributeName(code);
+      case State.AFTER_ATTRIBUTE_NAME: return this.afterAttributeName(code);
+      case State.BEFORE_ATTRIBUTE_VALUE: return this.beforeAttributeValue(code);
+      case State.ATTRIBUTE_VALUE_DOUBLE_QUOTED: return this.attributeValueDoubleQuoted(code);
+      case State.ATTRIBUTE_VALUE_SINGLE_QUOTED: return this.attributeValueSingleQuoted(code);
+      case State.ATTRIBUTE_VALUE_UNQUOTED: return this.attributeValueUnquoted(code);
+      case State.AFTER_ATTRIBUTE_VALUE_QUOTED: return this.afterAttributeValueQuoted(code);
+      case State.SELF_CLOSING_START_TAG: return this.selfClosingStartTag(code);
+      case State.BOGUS_COMMENT: return this.bogusComment(code);
+      case State.MARKUP_DECLARATION_OPEN: return this.markupDeclarationOpen(code);
+      case State.MARKUP_DECLARATION_FAIL: return this.markupDeclarationFail(code);
+      case State.COMMENT_START: return this.commentStart(code);
+      case State.COMMENT_START_DASH: return this.commentStartDash(code);
+      case State.COMMENT: return this.comment(code);
+      case State.COMMENT_LESS_THAN_SIGN: return this.commentLessThanSign(code);
+      case State.COMMENT_LESS_THAN_SIGN_BANG: return this.commentLessThanSignBang(code);
+      case State.COMMENT_LESS_THAN_SIGN_BANG_DASH: return this.commentLessThanSignBangDash(code);
+      case State.COMMENT_LESS_THAN_SIGN_BANG_DASH_DASH: return this.commentLessThanSignBangDashDash(code);
+      case State.COMMENT_END_DASH: return this.commentEndDash(code);
+      case State.COMMENT_END: return this.commentEnd(code);
+      case State.COMMENT_END_BANG: return this.commentEndBang(code);
+      case State.DOCTYPE: return this.doctype(code);
+      case State.BEFORE_DOCTYPE_NAME: return this.beforeDoctypeName(code);
+      case State.DOCTYPE_NAME: return this.doctypeName(code);
+      case State.AFTER_DOCTYPE_NAME: return this.afterDoctypeName(code);
+      case State.AFTER_DOCTYPE_NAME_FAILED_SEQUENCE: return this.afterDoctypeNameFailedSequence(code);
+      case State.AFTER_DOCTYPE_PUBLIC_KEYWORD: return this.afterDoctypePublicKeyword(code);
+      case State.BEFORE_DOCTYPE_PUBLIC_IDENTIFIER: return this.beforeDoctypePublicIdentifier(code);
+      case State.DOCTYPE_PUBLIC_IDENTIFIER_DOUBLE_QUOTED: return this.doctypePublicIdentifierDoubleQuoted(code);
+      case State.DOCTYPE_PUBLIC_IDENTIFIER_SINGLE_QUOTED: return this.doctypePublicIdentifierSingleQuoted(code);
+      case State.AFTER_DOCTYPE_PUBLIC_IDENTIFIER: return this.afterDoctypePublicIdentifier(code);
+      case State.BETWEEN_DOCTYPE_PUBLIC_AND_SYSTEM_IDENTIFIERS: return this.betweenDoctypePublicAndSystemIdentifiers(code);
+      case State.AFTER_DOCTYPE_SYSTEM_KEYWORD: return this.afterDoctypeSystemKeyword(code);
+      case State.BEFORE_DOCTYPE_SYSTEM_IDENTIFIER: return this.beforeDoctypeSystemIdentifier(code);
+      case State.DOCTYPE_SYSTEM_IDENTIFIER_DOUBLE_QUOTED: return this.doctypeSystemIdentifierDoubleQuoted(code);
+      case State.DOCTYPE_SYSTEM_IDENTIFIER_SINGLE_QUOTED: return this.doctypeSystemIdentifierSingleQuoted(code);
+      case State.AFTER_DOCTYPE_SYSTEM_IDENTIFIER: return this.afterDoctypeSystemIdentifier(code);
+      case State.BOGUS_DOCTYPE: return this.bogusDoctype(code);
+      case State.CDATA_SECTION_START: return this.cdataSectionStart(code);
+      case State.CDATA_SECTION: return this.cdataSection(code);
+      case State.CDATA_SECTION_BRACKET: return this.cdataSectionBracket(code);
+      case State.CDATA_SECTION_END: return this.cdataSectionEnd(code);
+      case State.CHARACTER_REFERENCE: return this.characterReference(code);
+      case State.NAMED_CHARACTER_REFERENCE: return this.namedCharacterReference(code);
+      case State.AMBIGUOUS_AMPERSAND: return this.ambiguousAmpersand(code);
+      case State.NUMERIC_CHARACTER_REFERENCE: return this.numericCharacterReference(code);
+      case State.HEXADECIMAL_CHARACTER_REFERENCE_START: return this.hexadecimalCharacterReferenceStart(code);
+      case State.DECIMAL_CHARACTER_REFERENCE_START: return this.decimalCharacterReferenceStart(code);
+      case State.HEXADECIMAL_CHARACTER_REFERENCE: return this.hexadecimalCharacterReference(code);
+      case State.DECIMAL_CHARACTER_REFERENCE: return this.decimalCharacterReference(code);
+      case State.SEQUENCE: return this.sequence(code);
+// @formatter:on
+    }
   }
 
   // TODO inline this for static transitions
