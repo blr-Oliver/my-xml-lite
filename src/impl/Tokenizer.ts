@@ -139,7 +139,6 @@ export class Tokenizer {
   execState(state: State, code: number): State {
     switch (state) {
 // @formatter:off
-      case State.EOF: return this.eof();
       case State.DATA: return this.data(code);
       case State.RCDATA: return this.rcdata(code);
       case State.RAWTEXT: return this.rawtext(code);
@@ -302,7 +301,7 @@ export class Tokenizer {
   eof(): State {
     this.emit(EOF_TOKEN);
     this.active = false;
-    return State.EOF;
+    return this.state;
   }
 
   startNewTag(name: string = '') {

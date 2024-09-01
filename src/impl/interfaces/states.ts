@@ -1,5 +1,4 @@
 export const enum State {
-  EOF = -1,
   DATA = 1,
   RCDATA,
   RAWTEXT,

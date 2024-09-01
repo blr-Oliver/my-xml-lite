@@ -1,7 +1,6 @@
 import {State} from '../src/impl/interfaces/states.js';
 
 export enum StateStringEnum {
-  EOF = 'eof',
   DATA = 'data',
   RCDATA = 'rcdata',
   RAWTEXT = 'rawtext',
@@ -94,7 +93,6 @@ export enum StateStringEnum {
 }
 
 export enum StateStringReversedEnum {
-  eof = State.EOF,
   data = State.DATA,
   rcdata = State.RCDATA,
   rawtext = State.RAWTEXT,
