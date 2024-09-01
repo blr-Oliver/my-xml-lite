@@ -1,4 +1,4 @@
-import {StateEnum} from '../../src/impl/interfaces/states.js';
+import {State} from '../../src/impl/interfaces/states.js';
 import {TestSerializer} from '../../src/impl/Serializer.js';
 import {SimpleNodeFactory} from '../../src/impl/simple-tree/SimpleNodeFactory.js';
 import {Tokenizer} from '../../src/impl/Tokenizer.js';
@@ -114,7 +114,7 @@ export class DefaultSuite<R = DefaultRawTest, T extends DefaultTestCase = Defaul
 
   runChecks(test: T) {
     const {output: expectedOutput, errors: expectedErrors} = test;
-    expect(this.tokenizer.state).toStrictEqual(StateEnum.EOF);
+    expect(this.tokenizer.state).toStrictEqual(State.EOF);
     const document = this.composer.document;
     expect(document).toBeDefined();
     const output = TestSerializer.serializeNode(document);

@@ -1,10 +1,11 @@
+import {StateStringReversedEnum} from '../../test/states-string.js';
 import {CharacterSource} from '../interfaces/CharacterSource.js';
 import {CodePoints} from '../interfaces/CodePoints.js';
 import {Element} from '../interfaces/dom-types.js';
 import {ErrorHandler, ignoring} from '../interfaces/ErrorHandler.js';
 import {PrefixNode} from '../interfaces/PrefixNode.js';
 import {FixedSizeStringBuilder} from './FixedSizeStringBuilder.js';
-import {StateEnum, StateStringReversedEnum} from './interfaces/states.js';
+import {State} from './interfaces/states.js';
 import {StringBuilder} from './interfaces/StringBuilder.js';
 import {Attribute, CDataToken, CharactersToken, CommentToken, DoctypeToken, EOF_TOKEN, TagToken, Token} from './interfaces/tokens.js';
 import {NS_HTML} from './TreeComposer.js';
@@ -46,7 +47,7 @@ export interface ComposerIntegration {
 }
 
 export class Tokenizer {
-  state!: StateEnum;
+  state!: State;
   active!: boolean;
   paused!: boolean;
   lastOpenTag?: string;
@@ -62,12 +63,12 @@ export class Tokenizer {
   sequenceData!: readonly number[];
   sequenceIndex!: number;
   sequenceCI!: boolean;
-  sequencePositiveState!: StateEnum;
-  sequenceNegativeState!: StateEnum;
+  sequencePositiveState!: State;
+  sequenceNegativeState!: State;
 
   textEndMark!: number;
 
-  returnState!: StateEnum;
+  returnState!: State;
   inAttribute!: boolean;
   referenceStartMark!: number;
   charCode!: number;
@@ -109,7 +110,7 @@ export class Tokenizer {
   }
 
   reset() {
-    this.state = StateEnum.DATA;
+    this.state = State.DATA;
     this.active = true;
     this.paused = false;
     this.lastOpenTag = undefined;
@@ -119,10 +120,10 @@ export class Tokenizer {
     this.sequenceData = undefined as unknown as number[];
     this.sequenceIndex = undefined as unknown as number;
     this.sequenceCI = undefined as unknown as boolean;
-    this.sequencePositiveState = undefined as unknown as StateEnum;
-    this.sequenceNegativeState = undefined as unknown as StateEnum;
+    this.sequencePositiveState = undefined as unknown as State;
+    this.sequenceNegativeState = undefined as unknown as State;
     this.textEndMark = undefined as unknown as number;
-    this.returnState = undefined as unknown as StateEnum;
+    this.returnState = undefined as unknown as State;
     this.inAttribute = undefined as unknown as boolean;
     this.referenceStartMark = undefined as unknown as number;
     this.charCode = undefined as unknown as number;
@@ -138,14 +139,14 @@ export class Tokenizer {
     return this.input.next();
   }
 
-  execState(state: StateEnum, code: number): StateEnum {
+  execState(state: State, code: number): State {
     // TODO switch through states
     // @ts-ignore
     return this[StateStringReversedEnum[state]](code);
   }
 
   // TODO inline this for static transitions
-  callState(state: StateEnum, code: number): StateEnum {
+  callState(state: State, code: number): State {
     return this.execState(this.state = state, code);
   }
 
@@ -204,17 +205,17 @@ export class Tokenizer {
     this.currentDoctype = undefined;
   }
 
-  eofInDoctype(): StateEnum {
+  eofInDoctype(): State {
     this.currentDoctype.forceQuirks = true;
     this.error('eof-in-doctype');
     this.emitCurrentDoctype();
     return this.eof();
   }
 
-  eof(): StateEnum {
+  eof(): State {
     this.emit(EOF_TOKEN);
     this.active = false;
-    return StateEnum.EOF;
+    return State.EOF;
   }
 
   startNewTag(name: string = '') {
@@ -291,8 +292,8 @@ export class Tokenizer {
    @param positiveState state to continue when the sequence is confirmed; first character in that state will be the character immediately AFTER the sequence
    @param negativeState state to continue when the sequence is failed; first character in that state will be the first character that differs
    */
-  matchSequence(code: number, seq: readonly number[], caseInsensitive: boolean, positiveState: StateEnum, negativeState: StateEnum): StateEnum {
-    this.state = StateEnum.SEQUENCE;
+  matchSequence(code: number, seq: readonly number[], caseInsensitive: boolean, positiveState: State, negativeState: State): State {
+    this.state = State.SEQUENCE;
     this.sequenceBufferOffset = this.buffer.position;
     this.sequenceData = seq;
     this.sequenceIndex = 0;
@@ -301,16 +302,16 @@ export class Tokenizer {
     return (this.sequenceCI = caseInsensitive) ? this.sequenceCaseInsensitive(code) : this.sequenceCaseSensitive(code);
   }
 
-  sequence(code: number): StateEnum {
+  sequence(code: number): State {
     return this.sequenceCI ? this.sequenceCaseInsensitive(code) : this.sequenceCaseSensitive(code);
   }
 
-  sequenceCaseSensitive(code: number): StateEnum {
+  sequenceCaseSensitive(code: number): State {
     const seqData = this.sequenceData;
     const buffer = this.buffer;
     const len = this.sequenceData.length;
     while (this.sequenceIndex < len) {
-      if (code === CodePoints.EOC) return StateEnum.SEQUENCE;
+      if (code === CodePoints.EOC) return State.SEQUENCE;
       if (code !== seqData[this.sequenceIndex++])
         return this.callState(this.sequenceNegativeState, code);
       buffer.append(code); // TODO check if this should belong to characters
@@ -323,12 +324,12 @@ export class Tokenizer {
     return this.callState(this.sequencePositiveState, code);
   }
 
-  sequenceCaseInsensitive(code: number): StateEnum {
+  sequenceCaseInsensitive(code: number): State {
     const seqData = this.sequenceData;
     const buffer = this.buffer;
     const len = this.sequenceData.length;
     while (this.sequenceIndex < len) {
-      if (code === CodePoints.EOC) return StateEnum.SEQUENCE;
+      if (code === CodePoints.EOC) return State.SEQUENCE;
       let ciCode = code;
       if (isAsciiUpperAlpha(ciCode)) ciCode += 0x20;
       if (ciCode !== seqData[this.sequenceIndex++])
@@ -344,7 +345,7 @@ export class Tokenizer {
   }
 
   // -----text helpers-----
-  textDataNoRefs(code: number, ltState: StateEnum, thisState: StateEnum): StateEnum {
+  textDataNoRefs(code: number, ltState: State, thisState: State): State {
     while (true) {
       switch (code) {
         case CodePoints.EOC:
@@ -366,7 +367,7 @@ export class Tokenizer {
     }
   }
 
-  textDataLessThanSign(code: number, endTagOpenState: StateEnum, textState: StateEnum, thisState: StateEnum): StateEnum {
+  textDataLessThanSign(code: number, endTagOpenState: State, textState: State, thisState: State): State {
     while (true) {
       switch (code) {
         case CodePoints.EOC:
@@ -385,7 +386,7 @@ export class Tokenizer {
     }
   }
 
-  textDataEndTagOpen(code: number, tagNameState: StateEnum, textState: StateEnum): StateEnum {
+  textDataEndTagOpen(code: number, tagNameState: State, textState: State): State {
     const buffer = this.buffer;
     if (isAsciiAlpha(code)) {
       this.textEndMark = buffer.position;
@@ -399,21 +400,21 @@ export class Tokenizer {
     }
   }
 
-  textDataEndTagMatched(code: number, textState: StateEnum): StateEnum {
+  textDataEndTagMatched(code: number, textState: State): State {
     switch (code) {
       case CodePoints.TAB:
       case CodePoints.LF:
       case CodePoints.FF:
       case CodePoints.SPACE:
         this.createTextDataEndTag(this.lastOpenTag!);
-        return StateEnum.BEFORE_ATTRIBUTE_NAME;
+        return State.BEFORE_ATTRIBUTE_NAME;
       case CodePoints.SLASH:
         this.createTextDataEndTag(this.lastOpenTag!);
-        return StateEnum.SELF_CLOSING_START_TAG;
+        return State.SELF_CLOSING_START_TAG;
       case CodePoints.GT:
         this.createTextDataEndTag(this.lastOpenTag!);
         this.emitCurrentTag();
-        return StateEnum.DATA;
+        return State.DATA;
       default:
         return this.callState(textState, code);
     }
@@ -428,18 +429,18 @@ export class Tokenizer {
     this.lastOpenTag = undefined;
   }
 
-  data(code: number): StateEnum {
+  data(code: number): State {
     while (true) {
       switch (code) {
         case CodePoints.EOC:
           this.paused = true;
-          return StateEnum.DATA;
+          return State.DATA;
         case CodePoints.AMPERSAND:
           this.returnState = this.state;
           this.inAttribute = false;
-          return StateEnum.CHARACTER_REFERENCE;
+          return State.CHARACTER_REFERENCE;
         case CodePoints.LT:
-          return StateEnum.TAG_OPEN;
+          return State.TAG_OPEN;
         case CodePoints.EOF:
           this.emitAccumulatedCharacters();
           return this.eof();
@@ -458,12 +459,12 @@ export class Tokenizer {
     }
   }
 
-  plaintext(code: number): StateEnum {
+  plaintext(code: number): State {
     while (true) {
       switch (code) {
         case CodePoints.EOC:
           this.paused = true;
-          return StateEnum.PLAINTEXT;
+          return State.PLAINTEXT;
         case CodePoints.EOF:
           this.emitAccumulatedCharacters();
           return this.eof();
@@ -479,19 +480,19 @@ export class Tokenizer {
   }
 
   // -----tag states-----
-  tagOpen(code: number): StateEnum {
+  tagOpen(code: number): State {
     const buffer = this.buffer;
     switch (code) {
       case CodePoints.EXCLAMATION:
-        return StateEnum.MARKUP_DECLARATION_OPEN;
+        return State.MARKUP_DECLARATION_OPEN;
       case CodePoints.SLASH:
         this.startNewTag();
-        return StateEnum.END_TAG_OPEN;
+        return State.END_TAG_OPEN;
       case CodePoints.QUESTION:
         this.emitAccumulatedCharacters();
         this.error('unexpected-question-mark-instead-of-tag-name');
         this.startNewComment();
-        return this.callState(StateEnum.BOGUS_COMMENT, code);
+        return this.callState(State.BOGUS_COMMENT, code);
       case CodePoints.EOF:
         this.appendCharacter(CodePoints.LT);
         this.emitAccumulatedCharacters();
@@ -501,19 +502,19 @@ export class Tokenizer {
         if (isAsciiAlpha(code)) {
           this.emitAccumulatedCharacters();
           this.startNewTag();
-          return this.callState(StateEnum.TAG_NAME, code);
+          return this.callState(State.TAG_NAME, code);
         }
         this.error('invalid-first-character-of-tag-name');
         buffer.append(CodePoints.LT);
-        return this.callState(StateEnum.DATA, code);
+        return this.callState(State.DATA, code);
     }
   }
 
-  endTagOpen(code: number): StateEnum {
+  endTagOpen(code: number): State {
     switch (code) {
       case CodePoints.GT:
         this.error('missing-end-tag-name');
-        return StateEnum.DATA;
+        return State.DATA;
       case CodePoints.EOF:
         this.appendNonWhitespace(CodePoints.LT);
         this.appendNonWhitespace(CodePoints.SLASH);
@@ -524,35 +525,35 @@ export class Tokenizer {
         if (isAsciiAlpha(code)) {
           this.emitAccumulatedCharacters();
           this.currentTag.type = 'endTag';
-          return this.callState(StateEnum.TAG_NAME, code);
+          return this.callState(State.TAG_NAME, code);
         }
         this.emitAccumulatedCharacters();
         this.error('invalid-first-character-of-tag-name');
         this.startNewComment();
-        return this.callState(StateEnum.BOGUS_COMMENT, code);
+        return this.callState(State.BOGUS_COMMENT, code);
     }
   }
 
-  tagName(code: number): StateEnum {
+  tagName(code: number): State {
     const buffer = this.buffer;
     while (true) {
       switch (code) {
         case CodePoints.EOC:
           this.paused = true;
-          return StateEnum.TAG_NAME;
+          return State.TAG_NAME;
         case CodePoints.TAB:
         case CodePoints.LF:
         case CodePoints.FF:
         case CodePoints.SPACE:
           this.currentTag.name = buffer.takeString();
-          return StateEnum.BEFORE_ATTRIBUTE_NAME;
+          return State.BEFORE_ATTRIBUTE_NAME;
         case CodePoints.SLASH:
           this.currentTag.name = buffer.takeString();
-          return StateEnum.SELF_CLOSING_START_TAG;
+          return State.SELF_CLOSING_START_TAG;
         case CodePoints.GT:
           this.currentTag.name = buffer.takeString();
           this.emitCurrentTag();
-          return StateEnum.DATA;
+          return State.DATA;
         case CodePoints.EOF:
           this.error('eof-in-tag');
           return this.eof();
@@ -567,12 +568,12 @@ export class Tokenizer {
     }
   }
 
-  beforeAttributeName(code: number): StateEnum {
+  beforeAttributeName(code: number): State {
     while (true) {
       switch (code) {
         case CodePoints.EOC:
           this.paused = true;
-          return StateEnum.BEFORE_ATTRIBUTE_NAME;
+          return State.BEFORE_ATTRIBUTE_NAME;
         case CodePoints.TAB:
         case CodePoints.LF:
         case CodePoints.FF:
@@ -582,29 +583,29 @@ export class Tokenizer {
         case CodePoints.SLASH:
         case CodePoints.GT:
         case CodePoints.EOF:
-          return this.callState(StateEnum.AFTER_ATTRIBUTE_NAME, code);
+          return this.callState(State.AFTER_ATTRIBUTE_NAME, code);
         case CodePoints.EQ:
           this.error('unexpected-equals-sign-before-attribute-name');
           this.startNewAttribute();
           this.buffer.append(code);
-          return StateEnum.ATTRIBUTE_NAME;
+          return State.ATTRIBUTE_NAME;
         default:
           this.startNewAttribute();
-          return this.callState(StateEnum.ATTRIBUTE_NAME, code);
+          return this.callState(State.ATTRIBUTE_NAME, code);
       }
     }
   }
 
-  attributeName(code: number): StateEnum {
+  attributeName(code: number): State {
     const buffer = this.buffer;
     while (true) {
       switch (code) {
         case CodePoints.EOC:
           this.paused = true;
-          return StateEnum.ATTRIBUTE_NAME;
+          return State.ATTRIBUTE_NAME;
         case CodePoints.EQ:
           this.checkDuplicateAttribute(this.currentAttribute.name = buffer.takeString());
-          return StateEnum.BEFORE_ATTRIBUTE_VALUE;
+          return State.BEFORE_ATTRIBUTE_VALUE;
         case CodePoints.TAB:
         case CodePoints.LF:
         case CodePoints.FF:
@@ -613,7 +614,7 @@ export class Tokenizer {
         case CodePoints.SLASH:
         case CodePoints.EOF:
           this.checkDuplicateAttribute(this.currentAttribute.name = buffer.takeString());
-          return this.callState(StateEnum.AFTER_ATTRIBUTE_NAME, code);
+          return this.callState(State.AFTER_ATTRIBUTE_NAME, code);
         case CodePoints.NUL:
           this.error('unexpected-null-character');
           buffer.append(CodePoints.REPLACEMENT_CHAR);
@@ -638,14 +639,14 @@ export class Tokenizer {
       this.currentAttributeNames.add(name);
   }
 
-  afterAttributeName(code: number): StateEnum {
+  afterAttributeName(code: number): State {
     while (true) {
       switch (code) {
         case CodePoints.EOC:
           this.paused = true;
-          return StateEnum.AFTER_ATTRIBUTE_NAME;
+          return State.AFTER_ATTRIBUTE_NAME;
         case CodePoints.EQ:
-          return StateEnum.BEFORE_ATTRIBUTE_VALUE;
+          return State.BEFORE_ATTRIBUTE_VALUE;
         case CodePoints.TAB:
         case CodePoints.LF:
         case CodePoints.FF:
@@ -654,25 +655,25 @@ export class Tokenizer {
           break;
         case CodePoints.GT:
           this.emitCurrentTag();
-          return StateEnum.DATA;
+          return State.DATA;
         case CodePoints.SLASH:
-          return StateEnum.SELF_CLOSING_START_TAG;
+          return State.SELF_CLOSING_START_TAG;
         case CodePoints.EOF:
           this.error('eof-in-tag');
           return this.eof();
         default:
           this.startNewAttribute();
-          return this.callState(StateEnum.ATTRIBUTE_NAME, code);
+          return this.callState(State.ATTRIBUTE_NAME, code);
       }
     }
   }
 
-  beforeAttributeValue(code: number): StateEnum {
+  beforeAttributeValue(code: number): State {
     while (true) {
       switch (code) {
         case CodePoints.EOC:
           this.paused = true;
-          return StateEnum.BEFORE_ATTRIBUTE_VALUE;
+          return State.BEFORE_ATTRIBUTE_VALUE;
         case CodePoints.TAB:
         case CodePoints.LF:
         case CodePoints.FF:
@@ -680,41 +681,41 @@ export class Tokenizer {
           code = this.nextCode();
           break;
         case CodePoints.DOUBLE_QUOTE:
-          return StateEnum.ATTRIBUTE_VALUE_DOUBLE_QUOTED;
+          return State.ATTRIBUTE_VALUE_DOUBLE_QUOTED;
         case CodePoints.SINGLE_QUOTE:
-          return StateEnum.ATTRIBUTE_VALUE_SINGLE_QUOTED;
+          return State.ATTRIBUTE_VALUE_SINGLE_QUOTED;
         case CodePoints.GT:
           this.error('missing-attribute-value');
           this.emitCurrentTag();
-          return StateEnum.DATA;
+          return State.DATA;
         default:
-          return this.callState(StateEnum.ATTRIBUTE_VALUE_UNQUOTED, code);
+          return this.callState(State.ATTRIBUTE_VALUE_UNQUOTED, code);
       }
     }
   }
 
-  attributeValueDoubleQuoted(code: number): StateEnum {
+  attributeValueDoubleQuoted(code: number): State {
     return this.attributeValueQuoted(code, CodePoints.DOUBLE_QUOTE);
   }
 
-  attributeValueSingleQuoted(code: number): StateEnum {
+  attributeValueSingleQuoted(code: number): State {
     return this.attributeValueQuoted(code, CodePoints.SINGLE_QUOTE);
   }
 
-  attributeValueQuoted(code: number, terminator: number): StateEnum {
+  attributeValueQuoted(code: number, terminator: number): State {
     const buffer = this.buffer;
     while (true) {
       switch (code) {
         case CodePoints.EOC:
           this.paused = true;
-          return terminator === CodePoints.DOUBLE_QUOTE ? StateEnum.ATTRIBUTE_VALUE_DOUBLE_QUOTED : StateEnum.ATTRIBUTE_VALUE_SINGLE_QUOTED;
+          return terminator === CodePoints.DOUBLE_QUOTE ? State.ATTRIBUTE_VALUE_DOUBLE_QUOTED : State.ATTRIBUTE_VALUE_SINGLE_QUOTED;
         case terminator:
           this.currentAttribute.value = buffer.takeString();
-          return StateEnum.AFTER_ATTRIBUTE_VALUE_QUOTED;
+          return State.AFTER_ATTRIBUTE_VALUE_QUOTED;
         case CodePoints.AMPERSAND:
           this.returnState = this.state;
           this.inAttribute = true;
-          return StateEnum.CHARACTER_REFERENCE;
+          return State.CHARACTER_REFERENCE;
         case CodePoints.EOF:
           this.error('eof-in-tag');
           return this.eof();
@@ -729,27 +730,27 @@ export class Tokenizer {
     }
   }
 
-  attributeValueUnquoted(code: number): StateEnum {
+  attributeValueUnquoted(code: number): State {
     const buffer = this.buffer;
     while (true) {
       switch (code) {
         case CodePoints.EOC:
           this.paused = true;
-          return StateEnum.ATTRIBUTE_VALUE_UNQUOTED;
+          return State.ATTRIBUTE_VALUE_UNQUOTED;
         case CodePoints.TAB:
         case CodePoints.LF:
         case CodePoints.FF:
         case CodePoints.SPACE:
           this.currentAttribute.value = buffer.takeString();
-          return StateEnum.BEFORE_ATTRIBUTE_NAME;
+          return State.BEFORE_ATTRIBUTE_NAME;
         case CodePoints.AMPERSAND:
           this.returnState = this.state;
           this.inAttribute = true;
-          return StateEnum.CHARACTER_REFERENCE;
+          return State.CHARACTER_REFERENCE;
         case CodePoints.GT:
           this.currentAttribute.value = buffer.takeString();
           this.emitCurrentTag();
-          return StateEnum.DATA;
+          return State.DATA;
         case CodePoints.NUL:
           this.error('unexpected-null-character');
           buffer.append(CodePoints.REPLACEMENT_CHAR);
@@ -771,62 +772,62 @@ export class Tokenizer {
     }
   }
 
-  afterAttributeValueQuoted(code: number): StateEnum {
+  afterAttributeValueQuoted(code: number): State {
     switch (code) {
       case CodePoints.TAB:
       case CodePoints.LF:
       case CodePoints.FF:
       case CodePoints.SPACE:
-        return StateEnum.BEFORE_ATTRIBUTE_NAME;
+        return State.BEFORE_ATTRIBUTE_NAME;
       case CodePoints.SLASH:
-        return StateEnum.SELF_CLOSING_START_TAG;
+        return State.SELF_CLOSING_START_TAG;
       case CodePoints.GT:
         this.emitCurrentTag();
-        return StateEnum.DATA;
+        return State.DATA;
       case CodePoints.EOF:
         this.error('eof-in-tag');
         return this.eof();
       default:
         this.error('missing-whitespace-between-attributes');
-        return this.callState(StateEnum.BEFORE_ATTRIBUTE_NAME, code);
+        return this.callState(State.BEFORE_ATTRIBUTE_NAME, code);
     }
   }
 
-  selfClosingStartTag(code: number): StateEnum {
+  selfClosingStartTag(code: number): State {
     switch (code) {
       case CodePoints.GT:
         this.currentTag.selfClosed = true;
         this.emitCurrentTag();
-        return StateEnum.DATA;
+        return State.DATA;
       case CodePoints.EOF:
         this.error('eof-in-tag');
         return this.eof();
       default:
         this.error('unexpected-solidus-in-tag');
-        return this.callState(StateEnum.BEFORE_ATTRIBUTE_NAME, code);
+        return this.callState(State.BEFORE_ATTRIBUTE_NAME, code);
     }
   }
 
   // -----CDATA states-----
-  cdataSectionStart(code: number): StateEnum {
+  cdataSectionStart(code: number): State {
     const adjustedNode = this.composer.adjustedCurrentNode;
     if (adjustedNode && adjustedNode.namespaceURI !== NS_HTML) {
       this.buffer.position = this.sequenceBufferOffset;
-      return this.callState(StateEnum.CDATA_SECTION, code);
+      return this.callState(State.CDATA_SECTION, code);
     }
     this.startNewComment();
     this.error('cdata-in-html-content');
     return this.bogusComment(code);
   }
 
-  cdataSection(code: number): StateEnum {
+  cdataSection(code: number): State {
     while (true) {
       switch (code) {
         case CodePoints.EOC:
           this.paused = true;
-          return StateEnum.CDATA_SECTION;
+          return State.CDATA_SECTION;
         case CodePoints.CLOSE_SQUARE_BRACKET:
-          return StateEnum.CDATA_SECTION_BRACKET;
+          return State.CDATA_SECTION_BRACKET;
         case CodePoints.EOF:
           this.emitCData();
           this.error('eof-in-cdata');
@@ -841,38 +842,38 @@ export class Tokenizer {
     }
   }
 
-  cdataSectionBracket(code: number): StateEnum {
+  cdataSectionBracket(code: number): State {
     if (code === CodePoints.CLOSE_SQUARE_BRACKET)
-      return StateEnum.CDATA_SECTION_END;
+      return State.CDATA_SECTION_END;
     else {
       this.appendNonWhitespace(CodePoints.CLOSE_SQUARE_BRACKET);
-      return this.callState(StateEnum.CDATA_SECTION, code);
+      return this.callState(State.CDATA_SECTION, code);
     }
   }
 
-  cdataSectionEnd(code: number): StateEnum {
+  cdataSectionEnd(code: number): State {
     while (true) {
       switch (code) {
         case CodePoints.EOC:
           this.paused = true;
-          return StateEnum.CDATA_SECTION_END;
+          return State.CDATA_SECTION_END;
         case CodePoints.CLOSE_SQUARE_BRACKET:
           this.appendNonWhitespace(CodePoints.CLOSE_SQUARE_BRACKET);
           code = this.nextCode();
           break;
         case CodePoints.GT:
           this.emitCData();
-          return StateEnum.DATA;
+          return State.DATA;
         default:
           this.appendNonWhitespace(CodePoints.CLOSE_SQUARE_BRACKET);
           this.appendNonWhitespace(CodePoints.CLOSE_SQUARE_BRACKET);
-          return this.callState(StateEnum.CDATA_SECTION, code);
+          return this.callState(State.CDATA_SECTION, code);
       }
     }
   }
 
   // -----character reference states-----
-  characterReference(code: number): StateEnum {
+  characterReference(code: number): State {
     const buffer = this.buffer;
     this.referenceStartMark = buffer.position;
     if (this.inAttribute) buffer.append(CodePoints.AMPERSAND);
@@ -881,23 +882,23 @@ export class Tokenizer {
     if (code === CodePoints.SHARP) {
       if (this.inAttribute) buffer.append(CodePoints.SHARP);
       else this.appendNonWhitespace(CodePoints.SHARP);
-      return StateEnum.NUMERIC_CHARACTER_REFERENCE;
+      return State.NUMERIC_CHARACTER_REFERENCE;
     } else if (isAsciiAlphaNum(code)) {
       this.lastRefNode = this.refsIndex;
       this.lastMatch = 0;
-      return this.callState(StateEnum.NAMED_CHARACTER_REFERENCE, code);
+      return this.callState(State.NAMED_CHARACTER_REFERENCE, code);
     } else
       return this.callState(this.returnState, code);
   }
 
-  numericCharacterReference(code: number): StateEnum {
+  numericCharacterReference(code: number): State {
     this.charCode = 0;
     if (code === CodePoints.X_CAPITAL || code === CodePoints.X_REGULAR) {
       if (this.inAttribute) this.buffer.append(code);
       else this.appendNonWhitespace(code);
-      return StateEnum.HEXADECIMAL_CHARACTER_REFERENCE_START;
+      return State.HEXADECIMAL_CHARACTER_REFERENCE_START;
     } else
-      return this.callState(StateEnum.DECIMAL_CHARACTER_REFERENCE_START, code);
+      return this.callState(State.DECIMAL_CHARACTER_REFERENCE_START, code);
   }
 
   numericCharacterReferenceEnd(): void {
@@ -923,7 +924,7 @@ export class Tokenizer {
     else this.appendCharacter(charCode);
   }
 
-  namedCharacterReference(code: number): StateEnum {
+  namedCharacterReference(code: number): State {
     const buffer = this.buffer;
     let node = this.lastRefNode, next: PrefixNode<number[]>;
     let lastMatch = this.lastMatch;
@@ -935,7 +936,7 @@ export class Tokenizer {
         this.paused = true;
         this.lastRefNode = node;
         this.lastMatch = lastMatch;
-        return StateEnum.NAMED_CHARACTER_REFERENCE;
+        return State.NAMED_CHARACTER_REFERENCE;
       }
     }
     if (node.value) {
@@ -949,22 +950,22 @@ export class Tokenizer {
         return this.callState(this.returnState, code);
       }
     } else
-      return this.callState(StateEnum.AMBIGUOUS_AMPERSAND, code);
+      return this.callState(State.AMBIGUOUS_AMPERSAND, code);
   }
 
-  hexadecimalCharacterReferenceStart(code: number): StateEnum {
+  hexadecimalCharacterReferenceStart(code: number): State {
     if (!isHexDigit(code)) {
       this.error('absence-of-digits-in-numeric-character-reference');
       return this.callState(this.returnState, code);
     } else
-      return this.callState(StateEnum.HEXADECIMAL_CHARACTER_REFERENCE, code);
+      return this.callState(State.HEXADECIMAL_CHARACTER_REFERENCE, code);
   }
 
-  hexadecimalCharacterReference(code: number): StateEnum {
+  hexadecimalCharacterReference(code: number): State {
     while (true) {
       if (code === CodePoints.EOC) {
         this.paused = true;
-        return StateEnum.HEXADECIMAL_CHARACTER_REFERENCE;
+        return State.HEXADECIMAL_CHARACTER_REFERENCE;
       } else if (code === CodePoints.SEMICOLON) {
         this.numericCharacterReferenceEnd();
         return this.returnState;
@@ -983,20 +984,20 @@ export class Tokenizer {
     }
   }
 
-  decimalCharacterReferenceStart(code: number): StateEnum {
+  decimalCharacterReferenceStart(code: number): State {
     if (!isDigit(code)) {
       this.error('absence-of-digits-in-numeric-character-reference');
       return this.callState(this.returnState, code);
     } else
-      return this.callState(StateEnum.DECIMAL_CHARACTER_REFERENCE, code);
+      return this.callState(State.DECIMAL_CHARACTER_REFERENCE, code);
   }
 
-  decimalCharacterReference(code: number): StateEnum {
+  decimalCharacterReference(code: number): State {
     while (true) {
       switch (code) {
         case CodePoints.EOC:
           this.paused = true;
-          return StateEnum.DECIMAL_CHARACTER_REFERENCE;
+          return State.DECIMAL_CHARACTER_REFERENCE;
         case CodePoints.SEMICOLON:
           this.numericCharacterReferenceEnd();
           return this.returnState;
@@ -1013,13 +1014,13 @@ export class Tokenizer {
     }
   }
 
-  ambiguousAmpersand(code: number): StateEnum {
+  ambiguousAmpersand(code: number): State {
     const buffer = this.buffer;
     while (true) {
       switch (code) {
         case CodePoints.EOC:
           this.paused = true;
-          return StateEnum.AMBIGUOUS_AMPERSAND;
+          return State.AMBIGUOUS_AMPERSAND;
         case CodePoints.SEMICOLON:
           this.error('unknown-named-character-reference');
           return this.callState(this.returnState, code);
@@ -1037,51 +1038,51 @@ export class Tokenizer {
   }
 
   // -----comment states-----
-  commentStart(code: number): StateEnum {
+  commentStart(code: number): State {
     this.buffer.position = this.sequenceBufferOffset;
     this.startNewComment();
     switch (code) {
       case CodePoints.HYPHEN:
-        return StateEnum.COMMENT_START_DASH;
+        return State.COMMENT_START_DASH;
       case CodePoints.GT:
         this.error('abrupt-closing-of-empty-comment');
         this.emitCurrentComment();
-        return StateEnum.DATA;
+        return State.DATA;
       default:
-        return this.callState(StateEnum.COMMENT, code);
+        return this.callState(State.COMMENT, code);
     }
   }
 
-  commentStartDash(code: number): StateEnum {
+  commentStartDash(code: number): State {
     switch (code) {
       case CodePoints.HYPHEN:
-        return StateEnum.COMMENT_END;
+        return State.COMMENT_END;
       case CodePoints.GT:
         this.error('abrupt-closing-of-empty-comment');
         this.emitCurrentComment();
-        return StateEnum.DATA;
+        return State.DATA;
       case CodePoints.EOF:
         this.error('eof-in-comment');
         this.emitCurrentComment();
         return this.eof();
       default:
         this.buffer.append(CodePoints.HYPHEN);
-        return this.callState(StateEnum.COMMENT, code);
+        return this.callState(State.COMMENT, code);
     }
   }
 
-  comment(code: number): StateEnum {
+  comment(code: number): State {
     const buffer = this.buffer;
     while (true) {
       switch (code) {
         case CodePoints.EOC:
           this.paused = true;
-          return StateEnum.COMMENT;
+          return State.COMMENT;
         case CodePoints.LT:
           buffer.append(code);
-          return StateEnum.COMMENT_LESS_THAN_SIGN;
+          return State.COMMENT_LESS_THAN_SIGN;
         case CodePoints.HYPHEN:
-          return StateEnum.COMMENT_END_DASH;
+          return State.COMMENT_END_DASH;
         case CodePoints.EOF:
           this.error('eof-in-comment');
           this.emitCurrentComment();
@@ -1096,50 +1097,50 @@ export class Tokenizer {
     }
   }
 
-  commentLessThanSign(code: number): StateEnum {
+  commentLessThanSign(code: number): State {
     const buffer = this.buffer;
     while (true) {
       switch (code) {
         case CodePoints.EOC:
           this.paused = true;
-          return StateEnum.COMMENT_LESS_THAN_SIGN;
+          return State.COMMENT_LESS_THAN_SIGN;
         case CodePoints.EXCLAMATION:
           buffer.append(code);
-          return StateEnum.COMMENT_LESS_THAN_SIGN_BANG;
+          return State.COMMENT_LESS_THAN_SIGN_BANG;
         case CodePoints.LT:
           buffer.append(code);
           code = this.nextCode();
           break;
         default:
-          return this.callState(StateEnum.COMMENT, code);
+          return this.callState(State.COMMENT, code);
       }
     }
   }
 
-  commentLessThanSignBang(code: number): StateEnum {
+  commentLessThanSignBang(code: number): State {
     if (code === CodePoints.HYPHEN)
-      return StateEnum.COMMENT_LESS_THAN_SIGN_BANG_DASH;
+      return State.COMMENT_LESS_THAN_SIGN_BANG_DASH;
     else
-      return this.callState(StateEnum.COMMENT, code);
+      return this.callState(State.COMMENT, code);
   }
 
-  commentLessThanSignBangDash(code: number): StateEnum {
+  commentLessThanSignBangDash(code: number): State {
     if (code === CodePoints.HYPHEN)
-      return StateEnum.COMMENT_LESS_THAN_SIGN_BANG_DASH_DASH;
+      return State.COMMENT_LESS_THAN_SIGN_BANG_DASH_DASH;
     else
-      return this.callState(StateEnum.COMMENT_END_DASH, code);
+      return this.callState(State.COMMENT_END_DASH, code);
   }
 
-  commentLessThanSignBangDashDash(code: number): StateEnum {
+  commentLessThanSignBangDashDash(code: number): State {
     if (code !== CodePoints.GT && code !== CodePoints.EOF)
       this.error('nested-comment');
-    return this.callState(StateEnum.COMMENT_END, code);
+    return this.callState(State.COMMENT_END, code);
   }
 
-  commentEndDash(code: number): StateEnum {
+  commentEndDash(code: number): State {
     switch (code) {
       case CodePoints.HYPHEN:
-        return StateEnum.COMMENT_END;
+        return State.COMMENT_END;
       case CodePoints.EOF:
         // by the spec extra dash is NOT appended here
         // so unfinished comments ending with single dash do NOT include that dash in data
@@ -1148,22 +1149,22 @@ export class Tokenizer {
         return this.eof();
       default:
         this.buffer.append(CodePoints.HYPHEN);
-        return this.callState(StateEnum.COMMENT, code);
+        return this.callState(State.COMMENT, code);
     }
   }
 
-  commentEnd(code: number): StateEnum {
+  commentEnd(code: number): State {
     const buffer = this.buffer;
     while (true) {
       switch (code) {
         case CodePoints.EOC:
           this.paused = true;
-          return StateEnum.COMMENT_END;
+          return State.COMMENT_END;
         case CodePoints.GT:
           this.emitCurrentComment();
-          return StateEnum.DATA;
+          return State.DATA;
         case CodePoints.EXCLAMATION:
-          return StateEnum.COMMENT_END_BANG;
+          return State.COMMENT_END_BANG;
         case CodePoints.EOF:
           this.error('eof-in-comment');
           this.emitCurrentComment();
@@ -1175,12 +1176,12 @@ export class Tokenizer {
         default:
           buffer.append(CodePoints.HYPHEN);
           buffer.append(CodePoints.HYPHEN);
-          return this.callState(StateEnum.COMMENT, code);
+          return this.callState(State.COMMENT, code);
       }
     }
   }
 
-  commentEndBang(code: number): StateEnum {
+  commentEndBang(code: number): State {
     const buffer = this.buffer;
     const data = buffer.buffer;
     let position: number;
@@ -1192,11 +1193,11 @@ export class Tokenizer {
         data[position++] = CodePoints.HYPHEN;
         data[position++] = CodePoints.EXCLAMATION;
         buffer.position += 3;
-        return StateEnum.COMMENT_END_DASH;
+        return State.COMMENT_END_DASH;
       case CodePoints.GT:
         this.error('incorrectly-closed-comment');
         this.emitCurrentComment();
-        return StateEnum.DATA;
+        return State.DATA;
       case CodePoints.EOF:
         this.error('eof-in-comment');
         this.emitCurrentComment();
@@ -1207,20 +1208,20 @@ export class Tokenizer {
         data[position++] = CodePoints.HYPHEN;
         data[position++] = CodePoints.EXCLAMATION;
         buffer.position += 3;
-        return this.callState(StateEnum.COMMENT, code);
+        return this.callState(State.COMMENT, code);
     }
   }
 
-  bogusComment(code: number): StateEnum {
+  bogusComment(code: number): State {
     const buffer = this.buffer;
     while (true) {
       switch (code) {
         case CodePoints.EOC:
           this.paused = true;
-          return StateEnum.BOGUS_COMMENT;
+          return State.BOGUS_COMMENT;
         case CodePoints.GT:
           this.emitCurrentComment();
-          return StateEnum.DATA;
+          return State.DATA;
         case CodePoints.EOF:
           this.emitCurrentComment();
           return this.eof();
@@ -1234,29 +1235,29 @@ export class Tokenizer {
     }
   }
 
-  markupDeclarationOpen(code: number): StateEnum {
+  markupDeclarationOpen(code: number): State {
     this.emitAccumulatedCharacters();
     switch (code) {
       case CodePoints.HYPHEN:
-        return this.matchSequence(code, TWO_HYPHENS, false, StateEnum.COMMENT_START, StateEnum.MARKUP_DECLARATION_FAIL);
+        return this.matchSequence(code, TWO_HYPHENS, false, State.COMMENT_START, State.MARKUP_DECLARATION_FAIL);
       case 0x44: // D
       case 0x64: // d
-        return this.matchSequence(code, DOCTYPE, true, StateEnum.DOCTYPE, StateEnum.MARKUP_DECLARATION_FAIL);
+        return this.matchSequence(code, DOCTYPE, true, State.DOCTYPE, State.MARKUP_DECLARATION_FAIL);
       case CodePoints.OPEN_SQUARE_BRACKET:
-        return this.matchSequence(code, CDATA, false, StateEnum.CDATA_SECTION_START, StateEnum.MARKUP_DECLARATION_FAIL);
+        return this.matchSequence(code, CDATA, false, State.CDATA_SECTION_START, State.MARKUP_DECLARATION_FAIL);
       default:
-        return this.callState(StateEnum.MARKUP_DECLARATION_FAIL, code);
+        return this.callState(State.MARKUP_DECLARATION_FAIL, code);
     }
   }
 
-  markupDeclarationFail(code: number): StateEnum {
+  markupDeclarationFail(code: number): State {
     this.startNewComment();
     this.error('incorrectly-opened-comment');
-    return this.callState(StateEnum.BOGUS_COMMENT, code);
+    return this.callState(State.BOGUS_COMMENT, code);
   }
 
   // -----doctype states-----
-  doctype(code: number): StateEnum {
+  doctype(code: number): State {
     this.buffer.position = this.sequenceBufferOffset;
     this.emitAccumulatedCharacters();
     this.startNewDoctype();
@@ -1265,23 +1266,23 @@ export class Tokenizer {
       case CodePoints.LF:
       case CodePoints.FF:
       case CodePoints.SPACE:
-        return StateEnum.BEFORE_DOCTYPE_NAME;
+        return State.BEFORE_DOCTYPE_NAME;
       case CodePoints.EOF:
         return this.eofInDoctype();
       default:
         this.error('missing-whitespace-before-doctype-name');
       case CodePoints.GT:
-        return this.callState(StateEnum.BEFORE_DOCTYPE_NAME, code);
+        return this.callState(State.BEFORE_DOCTYPE_NAME, code);
     }
   }
 
-  beforeDoctypeName(code: number): StateEnum {
+  beforeDoctypeName(code: number): State {
     const buffer = this.buffer;
     while (true) {
       switch (code) {
         case CodePoints.EOC:
           this.paused = true;
-          return StateEnum.BEFORE_DOCTYPE_NAME;
+          return State.BEFORE_DOCTYPE_NAME;
         case CodePoints.TAB:
         case CodePoints.LF:
         case CodePoints.FF:
@@ -1292,7 +1293,7 @@ export class Tokenizer {
           this.error('missing-doctype-name');
           this.currentDoctype.forceQuirks = true;
           this.emitCurrentDoctype();
-          return StateEnum.DATA;
+          return State.DATA;
         case CodePoints.EOF:
           return this.eofInDoctype();
         case CodePoints.NUL:
@@ -1301,28 +1302,28 @@ export class Tokenizer {
         default:
           if (isAsciiUpperAlpha(code)) code += 0x20;
           buffer.append(code);
-          return StateEnum.DOCTYPE_NAME;
+          return State.DOCTYPE_NAME;
       }
     }
   }
 
-  doctypeName(code: number): StateEnum {
+  doctypeName(code: number): State {
     const buffer = this.buffer;
     while (true) {
       switch (code) {
         case CodePoints.EOC:
           this.paused = true;
-          return StateEnum.DOCTYPE_NAME;
+          return State.DOCTYPE_NAME;
         case CodePoints.TAB:
         case CodePoints.LF:
         case CodePoints.FF:
         case CodePoints.SPACE:
           this.currentDoctype.name = buffer.takeString();
-          return StateEnum.AFTER_DOCTYPE_NAME;
+          return State.AFTER_DOCTYPE_NAME;
         case CodePoints.GT:
           this.currentDoctype.name = buffer.takeString();
           this.emitCurrentDoctype();
-          return StateEnum.DATA;
+          return State.DATA;
         case CodePoints.EOF:
           this.currentDoctype.name = buffer.takeString();
           return this.eofInDoctype();
@@ -1337,12 +1338,12 @@ export class Tokenizer {
     }
   }
 
-  afterDoctypeName(code: number): StateEnum {
+  afterDoctypeName(code: number): State {
     while (true) {
       switch (code) {
         case CodePoints.EOC:
           this.paused = true;
-          return StateEnum.AFTER_DOCTYPE_NAME;
+          return State.AFTER_DOCTYPE_NAME;
         case CodePoints.TAB:
         case CodePoints.LF:
         case CodePoints.FF:
@@ -1351,62 +1352,62 @@ export class Tokenizer {
           break;
         case CodePoints.GT:
           this.emitCurrentDoctype();
-          return StateEnum.DATA;
+          return State.DATA;
         case CodePoints.EOF:
           return this.eofInDoctype();
         case 0x50: // P
         case 0x70: // p
-          return this.matchSequence(code, PUBLIC, true, StateEnum.AFTER_DOCTYPE_PUBLIC_KEYWORD, StateEnum.AFTER_DOCTYPE_NAME_FAILED_SEQUENCE);
+          return this.matchSequence(code, PUBLIC, true, State.AFTER_DOCTYPE_PUBLIC_KEYWORD, State.AFTER_DOCTYPE_NAME_FAILED_SEQUENCE);
         case 0x53: // S
         case 0x73: // s
-          return this.matchSequence(code, SYSTEM, true, StateEnum.AFTER_DOCTYPE_SYSTEM_KEYWORD, StateEnum.AFTER_DOCTYPE_NAME_FAILED_SEQUENCE);
+          return this.matchSequence(code, SYSTEM, true, State.AFTER_DOCTYPE_SYSTEM_KEYWORD, State.AFTER_DOCTYPE_NAME_FAILED_SEQUENCE);
         default:
-          return this.callState(StateEnum.AFTER_DOCTYPE_NAME_FAILED_SEQUENCE, code);
+          return this.callState(State.AFTER_DOCTYPE_NAME_FAILED_SEQUENCE, code);
       }
     }
   }
 
-  afterDoctypeNameFailedSequence(code: number): StateEnum {
+  afterDoctypeNameFailedSequence(code: number): State {
     this.buffer.position = this.sequenceBufferOffset;
     this.currentDoctype.forceQuirks = true;
     this.error('invalid-character-sequence-after-doctype-name');
-    return this.callState(StateEnum.BOGUS_DOCTYPE, code);
+    return this.callState(State.BOGUS_DOCTYPE, code);
   }
 
-  afterDoctypePublicKeyword(code: number): StateEnum {
+  afterDoctypePublicKeyword(code: number): State {
     this.buffer.position = this.sequenceBufferOffset;
     switch (code) {
       case CodePoints.TAB:
       case CodePoints.LF:
       case CodePoints.FF:
       case CodePoints.SPACE:
-        return StateEnum.BEFORE_DOCTYPE_PUBLIC_IDENTIFIER;
+        return State.BEFORE_DOCTYPE_PUBLIC_IDENTIFIER;
       case CodePoints.DOUBLE_QUOTE:
         this.error('missing-whitespace-after-doctype-public-keyword');
-        return StateEnum.DOCTYPE_PUBLIC_IDENTIFIER_DOUBLE_QUOTED;
+        return State.DOCTYPE_PUBLIC_IDENTIFIER_DOUBLE_QUOTED;
       case CodePoints.SINGLE_QUOTE:
         this.error('missing-whitespace-after-doctype-public-keyword');
-        return StateEnum.DOCTYPE_PUBLIC_IDENTIFIER_SINGLE_QUOTED;
+        return State.DOCTYPE_PUBLIC_IDENTIFIER_SINGLE_QUOTED;
       case CodePoints.GT:
         this.currentDoctype.forceQuirks = true;
         this.error('missing-doctype-public-identifier');
         this.emitCurrentDoctype();
-        return StateEnum.DATA;
+        return State.DATA;
       case CodePoints.EOF:
         return this.eofInDoctype();
       default:
         this.currentDoctype.forceQuirks = true;
         this.error('missing-quote-before-doctype-public-identifier');
-        return this.callState(StateEnum.BOGUS_DOCTYPE, code);
+        return this.callState(State.BOGUS_DOCTYPE, code);
     }
   }
 
-  beforeDoctypePublicIdentifier(code: number): StateEnum {
+  beforeDoctypePublicIdentifier(code: number): State {
     while (true) {
       switch (code) {
         case CodePoints.EOC:
           this.paused = true;
-          return StateEnum.BEFORE_DOCTYPE_PUBLIC_IDENTIFIER;
+          return State.BEFORE_DOCTYPE_PUBLIC_IDENTIFIER;
         case CodePoints.TAB:
         case CodePoints.LF:
         case CodePoints.FF:
@@ -1414,48 +1415,48 @@ export class Tokenizer {
           code = this.nextCode();
           break;
         case CodePoints.DOUBLE_QUOTE:
-          return StateEnum.DOCTYPE_PUBLIC_IDENTIFIER_DOUBLE_QUOTED;
+          return State.DOCTYPE_PUBLIC_IDENTIFIER_DOUBLE_QUOTED;
         case CodePoints.SINGLE_QUOTE:
-          return StateEnum.DOCTYPE_PUBLIC_IDENTIFIER_SINGLE_QUOTED;
+          return State.DOCTYPE_PUBLIC_IDENTIFIER_SINGLE_QUOTED;
         case CodePoints.GT:
           this.currentDoctype.forceQuirks = true;
           this.error('missing-doctype-public-identifier');
           this.emitCurrentDoctype();
-          return StateEnum.DATA;
+          return State.DATA;
         case CodePoints.EOF:
           return this.eofInDoctype();
         default:
           this.currentDoctype.forceQuirks = true;
           this.error('missing-quote-before-doctype-public-identifier');
-          return this.callState(StateEnum.BOGUS_DOCTYPE, code);
+          return this.callState(State.BOGUS_DOCTYPE, code);
       }
     }
   }
 
-  doctypePublicIdentifierDoubleQuoted(code: number): StateEnum {
+  doctypePublicIdentifierDoubleQuoted(code: number): State {
     return this.doctypePublicIdentifierQuoted(code, CodePoints.DOUBLE_QUOTE);
   }
 
-  doctypePublicIdentifierSingleQuoted(code: number): StateEnum {
+  doctypePublicIdentifierSingleQuoted(code: number): State {
     return this.doctypePublicIdentifierQuoted(code, CodePoints.SINGLE_QUOTE);
   }
 
-  doctypePublicIdentifierQuoted(code: number, terminator: number): StateEnum {
+  doctypePublicIdentifierQuoted(code: number, terminator: number): State {
     const buffer = this.buffer;
     while (true) {
       switch (code) {
         case CodePoints.EOC:
           this.paused = true;
-          return terminator === CodePoints.DOUBLE_QUOTE ? StateEnum.DOCTYPE_PUBLIC_IDENTIFIER_DOUBLE_QUOTED : StateEnum.DOCTYPE_PUBLIC_IDENTIFIER_SINGLE_QUOTED;
+          return terminator === CodePoints.DOUBLE_QUOTE ? State.DOCTYPE_PUBLIC_IDENTIFIER_DOUBLE_QUOTED : State.DOCTYPE_PUBLIC_IDENTIFIER_SINGLE_QUOTED;
         case terminator:
           this.currentDoctype.publicId = buffer.takeString();
-          return StateEnum.AFTER_DOCTYPE_PUBLIC_IDENTIFIER;
+          return State.AFTER_DOCTYPE_PUBLIC_IDENTIFIER;
         case CodePoints.GT:
           this.currentDoctype.publicId = buffer.takeString();
           this.currentDoctype.forceQuirks = true;
           this.error('abrupt-doctype-public-identifier');
           this.emitCurrentDoctype();
-          return StateEnum.DATA;
+          return State.DATA;
         case CodePoints.EOF:
           this.currentDoctype.publicId = buffer.takeString();
           return this.eofInDoctype();
@@ -1469,37 +1470,37 @@ export class Tokenizer {
     }
   }
 
-  afterDoctypePublicIdentifier(code: number): StateEnum {
+  afterDoctypePublicIdentifier(code: number): State {
     switch (code) {
       case CodePoints.TAB:
       case CodePoints.LF:
       case CodePoints.FF:
       case CodePoints.SPACE:
-        return StateEnum.BETWEEN_DOCTYPE_PUBLIC_AND_SYSTEM_IDENTIFIERS;
+        return State.BETWEEN_DOCTYPE_PUBLIC_AND_SYSTEM_IDENTIFIERS;
       case CodePoints.GT:
         this.emitCurrentDoctype();
-        return StateEnum.DATA;
+        return State.DATA;
       case CodePoints.DOUBLE_QUOTE:
         this.error('missing-whitespace-between-doctype-public-and-system-identifiers');
-        return StateEnum.DOCTYPE_SYSTEM_IDENTIFIER_DOUBLE_QUOTED;
+        return State.DOCTYPE_SYSTEM_IDENTIFIER_DOUBLE_QUOTED;
       case CodePoints.SINGLE_QUOTE:
         this.error('missing-whitespace-between-doctype-public-and-system-identifiers');
-        return StateEnum.DOCTYPE_SYSTEM_IDENTIFIER_SINGLE_QUOTED;
+        return State.DOCTYPE_SYSTEM_IDENTIFIER_SINGLE_QUOTED;
       case CodePoints.EOF:
         return this.eofInDoctype();
       default:
         this.currentDoctype.forceQuirks = true;
         this.error('missing-quote-before-doctype-system-identifier');
-        return this.callState(StateEnum.BOGUS_DOCTYPE, code);
+        return this.callState(State.BOGUS_DOCTYPE, code);
     }
   }
 
-  betweenDoctypePublicAndSystemIdentifiers(code: number): StateEnum {
+  betweenDoctypePublicAndSystemIdentifiers(code: number): State {
     while (true) {
       switch (code) {
         case CodePoints.EOC:
           this.paused = true;
-          return StateEnum.BETWEEN_DOCTYPE_PUBLIC_AND_SYSTEM_IDENTIFIERS;
+          return State.BETWEEN_DOCTYPE_PUBLIC_AND_SYSTEM_IDENTIFIERS;
         case CodePoints.TAB:
         case CodePoints.LF:
         case CodePoints.FF:
@@ -1507,56 +1508,56 @@ export class Tokenizer {
           code = this.nextCode();
           break;
         case CodePoints.DOUBLE_QUOTE:
-          return StateEnum.DOCTYPE_SYSTEM_IDENTIFIER_DOUBLE_QUOTED;
+          return State.DOCTYPE_SYSTEM_IDENTIFIER_DOUBLE_QUOTED;
         case CodePoints.SINGLE_QUOTE:
-          return StateEnum.DOCTYPE_SYSTEM_IDENTIFIER_SINGLE_QUOTED;
+          return State.DOCTYPE_SYSTEM_IDENTIFIER_SINGLE_QUOTED;
         case CodePoints.GT:
           this.emitCurrentDoctype();
-          return StateEnum.DATA;
+          return State.DATA;
         case CodePoints.EOF:
           return this.eofInDoctype();
         default:
           this.currentDoctype.forceQuirks = true;
           this.error('missing-quote-before-doctype-system-identifier');
-          return this.callState(StateEnum.BOGUS_DOCTYPE, code);
+          return this.callState(State.BOGUS_DOCTYPE, code);
       }
     }
   }
 
-  afterDoctypeSystemKeyword(code: number): StateEnum {
+  afterDoctypeSystemKeyword(code: number): State {
     this.buffer.position = this.sequenceBufferOffset;
     switch (code) {
       case CodePoints.TAB:
       case CodePoints.LF:
       case CodePoints.FF:
       case CodePoints.SPACE:
-        return StateEnum.BEFORE_DOCTYPE_SYSTEM_IDENTIFIER;
+        return State.BEFORE_DOCTYPE_SYSTEM_IDENTIFIER;
       case CodePoints.DOUBLE_QUOTE:
         this.error('missing-whitespace-after-doctype-system-keyword');
-        return StateEnum.DOCTYPE_SYSTEM_IDENTIFIER_DOUBLE_QUOTED;
+        return State.DOCTYPE_SYSTEM_IDENTIFIER_DOUBLE_QUOTED;
       case CodePoints.SINGLE_QUOTE:
         this.error('missing-whitespace-after-doctype-system-keyword');
-        return StateEnum.DOCTYPE_SYSTEM_IDENTIFIER_SINGLE_QUOTED;
+        return State.DOCTYPE_SYSTEM_IDENTIFIER_SINGLE_QUOTED;
       case CodePoints.GT:
         this.currentDoctype.forceQuirks = true;
         this.error('missing-doctype-system-identifier');
         this.emitCurrentDoctype();
-        return StateEnum.DATA;
+        return State.DATA;
       case CodePoints.EOF:
         return this.eofInDoctype();
       default:
         this.currentDoctype.forceQuirks = true;
         this.error('missing-quote-before-doctype-system-identifier');
-        return this.callState(StateEnum.BOGUS_DOCTYPE, code);
+        return this.callState(State.BOGUS_DOCTYPE, code);
     }
   }
 
-  beforeDoctypeSystemIdentifier(code: number): StateEnum {
+  beforeDoctypeSystemIdentifier(code: number): State {
     while (true) {
       switch (code) {
         case CodePoints.EOC:
           this.paused = true;
-          return StateEnum.BEFORE_DOCTYPE_SYSTEM_IDENTIFIER;
+          return State.BEFORE_DOCTYPE_SYSTEM_IDENTIFIER;
         case CodePoints.TAB:
         case CodePoints.LF:
         case CodePoints.FF:
@@ -1564,47 +1565,47 @@ export class Tokenizer {
           code = this.nextCode();
           break;
         case CodePoints.DOUBLE_QUOTE:
-          return StateEnum.DOCTYPE_SYSTEM_IDENTIFIER_DOUBLE_QUOTED;
+          return State.DOCTYPE_SYSTEM_IDENTIFIER_DOUBLE_QUOTED;
         case CodePoints.SINGLE_QUOTE:
-          return StateEnum.DOCTYPE_SYSTEM_IDENTIFIER_SINGLE_QUOTED;
+          return State.DOCTYPE_SYSTEM_IDENTIFIER_SINGLE_QUOTED;
         case CodePoints.GT:
           this.currentDoctype.forceQuirks = true;
           this.error('missing-doctype-system-identifier');
           this.emitCurrentDoctype();
-          return StateEnum.DATA;
+          return State.DATA;
         case CodePoints.EOF:
           return this.eofInDoctype();
         default:
           this.currentDoctype.forceQuirks = true;
           this.error('missing-quote-before-doctype-system-identifier');
-          return this.callState(StateEnum.BOGUS_DOCTYPE, code);
+          return this.callState(State.BOGUS_DOCTYPE, code);
       }
     }
   }
 
-  doctypeSystemIdentifierDoubleQuoted(code: number): StateEnum {
+  doctypeSystemIdentifierDoubleQuoted(code: number): State {
     return this.doctypeSystemIdentifierQuoted(code, CodePoints.DOUBLE_QUOTE);
   }
-  doctypeSystemIdentifierSingleQuoted(code: number): StateEnum {
+  doctypeSystemIdentifierSingleQuoted(code: number): State {
     return this.doctypeSystemIdentifierQuoted(code, CodePoints.SINGLE_QUOTE);
   }
 
-  doctypeSystemIdentifierQuoted(code: number, terminator: number): StateEnum {
+  doctypeSystemIdentifierQuoted(code: number, terminator: number): State {
     const buffer = this.buffer;
     while (true) {
       switch (code) {
         case CodePoints.EOC:
           this.paused = true;
-          return terminator === CodePoints.DOUBLE_QUOTE ? StateEnum.DOCTYPE_SYSTEM_IDENTIFIER_DOUBLE_QUOTED : StateEnum.DOCTYPE_SYSTEM_IDENTIFIER_SINGLE_QUOTED;
+          return terminator === CodePoints.DOUBLE_QUOTE ? State.DOCTYPE_SYSTEM_IDENTIFIER_DOUBLE_QUOTED : State.DOCTYPE_SYSTEM_IDENTIFIER_SINGLE_QUOTED;
         case terminator:
           this.currentDoctype.systemId = buffer.takeString();
-          return StateEnum.AFTER_DOCTYPE_SYSTEM_IDENTIFIER;
+          return State.AFTER_DOCTYPE_SYSTEM_IDENTIFIER;
         case CodePoints.GT:
           this.currentDoctype.systemId = buffer.takeString();
           this.currentDoctype.forceQuirks = true;
           this.error('abrupt-doctype-system-identifier');
           this.emitCurrentDoctype();
-          return StateEnum.DATA;
+          return State.DATA;
         case CodePoints.EOF:
           this.currentDoctype.systemId = buffer.takeString();
           return this.eofInDoctype();
@@ -1618,12 +1619,12 @@ export class Tokenizer {
     }
   }
 
-  afterDoctypeSystemIdentifier(code: number): StateEnum {
+  afterDoctypeSystemIdentifier(code: number): State {
     while (true) {
       switch (code) {
         case CodePoints.EOC:
           this.paused = true;
-          return StateEnum.AFTER_DOCTYPE_SYSTEM_IDENTIFIER;
+          return State.AFTER_DOCTYPE_SYSTEM_IDENTIFIER;
         case CodePoints.TAB:
         case CodePoints.LF:
         case CodePoints.FF:
@@ -1632,25 +1633,25 @@ export class Tokenizer {
           break;
         case CodePoints.GT:
           this.emitCurrentDoctype();
-          return StateEnum.DATA;
+          return State.DATA;
         case CodePoints.EOF:
           return this.eofInDoctype();
         default:
           this.error('unexpected-character-after-doctype-system-identifier');
-          return this.callState(StateEnum.BOGUS_DOCTYPE, code);
+          return this.callState(State.BOGUS_DOCTYPE, code);
       }
     }
   }
 
-  bogusDoctype(code: number): StateEnum {
+  bogusDoctype(code: number): State {
     while (true) {
       switch (code) {
         case CodePoints.EOC:
           this.paused = true;
-          return StateEnum.BOGUS_DOCTYPE;
+          return State.BOGUS_DOCTYPE;
         case CodePoints.GT:
           this.emitCurrentDoctype()
-          return StateEnum.DATA;
+          return State.DATA;
         case CodePoints.EOF:
           this.emitCurrentDoctype();
           return this.eof();
@@ -1663,63 +1664,63 @@ export class Tokenizer {
   }
 
   // -----script states-----
-  scriptData(code: number): StateEnum {
-    return this.textDataNoRefs(code, StateEnum.SCRIPT_DATA_LESS_THAN_SIGN, StateEnum.SCRIPT_DATA);
+  scriptData(code: number): State {
+    return this.textDataNoRefs(code, State.SCRIPT_DATA_LESS_THAN_SIGN, State.SCRIPT_DATA);
   }
 
-  scriptDataLessThanSign(code: number): StateEnum {
+  scriptDataLessThanSign(code: number): State {
     switch (code) {
       case CodePoints.SLASH:
-        return StateEnum.SCRIPT_DATA_END_TAG_OPEN;
+        return State.SCRIPT_DATA_END_TAG_OPEN;
       case CodePoints.EXCLAMATION:
         this.appendNonWhitespace(CodePoints.LT);
         this.appendNonWhitespace(CodePoints.EXCLAMATION);
-        return StateEnum.SCRIPT_DATA_ESCAPE_START;
+        return State.SCRIPT_DATA_ESCAPE_START;
       default:
         this.appendNonWhitespace(CodePoints.LT);
-        return this.callState(StateEnum.SCRIPT_DATA, code);
+        return this.callState(State.SCRIPT_DATA, code);
     }
   }
 
-  scriptDataEndTagOpen(code: number): StateEnum {
-    return this.textDataEndTagOpen(code, StateEnum.SCRIPT_DATA_END_TAG_NAME, StateEnum.SCRIPT_DATA);
+  scriptDataEndTagOpen(code: number): State {
+    return this.textDataEndTagOpen(code, State.SCRIPT_DATA_END_TAG_NAME, State.SCRIPT_DATA);
   }
 
-  scriptDataEndTagName(code: number): StateEnum {
-    return this.matchSequence(code, SCRIPT, true, StateEnum.SCRIPT_DATA_END_TAG_NAME_MATCHED, StateEnum.SCRIPT_DATA);
+  scriptDataEndTagName(code: number): State {
+    return this.matchSequence(code, SCRIPT, true, State.SCRIPT_DATA_END_TAG_NAME_MATCHED, State.SCRIPT_DATA);
   }
 
-  scriptDataEndTagNameMatched(code: number): StateEnum {
-    return this.textDataEndTagMatched(code, StateEnum.SCRIPT_DATA);
+  scriptDataEndTagNameMatched(code: number): State {
+    return this.textDataEndTagMatched(code, State.SCRIPT_DATA);
   }
 
-  scriptDataEscapeStart(code: number): StateEnum {
+  scriptDataEscapeStart(code: number): State {
     if (code === CodePoints.HYPHEN) {
       this.appendNonWhitespace(code);
-      return StateEnum.SCRIPT_DATA_ESCAPE_START_DASH;
+      return State.SCRIPT_DATA_ESCAPE_START_DASH;
     } else
-      return this.callState(StateEnum.SCRIPT_DATA, code);
+      return this.callState(State.SCRIPT_DATA, code);
   }
 
-  scriptDataEscapeStartDash(code: number): StateEnum {
+  scriptDataEscapeStartDash(code: number): State {
     if (code === CodePoints.HYPHEN) {
       this.appendNonWhitespace(code);
-      return StateEnum.SCRIPT_DATA_ESCAPED_DASH_DASH;
+      return State.SCRIPT_DATA_ESCAPED_DASH_DASH;
     } else
-      return this.callState(StateEnum.SCRIPT_DATA, code);
+      return this.callState(State.SCRIPT_DATA, code);
   }
 
-  scriptDataEscaped(code: number): StateEnum {
+  scriptDataEscaped(code: number): State {
     while (true) {
       switch (code) {
         case CodePoints.EOC:
           this.paused = true;
-          return StateEnum.SCRIPT_DATA_ESCAPED;
+          return State.SCRIPT_DATA_ESCAPED;
         case CodePoints.HYPHEN:
           this.appendNonWhitespace(code);
-          return StateEnum.SCRIPT_DATA_ESCAPED_DASH;
+          return State.SCRIPT_DATA_ESCAPED_DASH;
         case CodePoints.LT:
-          return StateEnum.SCRIPT_DATA_ESCAPED_LESS_THAN_SIGN;
+          return State.SCRIPT_DATA_ESCAPED_LESS_THAN_SIGN;
         case CodePoints.EOF:
           this.error('eof-in-script-html-comment-like-text');
           this.emitAccumulatedCharacters();
@@ -1734,13 +1735,13 @@ export class Tokenizer {
     }
   }
 
-  scriptDataEscapedDash(code: number): StateEnum {
+  scriptDataEscapedDash(code: number): State {
     switch (code) {
       case CodePoints.HYPHEN:
         this.appendNonWhitespace(code);
-        return StateEnum.SCRIPT_DATA_ESCAPED_DASH_DASH;
+        return State.SCRIPT_DATA_ESCAPED_DASH_DASH;
       case CodePoints.LT:
-        return StateEnum.SCRIPT_DATA_ESCAPED_LESS_THAN_SIGN;
+        return State.SCRIPT_DATA_ESCAPED_LESS_THAN_SIGN;
       case CodePoints.EOF:
         this.error('eof-in-script-html-comment-like-text');
         this.emitAccumulatedCharacters();
@@ -1750,25 +1751,25 @@ export class Tokenizer {
         code = CodePoints.REPLACEMENT_CHAR;
       default:
         this.appendCharacter(code);
-        return StateEnum.SCRIPT_DATA_ESCAPED;
+        return State.SCRIPT_DATA_ESCAPED;
     }
   }
 
-  scriptDataEscapedDashDash(code: number): StateEnum {
+  scriptDataEscapedDashDash(code: number): State {
     while (true) {
       switch (code) {
         case CodePoints.EOC:
           this.paused = true;
-          return StateEnum.SCRIPT_DATA_ESCAPED_DASH_DASH;
+          return State.SCRIPT_DATA_ESCAPED_DASH_DASH;
         case CodePoints.HYPHEN:
           this.appendNonWhitespace(code);
           code = this.nextCode();
           break;
         case CodePoints.LT:
-          return StateEnum.SCRIPT_DATA_ESCAPED_LESS_THAN_SIGN;
+          return State.SCRIPT_DATA_ESCAPED_LESS_THAN_SIGN;
         case CodePoints.GT:
           this.appendNonWhitespace(code);
-          return StateEnum.SCRIPT_DATA;
+          return State.SCRIPT_DATA;
         case CodePoints.EOF:
           this.error('eof-in-script-html-comment-like-text');
           this.emitAccumulatedCharacters();
@@ -1778,64 +1779,64 @@ export class Tokenizer {
           code = CodePoints.REPLACEMENT_CHAR;
         default:
           this.appendCharacter(code);
-          return StateEnum.SCRIPT_DATA_ESCAPED;
+          return State.SCRIPT_DATA_ESCAPED;
       }
     }
   }
 
-  scriptDataEscapedLessThanSign(code: number): StateEnum {
+  scriptDataEscapedLessThanSign(code: number): State {
     if (code === CodePoints.SLASH) {
-      return StateEnum.SCRIPT_DATA_ESCAPED_END_TAG_OPEN;
+      return State.SCRIPT_DATA_ESCAPED_END_TAG_OPEN;
     } else if (isAsciiAlpha(code)) {
       this.appendNonWhitespace(CodePoints.LT);
       return this.scriptDataDoubleEscapeStart(code);
     } else {
       this.appendNonWhitespace(CodePoints.LT);
-      return this.callState(StateEnum.SCRIPT_DATA_ESCAPED, code);
+      return this.callState(State.SCRIPT_DATA_ESCAPED, code);
     }
   }
 
-  scriptDataEscapedEndTagOpen(code: number): StateEnum {
-    return this.textDataEndTagOpen(code, StateEnum.SCRIPT_DATA_ESCAPED_END_TAG_NAME, StateEnum.SCRIPT_DATA_ESCAPED);
+  scriptDataEscapedEndTagOpen(code: number): State {
+    return this.textDataEndTagOpen(code, State.SCRIPT_DATA_ESCAPED_END_TAG_NAME, State.SCRIPT_DATA_ESCAPED);
   }
 
-  scriptDataEscapedEndTagName(code: number): StateEnum {
-    return this.matchSequence(code, SCRIPT, true, StateEnum.SCRIPT_DATA_END_TAG_NAME_MATCHED, StateEnum.SCRIPT_DATA_ESCAPED);
+  scriptDataEscapedEndTagName(code: number): State {
+    return this.matchSequence(code, SCRIPT, true, State.SCRIPT_DATA_END_TAG_NAME_MATCHED, State.SCRIPT_DATA_ESCAPED);
   }
 
-  scriptDataDoubleEscapeStart(code: number): StateEnum {
-    return this.matchSequence(code, SCRIPT, true, StateEnum.SCRIPT_DATA_DOUBLE_ESCAPE_START_MATCHED, StateEnum.SCRIPT_DATA_ESCAPED);
+  scriptDataDoubleEscapeStart(code: number): State {
+    return this.matchSequence(code, SCRIPT, true, State.SCRIPT_DATA_DOUBLE_ESCAPE_START_MATCHED, State.SCRIPT_DATA_ESCAPED);
   }
 
-  scriptDataDoubleEscapeStartMatched(code: number): StateEnum {
+  scriptDataDoubleEscapeStartMatched(code: number): State {
     switch (code) {
       case CodePoints.TAB:
       case CodePoints.LF:
       case CodePoints.FF:
       case CodePoints.SPACE:
         this.appendWhitespace(code);
-        return StateEnum.SCRIPT_DATA_DOUBLE_ESCAPED;
+        return State.SCRIPT_DATA_DOUBLE_ESCAPED;
       case CodePoints.SLASH:
       case CodePoints.GT:
         this.appendNonWhitespace(code);
-        return StateEnum.SCRIPT_DATA_DOUBLE_ESCAPED;
+        return State.SCRIPT_DATA_DOUBLE_ESCAPED;
       default:
-        return this.callState(StateEnum.SCRIPT_DATA_ESCAPED, code);
+        return this.callState(State.SCRIPT_DATA_ESCAPED, code);
     }
   }
 
-  scriptDataDoubleEscaped(code: number): StateEnum {
+  scriptDataDoubleEscaped(code: number): State {
     while (true) {
       switch (code) {
         case CodePoints.EOC:
           this.paused = true;
-          return StateEnum.SCRIPT_DATA_DOUBLE_ESCAPED;
+          return State.SCRIPT_DATA_DOUBLE_ESCAPED;
         case CodePoints.HYPHEN:
           this.appendNonWhitespace(code);
-          return StateEnum.SCRIPT_DATA_DOUBLE_ESCAPED_DASH;
+          return State.SCRIPT_DATA_DOUBLE_ESCAPED_DASH;
         case CodePoints.LT:
           this.appendNonWhitespace(code);
-          return StateEnum.SCRIPT_DATA_DOUBLE_ESCAPED_LESS_THAN_SIGN;
+          return State.SCRIPT_DATA_DOUBLE_ESCAPED_LESS_THAN_SIGN;
         case CodePoints.EOF:
           this.error('eof-in-script-html-comment-like-text');
           this.emitAccumulatedCharacters();
@@ -1851,121 +1852,121 @@ export class Tokenizer {
     }
   }
 
-  scriptDataDoubleEscapedDash(code: number): StateEnum {
+  scriptDataDoubleEscapedDash(code: number): State {
     switch (code) {
       case CodePoints.HYPHEN:
         this.appendNonWhitespace(code);
-        return StateEnum.SCRIPT_DATA_DOUBLE_ESCAPED_DASH_DASH;
+        return State.SCRIPT_DATA_DOUBLE_ESCAPED_DASH_DASH;
       case CodePoints.LT:
         this.appendNonWhitespace(code);
-        return StateEnum.SCRIPT_DATA_DOUBLE_ESCAPED_LESS_THAN_SIGN;
+        return State.SCRIPT_DATA_DOUBLE_ESCAPED_LESS_THAN_SIGN;
       case CodePoints.NUL:
         this.error('unexpected-null-character');
         this.appendNonWhitespace(CodePoints.REPLACEMENT_CHAR);
-        return StateEnum.SCRIPT_DATA_DOUBLE_ESCAPED;
+        return State.SCRIPT_DATA_DOUBLE_ESCAPED;
       case CodePoints.EOF:
         this.error('eof-in-script-html-comment-like-text');
         this.emitAccumulatedCharacters();
         return this.eof();
       default:
         this.appendCharacter(code);
-        return StateEnum.SCRIPT_DATA_DOUBLE_ESCAPED;
+        return State.SCRIPT_DATA_DOUBLE_ESCAPED;
     }
   }
 
-  scriptDataDoubleEscapedDashDash(code: number): StateEnum {
+  scriptDataDoubleEscapedDashDash(code: number): State {
     while (true) {
       switch (code) {
         case CodePoints.EOC:
           this.paused = true;
-          return StateEnum.SCRIPT_DATA_DOUBLE_ESCAPED_DASH_DASH;
+          return State.SCRIPT_DATA_DOUBLE_ESCAPED_DASH_DASH;
         case CodePoints.HYPHEN:
           this.appendNonWhitespace(code);
           code = this.nextCode();
           break;
         case CodePoints.LT:
           this.appendNonWhitespace(code);
-          return StateEnum.SCRIPT_DATA_DOUBLE_ESCAPED_LESS_THAN_SIGN;
+          return State.SCRIPT_DATA_DOUBLE_ESCAPED_LESS_THAN_SIGN;
         case CodePoints.GT:
           this.appendNonWhitespace(code);
-          return StateEnum.SCRIPT_DATA;
+          return State.SCRIPT_DATA;
         case CodePoints.NUL:
           this.error('unexpected-null-character');
           this.appendNonWhitespace(CodePoints.REPLACEMENT_CHAR);
-          return StateEnum.SCRIPT_DATA_DOUBLE_ESCAPED;
+          return State.SCRIPT_DATA_DOUBLE_ESCAPED;
         case CodePoints.EOF:
           this.error('eof-in-script-html-comment-like-text');
           this.emitAccumulatedCharacters();
           return this.eof();
         default:
           this.appendCharacter(code);
-          return StateEnum.SCRIPT_DATA_DOUBLE_ESCAPED;
+          return State.SCRIPT_DATA_DOUBLE_ESCAPED;
       }
     }
   }
 
-  scriptDataDoubleEscapedLessThanSign(code: number): StateEnum {
+  scriptDataDoubleEscapedLessThanSign(code: number): State {
     if (code === CodePoints.SLASH) {
       this.appendNonWhitespace(code);
-      return StateEnum.SCRIPT_DATA_DOUBLE_ESCAPE_END;
+      return State.SCRIPT_DATA_DOUBLE_ESCAPE_END;
     } else {
-      return this.callState(StateEnum.SCRIPT_DATA_DOUBLE_ESCAPED, code);
+      return this.callState(State.SCRIPT_DATA_DOUBLE_ESCAPED, code);
     }
   }
 
   scriptDataDoubleEscapeEnd(code: number) {
-    return this.matchSequence(code, SCRIPT, true, StateEnum.SCRIPT_DATA_DOUBLE_ESCAPE_END_MATCHED, StateEnum.SCRIPT_DATA_DOUBLE_ESCAPED);
+    return this.matchSequence(code, SCRIPT, true, State.SCRIPT_DATA_DOUBLE_ESCAPE_END_MATCHED, State.SCRIPT_DATA_DOUBLE_ESCAPED);
   }
 
-  scriptDataDoubleEscapeEndMatched(code: number): StateEnum {
+  scriptDataDoubleEscapeEndMatched(code: number): State {
     switch (code) {
       case CodePoints.TAB:
       case CodePoints.LF:
       case CodePoints.FF:
       case CodePoints.SPACE:
         this.appendWhitespace(code);
-        return StateEnum.SCRIPT_DATA_ESCAPED;
+        return State.SCRIPT_DATA_ESCAPED;
       case CodePoints.SLASH:
       case CodePoints.GT:
         this.appendNonWhitespace(code);
-        return StateEnum.SCRIPT_DATA_ESCAPED;
+        return State.SCRIPT_DATA_ESCAPED;
       default:
-        return this.callState(StateEnum.SCRIPT_DATA_DOUBLE_ESCAPED, code);
+        return this.callState(State.SCRIPT_DATA_DOUBLE_ESCAPED, code);
     }
   }
   // -----text states-----
-  rawtext(code: number): StateEnum {
-    return this.textDataNoRefs(code, StateEnum.RAWTEXT_LESS_THAN_SIGN, StateEnum.RAWTEXT);
+  rawtext(code: number): State {
+    return this.textDataNoRefs(code, State.RAWTEXT_LESS_THAN_SIGN, State.RAWTEXT);
   }
 
-  rawtextLessThanSign(code: number): StateEnum {
-    return this.textDataLessThanSign(code, StateEnum.RAWTEXT_END_TAG_OPEN, StateEnum.RAWTEXT, StateEnum.RAWTEXT_LESS_THAN_SIGN);
+  rawtextLessThanSign(code: number): State {
+    return this.textDataLessThanSign(code, State.RAWTEXT_END_TAG_OPEN, State.RAWTEXT, State.RAWTEXT_LESS_THAN_SIGN);
   }
 
-  rawtextEndTagOpen(code: number): StateEnum {
-    return this.textDataEndTagOpen(code, StateEnum.RAWTEXT_END_TAG_NAME, StateEnum.RAWTEXT);
+  rawtextEndTagOpen(code: number): State {
+    return this.textDataEndTagOpen(code, State.RAWTEXT_END_TAG_NAME, State.RAWTEXT);
   }
 
-  rawtextEndTagName(code: number): StateEnum {
-    return this.matchSequence(code, stringToArray(this.lastOpenTag!), true, StateEnum.RAWTEXT_END_TAG_NAME_MATCHED, StateEnum.RAWTEXT);
+  rawtextEndTagName(code: number): State {
+    return this.matchSequence(code, stringToArray(this.lastOpenTag!), true, State.RAWTEXT_END_TAG_NAME_MATCHED, State.RAWTEXT);
   }
 
-  rawtextEndTagNameMatched(code: number): StateEnum {
-    return this.textDataEndTagMatched(code, StateEnum.RAWTEXT);
+  rawtextEndTagNameMatched(code: number): State {
+    return this.textDataEndTagMatched(code, State.RAWTEXT);
   }
 
-  rcdata(code: number): StateEnum {
+  rcdata(code: number): State {
     while (true) {
       switch (code) {
         case CodePoints.EOC:
           this.paused = true;
-          return StateEnum.RCDATA;
+          return State.RCDATA;
         case CodePoints.AMPERSAND:
           this.returnState = this.state;
           this.inAttribute = false;
-          return StateEnum.CHARACTER_REFERENCE;
+          return State.CHARACTER_REFERENCE;
         case CodePoints.LT:
-          return StateEnum.RCDATA_LESS_THAN_SIGN;
+          return State.RCDATA_LESS_THAN_SIGN;
         case CodePoints.EOF:
           this.emitAccumulatedCharacters();
           return this.eof();
@@ -1980,19 +1981,19 @@ export class Tokenizer {
     }
   }
 
-  rcdataLessThanSign(code: number): StateEnum {
-    return this.textDataLessThanSign(code, StateEnum.RCDATA_END_TAG_OPEN, StateEnum.RCDATA, StateEnum.RCDATA_LESS_THAN_SIGN);
+  rcdataLessThanSign(code: number): State {
+    return this.textDataLessThanSign(code, State.RCDATA_END_TAG_OPEN, State.RCDATA, State.RCDATA_LESS_THAN_SIGN);
   }
 
-  rcdataEndTagOpen(code: number): StateEnum {
-    return this.textDataEndTagOpen(code, StateEnum.RCDATA_END_TAG_NAME, StateEnum.RCDATA);
+  rcdataEndTagOpen(code: number): State {
+    return this.textDataEndTagOpen(code, State.RCDATA_END_TAG_NAME, State.RCDATA);
   }
 
-  rcdataEndTagName(code: number): StateEnum {
-    return this.matchSequence(code, stringToArray(this.lastOpenTag!), true, StateEnum.RCDATA_END_TAG_NAME_MATCHED, StateEnum.RCDATA);
+  rcdataEndTagName(code: number): State {
+    return this.matchSequence(code, stringToArray(this.lastOpenTag!), true, State.RCDATA_END_TAG_NAME_MATCHED, State.RCDATA);
   }
 
-  rcdataEndTagNameMatched(code: number): StateEnum {
-    return this.textDataEndTagMatched(code, StateEnum.RCDATA);
+  rcdataEndTagNameMatched(code: number): State {
+    return this.textDataEndTagMatched(code, State.RCDATA);
   }
 }

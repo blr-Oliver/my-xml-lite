@@ -1,4 +1,4 @@
-import {StateEnum} from '../../src/impl/interfaces/states.js';
+import {State} from '../../src/impl/interfaces/states.js';
 import {TagToken, Token} from '../../src/impl/interfaces/tokens.js';
 import {Tokenizer} from '../../src/impl/Tokenizer.js';
 import {default as rawTests} from './samples/script-data.json';
@@ -15,7 +15,7 @@ class ScriptSensitiveTokenSink extends TokenListSink {
   accept(token: Token) {
     super.accept(token);
     if (token.type === 'startTag' && (token as TagToken).name === 'script') {
-      this.tokenizer.state = StateEnum.SCRIPT_DATA;
+      this.tokenizer.state = State.SCRIPT_DATA;
       this.tokenizer.lastOpenTag = 'script';
     }
   }

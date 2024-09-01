@@ -1,4 +1,4 @@
-import {StateStringEnum} from '../../src/impl/interfaces/states.js';
+import {StateStringEnum} from '../states-string.js';
 import {default as rawTests} from './samples/char-ref.json';
 import {DefaultTokenizerRawTestCore, DefaultTokenizerTestCase, DefaultTokenizerTestSuite} from './TokenizerTestSuite.js';
 

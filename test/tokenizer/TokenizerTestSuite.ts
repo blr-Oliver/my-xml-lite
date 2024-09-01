@@ -1,9 +1,10 @@
-import {StateEnum, StateStringEnum, StateStringReversedEnum} from '../../src/impl/interfaces/states.js';
+import {State} from '../../src/impl/interfaces/states.js';
 import {CharactersToken, Token, TokenType} from '../../src/impl/interfaces/tokens.js';
 import {TestSerializer} from '../../src/impl/Serializer.js';
 import {Tokenizer} from '../../src/impl/Tokenizer.js';
 import {buildIndex} from '../../src/impl/util/build-index.js';
 import {HTML_SPECIAL} from '../../src/interfaces/named-character-refs.js';
+import {StateStringEnum, StateStringReversedEnum} from '../states-string.js';
 import {InterlacedStringCharacterSource} from '../util/InterlacedStringCharacterSource.js';
 import {TokenListSink} from './TokenListSink.js';
 
@@ -31,7 +32,7 @@ export class StateTrackingTokenizer extends Tokenizer {
     this.input = new InterlacedStringCharacterSource(2, '');
   }
 
-  eof(): StateEnum {
+  eof(): State {
     this.suite.lastState = this.state;
     return super.eof();
   }
@@ -45,7 +46,7 @@ export abstract class TokenizerTestSuite<Raw, Case extends GenericTestCase = Gen
   tokenizer!: Subj;
   tokenList: Token[] = [];
   errorList: string[] = [];
-  lastState!: StateEnum;
+  lastState!: State;
 
   constructor(name: string, rawTests: Raw[]) {
     this.name = name;

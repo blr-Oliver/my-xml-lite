@@ -3,7 +3,7 @@ import {ErrorHandler, ignoring} from '../interfaces/ErrorHandler.js';
 import {NodeFactory} from '../interfaces/NodeFactory.js';
 import {FormattingList} from './FormattingList.js';
 import {InsertionMode} from './interfaces/insertion-mode.js';
-import {StateEnum} from './interfaces/states.js';
+import {State} from './interfaces/states.js';
 import {CharactersToken, CommentToken, DoctypeToken, NamespacedAttribute, TagToken, Token} from './interfaces/tokens.js';
 import {ComposerIntegration, Tokenizer} from './Tokenizer.js';
 
@@ -67,7 +67,7 @@ export class TreeComposer implements ComposerIntegration {
     this.formattingList.reset();
     this.document = this.nodeFactory.createDocument();
     if (!(this.contextElement = contextElement)) {
-      this.tokenizer.state = StateEnum.DATA;
+      this.tokenizer.state = State.DATA;
       this.setInsertionMode('initial');
     } else
       this.resetForFragmentCase(contextElement!);
@@ -77,23 +77,23 @@ export class TreeComposer implements ComposerIntegration {
     switch (contextElement.tagName) {
       case 'title':
       case 'textarea':
-        this.tokenizer.state = StateEnum.RCDATA;
+        this.tokenizer.state = State.RCDATA;
         break;
       case 'style':
       case 'xmp':
       case 'iframe':
       case 'noembed':
       case 'noframes':
-        this.tokenizer.state = StateEnum.RAWTEXT;
+        this.tokenizer.state = State.RAWTEXT;
         break;
       case 'script':
-        this.tokenizer.state = StateEnum.SCRIPT_DATA;
+        this.tokenizer.state = State.SCRIPT_DATA;
         break;
       case 'plaintext':
-        this.tokenizer.state = StateEnum.PLAINTEXT;
+        this.tokenizer.state = State.PLAINTEXT;
         break;
       default:
-        this.tokenizer.state = StateEnum.DATA;
+        this.tokenizer.state = State.DATA;
     }
     const root = this.createElementNS({type: 'startTag', name: 'html', selfClosed: false, attributes: []}, NS_HTML, this.document);
     this.pushOpenElement(root);
@@ -514,7 +514,7 @@ export class TreeComposer implements ComposerIntegration {
     }
   }
 
-  startTextMode(tokenizerState: StateEnum, token: TagToken): InsertionMode {
+  startTextMode(tokenizerState: State, token: TagToken): InsertionMode {
     this.createAndInsertHTMLElement(token);
     this.originalInsertionMode = this.insertionMode;
     this.tokenizer.state = tokenizerState;
@@ -1206,12 +1206,12 @@ export class TreeComposer implements ComposerIntegration {
         this.createAndInsertEmptyHTMLElement(token);
         break;
       case 'title':
-        return this.startTextMode(StateEnum.RCDATA, token);
+        return this.startTextMode(State.RCDATA, token);
       case 'noframes':
       case 'style':
-        return this.startTextMode(StateEnum.RAWTEXT, token);
+        return this.startTextMode(State.RAWTEXT, token);
       case 'script':
-        return this.startTextMode(StateEnum.SCRIPT_DATA, token);
+        return this.startTextMode(State.SCRIPT_DATA, token);
       case 'noscript':
         this.createAndInsertHTMLElement(token);
         return 'inHeadNoscript';
@@ -1284,7 +1284,7 @@ export class TreeComposer implements ComposerIntegration {
       case 'noframes':
       case 'style':
         // return this.inHead(token);
-        return this.startTextMode(StateEnum.RAWTEXT, token);
+        return this.startTextMode(State.RAWTEXT, token);
       case 'head':
       case 'noscript':
         this.error('unexpected-start-tag-in-head-noscript');
@@ -1443,16 +1443,16 @@ export class TreeComposer implements ComposerIntegration {
       case 'noframes':
       case 'style':
         // return this.inHead(token);
-        return this.startTextMode(StateEnum.RAWTEXT, token);
+        return this.startTextMode(State.RAWTEXT, token);
       case 'script':
         // return this.inHead(token);
-        return this.startTextMode(StateEnum.SCRIPT_DATA, token);
+        return this.startTextMode(State.SCRIPT_DATA, token);
       case 'template':
         // return this.inHead(token);
         return this.startTemplate(token);
       case 'title':
         // return this.inHead(token);
-        return this.startTextMode(StateEnum.RCDATA, token);
+        return this.startTextMode(State.RCDATA, token);
       case 'body':
         this.error('unexpected-body-start-tag');
         if (this.openElements.length > 1 && this.openElements[1].tagName === 'body' && !this.openCounts['template']) {
@@ -1534,7 +1534,7 @@ export class TreeComposer implements ComposerIntegration {
       case 'plaintext':
         this.closeAnyHangingParagraph();
         this.createAndInsertHTMLElement(token);
-        this.tokenizer.state = StateEnum.PLAINTEXT;
+        this.tokenizer.state = State.PLAINTEXT;
         break;
       case 'button':
         if (this.hasElementInScope('button')) {
@@ -1617,14 +1617,14 @@ export class TreeComposer implements ComposerIntegration {
         break;
       case 'textarea':
         this.framesetOk = false;
-        return this.startTextMode(StateEnum.RCDATA, token);
+        return this.startTextMode(State.RCDATA, token);
       case 'xmp':
         this.closeAnyHangingParagraph();
         this.reconstructFormattingElements();
       case 'iframe': // ok no break
         this.framesetOk = false;
       case 'noembed': // ok no break
-        return this.startTextMode(StateEnum.RAWTEXT, token);
+        return this.startTextMode(State.RAWTEXT, token);
       case 'select':
         this.reconstructFormattingElements();
         this.createAndInsertHTMLElement(token);
@@ -2092,10 +2092,10 @@ export class TreeComposer implements ComposerIntegration {
         break; // fragment case
       case 'style':
         // return this.inHead(token);
-        return this.startTextMode(StateEnum.RAWTEXT, token);
+        return this.startTextMode(State.RAWTEXT, token);
       case 'script':
         // return this.inHead(token);
-        return this.startTextMode(StateEnum.SCRIPT_DATA, token);
+        return this.startTextMode(State.SCRIPT_DATA, token);
       case 'template':
         return this.startTemplate(token);
       case 'input':
@@ -2670,7 +2670,7 @@ export class TreeComposer implements ComposerIntegration {
         return this.closeSelect(token, true, false);
       case 'script':
         // return this.inHead(token);
-        return this.startTextMode(StateEnum.SCRIPT_DATA, token);
+        return this.startTextMode(State.SCRIPT_DATA, token);
       case 'template':
         return this.startTemplate(token);
       default:
@@ -2819,13 +2819,13 @@ export class TreeComposer implements ComposerIntegration {
       case 'noframes':
       case 'style':
         // return this.inHead(token);
-        return this.startTextMode(StateEnum.RAWTEXT, token);
+        return this.startTextMode(State.RAWTEXT, token);
       case 'script':
         // return this.inHead(token);
-        return this.startTextMode(StateEnum.SCRIPT_DATA, token);
+        return this.startTextMode(State.SCRIPT_DATA, token);
       case 'title':
         // return this.inHead(token);
-        return this.startTextMode(StateEnum.RCDATA, token);
+        return this.startTextMode(State.RCDATA, token);
       case 'template':
         return this.startTemplate(token);
       case 'caption':
@@ -2898,7 +2898,7 @@ export class TreeComposer implements ComposerIntegration {
         break;
       case 'noframes':
         // return this.inHead(token);
-        return this.startTextMode(StateEnum.RAWTEXT, token);
+        return this.startTextMode(State.RAWTEXT, token);
       default:
         this.error('unexpected-content-in-frameset');
     }
@@ -2995,7 +2995,7 @@ export class TreeComposer implements ComposerIntegration {
         return this.inBodyStartTagHtml(token);
       case 'noframes':
         // return this.inHead(token);
-        return this.startTextMode(StateEnum.RAWTEXT, token);
+        return this.startTextMode(State.RAWTEXT, token);
       default:
         this.error('unexpected-content-after-frameset');
     }
@@ -3075,7 +3075,7 @@ export class TreeComposer implements ComposerIntegration {
         return this.inBodyStartTagHtml(token);
       case 'noframes':
         // return this.inHead(token);
-        return this.startTextMode(StateEnum.RAWTEXT, token);
+        return this.startTextMode(State.RAWTEXT, token);
       default:
         this.error('content-after-html');
     }
