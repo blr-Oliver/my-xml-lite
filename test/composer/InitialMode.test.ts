@@ -1,5 +1,5 @@
 import {InsertionMode} from '../../src/impl/interfaces/insertion-mode.js';
-import {Token} from '../../src/impl/interfaces/tokens.js';
+import {Token, TokenType} from '../../src/impl/interfaces/tokens.js';
 import {SimpleNodeFactory} from '../../src/impl/simple-tree/SimpleNodeFactory.js';
 import {TreeComposer} from '../../src/impl/TreeComposer.js';
 import {ErrorHandler} from '../../src/interfaces/ErrorHandler.js';
@@ -26,7 +26,7 @@ class InitialModeSuite extends DefaultSuite<ModeTrackingRawTest, ModeTrackingTes
         super(new SimpleNodeFactory(), errorTracker);
       }
       accept(token: Token) {
-        if (token.type !== 'eof')
+        if (token.type !== TokenType.EOF)
           super.accept(token);
       }
     }(this.errorHandler);

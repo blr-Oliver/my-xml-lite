@@ -1,11 +1,19 @@
-export type TokenType = 'doctype' | 'startTag' | 'endTag' | 'comment' | 'characters' | 'cdata' | 'eof';
+export const enum TokenType {
+  EOF = -1,
+  DOCTYPE = 1,
+  START_TAG,
+  END_TAG,
+  COMMENT,
+  CHARACTERS,
+  CDATA
+}
 
 export interface Token {
   type: TokenType;
 }
 
 export interface DoctypeToken extends Token {
-  type: 'doctype';
+  type: TokenType.DOCTYPE;
   name: string | undefined;
   publicId: string | undefined;
   systemId: string | undefined;
@@ -24,30 +32,30 @@ export interface NamespacedAttribute extends Attribute {
 }
 
 export interface TagToken extends Token {
-  type: 'startTag' | 'endTag';
+  type: TokenType.START_TAG | TokenType.END_TAG;
   name: string;
   selfClosed: boolean;
   attributes: Attribute[];
 }
 
 export interface TextToken extends Token {
-  type: 'comment' | 'characters' | 'cdata';
+  type: TokenType.COMMENT | TokenType.CHARACTERS | TokenType.CDATA;
   data: string;
 }
 
 export interface CharactersToken extends TextToken {
-  type: 'characters' | 'cdata';
+  type: TokenType.CHARACTERS | TokenType.CDATA;
   whitespaceOnly: boolean;
 }
 
 export interface CommentToken extends TextToken {
-  type: 'comment';
+  type: TokenType.COMMENT;
 }
 
 export interface CDataToken extends CharactersToken {
-  type: 'cdata';
+  type: TokenType.CDATA;
 }
 
 export const EOF_TOKEN: Token = {
-  type: 'eof'
+  type: TokenType.EOF
 } as const;

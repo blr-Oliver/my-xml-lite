@@ -10,7 +10,7 @@ import {
   TemplateElement,
   Text
 } from '../interfaces/dom-types.js';
-import {CDataToken, CharactersToken, CommentToken, DoctypeToken, TagToken, Token} from './interfaces/tokens.js';
+import {CDataToken, CharactersToken, CommentToken, DoctypeToken, TagToken, Token, TokenType} from './interfaces/tokens.js';
 import {NS_HTML} from './TreeComposer.js';
 
 type DocumentTypeLike = {
@@ -71,25 +71,25 @@ export class Serializer {
   serializeToken(token: Token): string | null {
     const chunks: string[] = [];
     switch (token.type) {
-      case 'doctype':
+      case TokenType.DOCTYPE:
         this.serializeDoctype(token as DoctypeToken, chunks);
         break;
-      case 'startTag':
-      case 'endTag':
+      case TokenType.START_TAG:
+      case TokenType.END_TAG:
         const tagToken = token as TagToken;
         this.serializeElementStart(tagToken, tagToken.name, tagToken.selfClosed, chunks, false);
-        if (tagToken.type === 'endTag')
+        if (tagToken.type === TokenType.END_TAG)
           chunks.splice(1, 0, '/');
         break;
-      case 'comment':
+      case TokenType.COMMENT:
         this.serializeComment(token as CommentToken, chunks);
         break;
-      case 'characters':
+      case TokenType.CHARACTERS:
         return (token as CharactersToken).data;
-      case 'cdata':
+      case TokenType.CDATA:
         this.serializeCData(token as CDataToken, chunks);
         break;
-      case 'eof':
+      case TokenType.EOF:
         return null;
     }
     return chunks.join('');

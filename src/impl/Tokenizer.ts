@@ -6,7 +6,7 @@ import {PrefixNode} from '../interfaces/PrefixNode.js';
 import {FixedSizeStringBuilder} from './FixedSizeStringBuilder.js';
 import {State} from './interfaces/states.js';
 import {StringBuilder} from './interfaces/StringBuilder.js';
-import {Attribute, CDataToken, CharactersToken, CommentToken, DoctypeToken, EOF_TOKEN, TagToken, Token} from './interfaces/tokens.js';
+import {Attribute, CDataToken, CharactersToken, CommentToken, DoctypeToken, EOF_TOKEN, TagToken, Token, TokenType} from './interfaces/tokens.js';
 import {NS_HTML} from './TreeComposer.js';
 import {
   isAsciiAlpha,
@@ -261,7 +261,7 @@ export class Tokenizer {
     const buffer = this.buffer;
     if (buffer.position) {
       this.emit({
-        type: 'characters',
+        type: TokenType.CHARACTERS,
         data: buffer.takeString(),
         whitespaceOnly: this.hasWhitespaceOnly
       } as CharactersToken);
@@ -271,7 +271,7 @@ export class Tokenizer {
 
   emitCData() {
     this.emit({
-      type: 'cdata',
+      type: TokenType.CDATA,
       data: this.buffer.takeString(),
       whitespaceOnly: this.hasWhitespaceOnly
     } as CDataToken);
@@ -307,7 +307,7 @@ export class Tokenizer {
   startNewTag(name: string = '') {
     this.currentTag = {
       name,
-      type: 'startTag',
+      type: TokenType.START_TAG,
       selfClosed: false,
       attributes: []
     };
@@ -322,14 +322,14 @@ export class Tokenizer {
 
   startNewComment() {
     this.currentComment = {
-      type: 'comment',
+      type: TokenType.COMMENT,
       data: ''
     };
   }
 
   startNewDoctype(forceQuirks: boolean = false) {
     this.currentDoctype = {
-      type: 'doctype',
+      type: TokenType.DOCTYPE,
       name: undefined,
       publicId: undefined,
       systemId: undefined,
@@ -512,7 +512,7 @@ export class Tokenizer {
     buffer.position = this.textEndMark;
     this.emitAccumulatedCharacters();
     this.startNewTag(tag);
-    this.currentTag.type = 'endTag';
+    this.currentTag.type = TokenType.END_TAG;
     this.lastOpenTag = undefined;
   }
 
@@ -614,7 +614,7 @@ export class Tokenizer {
       default:
         if (isAsciiAlpha(code)) {
           this.emitAccumulatedCharacters();
-          this.currentTag.type = 'endTag';
+          this.currentTag.type = TokenType.END_TAG;
           this.state = State.TAG_NAME;
           return this.tagName(code);
         }

@@ -1,4 +1,4 @@
-import {TagToken} from '../../src/impl/interfaces/tokens.js';
+import {TagToken, TokenType} from '../../src/impl/interfaces/tokens.js';
 import {default as rawTests} from './samples/tags.json';
 import {DefaultTokenizerRawTestCore, DefaultTokenizerTestCase, DefaultTokenizerTestSuite} from './TokenizerTestSuite.js';
 
@@ -18,7 +18,7 @@ class TagTokenizerTest extends DefaultTokenizerTestSuite<TagTokenizerRawTest, Ta
 
   runChecks(test: TagTokenizerTestCase) {
     super.runChecks(test);
-    const tagToken = this.tokenList.find(token => token.type === 'startTag') as TagToken;
+    const tagToken = this.tokenList.find(token => token.type === TokenType.START_TAG) as TagToken;
     if (test.attributes.length)
       expect(tagToken).toBeDefined();
     if (tagToken) {

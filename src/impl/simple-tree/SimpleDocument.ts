@@ -1,5 +1,6 @@
 import nwsapi from 'nwsapi';
 import {Document, NodeType} from '../../interfaces/dom-types.js';
+import {TokenType} from '../interfaces/tokens.js';
 import {NS_HTML} from '../TreeComposer.js';
 import {SimpleDocumentType} from './SimpleDocumentType.js';
 import {SimpleElement} from './SimpleElement.js';
@@ -76,7 +77,7 @@ export class SimpleDocument extends SimpleParentNode implements Document {
   }
   createElement(tagName: string): SimpleElement {
     return new SimpleElement(null, {
-      type: 'startTag',
+      type: TokenType.START_TAG,
       name: tagName.toLowerCase(), // FIXME
       selfClosed: false,
       attributes: []

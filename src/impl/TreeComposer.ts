@@ -4,7 +4,7 @@ import {NodeFactory} from '../interfaces/NodeFactory.js';
 import {FormattingList} from './FormattingList.js';
 import {InsertionMode} from './interfaces/insertion-mode.js';
 import {State} from './interfaces/states.js';
-import {CharactersToken, CommentToken, DoctypeToken, NamespacedAttribute, TagToken, Token} from './interfaces/tokens.js';
+import {CharactersToken, CommentToken, DoctypeToken, NamespacedAttribute, TagToken, Token, TokenType} from './interfaces/tokens.js';
 import {ComposerIntegration, Tokenizer} from './Tokenizer.js';
 
 export const NS_HTML = 'http://www.w3.org/1999/xhtml';
@@ -95,7 +95,7 @@ export class TreeComposer implements ComposerIntegration {
       default:
         this.tokenizer.state = State.DATA;
     }
-    const root = this.createElementNS({type: 'startTag', name: 'html', selfClosed: false, attributes: []}, NS_HTML, this.document);
+    const root = this.createElementNS({type: TokenType.START_TAG, name: 'html', selfClosed: false, attributes: []}, NS_HTML, this.document);
     this.pushOpenElement(root);
     if (contextElement.tagName === 'template')
       this.templateInsertionModes.push('inTemplate');
@@ -108,7 +108,7 @@ export class TreeComposer implements ComposerIntegration {
   }
 
   accept(token: Token) {
-    if (token.type !== 'eof' && this.shouldUseForeignRules(token))
+    if (token.type !== TokenType.EOF && this.shouldUseForeignRules(token))
       this.setInsertionMode(this.inForeignContent(token));
     else this.setInsertionMode(this.process(token));
   }
@@ -121,14 +121,14 @@ export class TreeComposer implements ComposerIntegration {
     if (!token)
       return !this.isMathMLIntegrationPoint(adjustedNode) && !this.isHTMLIntegrationPoint(adjustedNode);
     if (this.isMathMLIntegrationPoint(adjustedNode)) {
-      if (token.type === 'characters') return false;
-      if (token.type === 'startTag' && (token as TagToken).name !== 'mglyph' && (token as TagToken).name !== 'malignmark') return false;
+      if (token.type === TokenType.CHARACTERS) return false;
+      if (token.type === TokenType.START_TAG && (token as TagToken).name !== 'mglyph' && (token as TagToken).name !== 'malignmark') return false;
     }
     if (adjustedNode.namespaceURI === NS_MATHML && adjustedNode.tagName === 'annotation-xml') {
-      if (token.type === 'startTag' && (token as TagToken).name === 'svg') return false;
+      if (token.type === TokenType.START_TAG && (token as TagToken).name === 'svg') return false;
     }
     if (this.isHTMLIntegrationPoint(adjustedNode)) {
-      if (token.type === 'characters' || token.type === 'startTag') return false;
+      if (token.type === TokenType.CHARACTERS || token.type === TokenType.START_TAG) return false;
     }
     return true;
   }
@@ -227,15 +227,15 @@ export class TreeComposer implements ComposerIntegration {
 
   text(token: Token): InsertionMode {
     switch (token.type) {
-      case 'characters':
-      case 'cdata':
+      case TokenType.CHARACTERS:
+      case TokenType.CDATA:
         this.insertCharacters(token as CharactersToken);
         break;
-      case 'eof':
+      case TokenType.EOF:
         this.error('abrupt-end-of-text');
         this.popCurrentElement();
         return this.reprocessIn(this.originalInsertionMode, token);
-      case 'endTag':
+      case TokenType.END_TAG:
         this.popCurrentElement();
         return this.originalInsertionMode;
     }
@@ -292,10 +292,10 @@ export class TreeComposer implements ComposerIntegration {
     if (this.insertParent.nodeType !== NodeType.DOCUMENT_NODE) {
       let node: CharacterData;
       switch (token.type) {
-        case 'characters':
+        case TokenType.CHARACTERS:
           node = this.nodeFactory.createText(this.insertParent, token.data);
           break;
-        case 'cdata':
+        case TokenType.CDATA:
           node = this.nodeFactory.createCData(this.insertParent, token.data);
       }
       this.insertNodeAtCurrentLocation(node);
@@ -366,7 +366,7 @@ export class TreeComposer implements ComposerIntegration {
 
   forceElementAndState(element: string, state: InsertionMode, token: Token): InsertionMode {
     this.createAndInsertHTMLElement({
-      type: 'startTag',
+      type: TokenType.START_TAG,
       name: element,
       selfClosed: false,
       attributes: []
@@ -1057,10 +1057,10 @@ export class TreeComposer implements ComposerIntegration {
 
   initial(token: Token): InsertionMode {
     switch (token.type) {
-      case 'comment':
+      case TokenType.COMMENT:
         this.insertComment(token as CommentToken);
         return 'initial';
-      case 'doctype':
+      case TokenType.DOCTYPE:
         this.insertDoctype(token as DoctypeToken);
         // TODO set doctype of current document
         return 'beforeHtml';
@@ -1073,15 +1073,15 @@ export class TreeComposer implements ComposerIntegration {
 
   beforeHtml(token: Token): InsertionMode {
     switch (token.type) {
-      case 'comment':
+      case TokenType.COMMENT:
         this.insertComment(token as CommentToken);
         return 'beforeHtml';
-      case 'doctype':
+      case TokenType.DOCTYPE:
         this.error('unexpected-doctype');
         return 'beforeHtml';
-      case 'startTag':
+      case TokenType.START_TAG:
         return this.beforeHtmlStartTag(token as TagToken);
-      case 'endTag':
+      case TokenType.END_TAG:
         return this.beforeHtmlEndTag(token as TagToken);
       default:
         //whitespace is ignored on tokenizer level
@@ -1112,18 +1112,18 @@ export class TreeComposer implements ComposerIntegration {
 
   beforeHead(token: Token): InsertionMode {
     switch (token.type) {
-      case 'characters':
+      case TokenType.CHARACTERS:
         // whitespace will be blocked on tokenizer level
         return this.forceHead(token);
-      case 'comment':
+      case TokenType.COMMENT:
         this.insertComment(token as CommentToken);
         break;
-      case 'doctype':
+      case TokenType.DOCTYPE:
         this.error('unexpected-doctype');
         break;
-      case 'startTag':
+      case TokenType.START_TAG:
         return this.beforeHeadStartTag(token as TagToken);
-      case 'endTag':
+      case TokenType.END_TAG:
         return this.beforeHeadEndTag(token as TagToken);
       default:
         return this.forceHead(token);
@@ -1158,7 +1158,7 @@ export class TreeComposer implements ComposerIntegration {
 
   forceHead(token: Token): InsertionMode {
     this.headElement = this.createAndInsertHTMLElement({
-      type: 'startTag',
+      type: TokenType.START_TAG,
       name: 'head',
       selfClosed: false,
       attributes: []
@@ -1168,17 +1168,17 @@ export class TreeComposer implements ComposerIntegration {
 
   inHead(token: Token): InsertionMode {
     switch (token.type) {
-      case 'characters':
+      case TokenType.CHARACTERS:
         return this.inHeadCharacters(token as CharactersToken);
-      case 'comment':
+      case TokenType.COMMENT:
         this.insertComment(token as CommentToken);
         break;
-      case 'doctype':
+      case TokenType.DOCTYPE:
         this.error('unexpected-doctype');
         break;
-      case 'startTag':
+      case TokenType.START_TAG:
         return this.inHeadStartTag(token as TagToken);
-      case 'endTag':
+      case TokenType.END_TAG:
         return this.inHeadEndTag(token as TagToken);
       default:
         return this.inHeadDefault(token);
@@ -1252,17 +1252,17 @@ export class TreeComposer implements ComposerIntegration {
 
   inHeadNoscript(token: Token): InsertionMode {
     switch (token.type) {
-      case 'comment':
+      case TokenType.COMMENT:
         this.insertComment(token as CommentToken);
         break;
-      case 'doctype':
+      case TokenType.DOCTYPE:
         this.error('unexpected-doctype');
         break;
-      case 'characters':
+      case TokenType.CHARACTERS:
         return this.inHeadNoscriptCharacters(token as CharactersToken);
-      case 'startTag':
+      case TokenType.START_TAG:
         return this.inHeadNoscriptStartTag(token as TagToken);
-      case 'endTag':
+      case TokenType.END_TAG:
         return this.inHeadNoscriptEndTag(token as TagToken);
       default:
         return this.escapeInHeadNoscript(token);
@@ -1323,17 +1323,17 @@ export class TreeComposer implements ComposerIntegration {
 
   afterHead(token: Token): InsertionMode {
     switch (token.type) {
-      case 'comment':
+      case TokenType.COMMENT:
         this.insertComment(token as CommentToken);
         break;
-      case 'doctype':
+      case TokenType.DOCTYPE:
         this.error('unexpected-doctype');
         break;
-      case 'characters':
+      case TokenType.CHARACTERS:
         return this.afterHeadCharacters(token as CharactersToken);
-      case 'startTag':
+      case TokenType.START_TAG:
         return this.afterHeadStartTag(token as TagToken);
-      case 'endTag':
+      case TokenType.END_TAG:
         return this.afterHeadEndTag(token as TagToken);
       default:
         return this.forceElementAndState('body', 'inBody', token);
@@ -1402,19 +1402,19 @@ export class TreeComposer implements ComposerIntegration {
 
   inBody(token: Token): InsertionMode {
     switch (token.type) {
-      case 'comment':
+      case TokenType.COMMENT:
         this.insertComment(token as CommentToken);
         break;
-      case 'doctype':
+      case TokenType.DOCTYPE:
         this.error('unexpected-doctype');
         break;
-      case 'characters':
+      case TokenType.CHARACTERS:
         return this.inBodyCharacters(token as CharactersToken);
-      case 'eof':
+      case TokenType.EOF:
         return this.inBodyEof(token);
-      case 'startTag':
+      case TokenType.START_TAG:
         return this.inBodyStartTag(token as TagToken);
-      case 'endTag':
+      case TokenType.END_TAG:
         return this.inBodyEndTag(token as TagToken);
     }
     return this.insertionMode;
@@ -1749,7 +1749,7 @@ export class TreeComposer implements ComposerIntegration {
       case 'p':
         if (!this.hasElementInButtonScope('p')) {
           this.error('orphan-p-end-tag');
-          this.createAndInsertHTMLElement({type: 'startTag', name: 'p', selfClosed: false, attributes: []});
+          this.createAndInsertHTMLElement({type: TokenType.START_TAG, name: 'p', selfClosed: false, attributes: []});
         }
         this.forceCloseElement('p');
         break;
@@ -1803,7 +1803,7 @@ export class TreeComposer implements ComposerIntegration {
         break;
       case 'br':
         this.error('br-end-tag');
-        return this.inBodyStartTag({type: 'startTag', name: 'br', selfClosed: false, attributes: []});
+        return this.inBodyStartTag({type: TokenType.START_TAG, name: 'br', selfClosed: false, attributes: []});
       default:
         this.inBodyEndTagDefault(token);
         return this.insertionMode;
@@ -2022,19 +2022,19 @@ export class TreeComposer implements ComposerIntegration {
 
   inTable(token: Token): InsertionMode {
     switch (token.type) {
-      case 'comment':
+      case TokenType.COMMENT:
         this.insertComment(token as CommentToken);
         break;
-      case 'doctype':
+      case TokenType.DOCTYPE:
         this.error('unexpected-doctype');
         break;
-      case 'characters':
+      case TokenType.CHARACTERS:
         return this.inTableCharacters(token as CharactersToken);
-      case 'startTag':
+      case TokenType.START_TAG:
         return this.inTableStartTag(token as TagToken);
-      case 'endTag':
+      case TokenType.END_TAG:
         return this.inTableEndTag(token as TagToken);
-      case 'eof':
+      case TokenType.EOF:
         return this.inBodyEof(token);
     }
     return this.insertionMode;
@@ -2164,7 +2164,7 @@ export class TreeComposer implements ComposerIntegration {
   }
 
   inTableDefault(token: Token): InsertionMode {
-    if (token.type !== 'characters' && token.type !== 'cdata')
+    if (token.type !== TokenType.CHARACTERS && token.type !== TokenType.CDATA)
       this.error('unexpected-content-in-table');
     this.fosterParentingEnabled = true;
     const result = this.inBody(token);
@@ -2173,7 +2173,7 @@ export class TreeComposer implements ComposerIntegration {
   }
 
   inTableText(token: Token) {
-    if (token.type === 'characters') {
+    if (token.type === TokenType.CHARACTERS) {
       this.pendingTableCharacters.push(token as CharactersToken);
       return this.insertionMode;
     } else {
@@ -2202,7 +2202,7 @@ export class TreeComposer implements ComposerIntegration {
         whitespaceOnly &&= textToken.whitespaceOnly;
       }
       return {
-        type: 'characters',
+        type: TokenType.CHARACTERS,
         data: chunks.join(''),
         whitespaceOnly
       };
@@ -2211,9 +2211,9 @@ export class TreeComposer implements ComposerIntegration {
 
   inCaption(token: Token): InsertionMode {
     switch (token.type) {
-      case 'startTag':
+      case TokenType.START_TAG:
         return this.inCaptionStartTag(token as TagToken);
-      case 'endTag':
+      case TokenType.END_TAG:
         return this.inCaptionEndTag(token as TagToken);
       default:
         return this.inBody(token);
@@ -2274,19 +2274,19 @@ export class TreeComposer implements ComposerIntegration {
 
   inColumnGroup(token: Token): InsertionMode {
     switch (token.type) {
-      case 'comment':
+      case TokenType.COMMENT:
         this.insertComment(token as CommentToken);
         break;
-      case 'doctype':
+      case TokenType.DOCTYPE:
         this.error('unexpected-doctype');
         break;
-      case 'characters':
+      case TokenType.CHARACTERS:
         return this.inColumnGroupCharacters(token as CharactersToken);
-      case 'eof':
+      case TokenType.EOF:
         return this.inBodyEof(token);
-      case 'startTag':
+      case TokenType.START_TAG:
         return this.inColumnGroupStartTag(token as TagToken);
-      case 'endTag':
+      case TokenType.END_TAG:
         return this.inColumnGroupEndTag(token as TagToken);
         // CDATA is impossible here
         // default: return this.inColumnGroupDefault(token);
@@ -2344,9 +2344,9 @@ export class TreeComposer implements ComposerIntegration {
 
   inTableBody(token: Token): InsertionMode {
     switch (token.type) {
-      case 'startTag':
+      case TokenType.START_TAG:
         return this.inTableBodyStartTag(token as TagToken);
-      case 'endTag':
+      case TokenType.END_TAG:
         return this.inTableBodyEndTag(token as TagToken);
       default:
         return this.inTable(token);
@@ -2446,9 +2446,9 @@ export class TreeComposer implements ComposerIntegration {
 
   inRow(token: Token): InsertionMode {
     switch (token.type) {
-      case 'startTag':
+      case TokenType.START_TAG:
         return this.inRowStartTag(token as TagToken);
-      case 'endTag':
+      case TokenType.END_TAG:
         return this.inRowEndTag(token as TagToken);
       default:
         return this.inTable(token);
@@ -2542,9 +2542,9 @@ export class TreeComposer implements ComposerIntegration {
 
   inCell(token: Token): InsertionMode {
     switch (token.type) {
-      case 'startTag':
+      case TokenType.START_TAG:
         return this.inCellStartTag(token as TagToken);
-      case 'endTag':
+      case TokenType.END_TAG:
         return this.inCellEndTag(token as TagToken);
       default:
         return this.inBody(token);
@@ -2621,20 +2621,20 @@ export class TreeComposer implements ComposerIntegration {
 
   inSelect(token: Token): InsertionMode {
     switch (token.type) {
-      case 'comment':
+      case TokenType.COMMENT:
         this.insertComment(token as CommentToken);
         break;
-      case 'doctype':
+      case TokenType.DOCTYPE:
         this.error('unexpected-doctype');
         break;
-      case 'characters':
+      case TokenType.CHARACTERS:
         this.insertCharacters(token as CharactersToken);
         break;
-      case 'startTag':
+      case TokenType.START_TAG:
         return this.inSelectStartTag(token as TagToken);
-      case 'endTag':
+      case TokenType.END_TAG:
         return this.inSelectEndTag(token as TagToken);
-      case 'eof':
+      case TokenType.EOF:
         return this.inBodyEof(token);
         // CDATA is impossible here
         // default: this.error('unexpected-content-in-select');
@@ -2722,9 +2722,9 @@ export class TreeComposer implements ComposerIntegration {
 
   inSelectInTable(token: Token): InsertionMode {
     switch (token.type) {
-      case 'startTag':
+      case TokenType.START_TAG:
         return this.inSelectInTableStartTag(token as TagToken);
-      case 'endTag':
+      case TokenType.END_TAG:
         return this.inSelectInTableEndTag(token as TagToken);
       default:
         return this.inSelect(token);
@@ -2774,21 +2774,21 @@ export class TreeComposer implements ComposerIntegration {
 
   inTemplate(token: Token): InsertionMode {
     switch (token.type) {
-      case 'characters':
+      case TokenType.CHARACTERS:
         return this.inBodyCharacters(token as CharactersToken);
-      case 'comment':
+      case TokenType.COMMENT:
         // return this.inBody(token);
         this.insertComment(token as CommentToken);
         break;
-      case 'doctype':
+      case TokenType.DOCTYPE:
         // return this.inBody(token);
         this.error('unexpected-doctype');
         break;
-      case 'eof':
+      case TokenType.EOF:
         return this.inTemplateEof(token);
-      case 'startTag':
+      case TokenType.START_TAG:
         return this.inTemplateStartTag(token as TagToken);
-      case 'endTag':
+      case TokenType.END_TAG:
         return this.inTemplateEndTag(token as TagToken);
     }
     return this.insertionMode;
@@ -2864,23 +2864,23 @@ export class TreeComposer implements ComposerIntegration {
 
   inFrameset(token: Token): InsertionMode {
     switch (token.type) {
-      case 'comment':
+      case TokenType.COMMENT:
         this.insertComment(token as CommentToken);
         break;
-      case 'doctype':
+      case TokenType.DOCTYPE:
         this.error('unexpected-doctype');
         break;
-      case 'characters':
+      case TokenType.CHARACTERS:
         // non-whitespace characters are filtered on tokenizer level
         this.insertCharacters(token as CharactersToken);
         break;
-      case 'eof':
+      case TokenType.EOF:
         if (this.openElements.length !== 1 || this.openElements[0].tagName !== 'html') // fragment case
           this.error('abrupt-end-of-frameset');
         return this.stopParsing();
-      case 'startTag':
+      case TokenType.START_TAG:
         return this.inFramesetStartTag(token as TagToken);
-      case 'endTag':
+      case TokenType.END_TAG:
         return this.inFramesetEndTag(token as TagToken);
     }
     return this.insertionMode;
@@ -2921,19 +2921,19 @@ export class TreeComposer implements ComposerIntegration {
 
   afterBody(token: Token): InsertionMode {
     switch (token.type) {
-      case 'comment':
+      case TokenType.COMMENT:
         this.insertComment(token as CommentToken, this.openElements[0]);
         break;
-      case 'doctype':
+      case TokenType.DOCTYPE:
         this.error('unexpected-doctype');
         break;
-      case 'characters':
+      case TokenType.CHARACTERS:
         return this.afterBodyCharacters(token as CharactersToken);
-      case 'startTag':
+      case TokenType.START_TAG:
         return this.afterBodyStartTag(token as TagToken);
-      case 'endTag':
+      case TokenType.END_TAG:
         return this.afterBodyEndTag(token as TagToken);
-      case 'eof':
+      case TokenType.EOF:
         return this.stopParsing();
     }
     return this.insertionMode;
@@ -2969,21 +2969,21 @@ export class TreeComposer implements ComposerIntegration {
 
   afterFrameset(token: Token): InsertionMode {
     switch (token.type) {
-      case 'comment':
+      case TokenType.COMMENT:
         this.insertComment(token as CommentToken);
         break;
-      case 'doctype':
+      case TokenType.DOCTYPE:
         this.error('unexpected-doctype');
         break;
-      case 'characters':
+      case TokenType.CHARACTERS:
         // non-whitespace characters are filtered on tokenizer level
         this.insertCharacters(token as CharactersToken);
         break;
-      case 'eof':
+      case TokenType.EOF:
         return this.stopParsing();
-      case 'startTag':
+      case TokenType.START_TAG:
         return this.afterFramesetStartTag(token as TagToken);
-      case 'endTag':
+      case TokenType.END_TAG:
         return this.afterFramesetEndTag(token as TagToken);
     }
     return this.insertionMode;
@@ -3014,17 +3014,17 @@ export class TreeComposer implements ComposerIntegration {
 
   afterAfterBody(token: Token): InsertionMode {
     switch (token.type) {
-      case 'comment':
+      case TokenType.COMMENT:
         this.insertComment(token as CommentToken, this.document);
         break;
-      case 'doctype':
+      case TokenType.DOCTYPE:
         this.error('unexpected-doctype');
         break;
-      case 'characters':
+      case TokenType.CHARACTERS:
         return this.afterAfterBodyCharacters(token as CharactersToken);
-      case 'eof':
+      case TokenType.EOF:
         return this.stopParsing();
-      case 'startTag':
+      case TokenType.START_TAG:
         return this.afterAfterBodyStartTag(token as TagToken);
       default:
         return this.afterAfterBodyDefault(token);
@@ -3051,17 +3051,17 @@ export class TreeComposer implements ComposerIntegration {
 
   afterAfterFrameset(token: Token): InsertionMode {
     switch (token.type) {
-      case 'comment':
+      case TokenType.COMMENT:
         this.insertComment(token as CommentToken, this.document);
         break;
-      case 'doctype':
+      case TokenType.DOCTYPE:
         this.error('unexpected-doctype');
         break;
-      case 'characters':
+      case TokenType.CHARACTERS:
         return this.inBodyCharacters(token as CharactersToken);
-      case 'eof':
+      case TokenType.EOF:
         return this.stopParsing();
-      case 'startTag':
+      case TokenType.START_TAG:
         return this.afterAfterFramesetStartTag(token as TagToken);
       default:
         this.error('content-after-html');
@@ -3084,19 +3084,19 @@ export class TreeComposer implements ComposerIntegration {
 
   inForeignContent(token: Token): InsertionMode {
     switch (token.type) {
-      case 'comment':
+      case TokenType.COMMENT:
         this.insertComment(token as CommentToken);
         break;
-      case 'doctype':
+      case TokenType.DOCTYPE:
         this.error('unexpected-doctype');
         break;
-      case 'characters':
-      case 'cdata':
+      case TokenType.CHARACTERS:
+      case TokenType.CDATA:
         this.insertCharacters(token as CharactersToken);
         break;
-      case 'startTag':
+      case TokenType.START_TAG:
         return this.inForeignContentStartTag(token as TagToken);
-      case 'endTag':
+      case TokenType.END_TAG:
         return this.inForeignContentEndTag(token as TagToken);
     }
     return this.insertionMode;

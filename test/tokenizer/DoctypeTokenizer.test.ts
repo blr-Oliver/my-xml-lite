@@ -1,4 +1,4 @@
-import {DoctypeToken} from '../../src/impl/interfaces/tokens.js';
+import {DoctypeToken, TokenType} from '../../src/impl/interfaces/tokens.js';
 import {default as rawTests} from './samples/doctype.json';
 import {DefaultTokenizerRawTestCore, DefaultTokenizerTestCase, DefaultTokenizerTestSuite} from './TokenizerTestSuite.js';
 
@@ -30,7 +30,7 @@ class DoctypeTokenizerTest extends DefaultTokenizerTestSuite<DoctypeRawTest, Doc
 
   runChecks(test: DoctypeTestCase) {
     super.runChecks(test);
-    const token = this.tokenList.find(token => token.type === 'doctype') as DoctypeToken;
+    const token = this.tokenList.find(token => token.type === TokenType.DOCTYPE) as DoctypeToken;
     if (!token) {
       expect(test.doctypeName).toBeNull();
       expect(test.publicId).toBeNull();

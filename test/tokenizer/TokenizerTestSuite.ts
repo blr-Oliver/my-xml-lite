@@ -4,6 +4,7 @@ import {Tokenizer} from '../../src/impl/Tokenizer.js';
 import {buildIndex} from '../../src/impl/util/build-index.js';
 import {HTML_SPECIAL} from '../../src/interfaces/named-character-refs.js';
 import {StateStringEnum, StateStringReversedEnum} from '../states-string.js';
+import {TokenTypeStringEnum, TokenTypeStringReversedEnum} from '../tokens-string.js';
 import {InterlacedStringCharacterSource} from '../util/InterlacedStringCharacterSource.js';
 import {TokenListSink} from './TokenListSink.js';
 
@@ -113,10 +114,10 @@ export class DefaultTokenizerTestSuite<Raw extends DefaultTokenizerRawTest = Def
   serializeTokens(tokenList: Token[]): string[] {
     const result: string[] = [];
     for (let token of tokenList) {
-      let type: TokenType | 'whitespace' = token.type;
-      if (type === 'characters' && (token as CharactersToken).whitespaceOnly)
-        type = 'whitespace';
       const content = TestSerializer.serializeToken(token);
+      let type: TokenTypeStringEnum | 'whitespace' = TokenTypeStringReversedEnum[token.type] as TokenTypeStringEnum;
+      if (token.type === TokenType.CHARACTERS && (token as CharactersToken).whitespaceOnly)
+        type = 'whitespace';
       if (content !== null)
         result.push(`${type}|${content}`);
       else
