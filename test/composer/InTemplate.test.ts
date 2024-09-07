@@ -1,8 +1,9 @@
 import {InsertionMode} from '../../src/impl/interfaces/insertion-mode.js';
+import {InsertionModeReadableString, InsertionModeStringReversed} from '../insertion-mode-strings.js';
 import {DefaultRawTestCore, DefaultSuite, DefaultTestCase} from './abstract-suite.js';
 import {inTemplate} from './samples/index.js';
 
-type InsertionModeChange = `${'+' | '-'}${InsertionMode}`;
+type InsertionModeChange = `${'+' | '-'}${InsertionModeReadableString}`;
 type TemplateRawTest = [...DefaultRawTestCore, InsertionModeChange[]];
 
 interface TemplateTestCase extends DefaultTestCase {
@@ -19,12 +20,12 @@ class InTemplateSuite extends DefaultSuite<TemplateRawTest, TemplateTestCase> {
   configure() {
     super.configure();
     this.composer.templateInsertionModes.push = (...args: InsertionMode[]) => {
-      this.templateModeChanges.push(...args.map(value => `+${value}` as InsertionModeChange));
+      this.templateModeChanges.push(...args.map(value => `+${InsertionModeStringReversed[value]}` as InsertionModeChange));
       return Array.prototype.push.call(this.composer.templateInsertionModes, ...args);
     }
     this.composer.templateInsertionModes.pop = () => {
-      const value = Array.prototype.pop.call(this.composer.templateInsertionModes);
-      this.templateModeChanges.push(`-${value}` as InsertionModeChange);
+      const value = Array.prototype.pop.call(this.composer.templateInsertionModes) as InsertionMode;
+      this.templateModeChanges.push(`-${InsertionModeStringReversed[value]}` as InsertionModeChange);
       return value;
     }
   }

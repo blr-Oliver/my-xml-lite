@@ -3,14 +3,15 @@ import {Token, TokenType} from '../../src/impl/interfaces/tokens.js';
 import {SimpleNodeFactory} from '../../src/impl/simple-tree/SimpleNodeFactory.js';
 import {TreeComposer} from '../../src/impl/TreeComposer.js';
 import {ErrorHandler} from '../../src/interfaces/ErrorHandler.js';
+import {InsertionModeReadableString, InsertionModeStringReversed} from '../insertion-mode-strings.js';
 import {trackProperty} from '../util/property-tracker.js';
 import {DefaultRawTestCore, DefaultSuite, DefaultTestCase} from './abstract-suite.js';
 import {initial} from './samples/index.js';
 
-type ModeTrackingRawTest = [...DefaultRawTestCore, InsertionMode[]/*modes*/];
+type ModeTrackingRawTest = [...DefaultRawTestCore, InsertionModeReadableString[]/*modes*/];
 
 interface ModeTrackingTestCase extends DefaultTestCase {
-  modes: InsertionMode[];
+  modes: InsertionModeReadableString[];
 }
 
 class InitialModeSuite extends DefaultSuite<ModeTrackingRawTest, ModeTrackingTestCase> {
@@ -50,7 +51,7 @@ class InitialModeSuite extends DefaultSuite<ModeTrackingRawTest, ModeTrackingTes
 
   runChecks(test: ModeTrackingTestCase) {
     super.runChecks(test);
-    expect(this.modes).toStrictEqual(test.modes);
+    expect(this.modes).toStrictEqual(test.modes.map(mode => InsertionModeStringReversed[mode]));
   }
 }
 

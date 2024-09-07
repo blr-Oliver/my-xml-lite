@@ -1,3 +1,4 @@
+import {InsertionModeStringReversed} from '../../test/insertion-mode-strings.js';
 import {CharacterData, Document, Element, Node, NodeType, ParentNode, TemplateElement} from '../interfaces/dom-types.js';
 import {ErrorHandler, ignoring} from '../interfaces/ErrorHandler.js';
 import {NodeFactory} from '../interfaces/NodeFactory.js';
@@ -68,7 +69,7 @@ export class TreeComposer implements ComposerIntegration {
     this.document = this.nodeFactory.createDocument();
     if (!(this.contextElement = contextElement)) {
       this.tokenizer.state = State.DATA;
-      this.setInsertionMode('initial');
+      this.setInsertionMode(InsertionMode.INITIAL);
     } else
       this.resetForFragmentCase(contextElement!);
   }
@@ -98,7 +99,7 @@ export class TreeComposer implements ComposerIntegration {
     const root = this.createElementNS({type: TokenType.START_TAG, name: 'html', selfClosed: false, attributes: []}, NS_HTML, this.document);
     this.pushOpenElement(root);
     if (contextElement.tagName === 'template')
-      this.templateInsertionModes.push('inTemplate');
+      this.templateInsertionModes.push(InsertionMode.IN_TEMPLATE);
     this.resetInsertionMode();
     for (let el: Element | null = contextElement; el; el = el.parentElement)
       if (el.tagName === 'form') {
@@ -135,7 +136,7 @@ export class TreeComposer implements ComposerIntegration {
 
   process(token: Token): InsertionMode {
     // @ts-ignore
-    return this[this.insertionMode](token);
+    return this[InsertionModeStringReversed[this.insertionMode]](token);
   }
 
   reprocessIn(mode: InsertionMode, token: Token): InsertionMode {
@@ -146,32 +147,32 @@ export class TreeComposer implements ComposerIntegration {
   setInsertionMode(value: InsertionMode) {
     if (this.insertionMode === value) return;
     switch (this.insertionMode = value) {
-      case 'initial':
-      case 'beforeHtml':
-      case 'beforeHead':
+      case InsertionMode.INITIAL:
+      case InsertionMode.BEFORE_HTML:
+      case InsertionMode.BEFORE_HEAD:
         return this.tokenizer.whitespaceMode = 'ignoreLeading';
-      case 'inHead':
-      case 'inHeadNoscript':
-      case 'afterHead':
-      case 'inColumnGroup':
-      case 'afterBody':
-      case 'afterAfterBody':
+      case InsertionMode.IN_HEAD:
+      case InsertionMode.IN_HEAD_NOSCRIPT:
+      case InsertionMode.AFTER_HEAD:
+      case InsertionMode.IN_COLUMN_GROUP:
+      case InsertionMode.AFTER_BODY:
+      case InsertionMode.AFTER_AFTER_BODY:
         return this.tokenizer.whitespaceMode = 'emitLeading';
-      case 'inBody':
-      case 'text':
-      case 'inTable':
-      case 'inTableText':
-      case 'inCaption':
-      case 'inTableBody':
-      case 'inRow':
-      case 'inCell':
-      case 'inSelect':
-      case 'inSelectInTable':
-      case 'inTemplate':
+      case InsertionMode.IN_BODY:
+      case InsertionMode.TEXT:
+      case InsertionMode.IN_TABLE:
+      case InsertionMode.IN_TABLE_TEXT:
+      case InsertionMode.IN_CAPTION:
+      case InsertionMode.IN_TABLE_BODY:
+      case InsertionMode.IN_ROW:
+      case InsertionMode.IN_CELL:
+      case InsertionMode.IN_SELECT:
+      case InsertionMode.IN_SELECT_IN_TABLE:
+      case InsertionMode.IN_TEMPLATE:
         return this.tokenizer.whitespaceMode = 'mixed';
-      case 'inFrameset':
-      case 'afterFrameset':
-      case 'afterAfterFrameset':
+      case InsertionMode.IN_FRAMESET:
+      case InsertionMode.AFTER_FRAMESET:
+      case InsertionMode.AFTER_AFTER_FRAMESET:
         return this.tokenizer.whitespaceMode = 'whitespaceOnly';
     }
   }
@@ -188,39 +189,39 @@ export class TreeComposer implements ComposerIntegration {
           for (let j = i - 1; j >= 0; --j) { // are we in table?
             switch (this.openElements[j].tagName) {
               case 'table':
-                return 'inSelectInTable';
+                return InsertionMode.IN_SELECT_IN_TABLE;
               case 'template':
-                return 'inSelect';
+                return InsertionMode.IN_SELECT;
             }
           }
-          return 'inSelect';
+          return InsertionMode.IN_SELECT;
         case 'td':
         case 'th':
-          return i === 0 ? /* fragment case */ 'inBody' : 'inCell';
+          return i === 0 ? /* fragment case */ InsertionMode.IN_BODY : InsertionMode.IN_CELL;
         case 'tr':
-          return 'inRow';
+          return InsertionMode.IN_ROW;
         case 'tbody':
         case 'thead':
         case 'tfoot':
-          return 'inTableBody';
+          return InsertionMode.IN_TABLE_BODY;
         case 'caption':
-          return 'inCaption';
+          return InsertionMode.IN_CAPTION;
         case 'colgroup':
-          return 'inColumnGroup';
+          return InsertionMode.IN_COLUMN_GROUP;
         case 'table':
-          return 'inTable';
+          return InsertionMode.IN_TABLE;
         case 'template':
           return this.templateInsertionModes.at(-1)!;
         case 'head':
-          return 'inHead';
+          return InsertionMode.IN_HEAD;
         case 'body':
-          return 'inBody';
+          return InsertionMode.IN_BODY;
         case 'frameset': // fragment case
-          return 'inFrameset';
+          return InsertionMode.IN_FRAMESET;
         case 'html':
-          return this.headElement ? 'afterHead' : /* fragment case */'beforeHead';
+          return this.headElement ? InsertionMode.AFTER_HEAD : /* fragment case */InsertionMode.BEFORE_HEAD;
         default: // fragment case
-          if (i === 0) return 'inBody';
+          if (i === 0) return InsertionMode.IN_BODY;
       }
     }
   }
@@ -519,15 +520,15 @@ export class TreeComposer implements ComposerIntegration {
     this.originalInsertionMode = this.insertionMode;
     this.tokenizer.state = tokenizerState;
     this.tokenizer.lastOpenTag = token.name;
-    return 'text';
+    return InsertionMode.TEXT;
   }
 
   startTemplate(token: TagToken): InsertionMode {
     this.formattingList.addMarker();
     this.framesetOk = false;
-    this.templateInsertionModes.push('inTemplate');
+    this.templateInsertionModes.push(InsertionMode.IN_TEMPLATE);
     this.createAndInsertHtmlTemplate(token);
-    return 'inTemplate';
+    return InsertionMode.IN_TEMPLATE;
   }
 
   endTemplate(): InsertionMode {
@@ -1059,15 +1060,15 @@ export class TreeComposer implements ComposerIntegration {
     switch (token.type) {
       case TokenType.COMMENT:
         this.insertComment(token as CommentToken);
-        return 'initial';
+        return InsertionMode.INITIAL;
       case TokenType.DOCTYPE:
         this.insertDoctype(token as DoctypeToken);
         // TODO set doctype of current document
-        return 'beforeHtml';
+        return InsertionMode.BEFORE_HTML;
       default:
         //whitespace is ignored on tokenizer level
         this.error('missing-doctype');
-        return this.reprocessIn('beforeHtml', token);
+        return this.reprocessIn(InsertionMode.BEFORE_HTML, token);
     }
   }
 
@@ -1075,26 +1076,26 @@ export class TreeComposer implements ComposerIntegration {
     switch (token.type) {
       case TokenType.COMMENT:
         this.insertComment(token as CommentToken);
-        return 'beforeHtml';
+        return InsertionMode.BEFORE_HTML;
       case TokenType.DOCTYPE:
         this.error('unexpected-doctype');
-        return 'beforeHtml';
+        return InsertionMode.BEFORE_HTML;
       case TokenType.START_TAG:
         return this.beforeHtmlStartTag(token as TagToken);
       case TokenType.END_TAG:
         return this.beforeHtmlEndTag(token as TagToken);
       default:
         //whitespace is ignored on tokenizer level
-        return this.forceElementAndState('html', 'beforeHead', token);
+        return this.forceElementAndState('html', InsertionMode.BEFORE_HEAD, token);
     }
   }
 
-  beforeHtmlStartTag(token: TagToken) {
+  beforeHtmlStartTag(token: TagToken): InsertionMode {
     if (token.name === 'html') {
       this.createAndInsertHTMLElement(token);
-      return 'beforeHead';
+      return InsertionMode.BEFORE_HEAD;
     }
-    return this.forceElementAndState('html', 'beforeHead', token);
+    return this.forceElementAndState('html', InsertionMode.BEFORE_HEAD, token);
   }
 
   beforeHtmlEndTag(token: TagToken): InsertionMode {
@@ -1103,10 +1104,10 @@ export class TreeComposer implements ComposerIntegration {
       case 'body':
       case 'html':
       case 'br':
-        return this.forceElementAndState('html', 'beforeHead', token);
+        return this.forceElementAndState('html', InsertionMode.BEFORE_HEAD, token);
       default:
         this.error('unexpected-tag-before-html');
-        return 'beforeHtml';
+        return InsertionMode.BEFORE_HTML;
     }
   }
 
@@ -1131,13 +1132,13 @@ export class TreeComposer implements ComposerIntegration {
     return this.insertionMode;
   }
 
-  beforeHeadStartTag(token: TagToken) {
+  beforeHeadStartTag(token: TagToken): InsertionMode {
     switch (token.name) {
       case 'html':
         return this.inBodyStartTagHtml(token);
       case 'head':
         this.headElement = this.createAndInsertHTMLElement(token);
-        return 'inHead';
+        return InsertionMode.IN_HEAD;
       default:
         return this.forceHead(token);
     }
@@ -1163,7 +1164,7 @@ export class TreeComposer implements ComposerIntegration {
       selfClosed: false,
       attributes: []
     } as TagToken);
-    return this.reprocessIn('inHead', token);
+    return this.reprocessIn(InsertionMode.IN_HEAD, token);
   }
 
   inHead(token: Token): InsertionMode {
@@ -1214,7 +1215,7 @@ export class TreeComposer implements ComposerIntegration {
         return this.startTextMode(State.SCRIPT_DATA, token);
       case 'noscript':
         this.createAndInsertHTMLElement(token);
-        return 'inHeadNoscript';
+        return InsertionMode.IN_HEAD_NOSCRIPT;
       case 'template':
         return this.startTemplate(token);
       case 'head':
@@ -1222,7 +1223,7 @@ export class TreeComposer implements ComposerIntegration {
         break;
       default:
         this.popCurrentElement();
-        return this.reprocessIn('afterHead', token);
+        return this.reprocessIn(InsertionMode.AFTER_HEAD, token);
     }
     return this.insertionMode;
   }
@@ -1231,14 +1232,14 @@ export class TreeComposer implements ComposerIntegration {
     switch (token.name) {
       case 'head':
         this.popCurrentElement();
-        return 'afterHead';
+        return InsertionMode.AFTER_HEAD;
       case 'template':
         return this.endTemplate();
       case 'body':
       case 'html':
       case 'br':
         this.popCurrentElement();
-        return this.reprocessIn('afterHead', token);
+        return this.reprocessIn(InsertionMode.AFTER_HEAD, token);
       default:
         this.error('unexpected-end-tag-in-head');
     }
@@ -1247,7 +1248,7 @@ export class TreeComposer implements ComposerIntegration {
 
   inHeadDefault(token: Token): InsertionMode {
     this.popCurrentElement();
-    return this.reprocessIn('afterHead', token);
+    return this.reprocessIn(InsertionMode.AFTER_HEAD, token);
   }
 
   inHeadNoscript(token: Token): InsertionMode {
@@ -1298,7 +1299,7 @@ export class TreeComposer implements ComposerIntegration {
     switch (token.name) {
       case 'noscript':
         this.popCurrentElement();
-        return 'inHead';
+        return InsertionMode.IN_HEAD;
       case 'br':
         return this.escapeInHeadNoscript(token);
       default:
@@ -1318,7 +1319,7 @@ export class TreeComposer implements ComposerIntegration {
   escapeInHeadNoscript(token: Token): InsertionMode {
     this.error('inappropriate-content-in-head-noscript');
     this.popCurrentElement();
-    return this.reprocessIn('inHead', token);
+    return this.reprocessIn(InsertionMode.IN_HEAD, token);
   }
 
   afterHead(token: Token): InsertionMode {
@@ -1336,7 +1337,7 @@ export class TreeComposer implements ComposerIntegration {
       case TokenType.END_TAG:
         return this.afterHeadEndTag(token as TagToken);
       default:
-        return this.forceElementAndState('body', 'inBody', token);
+        return this.forceElementAndState('body', InsertionMode.IN_BODY, token);
     }
     return this.insertionMode;
   }
@@ -1346,7 +1347,7 @@ export class TreeComposer implements ComposerIntegration {
       this.insertCharacters(token);
       return this.insertionMode;
     }
-    return this.forceElementAndState('body', 'inBody', token);
+    return this.forceElementAndState('body', InsertionMode.IN_BODY, token);
   }
 
   afterHeadStartTag(token: TagToken): InsertionMode {
@@ -1359,10 +1360,10 @@ export class TreeComposer implements ComposerIntegration {
       case 'body':
         this.createAndInsertHTMLElement(token);
         this.framesetOk = false;
-        return 'inBody';
+        return InsertionMode.IN_BODY;
       case 'frameset':
         this.createAndInsertHTMLElement(token);
-        return 'inFrameset';
+        return InsertionMode.IN_FRAMESET;
       case 'base':
       case 'basefont':
       case 'bgsound':
@@ -1379,7 +1380,7 @@ export class TreeComposer implements ComposerIntegration {
         this.removeFromStack(this.headElement!);
         return result;
       default:
-        return this.forceElementAndState('body', 'inBody', token);
+        return this.forceElementAndState('body', InsertionMode.IN_BODY, token);
     }
     return this.insertionMode;
   }
@@ -1393,7 +1394,7 @@ export class TreeComposer implements ComposerIntegration {
       case 'body':
       case 'html':
       case 'br':
-        return this.forceElementAndState('body', 'inBody', token);
+        return this.forceElementAndState('body', InsertionMode.IN_BODY, token);
       default:
         this.error('unexpected-end-tag-after-head');
         return this.insertionMode;
@@ -1468,7 +1469,7 @@ export class TreeComposer implements ComposerIntegration {
             while (this.openElements.length > 1)
               this.popCurrentElement();
             this.createAndInsertHTMLElement(token);
-            return 'inFrameset';
+            return InsertionMode.IN_FRAMESET;
           }
         }
         break;
@@ -1585,7 +1586,7 @@ export class TreeComposer implements ComposerIntegration {
         this.closeAnyHangingParagraph();
         this.createAndInsertHTMLElement(token);
         this.framesetOk = false;
-        return 'inTable';
+        return InsertionMode.IN_TABLE;
       case 'image':
         this.error('deprecated-image-tag');
         token.name = 'img';
@@ -1630,14 +1631,14 @@ export class TreeComposer implements ComposerIntegration {
         this.createAndInsertHTMLElement(token);
         this.framesetOk = false;
         switch (this.insertionMode) {
-          case 'inTable':
-          case 'inCaption':
-          case 'inTableBody':
-          case 'inRow':
-          case 'inCell':
-            return 'inSelectInTable';
+          case InsertionMode.IN_TABLE:
+          case InsertionMode.IN_CAPTION:
+          case InsertionMode.IN_TABLE_BODY:
+          case InsertionMode.IN_ROW:
+          case InsertionMode.IN_CELL:
+            return InsertionMode.IN_SELECT_IN_TABLE;
           default:
-            return 'inSelect';
+            return InsertionMode.IN_SELECT;
         }
       case 'optgroup':
       case 'option':
@@ -1705,7 +1706,7 @@ export class TreeComposer implements ComposerIntegration {
         if (this.hasElementInScope('body')) {
           if (this.hasExplicitlyClosableOnStack())
             this.error('abrupt-end-of-content');
-          return token.name === 'body' ? 'afterBody' : this.reprocessIn('afterBody', token);
+          return token.name === 'body' ? InsertionMode.AFTER_BODY : this.reprocessIn(InsertionMode.AFTER_BODY, token);
         }
         this.error('orphan-end-tag');
         break;
@@ -2051,7 +2052,7 @@ export class TreeComposer implements ComposerIntegration {
         case 'thead':
         case 'tr':
           this.originalInsertionMode = this.insertionMode;
-          return this.reprocessIn('inTableText', token);
+          return this.reprocessIn(InsertionMode.IN_TABLE_TEXT, token);
       }
     }
     return this.inTableDefault(token);
@@ -2063,25 +2064,25 @@ export class TreeComposer implements ComposerIntegration {
         this.popWhileMatches(this.notATableContext);
         this.formattingList.addMarker();
         this.createAndInsertHTMLElement(token);
-        return 'inCaption';
+        return InsertionMode.IN_CAPTION;
       case 'colgroup':
         this.popWhileMatches(this.notATableContext);
         this.createAndInsertHTMLElement(token);
-        return 'inColumnGroup';
+        return InsertionMode.IN_COLUMN_GROUP;
       case 'col':
         this.popWhileMatches(this.notATableContext);
-        return this.forceElementAndState('colgroup', 'inColumnGroup', token);
+        return this.forceElementAndState('colgroup', InsertionMode.IN_COLUMN_GROUP, token);
       case 'tbody':
       case 'tfoot':
       case 'thead':
         this.popWhileMatches(this.notATableContext);
         this.createAndInsertHTMLElement(token);
-        return 'inTableBody';
+        return InsertionMode.IN_TABLE_BODY;
       case 'td':
       case 'th':
       case 'tr':
         this.popWhileMatches(this.notATableContext);
-        return this.forceElementAndState('tbody', 'inTableBody', token);
+        return this.forceElementAndState('tbody', InsertionMode.IN_TABLE_BODY, token);
       case 'table':
         this.error('table-in-table');
         if (this.hasElementInTableScope('table')) {
@@ -2265,7 +2266,7 @@ export class TreeComposer implements ComposerIntegration {
     if (this.hasElementInTableScope('caption')) {
       this.forceCloseElement('caption');
       this.formattingList.clearToMarker();
-      return reprocess ? this.reprocessIn('inTable', token) : 'inTable';
+      return reprocess ? this.reprocessIn(InsertionMode.IN_TABLE, token) : InsertionMode.IN_TABLE;
     } else { // fragment case
       this.error(error);
       return this.insertionMode;
@@ -2338,7 +2339,7 @@ export class TreeComposer implements ComposerIntegration {
       return this.insertionMode;
     } else {
       this.popCurrentElement();
-      return reprocess ? this.reprocessIn('inTable', token) : 'inTable';
+      return reprocess ? this.reprocessIn(InsertionMode.IN_TABLE, token) : InsertionMode.IN_TABLE;
     }
   }
 
@@ -2358,12 +2359,12 @@ export class TreeComposer implements ComposerIntegration {
       case 'tr':
         this.popWhileMatches(this.notATBodyContext);
         this.createAndInsertHTMLElement(token);
-        return 'inRow';
+        return InsertionMode.IN_ROW;
       case 'th':
       case 'td':
         this.error('table-cell-in-table-body');
         this.popWhileMatches(this.notATBodyContext);
-        return this.forceElementAndState('tr', 'inRow', token);
+        return this.forceElementAndState('tr', InsertionMode.IN_ROW, token);
       case 'caption':
       case 'col':
       case 'colgroup':
@@ -2384,7 +2385,7 @@ export class TreeComposer implements ComposerIntegration {
         if (this.hasElementInTableScope(token.name)) {
           this.popWhileMatches(this.notATBodyContext);
           this.popCurrentElement();
-          return 'inTable';
+          return InsertionMode.IN_TABLE;
         } else {
           this.error('wrong-table-body-end-tag');
           break;
@@ -2411,7 +2412,7 @@ export class TreeComposer implements ComposerIntegration {
     if (this.hasMatchInScope(this.isTableBodyElement, this.isTableScopeFence)) {
       this.popWhileMatches(this.notATBodyContext);
       this.popCurrentElement();
-      return this.reprocessIn('inTable', token);
+      return this.reprocessIn(InsertionMode.IN_TABLE, token);
     } else { // fragment case
       this.error(error);
       return this.insertionMode;
@@ -2462,7 +2463,7 @@ export class TreeComposer implements ComposerIntegration {
         this.popWhileMatches(this.notARowContext);
         this.createAndInsertHTMLElement(token);
         this.formattingList.addMarker();
-        return 'inCell';
+        return InsertionMode.IN_CELL;
       case 'caption':
       case 'col':
       case 'colgroup':
@@ -2473,7 +2474,7 @@ export class TreeComposer implements ComposerIntegration {
         if (this.hasElementInTableScope('tr')) {
           this.popWhileMatches(this.notARowContext);
           this.popCurrentElement();
-          return this.reprocessIn('inTableBody', token);
+          return this.reprocessIn(InsertionMode.IN_TABLE_BODY, token);
         } else { // fragment case
           this.error('unexpected-start-tag');
           return this.insertionMode;
@@ -2489,7 +2490,7 @@ export class TreeComposer implements ComposerIntegration {
         if (this.hasElementInTableScope('tr')) {
           this.popWhileMatches(this.notARowContext);
           this.popCurrentElement();
-          return 'inTableBody';
+          return InsertionMode.IN_TABLE_BODY;
         } else // fragment case
           this.error('orphan-end-tag');
         break;
@@ -2497,7 +2498,7 @@ export class TreeComposer implements ComposerIntegration {
         if (this.hasElementInTableScope('tr')) {
           this.popWhileMatches(this.notARowContext);
           this.popCurrentElement();
-          return this.reprocessIn('inTableBody', token);
+          return this.reprocessIn(InsertionMode.IN_TABLE_BODY, token);
         } else // fragment case
           this.error('unexpected-end-tag');
         break;
@@ -2508,7 +2509,7 @@ export class TreeComposer implements ComposerIntegration {
           if (this.hasElementInTableScope('tr')) {
             this.popWhileMatches(this.notARowContext);
             this.popCurrentElement();
-            return this.reprocessIn('inTableBody', token);
+            return this.reprocessIn(InsertionMode.IN_TABLE_BODY, token);
           }
         } else
           this.error('unexpected-end-tag');
@@ -2581,7 +2582,7 @@ export class TreeComposer implements ComposerIntegration {
           } else
             this.popCurrentElement();
           this.formattingList.clearToMarker();
-          return 'inRow';
+          return InsertionMode.IN_ROW;
         } else
           this.error('wrong-cell-end-tag');
         break;
@@ -2616,7 +2617,7 @@ export class TreeComposer implements ComposerIntegration {
     }
     this.popCurrentElement();
     this.formattingList.clearToMarker();
-    return this.reprocessIn('inRow', token);
+    return this.reprocessIn(InsertionMode.IN_ROW, token);
   }
 
   inSelect(token: Token): InsertionMode {
@@ -2833,16 +2834,16 @@ export class TreeComposer implements ComposerIntegration {
       case 'tbody':
       case 'tfoot':
       case 'thead':
-        return this.updateTemplateModeAndReprocess('inTable', token);
+        return this.updateTemplateModeAndReprocess(InsertionMode.IN_TABLE, token);
       case 'col':
-        return this.updateTemplateModeAndReprocess('inColumnGroup', token);
+        return this.updateTemplateModeAndReprocess(InsertionMode.IN_COLUMN_GROUP, token);
       case 'tr':
-        return this.updateTemplateModeAndReprocess('inTableBody', token);
+        return this.updateTemplateModeAndReprocess(InsertionMode.IN_TABLE_BODY, token);
       case 'td':
       case 'th':
-        return this.updateTemplateModeAndReprocess('inRow', token);
+        return this.updateTemplateModeAndReprocess(InsertionMode.IN_ROW, token);
       default:
-        return this.updateTemplateModeAndReprocess('inBody', token);
+        return this.updateTemplateModeAndReprocess(InsertionMode.IN_BODY, token);
     }
   }
 
@@ -2912,7 +2913,7 @@ export class TreeComposer implements ComposerIntegration {
       } else {
         this.popCurrentElement();
         if (!this.contextElement && this.current.tagName !== 'frameset')
-          return 'afterFrameset';
+          return InsertionMode.AFTER_FRAMESET;
       }
     } else
       this.error('unexpected-content-in-frameset');
@@ -2957,14 +2958,14 @@ export class TreeComposer implements ComposerIntegration {
         this.error('unexpected-end-tag');
         return this.insertionMode;
       }
-      return 'afterAfterBody';
+      return InsertionMode.AFTER_AFTER_BODY;
     }
     return this.afterBodyDefault(token);
   }
 
   afterBodyDefault(token: Token): InsertionMode {
     this.error('content-after-body');
-    return this.reprocessIn('inBody', token);
+    return this.reprocessIn(InsertionMode.IN_BODY, token);
   }
 
   afterFrameset(token: Token): InsertionMode {
@@ -3005,7 +3006,7 @@ export class TreeComposer implements ComposerIntegration {
   afterFramesetEndTag(token: TagToken): InsertionMode {
     switch (token.name) {
       case 'html':
-        return 'afterAfterFrameset';
+        return InsertionMode.AFTER_AFTER_FRAMESET;
       default:
         this.error('unexpected-content-after-frameset');
     }
@@ -3046,7 +3047,7 @@ export class TreeComposer implements ComposerIntegration {
 
   afterAfterBodyDefault(token: Token): InsertionMode {
     this.error('content-after-html');
-    return this.reprocessIn('inBody', token);
+    return this.reprocessIn(InsertionMode.IN_BODY, token);
   }
 
   afterAfterFrameset(token: Token): InsertionMode {
