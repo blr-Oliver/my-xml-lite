@@ -1,4 +1,3 @@
-import {InsertionModeStringReversed} from '../../test/insertion-mode-strings.js';
 import {CharacterData, Document, Element, Node, NodeType, ParentNode, TemplateElement} from '../interfaces/dom-types.js';
 import {ErrorHandler, ignoring} from '../interfaces/ErrorHandler.js';
 import {NodeFactory} from '../interfaces/NodeFactory.js';
@@ -135,8 +134,33 @@ export class TreeComposer implements ComposerIntegration {
   }
 
   process(token: Token): InsertionMode {
-    // @ts-ignore
-    return this[InsertionModeStringReversed[this.insertionMode]](token);
+    switch (this.insertionMode) {
+//@formatter:off
+      case InsertionMode.INITIAL: return this.initial(token);
+      case InsertionMode.BEFORE_HTML: return this.beforeHtml(token);
+      case InsertionMode.BEFORE_HEAD: return this.beforeHead(token);
+      case InsertionMode.IN_HEAD: return this.inHead(token);
+      case InsertionMode.IN_HEAD_NOSCRIPT: return this.inHeadNoscript(token);
+      case InsertionMode.AFTER_HEAD: return this.afterHead(token);
+      case InsertionMode.IN_BODY: return this.inBody(token);
+      case InsertionMode.TEXT: return this.text(token);
+      case InsertionMode.IN_TABLE: return this.inTable(token);
+      case InsertionMode.IN_TABLE_TEXT: return this.inTableText(token);
+      case InsertionMode.IN_CAPTION: return this.inCaption(token);
+      case InsertionMode.IN_COLUMN_GROUP: return this.inColumnGroup(token);
+      case InsertionMode.IN_TABLE_BODY: return this.inTableBody(token);
+      case InsertionMode.IN_ROW: return this.inRow(token);
+      case InsertionMode.IN_CELL: return this.inCell(token);
+      case InsertionMode.IN_SELECT: return this.inSelect(token);
+      case InsertionMode.IN_SELECT_IN_TABLE: return this.inSelectInTable(token);
+      case InsertionMode.IN_TEMPLATE: return this.inTemplate(token);
+      case InsertionMode.AFTER_BODY: return this.afterBody(token);
+      case InsertionMode.IN_FRAMESET: return this.inFrameset(token);
+      case InsertionMode.AFTER_FRAMESET: return this.afterFrameset(token);
+      case InsertionMode.AFTER_AFTER_BODY: return this.afterAfterBody(token);
+      case InsertionMode.AFTER_AFTER_FRAMESET: return this.afterAfterFrameset(token);
+//@formatter:on
+    }
   }
 
   reprocessIn(mode: InsertionMode, token: Token): InsertionMode {
